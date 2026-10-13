@@ -1,0 +1,603 @@
+[
+ {
+  "id": "pg-009",
+  "subtopic": "EXPLAIN & EXPLAIN ANALYZE",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "explain",
+   "explain-analyze",
+   "query-planning",
+   "production-safety"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "A teammate runs `EXPLAIN ANALYZE DELETE FROM sessions WHERE expires_at < now();` on production \"just to see the plan\". What happens?",
+   "bn": "একজন teammate production-এ \"শুধু plan দেখার জন্য\" `EXPLAIN ANALYZE DELETE FROM sessions WHERE expires_at < now();` চালালো। কী ঘটবে?"
+  },
+  "answer": {
+   "en": "The `DELETE` really runs. `EXPLAIN` alone only plans the statement; `EXPLAIN ANALYZE` **executes** it to measure actual row counts and timings, so its side effects (deleted rows, fired triggers) are real. To analyse a write safely, wrap it: `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`.",
+   "bn": "`DELETE` সত্যিই চলবে। শুধু `EXPLAIN` statement-টার plan বানায়; কিন্তু `EXPLAIN ANALYZE` আসল row সংখ্যা আর timing মাপার জন্য statement-টা **execute** করে, তাই এর side effect (row মুছে যাওয়া, trigger চলা) সত্যিকারের। কোনো write নিরাপদে analyse করতে চাইলে এভাবে মুড়ে নাও: `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`।"
+  },
+  "explanation": {
+   "en": "- `EXPLAIN` → estimated plan: `cost=startup..total`, estimated `rows`, `width`.\n- `EXPLAIN ANALYZE` → also `actual time`, actual `rows`, and `loops`. Comparing estimated vs actual rows is the fastest way to spot bad statistics.\n- In PostgreSQL 18, `EXPLAIN ANALYZE` includes `BUFFERS` output automatically (shared hit/read counts), and actual row counts are shown with decimals (e.g. `rows=1.00`).\n\nThe tempting wrong answer is the last option: there is no automatic rollback. The rollback only happens if *you* open a transaction and roll it back.",
+   "bn": "- `EXPLAIN` → estimated plan: `cost=startup..total`, আনুমানিক `rows`, `width`।\n- `EXPLAIN ANALYZE` → সাথে `actual time`, আসল `rows` আর `loops`। Estimated আর actual row তুলনা করাই খারাপ statistics ধরার সবচেয়ে দ্রুত উপায়।\n- PostgreSQL 18-এ `EXPLAIN ANALYZE` নিজে থেকেই `BUFFERS` output দেখায় (shared hit/read সংখ্যা), আর actual row সংখ্যা দশমিকসহ দেখায় (যেমন `rows=1.00`)।\n\nলোভনীয় ভুল উত্তর হলো শেষ option-টা: কোনো automatic rollback নেই। Rollback তখনই হয় যখন *তুমি নিজে* transaction খুলে rollback করো।"
+  },
+  "interviewTip": {
+   "en": "Say \"ANALYZE means execute\" first, then show the `BEGIN ... ROLLBACK` pattern. Mentioning the PG18 BUFFERS default shows you follow recent releases.",
+   "bn": "প্রথমেই বলো \"ANALYZE মানে execute করা\", তারপর `BEGIN ... ROLLBACK` pattern-টা দেখাও। PG18-এ BUFFERS default হওয়ার কথা বললে বোঝা যায় তুমি নতুন release-এর খোঁজ রাখো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — EXPLAIN",
+    "url": "https://www.postgresql.org/docs/current/sql-explain.html"
+   },
+   {
+    "title": "PostgreSQL docs — Using EXPLAIN",
+    "url": "https://www.postgresql.org/docs/current/using-explain.html"
+   },
+   {
+    "title": "PostgreSQL 18 release notes",
+    "url": "https://www.postgresql.org/docs/18/release-18.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "pg-024"
+  ],
+  "extraCode": [
+   {
+    "language": "sql",
+    "source": "BEGIN;\nEXPLAIN (ANALYZE) DELETE FROM sessions WHERE expires_at < now();\nROLLBACK;   -- the DELETE really ran inside the transaction; this undoes it",
+    "label": {
+     "en": "Safely analysing a write",
+     "bn": "নিরাপদে একটা write analyse করা"
+    }
+   }
+  ],
+  "options": [
+   {
+    "en": "Nothing changes — `EXPLAIN ANALYZE` only shows the estimated plan without running the statement.",
+    "bn": "কিছুই বদলাবে না — `EXPLAIN ANALYZE` statement না চালিয়ে শুধু estimated plan দেখায়।"
+   },
+   {
+    "en": "The `DELETE` really executes and the rows are deleted, unless it was wrapped in a transaction that is rolled back.",
+    "bn": "`DELETE` সত্যিই execute হবে আর row-গুলো মুছে যাবে — যদি না এটা এমন একটা transaction-এর ভেতরে চালানো হয় যেটা পরে rollback করা হয়।"
+   },
+   {
+    "en": "PostgreSQL rejects it, because `EXPLAIN ANALYZE` is only allowed for `SELECT` statements.",
+    "bn": "PostgreSQL এটা reject করবে, কারণ `EXPLAIN ANALYZE` শুধু `SELECT` statement-এর জন্য অনুমোদিত।"
+   },
+   {
+    "en": "The `DELETE` runs, but PostgreSQL automatically rolls it back after measuring the timings.",
+    "bn": "`DELETE` চলবে, কিন্তু timing মাপার পর PostgreSQL নিজে থেকেই সেটা rollback করে দেবে।"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-010",
+  "subtopic": "JSONB",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "json",
+   "jsonb",
+   "data-types",
+   "gin"
+  ],
+  "technologyVersion": "Version-independent (PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `json` and `jsonb` in PostgreSQL, and which one would you use?",
+   "bn": "PostgreSQL-এ `json` আর `jsonb`-এর পার্থক্য কী, আর তুমি কোনটা ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "`json` stores the input text exactly as sent — whitespace, key order, and duplicate keys are kept — and re-parses it on every access. `jsonb` stores a decomposed binary format: inserts are slightly slower, but reads and queries are much faster, duplicate keys are collapsed (the last one wins), and key order isn't preserved.\n\nThe big win is that `jsonb` supports indexing (GIN) and rich operators such as containment `@>` and key-exists `?`. I use `jsonb` by default and only pick `json` if I truly need the original text preserved.",
+   "bn": "`json` input text-টা হুবহু রেখে দেয় — whitespace, key-এর ক্রম, duplicate key সব থাকে — আর প্রতিবার access-এর সময় আবার parse করে। `jsonb` একটা decomposed binary format-এ রাখে: insert একটু ধীর, কিন্তু read আর query অনেক দ্রুত; duplicate key একটায় মিশে যায় (শেষেরটা থাকে), আর key-এর ক্রম রাখা হয় না।\n\nসবচেয়ে বড় সুবিধা হলো `jsonb` indexing (GIN) আর containment `@>`, key-exists `?`-এর মতো operator support করে। আমি default-ভাবে `jsonb` ব্যবহার করি; মূল text হুবহু রাখা সত্যিই দরকার হলে তবেই `json`।"
+  },
+  "explanation": {
+   "en": "When **not** to use JSONB:\n- Core fields you filter, join, sort, or constrain on all the time (price, status, customer_id) belong in real columns: you get types, `NOT NULL`/`CHECK`/foreign keys, and proper planner statistics.\n- PostgreSQL keeps no per-key statistics inside a `jsonb` value, so row estimates for `attrs->>'x' = ...` filters can be poor.\n- Updating one key rewrites the whole value; very large, frequently-updated documents cause write amplification.\n\nGood uses: flexible product attributes, third-party webhook payloads, sparse user settings — usually next to normal columns (a hybrid model).",
+   "bn": "কখন JSONB **ব্যবহার করবে না**:\n- যে মূল field-গুলো দিয়ে সবসময় filter, join, sort বা constraint দাও (price, status, customer_id) — সেগুলো আসল column-এ রাখো: type, `NOT NULL`/`CHECK`/foreign key আর ঠিকঠাক planner statistics পাবে।\n- `jsonb` value-এর ভেতরের key-গুলোর জন্য PostgreSQL আলাদা statistics রাখে না, তাই `attrs->>'x' = ...` ধরনের filter-এ row estimate খারাপ হতে পারে।\n- একটা key update করলেও পুরো value আবার লেখা হয়; অনেক বড় আর ঘনঘন update হওয়া document-এ write amplification হয়।\n\nভালো ব্যবহার: flexible product attribute, third-party webhook payload, sparse user setting — সাধারণত সাধারণ column-এর পাশাপাশি (hybrid model)।"
+  },
+  "interviewTip": {
+   "en": "Give the storage difference in one line, then pivot to \"when not to use JSONB\" — interviewers often probe whether you'd dump everything into a JSON column.",
+   "bn": "Storage-এর পার্থক্য এক লাইনে বলো, তারপর \"কখন JSONB ব্যবহার করব না\"-তে চলে যাও — interviewer প্রায়ই যাচাই করে তুমি সবকিছু একটা JSON column-এ ঢেলে দেবে কিনা।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — JSON Types",
+    "url": "https://www.postgresql.org/docs/current/datatype-json.html"
+   },
+   {
+    "title": "PostgreSQL docs — JSON Functions and Operators",
+    "url": "https://www.postgresql.org/docs/current/functions-json.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you index a `jsonb` column for `@>` queries?",
+    "bn": "`@>` query-র জন্য `jsonb` column-এ কীভাবে index দেবে?"
+   },
+   {
+    "en": "How do you query a single numeric key efficiently with a range filter?",
+    "bn": "একটা numeric key-তে range filter দিয়ে কীভাবে দ্রুত query করবে?"
+   }
+  ],
+  "related": [
+   "pg-016"
+  ],
+  "commonMistakes": {
+   "en": "Treating `jsonb` as a replacement for schema design, or expecting `jsonb` to preserve key order and duplicate keys.",
+   "bn": "`jsonb`-কে schema design-এর বিকল্প ভাবা, অথবা আশা করা যে `jsonb` key-এর ক্রম আর duplicate key রেখে দেবে।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT '{\"b\": 1, \"a\": 2, \"a\": 3}'::json  AS j,\n       '{\"b\": 1, \"a\": 2, \"a\": 3}'::jsonb AS jb;",
+   "output": "            j             |        jb\n--------------------------+------------------\n {\"b\": 1, \"a\": 2, \"a\": 3} | {\"a\": 3, \"b\": 1}"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-011",
+  "subtopic": "Backup & Recovery",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "backup",
+   "pg_dump",
+   "pg_restore",
+   "pg_basebackup"
+  ],
+  "technologyVersion": "Version-independent (PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you back up and restore a single PostgreSQL database? How is `pg_dump` different from `pg_basebackup`?",
+   "bn": "একটা PostgreSQL database-এর backup আর restore কীভাবে করো? `pg_dump` আর `pg_basebackup`-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "For one database I use `pg_dump`, which produces a **logical** backup — SQL or an archive of the schema and data — from a consistent snapshot without blocking normal reads and writes. I prefer the custom format (`-Fc`): it's compressed and lets `pg_restore` restore selectively and in parallel (`-j`).\n\n`pg_basebackup` takes a **physical** copy of the whole cluster's data files. It's what you use to build a streaming replica or, together with archived WAL, to do point-in-time recovery.\n\nRule of thumb: `pg_dump` for portable, per-database backups and migrations between major versions; physical backups + WAL archiving for production disaster recovery. And a backup isn't real until you've tested a restore.",
+   "bn": "একটা database-এর জন্য আমি `pg_dump` ব্যবহার করি — এটা একটা **logical** backup বানায় (SQL অথবা schema ও data-র archive), একটা consistent snapshot থেকে, সাধারণ read/write block না করে। আমি custom format (`-Fc`) পছন্দ করি: compressed হয়, আর `pg_restore` দিয়ে বেছে বেছে এবং parallel-এ (`-j`) restore করা যায়।\n\n`pg_basebackup` পুরো cluster-এর data file-গুলোর একটা **physical** copy নেয়। Streaming replica বানাতে, বা archived WAL-এর সাথে মিলিয়ে point-in-time recovery করতে এটাই লাগে।\n\nসহজ নিয়ম: portable, per-database backup আর major version-এর মধ্যে migration-এর জন্য `pg_dump`; production disaster recovery-র জন্য physical backup + WAL archiving। আর restore test না করা পর্যন্ত backup আসলে backup না।"
+  },
+  "explanation": {
+   "en": "- `pg_dump` does not include cluster-wide objects such as roles and tablespaces — dump them with `pg_dumpall --globals-only`.\n- It takes `ACCESS SHARE` locks, so it doesn't block DML, but it does block DDL like `ALTER TABLE`/`DROP TABLE` on dumped tables, and it holds a long transaction (which delays VACUUM cleanup) on big databases.\n- A dump is a snapshot from one moment: restoring it loses everything written after the dump started. That's why production also needs WAL-based PITR.\n- For very large databases, logical dumps and restores get slow (indexes must be rebuilt on restore); physical backups scale better.",
+   "bn": "- `pg_dump`-এ role আর tablespace-এর মতো cluster-wide object থাকে না — এগুলোর জন্য `pg_dumpall --globals-only` চালাও।\n- এটা `ACCESS SHARE` lock নেয়, তাই DML block করে না, কিন্তু dump হতে থাকা table-এ `ALTER TABLE`/`DROP TABLE`-এর মতো DDL block করে; আর বড় database-এ লম্বা একটা transaction ধরে রাখে (যা VACUUM-এর cleanup দেরি করায়)।\n- Dump হলো এক মুহূর্তের snapshot: restore করলে dump শুরুর পরের সব write হারিয়ে যায়। এজন্যই production-এ WAL-based PITR-ও লাগে।\n- খুব বড় database-এ logical dump আর restore ধীর হয়ে যায় (restore-এর সময় index আবার বানাতে হয়); physical backup বেশি ভালোভাবে scale করে।"
+  },
+  "interviewTip": {
+   "en": "Frame it as logical vs physical, then mention globals, restore testing, and that dumps alone can't give you point-in-time recovery.",
+   "bn": "Logical বনাম physical — এভাবে সাজিয়ে বলো, তারপর globals, restore test আর শুধু dump দিয়ে যে point-in-time recovery হয় না — এগুলো উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — SQL Dump",
+    "url": "https://www.postgresql.org/docs/current/backup-dump.html"
+   },
+   {
+    "title": "PostgreSQL docs — pg_dump",
+    "url": "https://www.postgresql.org/docs/current/app-pgdump.html"
+   },
+   {
+    "title": "PostgreSQL docs — pg_basebackup",
+    "url": "https://www.postgresql.org/docs/current/app-pgbasebackup.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you recover a table that someone accidentally emptied at 14:32 today?",
+    "bn": "আজ ১৪:৩২-এ কেউ ভুল করে একটা table খালি করে ফেলেছে — কীভাবে recover করবে?"
+   },
+   {
+    "en": "How do you upgrade PostgreSQL 16 to 18 — `pg_dump`/`pg_restore` or `pg_upgrade`?",
+    "bn": "PostgreSQL 16 থেকে 18-এ কীভাবে upgrade করবে — `pg_dump`/`pg_restore` নাকি `pg_upgrade`?"
+   }
+  ],
+  "related": [
+   "pg-026"
+  ],
+  "commonMistakes": {
+   "en": "Forgetting roles (`--globals-only`), never testing restores, or relying only on nightly dumps for a system that can't lose a day of data.",
+   "bn": "Role-এর কথা ভুলে যাওয়া (`--globals-only`), কখনো restore test না করা, অথবা এক দিনের data হারানো যায় না এমন system-এ শুধু রাতের dump-এর উপর ভরসা করা।"
+  },
+  "code": {
+   "language": "bash",
+   "source": "# logical backup of one database (custom format: compressed, selective/parallel restore)\npg_dump -h db.internal -U backup_user -d shop -Fc -f shop_2026-10-12.dump\n\n# roles and tablespaces are cluster-wide, so dump them separately\npg_dumpall -h db.internal -U postgres --globals-only -f globals.sql\n\n# restore into a new, empty database with 4 parallel jobs\ncreatedb -h staging-db -U postgres shop_restore\npg_restore -h staging-db -U postgres -d shop_restore -j 4 shop_2026-10-12.dump\n\n# physical base backup of the whole cluster (for replicas / PITR)\npg_basebackup -h db.internal -U replicator -D /backups/base_2026-10-12 -Ft -z -P"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-012",
+  "subtopic": "Data Types & Keys (PostgreSQL 18)",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "identity",
+   "serial",
+   "uuidv7",
+   "generated-columns",
+   "postgresql-18"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "version-specific",
+  "question": {
+   "en": "You're designing a new table on PostgreSQL 18. Compare `serial` vs identity columns, `gen_random_uuid()` vs `uuidv7()` for keys, and stored vs virtual generated columns. What would you choose?",
+   "bn": "PostgreSQL 18-এ একটা নতুন table design করছ। `serial` বনাম identity column, key-এর জন্য `gen_random_uuid()` বনাম `uuidv7()`, আর stored বনাম virtual generated column — তুলনা করো। তুমি কোনগুলো বেছে নেবে?"
+  },
+  "answer": {
+   "en": "- **Identity over serial.** `GENERATED ALWAYS AS IDENTITY` is SQL-standard, its sequence is tied to the column (no separate grants, cleaner copies/drops), and `ALWAYS` rejects accidental manual ids. `serial` still works but is the legacy approach.\n- **UUIDs only when you need them** (ids generated outside the DB, merging data across systems, non-guessable public ids). Then prefer **`uuidv7()`** (new in PG18): it's time-ordered, so inserts land at the \"right edge\" of the B-tree like a `bigint`. `gen_random_uuid()` (v4) is fully random, so inserts hit random index pages — more page splits, worse cache hit rate, more WAL on big tables.\n- **Generated columns:** in PG18 the default is **virtual** — computed on read, no storage. Use `STORED` when you need to index the value (PG18 can't index virtual generated columns) or when the expression is expensive to recompute on every read.",
+   "bn": "- **Serial-এর বদলে identity।** `GENERATED ALWAYS AS IDENTITY` SQL-standard, এর sequence column-এর সাথে বাঁধা থাকে (আলাদা grant লাগে না, copy/drop পরিষ্কার), আর `ALWAYS` ভুল করে হাতে id দেওয়া আটকায়। `serial` এখনো কাজ করে, কিন্তু এটা legacy পদ্ধতি।\n- **UUID শুধু দরকার হলে** (DB-র বাইরে id তৈরি হয়, বিভিন্ন system-এর data merge করতে হয়, অনুমান-অযোগ্য public id লাগে)। তখন **`uuidv7()`** (PG18-এ নতুন) বেছে নাও: এটা time-ordered, তাই insert B-tree-র \"ডান প্রান্তে\" গিয়ে পড়ে, ঠিক `bigint`-এর মতো। `gen_random_uuid()` (v4) পুরোপুরি random, তাই insert এলোমেলো index page-এ পড়ে — বড় table-এ বেশি page split, cache hit কম, WAL বেশি।\n- **Generated column:** PG18-এ default হলো **virtual** — read-এর সময় হিসাব হয়, storage লাগে না। Value-টা index করতে হলে (PG18 virtual generated column index করতে পারে না) বা expression প্রতিবার হিসাব করা ব্যয়বহুল হলে `STORED` ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "- `bigint` identity is still the smallest and fastest key (8 bytes vs 16 for a UUID). A common pattern is a `bigint` internal key plus a UUID public id.\n- UUIDv7 embeds the creation time; `uuid_extract_timestamp(id)` returns it. Don't use it where revealing creation time is a privacy problem.\n- With `GENERATED ALWAYS`, inserting an explicit id fails unless you write `OVERRIDING SYSTEM VALUE` (useful for data migrations). `GENERATED BY DEFAULT` allows manual values.\n- Generated-column rules: the expression must be immutable, can't reference other generated columns or other tables; virtual ones may only use built-in functions and types. Before PG18 only `STORED` existed and the keyword was mandatory, so `GENERATED ALWAYS AS (...)` without `STORED` is a syntax error on PostgreSQL 12–17 — watch this when the same migration must run on older servers.\n- Bangladesh example: a 15% VAT computed from `subtotal` is a natural generated column — no app can store an inconsistent `total`.",
+   "bn": "- `bigint` identity এখনো সবচেয়ে ছোট আর দ্রুত key (UUID-এর 16 byte-এর বিপরীতে 8 byte)। একটা প্রচলিত pattern: ভেতরে `bigint` key, বাইরে দেখানোর জন্য UUID public id।\n- UUIDv7-এর ভেতরে তৈরির সময় লুকানো থাকে; `uuid_extract_timestamp(id)` সেটা বের করে দেয়। তৈরির সময় প্রকাশ পাওয়া privacy সমস্যা হলে এটা ব্যবহার কোরো না।\n- `GENERATED ALWAYS`-এ নিজে id দিয়ে insert করলে fail হয়, যদি না `OVERRIDING SYSTEM VALUE` লেখো (data migration-এ কাজে লাগে)। `GENERATED BY DEFAULT` হাতে value দিতে দেয়।\n- Generated column-এর নিয়ম: expression immutable হতে হবে, অন্য generated column বা অন্য table refer করা যাবে না; virtual হলে শুধু built-in function আর type ব্যবহার করা যায়। PG18-এর আগে শুধু `STORED` ছিল আর keyword-টা বাধ্যতামূলক ছিল, তাই PostgreSQL 12–17-এ `STORED` ছাড়া `GENERATED ALWAYS AS (...)` লিখলে syntax error হয় — একই migration পুরনো server-এও চালাতে হলে এটা খেয়াল রাখো।\n- বাংলাদেশি উদাহরণ: `subtotal` থেকে 15% VAT হিসাব করা generated column-এর জন্য একদম মানানসই — কোনো app ভুল `total` রাখতে পারবে না।"
+  },
+  "interviewTip": {
+   "en": "Structure it as three mini-comparisons, each ending with your pick and one reason. The \"random UUID inserts fragment the B-tree\" point is what separates senior answers.",
+   "bn": "তিনটা ছোট তুলনা হিসেবে সাজাও, প্রতিটার শেষে তোমার পছন্দ আর একটা কারণ বলো। \"Random UUID insert B-tree-কে এলোমেলো করে\" — এই কথাটাই senior-level উত্তরকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — UUID Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-uuid.html"
+   },
+   {
+    "title": "PostgreSQL docs — Generated Columns",
+    "url": "https://www.postgresql.org/docs/current/ddl-generated-columns.html"
+   },
+   {
+    "title": "PostgreSQL docs — CREATE TABLE (identity & generated columns)",
+    "url": "https://www.postgresql.org/docs/current/sql-createtable.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you migrate an existing `serial` column to an identity column?",
+    "bn": "একটা existing `serial` column-কে identity column-এ কীভাবে migrate করবে?"
+   },
+   {
+    "en": "Why would a random UUID primary key slow down inserts on a 500-million-row table?",
+    "bn": "৫০ কোটি row-এর table-এ random UUID primary key কেন insert ধীর করে দিতে পারে?"
+   }
+  ],
+  "related": [
+   "pg-003",
+   "pg-013"
+  ],
+  "commonMistakes": {
+   "en": "Using UUIDv4 primary keys \"for scale\" without knowing the index-locality cost, or expecting to index a virtual generated column in PG18.",
+   "bn": "Index locality-র খরচ না জেনে \"scale-এর জন্য\" UUIDv4 primary key ব্যবহার করা, অথবা PG18-এ virtual generated column-এ index দেওয়া যাবে বলে আশা করা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE orders (\n  id          uuid PRIMARY KEY DEFAULT uuidv7(),           -- PG18: time-ordered UUID\n  order_no    bigint GENERATED ALWAYS AS IDENTITY UNIQUE,  -- human-friendly number\n  customer_id bigint NOT NULL,\n  subtotal    numeric(12,2) NOT NULL,\n  vat_rate    numeric(4,3)  NOT NULL DEFAULT 0.150,\n  -- VIRTUAL by default in PG18: computed on read, no storage, not indexable\n  vat         numeric(12,2) GENERATED ALWAYS AS (round(subtotal * vat_rate, 2)),\n  -- STORED: written on insert/update, can be indexed\n  total       numeric(12,2) GENERATED ALWAYS AS (subtotal + round(subtotal * vat_rate, 2)) STORED,\n  created_at  timestamptz NOT NULL DEFAULT now()\n);\n\nCREATE INDEX ON orders (total);\n\nSELECT uuid_extract_timestamp(id) AS id_created_at, order_no, vat, total FROM orders;"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-013",
+  "subtopic": "Index Types",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "b-tree",
+   "gin",
+   "gist",
+   "brin",
+   "hash"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "PostgreSQL offers B-tree, Hash, GIN, GiST, SP-GiST, and BRIN indexes. When would you use each?",
+   "bn": "PostgreSQL-এ B-tree, Hash, GIN, GiST, SP-GiST আর BRIN index আছে। কোনটা কখন ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "- **B-tree (default):** equality, ranges, `ORDER BY`, uniqueness. Covers most needs, including multicolumn indexes.\n- **Hash:** equality only. Smaller for long keys in some cases, but it can't do ranges, sorting, or uniqueness — B-tree is usually fine.\n- **GIN (Generalized Inverted Index):** \"does this value contain X?\" — `jsonb` containment (`@>`), arrays, full-text search (`tsvector`), and trigram search with `pg_trgm` for `LIKE '%abc%'`. Fast reads, slower and bigger writes.\n- **GiST / SP-GiST:** geometric and range data — overlaps (`&&`), nearest-neighbour (`<->`), PostGIS, and `EXCLUDE` constraints (e.g. no overlapping bookings).\n- **BRIN (Block Range INdex):** huge, append-only tables where the column follows the physical order, like `created_at` on an events/log table. It stores min/max per block range, so it's tiny.",
+   "bn": "- **B-tree (default):** equality, range, `ORDER BY`, uniqueness। Multicolumn index সহ বেশিরভাগ প্রয়োজন এটাতেই মেটে।\n- **Hash:** শুধু equality। কিছু ক্ষেত্রে লম্বা key-এর জন্য ছোট হয়, কিন্তু range, sorting বা uniqueness পারে না — সাধারণত B-tree-ই যথেষ্ট।\n- **GIN (Generalized Inverted Index):** \"এই value-এর ভেতরে X আছে কি?\" — `jsonb` containment (`@>`), array, full-text search (`tsvector`), আর `LIKE '%abc%'`-এর জন্য `pg_trgm` দিয়ে trigram search। Read দ্রুত, write ধীর আর index বড়।\n- **GiST / SP-GiST:** geometric আর range data — overlap (`&&`), nearest-neighbour (`<->`), PostGIS, আর `EXCLUDE` constraint (যেমন booking overlap করতে পারবে না)।\n- **BRIN (Block Range INdex):** বিশাল, append-only table যেখানে column-এর value physical order মেনে চলে — যেমন events/log table-এর `created_at`। প্রতি block range-এর min/max রাখে, তাই খুবই ছোট।"
+  },
+  "explanation": {
+   "en": "- BRIN only works well when values correlate with physical row order; after lots of updates or out-of-order inserts it degrades into scanning most of the table. Check `pg_stats.correlation` for the column.\n- For `jsonb`, the `jsonb_path_ops` GIN operator class is smaller and faster for `@>` but doesn't support key-exists operators (`?`, `?|`, `?&`); the default `jsonb_ops` does.\n- Partial (`WHERE status = 'pending'`), expression (`lower(email)`), and covering (`INCLUDE (...)`) indexes are *features* you can combine with these types, not separate types.\n- PostgreSQL 18 adds **skip scan** for multicolumn B-trees, so an index on `(a, b)` can sometimes serve `WHERE b = ?` when `a` has few distinct values.\n- Extensions add more, e.g. HNSW/IVFFlat from pgvector for vector similarity.",
+   "bn": "- BRIN তখনই ভালো কাজ করে যখন value-গুলো physical row order-এর সাথে মিলে চলে; অনেক update বা এলোমেলো insert-এর পর এটা প্রায় পুরো table scan-এ পরিণত হয়। Column-টার `pg_stats.correlation` দেখে নাও।\n- `jsonb`-এর জন্য `jsonb_path_ops` GIN operator class `@>`-এর জন্য ছোট আর দ্রুত, কিন্তু key-exists operator (`?`, `?|`, `?&`) support করে না; default `jsonb_ops` করে।\n- Partial (`WHERE status = 'pending'`), expression (`lower(email)`) আর covering (`INCLUDE (...)`) index হলো *feature*, যেগুলো এই type-গুলোর সাথে মেলানো যায় — আলাদা type নয়।\n- PostgreSQL 18-এ multicolumn B-tree-র জন্য **skip scan** এসেছে, ফলে `(a, b)`-এর index কখনো কখনো `WHERE b = ?` query-ও সামলাতে পারে, যদি `a`-র distinct value কম থাকে।\n- Extension আরও type যোগ করে, যেমন vector similarity-র জন্য pgvector-এর HNSW/IVFFlat।"
+  },
+  "interviewTip": {
+   "en": "Pair each index type with a concrete query it accelerates. Ending with \"partial/expression/covering are features, not types\" shows precise understanding.",
+   "bn": "প্রতিটা index type-এর সাথে একটা concrete query জুড়ে দাও যেটা এটা দ্রুত করে। শেষে \"partial/expression/covering আসলে feature, type নয়\" বললে বোঝা যায় তোমার ধারণা পরিষ্কার।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Index Types",
+    "url": "https://www.postgresql.org/docs/current/indexes-types.html"
+   },
+   {
+    "title": "PostgreSQL docs — GIN Indexes",
+    "url": "https://www.postgresql.org/docs/current/gin.html"
+   },
+   {
+    "title": "PostgreSQL docs — BRIN Indexes",
+    "url": "https://www.postgresql.org/docs/current/brin.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why might a BRIN index stop being useful after a large backfill?",
+    "bn": "বড় একটা backfill-এর পর BRIN index কেন আর কাজে নাও লাগতে পারে?"
+   },
+   {
+    "en": "What are the write-side costs of GIN indexes and how does `fastupdate` help?",
+    "bn": "GIN index-এর write-এর দিকের খরচ কী, আর `fastupdate` কীভাবে সাহায্য করে?"
+   }
+  ],
+  "related": [
+   "pg-005",
+   "pg-014",
+   "pg-028",
+   "pg-016"
+  ],
+  "commonMistakes": {
+   "en": "Using BRIN on a randomly-ordered column, or expecting a B-tree to speed up `LIKE '%term%'` (use `pg_trgm` + GIN, or full-text search).",
+   "bn": "এলোমেলো ক্রমের column-এ BRIN ব্যবহার করা, অথবা আশা করা যে B-tree `LIKE '%term%'` দ্রুত করবে (এর জন্য `pg_trgm` + GIN, বা full-text search লাগে)।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "-- B-tree (default): equality, ranges, sorting\nCREATE INDEX ON orders (customer_id, created_at);\n\n-- GIN: containment on jsonb, arrays, full-text, trigram LIKE '%...%'\nCREATE INDEX ON products USING gin (attrs jsonb_path_ops);\nCREATE INDEX ON articles USING gin (to_tsvector('english', body));\nCREATE EXTENSION IF NOT EXISTS pg_trgm;\nCREATE INDEX ON customers USING gin (name gin_trgm_ops);\n\n-- GiST: ranges / geometry / nearest neighbour / exclusion constraints\nCREATE INDEX ON bookings USING gist (during);\n\n-- BRIN: huge append-only table, values follow insertion order\nCREATE INDEX ON events USING brin (created_at);\n\n-- Hash: equality only\nCREATE INDEX ON sessions USING hash (token);"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-014",
+  "subtopic": "Expression, Partial & Covering Indexes",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "expression-index",
+   "partial-index",
+   "covering-index",
+   "sargability",
+   "explain"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "The login query below is slow even though `users.email` has an index. The plan shows a sequential scan on a 100,000-row table. What's wrong, and how would you fix it?",
+   "bn": "নিচের login query-টা ধীর, যদিও `users.email`-এ index আছে। Plan-এ ১,০০,০০০ row-এর table-এ sequential scan দেখা যাচ্ছে। সমস্যা কোথায়, আর কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "The query filters on `lower(email)`, but the index is on plain `email`. A B-tree stores the raw column values, so it can't answer a condition on a *function* of the column — the predicate isn't sargable for that index, and PostgreSQL must compute `lower(email)` for every row.\n\nFix: create an **expression index** that matches the expression exactly — `CREATE INDEX CONCURRENTLY ... ON users (lower(email))` — then `ANALYZE` so the planner has statistics on the expression. If emails must be unique case-insensitively, make it a `UNIQUE` expression index, which also enforces the rule.\n\nI'd go further: if most queries skip soft-deleted users, a **partial index** (`WHERE deleted_at IS NULL`) is smaller. A covering index (`INCLUDE (...)`) can even enable an index-only scan, but only if it holds every column the query reads.",
+   "bn": "Query filter করছে `lower(email)` দিয়ে, কিন্তু index আছে সাধারণ `email`-এর উপর। B-tree column-এর কাঁচা value রাখে, তাই column-এর উপর *function* লাগানো condition সে সামলাতে পারে না — ওই index-এর জন্য predicate-টা sargable নয়, তাই PostgreSQL-কে প্রতিটা row-এর জন্য `lower(email)` হিসাব করতে হয়।\n\nসমাধান: হুবহু একই expression দিয়ে একটা **expression index** বানাও — `CREATE INDEX CONCURRENTLY ... ON users (lower(email))` — তারপর `ANALYZE` চালাও যাতে planner expression-টার statistics পায়। Email যদি case-insensitive-ভাবে unique হতে হয়, তাহলে `UNIQUE` expression index বানাও — এতে rule-টাও enforce হয়।\n\nআমি আরেকটু এগোব: বেশিরভাগ query যদি soft-deleted user বাদ দেয়, তাহলে একটা **partial index** (`WHERE deleted_at IS NULL`) ছোট হয়। Covering index (`INCLUDE (...)`) দিলে index-only scan-ও সম্ভব, তবে শুধু তখনই যখন query যত column পড়ে সবগুলো index-এ থাকে।"
+  },
+  "explanation": {
+   "en": "- The expression in the query must match the index expression (`lower(email)`, not `upper(email)` or `lower(trim(email))`).\n- Use `CONCURRENTLY` on a live table so writes aren't blocked during the build. It can't run inside a transaction block, and a failed build leaves an `INVALID` index you must drop and recreate.\n- A partial index is only used when the query's `WHERE` clause implies the index predicate — so the query must also say `deleted_at IS NULL`.\n- `INCLUDE` columns are stored in the leaf pages but aren't part of the search key. An index-only scan needs **every** column the query reads in the index — here `id` and `password_hash`, plus the raw `email` column, because the planner only considers index-only scans on an expression index like `lower(email)` when the underlying column is available too. It also needs an up-to-date visibility map (VACUUM). For a single-row login lookup the gain is small; the partial index is the bigger win.\n- Alternatives: normalise emails to lowercase on write (simplest), or use the `citext` extension type.",
+   "bn": "- Query-র expression index-এর expression-এর সাথে হুবহু মিলতে হবে (`lower(email)`, `upper(email)` বা `lower(trim(email))` নয়)।\n- Live table-এ `CONCURRENTLY` ব্যবহার করো, যাতে build-এর সময় write block না হয়। এটা transaction block-এর ভেতরে চলে না, আর build fail করলে একটা `INVALID` index থেকে যায় যেটা drop করে আবার বানাতে হয়।\n- Partial index তখনই ব্যবহার হয় যখন query-র `WHERE` থেকে index-এর predicate বোঝা যায় — তাই query-তেও `deleted_at IS NULL` থাকতে হবে।\n- `INCLUDE` column leaf page-এ রাখা হয়, কিন্তু search key-এর অংশ নয়। Index-only scan-এর জন্য query যত column পড়ে **সবগুলো** index-এ থাকতে হয় — এখানে `id` আর `password_hash`, সাথে কাঁচা `email` column-ও, কারণ `lower(email)`-এর মতো expression index-এ planner তখনই index-only scan বিবেচনা করে যখন মূল column-টাও index-এ পাওয়া যায়। Visibility map-ও up to date থাকতে হয় (VACUUM)। একটা row-এর login lookup-এ লাভ সামান্য; আসল লাভ partial index-এ।\n- বিকল্প: write-এর সময়ই email lowercase করে রাখা (সবচেয়ে সহজ), অথবা `citext` extension type ব্যবহার করা।"
+  },
+  "interviewTip": {
+   "en": "Name the root cause in one word — \"sargability\" — then give the exact fix and the `CONCURRENTLY` detail. Interviewers love hearing you'd verify with `EXPLAIN` afterwards.",
+   "bn": "Root cause এক শব্দে বলো — \"sargability\" — তারপর হুবহু fix আর `CONCURRENTLY`-র খুঁটিনাটি বলো। পরে `EXPLAIN` দিয়ে যাচাই করবে বললে interviewer খুশি হয়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Indexes on Expressions",
+    "url": "https://www.postgresql.org/docs/current/indexes-expressional.html"
+   },
+   {
+    "title": "PostgreSQL docs — Partial Indexes",
+    "url": "https://www.postgresql.org/docs/current/indexes-partial.html"
+   },
+   {
+    "title": "PostgreSQL docs — Index-Only Scans and Covering Indexes",
+    "url": "https://www.postgresql.org/docs/current/indexes-index-only-scans.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is `WHERE created_at::date = '2026-10-12'` slow, and how would you rewrite it?",
+    "bn": "`WHERE created_at::date = '2026-10-12'` কেন ধীর, আর কীভাবে আবার লিখবে?"
+   },
+   {
+    "en": "What happens if `CREATE INDEX CONCURRENTLY` fails halfway?",
+    "bn": "`CREATE INDEX CONCURRENTLY` মাঝপথে fail করলে কী হয়?"
+   }
+  ],
+  "related": [
+   "pg-005",
+   "pg-013",
+   "pg-025"
+  ],
+  "commonMistakes": {
+   "en": "Creating the expression index without `CONCURRENTLY` on a busy production table (blocking writes), or writing the query with a slightly different expression than the index.",
+   "bn": "Busy production table-এ `CONCURRENTLY` ছাড়া expression index বানানো (write block হয়ে যায়), অথবা index-এর চেয়ে সামান্য আলাদা expression দিয়ে query লেখা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "CREATE INDEX idx_users_email ON users (email);\n\nEXPLAIN SELECT id, password_hash\nFROM users\nWHERE lower(email) = 'rahim@example.com';\n\n--                         QUERY PLAN\n-- -----------------------------------------------------------\n--  Seq Scan on users  (cost=0.00..2637.00 rows=500 width=41)\n--    Filter: (lower(email) = 'rahim@example.com'::text)"
+  },
+  "extraCode": [
+   {
+    "language": "sql",
+    "source": "-- matches the query expression exactly; UNIQUE also enforces case-insensitive uniqueness\nCREATE UNIQUE INDEX CONCURRENTLY idx_users_lower_email ON users (lower(email));\nANALYZE users;\n\nEXPLAIN SELECT id, password_hash FROM users WHERE lower(email) = 'rahim@example.com';\n--  Index Scan using idx_users_lower_email on users  (cost=0.42..8.44 rows=1 width=41)\n--    Index Cond: (lower(email) = 'rahim@example.com'::text)\n\n-- variant: only active users, covering every column the query reads\n-- (email is included because index-only scans on lower(email) need the raw column too)\nCREATE INDEX CONCURRENTLY idx_users_active_login\n  ON users (lower(email)) INCLUDE (id, password_hash, email)\n  WHERE deleted_at IS NULL;\n\nSELECT id, password_hash FROM users\nWHERE lower(email) = $1 AND deleted_at IS NULL;   -- query must repeat the predicate",
+    "label": {
+     "en": "Fix: expression index (plus partial/covering variant)",
+     "bn": "সমাধান: expression index (সাথে partial/covering রূপ)"
+    }
+   }
+  ],
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-015",
+  "subtopic": "CTEs",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 3,
+  "tags": [
+   "cte",
+   "with",
+   "materialized",
+   "query-planning"
+  ],
+  "technologyVersion": "PostgreSQL 12+ (current: 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "On PostgreSQL 18, how is the CTE in this query executed? Assume an index exists on `orders (customer_id, created_at)`.",
+   "bn": "PostgreSQL 18-এ এই query-র CTE কীভাবে execute হবে? ধরে নাও `orders (customer_id, created_at)`-এ একটা index আছে।"
+  },
+  "answer": {
+   "en": "Since PostgreSQL 12, a non-recursive, side-effect-free CTE that is referenced only once is **inlined** like a subquery. The planner sees `created_at > ... AND customer_id = 42` together and can use the `(customer_id, created_at)` index.",
+   "bn": "PostgreSQL 12 থেকে, non-recursive আর side-effect-free CTE যদি মাত্র একবার reference হয়, তাহলে সেটা subquery-র মতো **inline** হয়ে যায়। Planner `created_at > ... AND customer_id = 42` একসাথে দেখে, তাই `(customer_id, created_at)` index ব্যবহার করতে পারে।"
+  },
+  "explanation": {
+   "en": "The first option was true **before PostgreSQL 12** — CTEs were always materialized, and many old blog posts still describe them as optimization fences. That's why it's tempting.\n\nCurrent rules:\n- Referenced once, no side effects, not recursive → inlined by default.\n- Referenced **more than once** → materialized by default (computed once, reused).\n- Recursive CTEs and data-modifying CTEs (`INSERT/UPDATE/DELETE ... RETURNING` inside `WITH`) are always executed exactly once.\n- You can override: `WITH x AS MATERIALIZED (...)` forces a fence (handy to compute an expensive result once or to stop a bad plan); `AS NOT MATERIALIZED` forces inlining even when referenced twice.",
+   "bn": "প্রথম option-টা **PostgreSQL 12-এর আগে** সত্য ছিল — তখন CTE সবসময় materialize হতো, আর অনেক পুরনো blog post এখনো এগুলোকে optimization fence বলে। এজন্যই এটা লোভনীয়।\n\nএখনকার নিয়ম:\n- একবার reference, side effect নেই, recursive নয় → default-ভাবে inline।\n- **একাধিকবার** reference → default-ভাবে materialize (একবার হিসাব হয়, বারবার ব্যবহার হয়)।\n- Recursive CTE আর data-modifying CTE (`WITH`-এর ভেতরে `INSERT/UPDATE/DELETE ... RETURNING`) সবসময় ঠিক একবার execute হয়।\n- চাইলে বদলাতে পারো: `WITH x AS MATERIALIZED (...)` fence বসিয়ে দেয় (ব্যয়বহুল result একবার হিসাব করতে বা খারাপ plan ঠেকাতে কাজে লাগে); `AS NOT MATERIALIZED` দুবার reference হলেও inline করতে বাধ্য করে।"
+  },
+  "interviewTip": {
+   "en": "Mention the PG12 change explicitly and the `MATERIALIZED` / `NOT MATERIALIZED` keywords — it shows your knowledge isn't based on outdated articles.",
+   "bn": "PG12-এর পরিবর্তন আর `MATERIALIZED` / `NOT MATERIALIZED` keyword-এর কথা স্পষ্ট করে বলো — এতে বোঝা যায় তোমার জ্ঞান পুরনো article-নির্ভর নয়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — WITH Queries (CTEs)",
+    "url": "https://www.postgresql.org/docs/current/queries-with.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "pg-024"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "WITH recent AS (\n  SELECT * FROM orders\n  WHERE created_at > now() - interval '7 days'\n)\nSELECT * FROM recent\nWHERE customer_id = 42;"
+  },
+  "options": [
+   {
+    "en": "It's always materialized first (an \"optimization fence\"), so all recent orders are computed before `customer_id = 42` is applied.",
+    "bn": "এটা সবসময় আগে materialize হয় (একটা \"optimization fence\"), তাই `customer_id = 42` প্রয়োগের আগে সব recent order হিসাব হয়।"
+   },
+   {
+    "en": "Because it's non-recursive, side-effect-free, and referenced once, the planner inlines it into the outer query, so both conditions can use the index.",
+    "bn": "যেহেতু এটা non-recursive, side-effect-free আর মাত্র একবার reference হয়েছে, planner এটাকে outer query-র ভেতরে inline করে দেয়, ফলে দুটো condition-ই index ব্যবহার করতে পারে।"
+   },
+   {
+    "en": "It's materialized only if its result fits in `work_mem`; otherwise it's inlined.",
+    "bn": "এর result `work_mem`-এ এঁটে গেলে তবেই materialize হয়; না হলে inline হয়।"
+   },
+   {
+    "en": "PostgreSQL inlines every CTE, even ones referenced several times or containing `DELETE ... RETURNING`.",
+    "bn": "PostgreSQL সব CTE inline করে, এমনকি যেগুলো কয়েকবার reference হয় বা যেগুলোর ভেতরে `DELETE ... RETURNING` আছে সেগুলোও।"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-016",
+  "subtopic": "JSONB",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "jsonb",
+   "gin",
+   "operators",
+   "containment",
+   "nulls-last"
+  ],
+  "technologyVersion": "PostgreSQL 18 (PostgreSQL-specific operators)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Using the `products` table below, return the name, color, RAM (as an integer), and whether the product is tagged `5g` for every **Walton** product. Sort by RAM from highest to lowest, with products that have no RAM value last. The query should be able to use the GIN index.",
+   "bn": "নিচের `products` table থেকে সব **Walton** product-এর name, color, RAM (integer হিসেবে) আর product-টা `5g` tag করা কিনা — বের করো। RAM বেশি থেকে কম ক্রমে sort করো, আর যেসব product-এর RAM value নেই সেগুলো শেষে রাখো। Query-টা যেন GIN index ব্যবহার করতে পারে।"
+  },
+  "answer": {
+   "en": "- `attrs @> '{\"brand\": \"Walton\"}'` is a **containment** test: \"does `attrs` contain this JSON?\" It's the operator the `jsonb_path_ops` GIN index supports, so the filter can use a Bitmap Index Scan.\n- `->>` returns **text** (good for display); `->` returns **jsonb** (needed to keep navigating, as in `attrs->'tags'`).\n- `(attrs->>'ram_gb')::int` casts to integer so sorting is numeric; text sorting would put `'12'` before `'4'`.\n- `attrs->'tags' ? '5g'` checks whether the array contains the string `5g`. The fridge has no `tags` key, so `attrs->'tags'` is NULL and the result is NULL (shown empty).\n- `DESC NULLS LAST`: in PostgreSQL, NULLs sort as larger than any value, so plain `DESC` would put the fridge **first**.",
+   "bn": "- `attrs @> '{\"brand\": \"Walton\"}'` হলো **containment** test: \"`attrs`-এর ভেতরে কি এই JSON আছে?\" `jsonb_path_ops` GIN index ঠিক এই operator-টাই support করে, তাই filter-টা Bitmap Index Scan ব্যবহার করতে পারে।\n- `->>` **text** return করে (দেখানোর জন্য ভালো); `->` **jsonb** return করে (ভেতরে আরও ঢুকতে লাগে, যেমন `attrs->'tags'`)।\n- `(attrs->>'ram_gb')::int` integer-এ cast করে, যাতে sort সংখ্যা হিসেবে হয়; text হিসেবে sort করলে `'12'`, `'4'`-এর আগে চলে আসত।\n- `attrs->'tags' ? '5g'` দেখে array-তে `5g` string আছে কিনা। Fridge-এর `tags` key নেই, তাই `attrs->'tags'` NULL, ফলাফলও NULL (খালি দেখায়)।\n- `DESC NULLS LAST`: PostgreSQL-এ NULL-কে সব value-এর চেয়ে বড় ধরা হয়, তাই শুধু `DESC` দিলে fridge **প্রথমে** চলে আসত।"
+  },
+  "explanation": {
+   "en": "- **Index caveat:** a range filter like `(attrs->>'ram_gb')::int >= 8` can't use the GIN index. If that's a hot query, add a B-tree expression index on `((attrs->>'ram_gb')::int)` — or promote `ram_gb` to a real column.\n- `jsonb_path_ops` supports `@>`, `@?`, and `@@` but **not** `?`. If you filter with `attrs ? 'ram_gb'`, use the default `jsonb_ops` class.\n- SQL/JSON path is an alternative: `WHERE attrs @? '$.tags[*] ? (@ == \"5g\")'` finds 5G products and can use the GIN index too; `jsonb_path_query()` returns matching elements.\n- All of these operators (`->`, `->>`, `@>`, `?`, `::`) are PostgreSQL-specific syntax.",
+   "bn": "- **Index-এর সতর্কতা:** `(attrs->>'ram_gb')::int >= 8`-এর মতো range filter GIN index ব্যবহার করতে পারে না। এটা যদি ঘনঘন চলা query হয়, `((attrs->>'ram_gb')::int)`-এর উপর একটা B-tree expression index দাও — অথবা `ram_gb`-কে আসল column বানাও।\n- `jsonb_path_ops` `@>`, `@?` আর `@@` support করে, কিন্তু `?` **করে না**। `attrs ? 'ram_gb'` দিয়ে filter করলে default `jsonb_ops` class ব্যবহার করো।\n- বিকল্প হিসেবে SQL/JSON path: `WHERE attrs @? '$.tags[*] ? (@ == \"5g\")'` 5G product খুঁজে দেয় আর GIN index-ও ব্যবহার করতে পারে; `jsonb_path_query()` matching element-গুলো return করে।\n- এই সব operator (`->`, `->>`, `@>`, `?`, `::`) PostgreSQL-specific syntax।"
+  },
+  "interviewTip": {
+   "en": "Explain `->` vs `->>` and why containment is index-friendly. Catching the NULL-ordering detail without being asked is a strong signal.",
+   "bn": "`->` বনাম `->>` আর containment কেন index-friendly — ব্যাখ্যা করো। কেউ জিজ্ঞেস না করতেই NULL-ordering-এর খুঁটিনাটি ধরলে খুব ভালো impression পড়ে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — JSON Functions and Operators",
+    "url": "https://www.postgresql.org/docs/current/functions-json.html"
+   },
+   {
+    "title": "PostgreSQL docs — JSON Types",
+    "url": "https://www.postgresql.org/docs/current/datatype-json.html"
+   },
+   {
+    "title": "PostgreSQL docs — GIN Indexes",
+    "url": "https://www.postgresql.org/docs/current/gin.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you find products whose `tags` array contains `5g` using a JSON path expression?",
+    "bn": "JSON path expression দিয়ে কীভাবে সেসব product খুঁজবে যাদের `tags` array-তে `5g` আছে?"
+   },
+   {
+    "en": "When would you move a JSONB key into its own column?",
+    "bn": "কখন একটা JSONB key-কে আলাদা column-এ সরিয়ে নেবে?"
+   }
+  ],
+  "related": [
+   "pg-010",
+   "pg-013"
+  ],
+  "commonMistakes": {
+   "en": "Comparing `attrs->>'ram_gb'` as text, or using `?` with a `jsonb_path_ops` index and wondering why it isn't used. Some drivers (JDBC, PDO) treat `?` as a parameter placeholder — use `jsonb_exists()` or the driver's escape there.",
+   "bn": "`attrs->>'ram_gb'`-কে text হিসেবে তুলনা করা, অথবা `jsonb_path_ops` index থাকা অবস্থায় `?` ব্যবহার করে অবাক হওয়া যে index কেন কাজে লাগছে না। কিছু driver (JDBC, PDO) `?`-কে parameter placeholder ধরে — সেখানে `jsonb_exists()` বা driver-এর escape ব্যবহার করো।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT name,\n       attrs->>'color'          AS color,\n       (attrs->>'ram_gb')::int  AS ram_gb,\n       attrs->'tags' ? '5g'     AS has_5g\nFROM products\nWHERE attrs @> '{\"brand\": \"Walton\"}'\nORDER BY ram_gb DESC NULLS LAST;",
+   "output": "      name      | color  | ram_gb | has_5g\n----------------+--------+--------+--------\n Walton Primo X | black  |      8 | t\n Walton Tab T1  | black  |      4 | f\n Walton Fridge  | silver |        |"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE products (\n  id    int PRIMARY KEY,\n  name  text NOT NULL,\n  attrs jsonb NOT NULL\n);\n\nINSERT INTO products VALUES\n  (1, 'Walton Primo X', '{\"brand\": \"Walton\", \"color\": \"black\", \"ram_gb\": 8, \"tags\": [\"5g\", \"android\"]}'),\n  (2, 'Symphony Z60',   '{\"brand\": \"Symphony\", \"color\": \"blue\", \"ram_gb\": 4, \"tags\": [\"android\"]}'),\n  (3, 'Walton Fridge',  '{\"brand\": \"Walton\", \"color\": \"silver\", \"capacity_l\": 250}'),\n  (4, 'Walton Tab T1',  '{\"brand\": \"Walton\", \"color\": \"black\", \"ram_gb\": 4, \"tags\": [\"android\", \"tablet\"]}'),\n  (5, 'Xiaomi 14',      '{\"brand\": \"Xiaomi\", \"color\": \"black\", \"ram_gb\": 12, \"tags\": [\"5g\", \"android\"]}');\n\nCREATE INDEX idx_products_attrs ON products USING gin (attrs jsonb_path_ops);"
+  },
+  "technology": "postgresql"
+ }
+]

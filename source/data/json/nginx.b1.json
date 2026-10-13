@@ -1,0 +1,595 @@
+[
+ {
+  "id": "nginx-001",
+  "subtopic": "Web Server Fundamentals",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "master-worker",
+   "event-driven",
+   "worker_processes",
+   "worker_connections",
+   "architecture"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How does NGINX handle many thousands of concurrent connections? Explain its master/worker process model and event-driven architecture.",
+   "bn": "NGINX কীভাবে হাজার হাজার concurrent connection সামলায়? এর master/worker process model আর event-driven architecture ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "NGINX runs **one master process and several worker processes**.\n\n- The **master** (usually root) reads and validates the configuration, opens the listening sockets (80/443), starts and monitors workers, and handles control signals such as reload and binary upgrade. It doesn't serve requests.\n- The **workers** (an unprivileged user such as `nginx` or `www-data`) do all the real work. Each worker runs an **event loop** on the OS's efficient notification mechanism (`epoll` on Linux, `kqueue` on BSD/macOS) and handles thousands of connections with **non-blocking I/O**. There's no thread or process per connection.\n\n`worker_processes auto;` starts one worker per CPU core, and `worker_connections` caps simultaneous connections per worker. Because an idle keep-alive connection costs only a little memory and no thread, NGINX copes well with slow clients and huge connection counts. That's why it sits so well in front of Node.js, which uses the same event-loop idea.",
+   "bn": "NGINX চালায় **একটা master process আর কয়েকটা worker process**।\n\n- **Master** (সাধারণত root) configuration পড়ে ও validate করে, listening socket (80/443) খোলে, worker-দের start ও monitor করে, আর reload বা binary upgrade-এর মতো control signal সামলায়। এটা নিজে কোনো request serve করে না।\n- **Worker**-রা (`nginx` বা `www-data`-এর মতো unprivileged user) আসল সব কাজ করে। প্রতিটা worker OS-এর দক্ষ notification ব্যবস্থার (Linux-এ `epoll`, BSD/macOS-এ `kqueue`) উপর একটা **event loop** চালায়, আর **non-blocking I/O** দিয়ে হাজার হাজার connection সামলায়। প্রতি connection-এর জন্য আলাদা thread বা process নেই।\n\n`worker_processes auto;` প্রতিটা CPU core-এর জন্য একটা worker চালু করে, আর `worker_connections` প্রতিটা worker-এর একসাথে কতগুলো connection থাকতে পারবে তার সীমা ঠিক করে। একটা idle keep-alive connection-এর জন্য সামান্য memory লাগে আর কোনো thread লাগে না, তাই ধীর client আর বিপুল সংখ্যক connection NGINX ভালোভাবে সামলাতে পারে। এজন্যই Node.js-এর সামনে এটা এত ভালো মানায়, কারণ Node.js-ও একই event-loop ধারণা ব্যবহার করে।"
+  },
+  "explanation": {
+   "en": "- **Why one worker per core:** CPU-heavy work such as TLS handshakes and gzip happens inside workers. More workers than cores just adds context switching.\n- **Blocking is the enemy:** anything that blocks a worker (slow disk reads, synchronous modules) stalls **all** its connections. NGINX offers thread pools (`aio threads`) for that.\n- **Other processes:** with `proxy_cache`, you'll also see a **cache loader** and a **cache manager** process.\n- **Graceful reloads:** on reload the master starts new workers with the new config while the old ones finish their in-flight requests. That's how configuration changes avoid downtime.\n- **Contrast:** a classic thread/process-per-connection server (e.g. Apache prefork) needs far more memory for the same number of idle connections.",
+   "bn": "- **কেন প্রতি core-এ একটা worker:** TLS handshake আর gzip-এর মতো CPU-ভারী কাজ worker-এর ভেতরেই হয়। Core-এর চেয়ে বেশি worker হলে শুধু context switching বাড়ে।\n- **Blocking হলো শত্রু:** worker-কে block করে এমন যেকোনো কিছু (ধীর disk read, synchronous module) ওই worker-এর **সব** connection থামিয়ে দেয়। এর জন্য NGINX thread pool (`aio threads`) দেয়।\n- **অন্যান্য process:** `proxy_cache` ব্যবহার করলে একটা **cache loader** আর একটা **cache manager** process-ও দেখা যায়।\n- **Graceful reload:** reload-এর সময় master নতুন config দিয়ে নতুন worker চালু করে, আর পুরনোরা হাতে থাকা request শেষ করে। এভাবেই downtime ছাড়া configuration বদলানো যায়।\n- **তুলনা:** প্রতি connection-এ একটা thread/process দেওয়া classic server (যেমন Apache prefork)-এর একই সংখ্যক idle connection রাখতে অনেক বেশি memory লাগে।"
+  },
+  "interviewTip": {
+   "en": "Use the phrase \"a few workers, each with an event loop, instead of a thread per connection\", then link it to a real benefit: slow mobile clients on 3G/4G don't tie up your Node.js processes when NGINX buffers in front of them.",
+   "bn": "\"প্রতি connection-এ thread-এর বদলে কয়েকটা worker, প্রত্যেকের একটা event loop\", এই কথাটা ব্যবহার করো। তারপর একটা বাস্তব সুবিধার সাথে যুক্ত করো: NGINX সামনে থেকে buffer করলে 3G/4G-এর ধীর mobile client তোমার Node.js process আটকে রাখতে পারে না।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Beginner's Guide",
+    "url": "https://nginx.org/en/docs/beginners_guide.html"
+   },
+   {
+    "title": "NGINX — Core functionality (worker_processes, events)",
+    "url": "https://nginx.org/en/docs/ngx_core_module.html"
+   },
+   {
+    "title": "NGINX — Connection processing methods",
+    "url": "https://nginx.org/en/docs/events.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to in-flight requests during `nginx -s reload`?",
+    "bn": "`nginx -s reload`-এর সময় চলমান request-গুলোর কী হয়?"
+   },
+   {
+    "en": "Why can a blocking operation inside a worker hurt many users at once?",
+    "bn": "একটা worker-এর ভেতরে blocking operation কেন একসাথে অনেক user-এর ক্ষতি করতে পারে?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Saying NGINX is \"multi-threaded with one thread per request\", setting `worker_processes` far above the CPU count, or thinking the master process handles traffic.",
+   "bn": "NGINX-কে \"প্রতি request-এ একটা thread-ওয়ালা multi-threaded server\" বলা, CPU-র সংখ্যার চেয়ে অনেক বেশি `worker_processes` set করা, অথবা ভাবা যে master process traffic সামলায়।"
+  },
+  "code": {
+   "language": "bash",
+   "source": "$ ps -o pid,user,cmd -C nginx\n    PID USER     CMD\n   1021 root     nginx: master process /usr/sbin/nginx -c /etc/nginx/nginx.conf\n   1022 nginx    nginx: worker process\n   1023 nginx    nginx: worker process\n   1024 nginx    nginx: worker process\n   1025 nginx    nginx: worker process\n\n# nginx.conf (main + events contexts)\n#   worker_processes auto;\n#   events { worker_connections 1024; }"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-002",
+  "subtopic": "Reverse Proxy",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "reverse-proxy",
+   "forward-proxy",
+   "cdn",
+   "load-balancer"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between a forward proxy and a reverse proxy? Why do we put NGINX as a reverse proxy in front of a Node.js app?",
+   "bn": "Forward proxy আর reverse proxy-র মধ্যে পার্থক্য কী? Node.js app-এর সামনে NGINX-কে reverse proxy হিসেবে কেন বসানো হয়?"
+  },
+  "answer": {
+   "en": "- A **forward proxy** sits in front of **clients** and makes requests to the internet on their behalf, like a corporate or university proxy. The client is configured to use it, and websites see the proxy instead of the user. It's used for filtering, caching, auditing or anonymity.\n- A **reverse proxy** sits in front of **servers** and receives requests on their behalf. The client thinks it's talking to the real site and has no idea which backend actually served it.\n\nIn front of Node.js, NGINX as a reverse proxy gives me:\n- **TLS termination** and HTTP/2/HTTP/3 support;\n- **load balancing** across several Node processes or hosts;\n- fast **static file** serving, **compression** and **caching**;\n- **buffering** of slow clients, so Node isn't tied up;\n- rate limiting, request size limits and security headers;\n- hiding internal ports and topology. The app listens only on `127.0.0.1:3000`.",
+   "bn": "- **Forward proxy** বসে **client-দের** সামনে, আর তাদের হয়ে internet-এ request পাঠায়, যেমন অফিস বা বিশ্ববিদ্যালয়ের proxy। Client-কে এটা ব্যবহারের জন্য configure করা থাকে, আর website user-এর বদলে proxy-কে দেখে। এটা ব্যবহার হয় filtering, caching, auditing বা anonymity-র জন্য।\n- **Reverse proxy** বসে **server-দের** সামনে, আর তাদের হয়ে request গ্রহণ করে। Client ভাবে সে আসল site-এর সাথেই কথা বলছে, কোন backend আসলে উত্তর দিল সে জানেই না।\n\nNode.js-এর সামনে NGINX reverse proxy হিসেবে আমাকে দেয়:\n- **TLS termination** আর HTTP/2/HTTP/3 support;\n- একাধিক Node process বা host-এর মধ্যে **load balancing**;\n- দ্রুত **static file** serving, **compression** আর **caching**;\n- ধীর client-দের **buffering**, যাতে Node আটকে না থাকে;\n- rate limiting, request size limit আর security header;\n- ভেতরের port আর topology লুকিয়ে রাখা। App শুধু `127.0.0.1:3000`-এ listen করে।"
+  },
+  "explanation": {
+   "en": "- **Who knows about the proxy?** With a forward proxy the **client** knows and configures it. With a reverse proxy only the **server operator** knows. That's the cleanest way to tell them apart.\n- **Same family:** CDNs, API gateways and cloud load balancers (e.g. AWS ALB) are all reverse proxies with extra features.\n- **NGINX as a forward proxy:** NGINX was designed as a reverse proxy. HTTPS forward proxying needs the `CONNECT` method, which stock NGINX didn't support until the `ngx_http_tunnel_module` appeared in the **1.31 mainline** (it's not in 1.30 stable). Dedicated tools like Squid remain the usual choice for forward proxies.\n- **Side effect:** the app now sees NGINX's IP as the client, so you must forward the real client IP and protocol with proxy headers.",
+   "bn": "- **Proxy-র কথা কে জানে?** Forward proxy-র ক্ষেত্রে **client** জানে আর নিজেই configure করে। Reverse proxy-র ক্ষেত্রে শুধু **server operator** জানে। দুটোকে আলাদা করার সবচেয়ে পরিষ্কার উপায় এটাই।\n- **একই পরিবার:** CDN, API gateway আর cloud load balancer (যেমন AWS ALB) সবই বাড়তি feature-ওয়ালা reverse proxy।\n- **Forward proxy হিসেবে NGINX:** NGINX reverse proxy হিসেবেই design করা। HTTPS forward proxying-এর জন্য `CONNECT` method লাগে, যেটা সাধারণ NGINX-এ ছিল না, যতদিন না **1.31 mainline**-এ `ngx_http_tunnel_module` এল (1.30 stable-এ নেই)। Forward proxy-র জন্য এখনো Squid-এর মতো নিবেদিত tool-ই সাধারণ পছন্দ।\n- **পার্শ্বপ্রতিক্রিয়া:** app এখন client হিসেবে NGINX-এর IP দেখে, তাই proxy header দিয়ে আসল client IP আর protocol পাঠাতে হয়।"
+  },
+  "interviewTip": {
+   "en": "Use the \"who is configured to know about the proxy\" test, then list three or four concrete benefits for a Node.js deployment. Concrete benefits beat abstract definitions.",
+   "bn": "\"Proxy-র কথা জানার জন্য কাকে configure করা হয়েছে\", এই পরীক্ষাটা ব্যবহার করো। তারপর Node.js deployment-এর জন্য তিন-চারটা বাস্তব সুবিধা বলো। বিমূর্ত সংজ্ঞার চেয়ে বাস্তব সুবিধা বেশি কাজে দেয়।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_proxy_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+   },
+   {
+    "title": "NGINX — Beginner's Guide",
+    "url": "https://nginx.org/en/docs/beginners_guide.html"
+   },
+   {
+    "title": "NGINX — ngx_http_tunnel_module (1.31 mainline)",
+    "url": "https://nginx.org/en/docs/http/ngx_http_tunnel_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Is a CDN a forward or a reverse proxy? Why?",
+    "bn": "CDN কি forward proxy না reverse proxy? কেন?"
+   },
+   {
+    "en": "What does the Node app lose by default when it sits behind a reverse proxy?",
+    "bn": "Reverse proxy-র পেছনে বসলে Node app default হিসেবে কী কী তথ্য হারায়?"
+   }
+  ],
+  "related": [
+   "nginx-001"
+  ],
+  "commonMistakes": {
+   "en": "Calling a VPN a forward proxy (it works at a different layer), or forgetting that the app needs `X-Forwarded-*` headers once it sits behind a reverse proxy.",
+   "bn": "VPN-কে forward proxy বলা (এটা অন্য layer-এ কাজ করে), অথবা ভুলে যাওয়া যে reverse proxy-র পেছনে বসার পর app-এর `X-Forwarded-*` header লাগে।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "# Reverse proxy: clients talk to NGINX, NGINX talks to Node on localhost\nserver {\n    listen 80;\n    server_name api.example.com;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_set_header Host $host;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}\n\n# Forward proxy, from the client's side (the client must be configured):\n#   curl -x http://proxy.corp.local:3128 https://example.com"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-003",
+  "subtopic": "Configuration Blocks",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "contexts",
+   "server-block",
+   "location",
+   "inheritance",
+   "nginx-t"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline (add_header_inherit since 1.29.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Explain how an NGINX configuration is structured. What are contexts, how does directive inheritance work, and how do you safely apply a change?",
+   "bn": "NGINX configuration-এর গঠন কেমন, ব্যাখ্যা করো। Context কী, directive inheritance কীভাবে কাজ করে, আর একটা পরিবর্তন নিরাপদে কীভাবে প্রয়োগ করবে?"
+  },
+  "answer": {
+   "en": "A config is made of **directives**: simple ones (`name value;`) and block ones that open a **context**. The hierarchy is:\n\n- **main** (top level): `user`, `worker_processes`, `error_log`, `pid`.\n- **`events {}`**: connection processing, e.g. `worker_connections`.\n- **`http {}`**: everything HTTP. MIME types, logs, gzip, `upstream` groups, `map`s and rate-limit zones live here.\n- **`server {}`**: a virtual host, with `listen`, `server_name` and TLS certificates.\n- **`location {}`**: per-URI handling inside a server, such as `proxy_pass`, `root` or `try_files`.\n\nThere's also `stream {}` for TCP/UDP proxying.\n\n**Inheritance:** a directive set in an outer context applies to inner ones unless the inner context redefines it. The classic gotcha is \"array\" directives such as `proxy_set_header` and `add_header`: defining **even one** at an inner level drops **all** the inherited ones.\n\n**Applying a change safely:** run `nginx -t` (syntax and config test), optionally `nginx -T` to dump the full effective config, then `nginx -s reload` or `systemctl reload nginx`. Reloads are graceful, and an invalid config is rejected while the old one keeps running.",
+   "bn": "Config তৈরি হয় **directive** দিয়ে: সাধারণ directive (`name value;`) আর block directive, যেটা একটা **context** খোলে। Hierarchy হলো:\n\n- **main** (সবচেয়ে উপরের স্তর): `user`, `worker_processes`, `error_log`, `pid`।\n- **`events {}`**: connection processing, যেমন `worker_connections`।\n- **`http {}`**: HTTP-সংক্রান্ত সবকিছু। MIME type, log, gzip, `upstream` group, `map` আর rate-limit zone এখানে থাকে।\n- **`server {}`**: একটা virtual host, যেখানে থাকে `listen`, `server_name` আর TLS certificate।\n- **`location {}`**: server-এর ভেতরে প্রতিটা URI কীভাবে handle হবে, যেমন `proxy_pass`, `root` বা `try_files`।\n\nTCP/UDP proxying-এর জন্য `stream {}`-ও আছে।\n\n**Inheritance:** বাইরের context-এ set করা directive ভেতরের context-এও প্রযোজ্য, যদি না ভেতরের context সেটা নতুন করে define করে। Classic gotcha হলো `proxy_set_header` আর `add_header`-এর মতো \"array\" directive: ভেতরের স্তরে **একটাও** define করলে inherit হওয়া **সবগুলো** বাদ পড়ে যায়।\n\n**নিরাপদে পরিবর্তন প্রয়োগ:** `nginx -t` চালাও (syntax আর config test), চাইলে `nginx -T` দিয়ে পুরো কার্যকর config দেখে নাও, তারপর `nginx -s reload` বা `systemctl reload nginx`। Reload graceful হয়, আর config ভুল হলে সেটা reject হয়, পুরনোটা চলতে থাকে।"
+  },
+  "explanation": {
+   "en": "- **File layout:** `nginx.org` packages include `/etc/nginx/conf.d/*.conf` from `nginx.conf`, while Debian/Ubuntu packages also use `sites-available/` with symlinks in `sites-enabled/`. Know which one your server uses before adding files.\n- **The inheritance gotcha in practice:** you set HSTS with `add_header` in the `server` block, then add one `add_header Cache-Control …` inside a `location`. Responses from that location silently lose HSTS. NGINX 1.29.3+ (so 1.30 stable) adds `add_header_inherit merge;` to change this behaviour. On older versions, repeat the headers or use a shared `include` snippet.\n- **Order:** the order of `location` blocks in the file doesn't decide matching (except among regex locations). Matching rules are a separate topic.\n- A reload applies configuration only. Upgrading the NGINX binary itself needs a restart or the on-the-fly binary upgrade procedure (`USR2` signal).",
+   "bn": "- **File layout:** `nginx.org`-এর package `nginx.conf` থেকে `/etc/nginx/conf.d/*.conf` include করে, আর Debian/Ubuntu-র package এর সাথে `sites-available/` আর `sites-enabled/`-এ symlink ব্যবহার করে। নতুন file যোগ করার আগে জেনে নাও তোমার server কোনটা ব্যবহার করে।\n- **বাস্তবে inheritance-এর gotcha:** `server` block-এ `add_header` দিয়ে HSTS set করলে, তারপর একটা `location`-এ একটা `add_header Cache-Control …` যোগ করলে। ওই location-এর response থেকে HSTS চুপচাপ হারিয়ে যায়। NGINX 1.29.3+ (অর্থাৎ 1.30 stable) এই আচরণ বদলাতে `add_header_inherit merge;` যোগ করেছে। পুরনো version-এ header-গুলো আবার লেখো, বা একটা shared `include` snippet ব্যবহার করো।\n- **ক্রম:** file-এ `location` block-এর ক্রম matching ঠিক করে না (regex location-গুলোর মধ্যে ছাড়া)। Matching-এর নিয়ম আলাদা একটা বিষয়।\n- Reload শুধু configuration প্রয়োগ করে। NGINX-এর binary নিজেই upgrade করতে হলে restart লাগে, অথবা on-the-fly binary upgrade পদ্ধতি (`USR2` signal)।"
+  },
+  "interviewTip": {
+   "en": "Sketch the nesting (main → events/http → server → location) out loud, then mention the `add_header`/`proxy_set_header` inheritance trap. Many experienced engineers have been bitten by it, so it signals real-world experience.",
+   "bn": "Nesting-টা মুখে মুখে এঁকে দেখাও (main → events/http → server → location), তারপর `add_header`/`proxy_set_header` inheritance-এর ফাঁদটা উল্লেখ করো। অনেক অভিজ্ঞ engineer এতে ধরা খেয়েছে, তাই এটা বাস্তব অভিজ্ঞতার পরিচয় দেয়।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Beginner's Guide",
+    "url": "https://nginx.org/en/docs/beginners_guide.html"
+   },
+   {
+    "title": "NGINX — Controlling nginx",
+    "url": "https://nginx.org/en/docs/control.html"
+   },
+   {
+    "title": "NGINX — ngx_http_headers_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_headers_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why do security headers sometimes disappear on certain URLs?",
+    "bn": "কিছু URL-এ security header মাঝে মাঝে কেন হারিয়ে যায়?"
+   },
+   {
+    "en": "What's the difference between `reload` and `restart` for NGINX?",
+    "bn": "NGINX-এর `reload` আর `restart`-এর মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "nginx-001"
+  ],
+  "commonMistakes": {
+   "en": "Running `systemctl restart nginx` for every change (it drops connections), editing without `nginx -t`, or putting `upstream`/`map` blocks inside `server`.",
+   "bn": "প্রতিটা পরিবর্তনে `systemctl restart nginx` চালানো (এতে connection কেটে যায়), `nginx -t` না চালিয়েই edit করা, অথবা `upstream`/`map` block `server`-এর ভেতরে রাখা।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "user  nginx;\nworker_processes  auto;                     # main context\nerror_log  /var/log/nginx/error.log warn;\n\nevents {\n    worker_connections  1024;\n}\n\nhttp {\n    include       /etc/nginx/mime.types;\n    default_type  application/octet-stream;\n    sendfile      on;\n\n    upstream app {                          # lives in http\n        server 127.0.0.1:3000;\n    }\n\n    server {                                # virtual host\n        listen 80;\n        server_name example.com;\n\n        location / {                        # per-URI rules\n            proxy_pass http://app;\n        }\n    }\n\n    include /etc/nginx/conf.d/*.conf;\n}"
+  },
+  "extraCode": [
+   {
+    "language": "bash",
+    "source": "sudo nginx -t                  # test syntax + config\nsudo nginx -T | less           # full effective config, all includes expanded\nsudo systemctl reload nginx    # graceful (same as nginx -s reload)",
+    "label": {
+     "en": "Safe change workflow",
+     "bn": "নিরাপদে পরিবর্তনের ধাপ"
+    }
+   }
+  ],
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-004",
+  "subtopic": "Request Size Limits",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "413",
+   "client_max_body_size",
+   "uploads"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Users get `413 Request Entity Too Large` from NGINX when uploading a 5 MB profile photo to your Express API. Which directive fixes it?",
+   "bn": "Express API-তে 5 MB-এর একটা profile photo upload করার সময় user-রা NGINX থেকে `413 Request Entity Too Large` পাচ্ছে। কোন directive এটা ঠিক করবে?"
+  },
+  "answer": {
+   "en": "`client_max_body_size` sets the largest request body NGINX accepts. Its default is **1m**, so a 5 MB upload is rejected with 413 before it ever reaches Node. Raise it, ideally only on the upload route (e.g. `location /api/uploads { client_max_body_size 10m; … }`), instead of globally.",
+   "bn": "`client_max_body_size` ঠিক করে NGINX সর্বোচ্চ কত বড় request body গ্রহণ করবে। এর default **1m**, তাই 5 MB-এর upload Node-এ পৌঁছানোর আগেই 413 দিয়ে reject হয়। এটা বাড়াও, তবে globally না করে সম্ভব হলে শুধু upload route-এ (যেমন `location /api/uploads { client_max_body_size 10m; … }`)।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is `client_body_buffer_size`. It controls how much of the body is buffered **in memory** before NGINX spills it to a temporary file. It doesn't change the size limit. `proxy_buffer_size` concerns the **upstream response** headers, and `large_client_header_buffers` limits request **headers**.\n\nAlso check the app layer. `express.json()` defaults to a 100kb limit (larger bodies fail with a 413 `PayloadTooLargeError`), and multer's `limits.fileSize` raises a `MulterError` (`LIMIT_FILE_SIZE`) that your error handler should map to 413. NGINX's own 413 is a small HTML page that mentions nginx, while the app's response comes from your Express error handler, which helps you tell which layer rejected the request. Setting `client_max_body_size 0;` disables the check entirely. Avoid that on public endpoints.",
+   "bn": "বিভ্রান্তিকর ভুল উত্তর হলো `client_body_buffer_size`। এটা ঠিক করে body-র কতটা **memory-তে** buffer হবে, তারপর NGINX বাকিটা temporary file-এ লেখে। এটা size limit বদলায় না। `proxy_buffer_size` **upstream response**-এর header-এর সাথে সম্পর্কিত, আর `large_client_header_buffers` request-এর **header** সীমিত করে।\n\nApp layer-ও দেখে নাও। `express.json()`-এর default limit 100kb (এর চেয়ে বড় body 413 `PayloadTooLargeError` দিয়ে fail করে), আর multer-এর `limits.fileSize` পার হলে একটা `MulterError` (`LIMIT_FILE_SIZE`) আসে, যেটা তোমার error handler-এ 413-এ map করা উচিত। NGINX-এর নিজের 413 হলো nginx-এর নাম লেখা ছোট একটা HTML page, আর app-এর response আসে তোমার Express error handler থেকে। এতে বোঝা যায় কোন layer request reject করেছে। `client_max_body_size 0;` দিলে check পুরোপুরি বন্ধ হয়ে যায়। Public endpoint-এ এটা এড়িয়ে চলো।"
+  },
+  "interviewTip": {
+   "en": "Mention the 1 MB default and scoping the limit to the upload location. It shows you think about DoS surface, not just making the error disappear.",
+   "bn": "1 MB-এর default আর limit শুধু upload location-এ সীমিত রাখার কথা বলো। এতে বোঝা যায় তুমি শুধু error দূর করার কথা না, DoS-এর ঝুঁকির কথাও ভাবো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   },
+   {
+    "title": "Express 5.x API — express.json() limit",
+    "url": "https://expressjs.com/en/5x/api.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nginx-003"
+  ],
+  "options": [
+   {
+    "en": "`proxy_buffer_size 8m;`",
+    "bn": "`proxy_buffer_size 8m;`"
+   },
+   {
+    "en": "`client_body_buffer_size 10m;`",
+    "bn": "`client_body_buffer_size 10m;`"
+   },
+   {
+    "en": "`client_max_body_size 10m;`",
+    "bn": "`client_max_body_size 10m;`"
+   },
+   {
+    "en": "`large_client_header_buffers 4 10m;`",
+    "bn": "`large_client_header_buffers 4 10m;`"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-012",
+  "subtopic": "Location Matching",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "location",
+   "regex",
+   "prefix",
+   "matching-order"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Given this server block, which response does `GET /images/photo.png` return?",
+   "bn": "এই server block দেখে বলো, `GET /images/photo.png` কোন response দেবে?"
+  },
+  "answer": {
+   "en": "The answer is **D**. NGINX first checks exact (`=`) matches, then finds the **longest prefix** match, which is `/images/` here, and remembers it. Because that prefix isn't marked `^~`, NGINX then tests **regex locations in the order they appear**. `~* \\.(png|jpe?g|gif)$` matches, so it wins. The remembered prefix is used only if no regex matches.",
+   "bn": "উত্তর **D**। NGINX প্রথমে exact (`=`) match দেখে, তারপর **সবচেয়ে লম্বা prefix** match খোঁজে, এখানে `/images/`, আর সেটা মনে রাখে। ওই prefix-এ `^~` চিহ্ন নেই, তাই NGINX এরপর **file-এ যে ক্রমে আছে সেই ক্রমে regex location** পরীক্ষা করে। `~* \\.(png|jpe?g|gif)$` মিলে যায়, তাই এটাই জেতে। কোনো regex না মিললে তবেই মনে রাখা prefix ব্যবহার হয়।"
+  },
+  "explanation": {
+   "en": "The full algorithm:\n1. `=` exact match → use it immediately (`/images/logo.png` → **E**).\n2. Find the longest prefix match. If it's marked `^~`, use it and **skip regexes** (`/images/icons/cart.png` → **C**, even though it ends in `.png`).\n3. Otherwise check `~` (case-sensitive) and `~*` (case-insensitive) regexes in file order; the first match wins (`/images/photo.png` → **D**).\n4. If no regex matches, use the longest prefix from step 2 (`/images/readme.txt` → **B**; `/about` → **A**).\n\nThe tempting wrong answer is B, from people who assume \"longest prefix always wins\". The `^~` answer (C) is wrong because `^~` only wins when it **is** the longest prefix match. It isn't \"checked first\".",
+   "bn": "পুরো algorithm:\n1. `=` exact match → সাথে সাথে সেটা ব্যবহার (`/images/logo.png` → **E**)।\n2. সবচেয়ে লম্বা prefix match খোঁজো। সেটা `^~` চিহ্নিত হলে সেটাই ব্যবহার করো আর **regex বাদ দাও** (`/images/icons/cart.png` → **C**, যদিও শেষে `.png`)।\n3. না হলে file-এর ক্রমে `~` (case-sensitive) আর `~*` (case-insensitive) regex পরীক্ষা করো; প্রথম যেটা মেলে সেটা জেতে (`/images/photo.png` → **D**)।\n4. কোনো regex না মিললে ধাপ ২-এর সবচেয়ে লম্বা prefix ব্যবহার করো (`/images/readme.txt` → **B**; `/about` → **A**)।\n\nবিভ্রান্তিকর ভুল উত্তর হলো B, যারা ধরে নেয় \"সবচেয়ে লম্বা prefix সবসময় জেতে\" তারা এটা বেছে নেয়। `^~`-এর উত্তর (C) ভুল, কারণ `^~` তখনই জেতে যখন সেটাই সবচেয়ে লম্বা prefix match। এটা \"আগে check করা হয়\" না।"
+  },
+  "interviewTip": {
+   "en": "Recite the order as \"exact, longest prefix (stop if `^~`), regex in file order, else the prefix\". Then trace two or three URLs through it out loud. Tracing shows understanding, not memorisation.",
+   "bn": "ক্রমটা এভাবে বলো: \"exact, সবচেয়ে লম্বা prefix (`^~` হলে থামো), file-এর ক্রমে regex, নইলে সেই prefix\"। তারপর দুই-তিনটা URL এর মধ্য দিয়ে মুখে মুখে trace করো। Trace করা মুখস্থ না, বোঝাপড়া দেখায়।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   },
+   {
+    "title": "NGINX — How nginx processes a request",
+    "url": "https://nginx.org/en/docs/http/request_processing.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nginx-003"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "server {\n    listen 80;\n\n    location / {\n        return 200 \"A\";\n    }\n    location /images/ {\n        return 200 \"B\";\n    }\n    location ^~ /images/icons/ {\n        return 200 \"C\";\n    }\n    location ~* \\.(png|jpe?g|gif)$ {\n        return 200 \"D\";\n    }\n    location = /images/logo.png {\n        return 200 \"E\";\n    }\n}"
+  },
+  "options": [
+   {
+    "en": "B — `/images/` is the longest matching prefix",
+    "bn": "B — `/images/` হলো সবচেয়ে লম্বা মিলে যাওয়া prefix"
+   },
+   {
+    "en": "D — the regex location wins over a plain prefix match",
+    "bn": "D — সাধারণ prefix match-এর উপর regex location জিতে যায়"
+   },
+   {
+    "en": "C — `^~` locations are always checked first",
+    "bn": "C — `^~` location সবসময় আগে check করা হয়"
+   },
+   {
+    "en": "A — `/` matches every request",
+    "bn": "A — `/` সব request-এর সাথেই মেলে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-013",
+  "subtopic": "Reverse Proxy",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "proxy_pass",
+   "trailing-slash",
+   "uri-rewriting",
+   "express",
+   "404"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline, Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "The React app loads fine, but every API call returns 404. The Express app defines its routes as `app.use('/api/products', productsRouter)`, and its logs show `GET /products 404`. Find the bug in this NGINX config.",
+   "bn": "React app ঠিকঠাক load হচ্ছে, কিন্তু প্রতিটা API call 404 দিচ্ছে। Express app-এ route define করা আছে `app.use('/api/products', productsRouter)` দিয়ে, আর এর log-এ দেখা যাচ্ছে `GET /products 404`। এই NGINX config-এর bug খুঁজে বের করো।"
+  },
+  "answer": {
+   "en": "The bug is the trailing slash in `proxy_pass http://127.0.0.1:4000/;`.\n\nThe rule: if `proxy_pass` contains a **URI part** (anything after host:port, even a lone `/`), NGINX **replaces the part of the request URI that matched the location** with that URI. Here `/api/` is replaced by `/`, so `/api/products` reaches Express as `/products`, and no route matches.\n\nIf `proxy_pass` has **no URI**, the original request URI is passed unchanged.\n\n**Fix:** use `proxy_pass http://127.0.0.1:4000;` so Express receives `/api/products`. The alternative, keeping the slash, is fine only if you **intend** to strip the prefix and mount Express routes at `/products`. Either way, pick one convention and document it.",
+   "bn": "Bug-টা হলো `proxy_pass http://127.0.0.1:4000/;`-এর শেষের slash।\n\nনিয়মটা হলো: `proxy_pass`-এ **URI অংশ** থাকলে (host:port-এর পরে যেকোনো কিছু, শুধু একটা `/` হলেও), NGINX request URI-এর **যে অংশ location-এর সাথে মিলেছে** সেটাকে ওই URI দিয়ে replace করে। এখানে `/api/` replace হয়ে যায় `/` দিয়ে, তাই `/api/products` Express-এ পৌঁছায় `/products` হয়ে, আর কোনো route মেলে না।\n\n`proxy_pass`-এ **কোনো URI না থাকলে** আসল request URI অপরিবর্তিত অবস্থায় যায়।\n\n**সমাধান:** `proxy_pass http://127.0.0.1:4000;` ব্যবহার করো, তাহলে Express পাবে `/api/products`। বিকল্প হলো slash রেখে দেওয়া, তবে সেটা তখনই ঠিক যখন তুমি **ইচ্ছা করেই** prefix কেটে Express route `/products`-এ mount করতে চাও। যেটাই করো, একটা নিয়ম বেছে নিয়ে document করো।"
+  },
+  "explanation": {
+   "en": "- **Mismatched slashes cause stranger bugs:** with `location /api` (no slash) and `proxy_pass http://127.0.0.1:4000/;`, the request `/api/products` becomes `//products`, and `/apiary` also matches the location.\n- **Regex and named locations:** NGINX can't tell which part to replace, so `proxy_pass` there must not have a URI (`nginx -t` reports an error otherwise). Use `rewrite … break` if you need to change the path.\n- **With variables** (e.g. `proxy_pass http://$backend;`), a URI given in the directive replaces the whole request URI. That's another source of surprises.\n- **Debugging trick:** compare NGINX's access log (`$request_uri`) with the backend's log, or temporarily `return 200 \"$uri\\n\";` in the location to see what NGINX matched.",
+   "bn": "- **Slash না মিললে আরও অদ্ভুত bug:** `location /api` (slash ছাড়া) আর `proxy_pass http://127.0.0.1:4000/;` হলে `/api/products` হয়ে যায় `//products`, আর `/apiary`-ও ওই location-এর সাথে মিলে যায়।\n- **Regex আর named location:** NGINX বুঝতে পারে না কোন অংশ replace করবে, তাই সেখানে `proxy_pass`-এ URI রাখা যায় না (রাখলে `nginx -t` error দেখায়)। Path বদলাতে চাইলে `rewrite … break` ব্যবহার করো।\n- **Variable থাকলে** (যেমন `proxy_pass http://$backend;`) directive-এ দেওয়া URI পুরো request URI-কেই replace করে। এটাও বিস্ময়ের আরেকটা উৎস।\n- **Debugging-এর কৌশল:** NGINX-এর access log (`$request_uri`) আর backend-এর log মিলিয়ে দেখো, অথবা location-এ সাময়িকভাবে `return 200 \"$uri\\n\";` দিয়ে দেখো NGINX কী match করেছে।"
+  },
+  "interviewTip": {
+   "en": "State the rule in one sentence: \"URI in proxy_pass means replace the matched prefix; no URI means pass it through\". Then show the before/after path. Interviewers love this question because the bug is one character.",
+   "bn": "নিয়মটা এক বাক্যে বলো: \"proxy_pass-এ URI থাকলে মিলে যাওয়া prefix replace হয়; URI না থাকলে যেমন আছে তেমনই যায়\"। তারপর আগে/পরের path দেখাও। Interviewer-রা এই প্রশ্ন পছন্দ করে, কারণ পুরো bug-টা একটা character-এর।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_proxy_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+   },
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you strip `/api` intentionally inside a regex location?",
+    "bn": "Regex location-এর ভেতরে ইচ্ছা করে `/api` কীভাবে কেটে ফেলবে?"
+   },
+   {
+    "en": "Why does the SPA's `try_files` not interfere with the `/api/` location here?",
+    "bn": "এখানে SPA-র `try_files` কেন `/api/` location-এ হস্তক্ষেপ করে না?"
+   }
+  ],
+  "related": [
+   "nginx-012",
+   "nginx-002"
+  ],
+  "commonMistakes": {
+   "en": "Adding Express rewrites to \"fix\" the path instead of correcting `proxy_pass`, or assuming the trailing slash is purely cosmetic.",
+   "bn": "`proxy_pass` ঠিক না করে path \"ঠিক\" করতে Express-এ rewrite যোগ করা, অথবা ধরে নেওয়া যে শেষের slash শুধুই দেখার ব্যাপার।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "server {\n    listen 80;\n    server_name shop.example.com;\n\n    root /var/www/shop/dist;\n\n    location / {\n        try_files $uri /index.html;\n    }\n\n    location /api/ {\n        proxy_pass http://127.0.0.1:4000/;\n    }\n}"
+  },
+  "extraCode": [
+   {
+    "language": "nginx",
+    "source": "location /api/ {\n    proxy_pass http://127.0.0.1:4000;        # no trailing slash / URI\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header X-Forwarded-Proto $scheme;\n}",
+    "label": {
+     "en": "Fixed: no URI part in proxy_pass, so /api/... is passed unchanged",
+     "bn": "সমাধান: proxy_pass-এ URI অংশ নেই, তাই /api/... যেমন আছে তেমনই যায়"
+    }
+   }
+  ],
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-023",
+  "subtopic": "Caching",
+  "difficulty": "hard",
+  "type": "coding",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 12,
+  "tags": [
+   "proxy_cache",
+   "microcaching",
+   "cache-stampede",
+   "stale",
+   "performance"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Your public `GET /api/products` endpoint (Node.js) is hammered during sales campaigns. The data may be up to 10 seconds stale, but requests from logged-in users (an `Authorization` header or a `session` cookie) must never be cached.\n\nWrite the NGINX config to:\n- micro-cache successful responses for 10 seconds;\n- send only **one** request to Node when a cache entry is missing or expired (no stampede);\n- serve stale content if Node errors or times out;\n- expose whether a response was a cache HIT/MISS.",
+   "bn": "Sale campaign-এর সময় তোমার public `GET /api/products` endpoint (Node.js)-এ প্রচণ্ড চাপ পড়ে। Data সর্বোচ্চ ১০ সেকেন্ড পুরনো হলেও চলবে, কিন্তু logged-in user-দের request (`Authorization` header বা `session` cookie থাকলে) কখনো cache করা যাবে না।\n\nএমন NGINX config লেখো যা:\n- সফল response ১০ সেকেন্ডের জন্য micro-cache করবে;\n- cache entry না থাকলে বা expire হলে Node-এ মাত্র **একটা** request পাঠাবে (কোনো stampede নয়);\n- Node error দিলে বা timeout হলে stale content serve করবে;\n- response cache HIT না MISS ছিল সেটা দেখাবে।"
+  },
+  "answer": {
+   "en": "- **`proxy_cache_path`** defines the on-disk cache and a shared-memory **keys zone** (`api_cache:50m` holds the keys and metadata; bodies live on disk, capped by `max_size`). `inactive=10m` evicts entries that nobody requested for 10 minutes.\n- **`proxy_cache_valid 200 10s`** is the micro-cache TTL. Even 1–10 seconds collapses thousands of identical requests per second into a handful of upstream calls.\n- **Stampede protection:** `proxy_cache_lock on` lets only one request populate a missing entry while the others wait. `proxy_cache_use_stale updating` plus `proxy_cache_background_update on` serve the old copy while a single background request refreshes an expired one.\n- **Resilience:** `proxy_cache_use_stale error timeout http_5xx` keeps the catalogue online if Node fails.\n- **Never cache personal data:** the `map` sets `$skip_cache` to 1 when an `Authorization` header or a `session` cookie is present. `proxy_cache_bypass` skips reading the cache, and `proxy_no_cache` skips storing.\n- **Observability:** `$upstream_cache_status` (HIT, MISS, EXPIRED, STALE, UPDATING, BYPASS) in a header and in access logs.",
+   "bn": "- **`proxy_cache_path`** disk-এ cache আর একটা shared-memory **keys zone** define করে (`api_cache:50m`-এ key আর metadata থাকে; body থাকে disk-এ, `max_size` পর্যন্ত)। `inactive=10m` মানে ১০ মিনিট কেউ request না করা entry সরিয়ে দেওয়া হয়।\n- **`proxy_cache_valid 200 10s`** হলো micro-cache-এর TTL। মাত্র ১–১০ সেকেন্ডও প্রতি সেকেন্ডের হাজার হাজার একই request-কে অল্প কয়েকটা upstream call-এ নামিয়ে আনে।\n- **Stampede থেকে সুরক্ষা:** `proxy_cache_lock on` থাকলে না-থাকা entry পূরণ করে শুধু একটা request, বাকিরা অপেক্ষা করে। `proxy_cache_use_stale updating` আর `proxy_cache_background_update on` মিলে expire হওয়া entry-র পুরনো copy serve করে, আর background-এ একটা মাত্র request সেটা refresh করে।\n- **Resilience:** Node fail করলেও `proxy_cache_use_stale error timeout http_5xx` catalogue online রাখে।\n- **ব্যক্তিগত data কখনো cache নয়:** `Authorization` header বা `session` cookie থাকলে `map` `$skip_cache`-কে 1 করে দেয়। `proxy_cache_bypass` cache থেকে পড়া বাদ দেয়, আর `proxy_no_cache` store করা বাদ দেয়।\n- **Observability:** `$upstream_cache_status` (HIT, MISS, EXPIRED, STALE, UPDATING, BYPASS) header-এ আর access log-এ।"
+  },
+  "explanation": {
+   "en": "- **Upstream headers win:** `Cache-Control: no-store/private`, `Expires` or `X-Accel-Expires` from Node override `proxy_cache_valid`. By default, responses with `Set-Cookie` aren't cached, and only `GET`/`HEAD` are cached. Never add `proxy_ignore_headers Set-Cookie` without understanding that it can cache one user's cookie for everyone.\n- **Cache key design:** include everything that changes the response (scheme, host, full URI with query string). If the response depends on a header such as language, add it to the key or rely on `Vary`.\n- **Purging:** `proxy_cache_purge` is an NGINX Plus feature. In open source, use short TTLs, versioned URLs/keys, or a third-party purge module.\n- **Edge cases:** keep `keys_zone` big enough (roughly 8,000 keys per MB) and put the cache on fast disk. Also watch `$upstream_cache_status` ratios after deploys.",
+   "bn": "- **Upstream header-ই জেতে:** Node থেকে আসা `Cache-Control: no-store/private`, `Expires` বা `X-Accel-Expires` `proxy_cache_valid`-কে override করে। Default হিসেবে `Set-Cookie` থাকা response cache হয় না, আর শুধু `GET`/`HEAD` cache হয়। না বুঝে কখনো `proxy_ignore_headers Set-Cookie` যোগ কোরো না, এতে একজনের cookie সবার জন্য cache হয়ে যেতে পারে।\n- **Cache key design:** response বদলায় এমন সবকিছু key-তে রাখো (scheme, host, query string-সহ পুরো URI)। Response কোনো header-এর উপর নির্ভর করলে (যেমন ভাষা), সেটা key-তে যোগ করো বা `Vary`-এর উপর ভরসা করো।\n- **Purge:** `proxy_cache_purge` NGINX Plus-এর feature। Open source-এ ছোট TTL, versioned URL/key বা third-party purge module ব্যবহার করো।\n- **Edge case:** `keys_zone` যথেষ্ট বড় রাখো (প্রতি MB-তে মোটামুটি ৮,০০০ key), cache দ্রুত disk-এ রাখো। Deploy-এর পরে `$upstream_cache_status`-এর অনুপাতও নজরে রাখো।"
+  },
+  "interviewTip": {
+   "en": "Explain the three separate concerns, freshness (TTL), stampede (lock and background update) and safety (bypass for authenticated users), before you write directives. Ending with \"upstream `Cache-Control` and `Set-Cookie` override this\" shows you know the sharp edges.",
+   "bn": "Directive লেখার আগে তিনটা আলাদা বিষয় ব্যাখ্যা করো: freshness (TTL), stampede (lock আর background update) আর safety (authenticated user-এর জন্য bypass)। শেষে \"upstream-এর `Cache-Control` আর `Set-Cookie` এটাকে override করে\" বললে বোঝা যায় তুমি ধারালো কোণগুলোও জানো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_proxy_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+   },
+   {
+    "title": "NGINX — ngx_http_map_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_map_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you invalidate the product cache immediately after an admin edits a price?",
+    "bn": "Admin দাম বদলানোর সাথে সাথে product cache কীভাবে invalidate করবে?"
+   },
+   {
+    "en": "What's the difference between `proxy_cache_bypass` and `proxy_no_cache`?",
+    "bn": "`proxy_cache_bypass` আর `proxy_no_cache`-এর মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "nginx-013"
+  ],
+  "commonMistakes": {
+   "en": "Caching responses for logged-in users, forgetting `proxy_no_cache` (bypassed responses still get stored), using a huge TTL for \"performance\", and ignoring `Set-Cookie`.",
+   "bn": "Logged-in user-দের response cache করা, `proxy_no_cache` ভুলে যাওয়া (bypass করা response-ও তখন store হয়ে যায়), \"performance\"-এর জন্য বিশাল TTL দেওয়া, আর `Set-Cookie` উপেক্ষা করা।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "http {\n    proxy_cache_path /var/cache/nginx/api levels=1:2 keys_zone=api_cache:50m\n                     max_size=2g inactive=10m use_temp_path=off;\n\n    # 1 = skip the cache when the request carries credentials\n    map $http_authorization$cookie_session $skip_cache {\n        default 1;\n        \"\"      0;\n    }\n\n    upstream app {\n        server 127.0.0.1:3000;\n    }\n\n    server {\n        listen 443 ssl;\n        http2 on;\n        server_name shop.example.com;\n        # ssl_certificate ... ;\n\n        location = /api/products {\n            proxy_pass http://app;\n            proxy_set_header Host $host;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n            proxy_set_header X-Forwarded-Proto $scheme;\n\n            proxy_cache            api_cache;\n            proxy_cache_key        \"$scheme$request_method$host$request_uri\";\n            proxy_cache_valid      200 10s;\n            proxy_cache_valid      404 5s;\n\n            proxy_cache_lock       on;            # one request fills a missing entry\n            proxy_cache_use_stale  error timeout updating http_500 http_502 http_503 http_504;\n            proxy_cache_background_update on;     # refresh expired entries in the background\n\n            proxy_cache_bypass     $skip_cache;   # don't serve from cache\n            proxy_no_cache         $skip_cache;   # don't store in cache\n\n            add_header X-Cache-Status $upstream_cache_status always;\n        }\n    }\n}"
+  },
+  "complexity": {
+   "time": "O(1) cache lookup per request (hashed key in shared memory)",
+   "space": "O(entries): keys in keys_zone, bodies on disk up to max_size"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-030",
+  "subtopic": "Deployment Architecture",
+  "difficulty": "extreme",
+  "type": "system-design",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 25,
+  "tags": [
+   "system-design",
+   "cdn",
+   "load-balancing",
+   "flash-sale",
+   "rate-limiting",
+   "microcaching"
+  ],
+  "technologyVersion": "NGINX 1.30 stable (keepalive-to-upstream default since 1.29.7)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "An e-commerce company expects a 20× traffic spike during a midnight flash sale. The stack is a Next.js storefront and a Node.js API on a few VMs, with PostgreSQL and Redis. Design the edge and NGINX layer (CDN → NGINX → app replicas) so the site stays up, checkout stays fair and the database survives.",
+   "bn": "একটা e-commerce company মধ্যরাতের flash sale-এ স্বাভাবিকের ২০ গুণ traffic আশা করছে। Stack হলো কয়েকটা VM-এ একটা Next.js storefront আর একটা Node.js API, সাথে PostgreSQL আর Redis। Edge আর NGINX layer (CDN → NGINX → app replica) এমনভাবে design করো যাতে site চালু থাকে, checkout ন্যায্য থাকে আর database টিকে থাকে।"
+  },
+  "answer": {
+   "en": "**(Advanced, senior system design.)** First I'd clarify the numbers: peak requests per second, the read/write mix (browsing is ~95% reads; checkout is the scarce write path), inventory size and acceptable staleness.\n\n**Layered design:**\n1. **CDN (Cloudflare/CloudFront):** serves all static assets (`/_next/static`, images) with long immutable caching, absorbs bots and DDoS, and terminates TLS close to users. Product and category pages can be edge-cached for a few seconds.\n2. **Load balancer tier:** two or more NGINX nodes behind a cloud LB (or a keepalived floating IP), so NGINX isn't a single point of failure.\n3. **NGINX:** real client IP, rate limits, micro-caching, load balancing and timeouts (details below).\n4. **App tier:** stateless Node replicas (sessions and carts in Redis), pre-scaled **before** midnight because autoscaling reacts too slowly to a cliff-edge spike.\n5. **Checkout fairness and DB protection:** atomic stock reservation in Redis (`DECR`/Lua) before hitting Postgres; a queue or virtual waiting room when checkout concurrency exceeds what the DB can commit; idempotency keys for payment callbacks.\n6. **Observability:** NGINX logs with `$request_time` and `$upstream_response_time`, `stub_status` metrics, cache hit ratio, 429/5xx rates and dashboards, plus a load test at 2× the expected peak beforehand.\n\n**NGINX layer details:**\n- **Real client IP** from the CDN (`set_real_ip_from` the CDN ranges, `real_ip_header`); otherwise every limit sees the CDN's IP.\n- **Rate limits** per IP for the API and a tighter per-session limit on `/checkout`, returning 429.\n- **Micro-caching** (1–5 s) of public catalogue APIs with `proxy_cache_lock` and `use_stale`, so a 20× spike becomes a few upstream requests per second.\n- **`least_conn` load balancing** with upstream keepalive (on by default since 1.29.7) and passive health checks (`max_fails`/`fail_timeout`).\n- **Tight timeouts**, and no retries for non-idempotent requests (NGINX's default).",
+   "bn": "**(Advanced, senior system design।)** প্রথমে আমি সংখ্যাগুলো পরিষ্কার করব: peak-এ প্রতি সেকেন্ডে কত request, read/write-এর অনুপাত (browsing প্রায় ৯৫% read; checkout হলো দুর্লভ write path), inventory-র আকার, আর কতটা পুরনো data চলবে।\n\n**স্তরভিত্তিক design:**\n1. **CDN (Cloudflare/CloudFront):** সব static asset (`/_next/static`, image) দীর্ঘমেয়াদি immutable caching-সহ serve করে, bot আর DDoS সামলায়, আর user-এর কাছাকাছি TLS terminate করে। Product আর category page কয়েক সেকেন্ডের জন্য edge-এ cache করা যায়।\n2. **Load balancer tier:** একটা cloud LB (বা keepalived floating IP)-এর পেছনে দুই বা ততোধিক NGINX node, যাতে NGINX single point of failure না হয়।\n3. **NGINX:** আসল client IP, rate limit, micro-caching, load balancing আর timeout (বিস্তারিত নিচে)।\n4. **App tier:** stateless Node replica (session আর cart Redis-এ), মধ্যরাতের **আগেই** pre-scale করা, কারণ হঠাৎ খাড়া spike-এ autoscaling খুব দেরিতে সাড়া দেয়।\n5. **Checkout-এর ন্যায্যতা আর DB-র সুরক্ষা:** Postgres-এ যাওয়ার আগে Redis-এ atomic stock reservation (`DECR`/Lua); DB যতটা commit করতে পারে checkout-এর concurrency তার বেশি হলে একটা queue বা virtual waiting room; payment callback-এর জন্য idempotency key।\n6. **Observability:** `$request_time` আর `$upstream_response_time`-সহ NGINX log, `stub_status` metrics, cache hit ratio, 429/5xx-এর হার আর dashboard। আর আগেই প্রত্যাশিত peak-এর দ্বিগুণে একটা load test।\n\n**NGINX layer-এর বিস্তারিত:**\n- CDN থেকে **আসল client IP** (CDN-এর range-গুলো `set_real_ip_from`-এ, সাথে `real_ip_header`); নইলে প্রতিটা limit শুধু CDN-এর IP দেখবে।\n- API-র জন্য প্রতি IP-তে **rate limit**, আর `/checkout`-এ প্রতি session-এ আরও কড়া limit, যেটা 429 ফেরত দেয়।\n- Public catalogue API-র **micro-caching** (১–৫ সেকেন্ড), `proxy_cache_lock` আর `use_stale`-সহ, যাতে ২০ গুণ spike প্রতি সেকেন্ডে অল্প কয়েকটা upstream request-এ নেমে আসে।\n- Upstream keepalive (1.29.7 থেকে default চালু) আর passive health check (`max_fails`/`fail_timeout`)-সহ **`least_conn` load balancing**।\n- **কড়া timeout**, আর non-idempotent request-এ retry নয় (NGINX-এর default)।"
+  },
+  "explanation": {
+   "en": "**Failure scenarios:**\n- **Node replica dies:** passive health checks stop sending traffic to it after `max_fails`, and the others absorb the load. Without active checks (NGINX Plus), the first failures still hit real users. Keep timeouts short.\n- **Origin overloaded:** micro-cache plus `proxy_cache_use_stale` keep browsing alive, and rate limits shed abusive load with 429 instead of letting everything time out.\n- **Postgres saturated:** the waiting room caps concurrent checkouts, and read replicas or Redis caches serve product reads.\n- **An NGINX node dies:** the LB health check removes it.\n- **Bad deploy during the sale:** a deploy freeze, with rollback by switching back the upstream.\n\n**Trade-offs:** more caching means staler prices and stock counts, so show \"only N left\" from Redis, not from the cached page. Per-IP limits hurt users behind carrier-grade NAT, so use per-session/per-user limits for logged-in flows.",
+   "bn": "**Failure scenario:**\n- **একটা Node replica মারা গেল:** `max_fails`-এর পরে passive health check সেটায় traffic পাঠানো বন্ধ করে, বাকিরা চাপ সামলায়। Active check (NGINX Plus) না থাকায় প্রথম কয়েকটা failure আসল user-দের গায়েই লাগে। Timeout ছোট রাখো।\n- **Origin overload:** micro-cache আর `proxy_cache_use_stale` browsing চালু রাখে, আর rate limit সবকিছু timeout হতে না দিয়ে অপব্যবহারকারী load 429 দিয়ে ঝেড়ে ফেলে।\n- **Postgres saturated:** waiting room একসাথে কতগুলো checkout হবে তার সীমা বেঁধে দেয়, আর read replica বা Redis cache product read serve করে।\n- **একটা NGINX node মারা গেল:** LB-এর health check সেটাকে সরিয়ে দেয়।\n- **Sale চলাকালীন খারাপ deploy:** deploy freeze রাখো, আর upstream আগের অবস্থায় ফিরিয়ে rollback করো।\n\n**Trade-off:** caching বেশি হলে দাম আর stock-এর সংখ্যা বেশি পুরনো দেখায়, তাই \"আর মাত্র Nটা বাকি\" cached page থেকে না দেখিয়ে Redis থেকে দেখাও। Carrier-grade NAT-এর পেছনে থাকা user-রা per-IP limit-এ ক্ষতিগ্রস্ত হয়, তাই logged-in flow-তে per-session/per-user limit ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Structure it as requirements → layers (edge, proxy, app, data) → failure scenarios → trade-offs, and draw the request path. Name concrete numbers (TTL 1–5 s, a 429 limit) so the design feels real, not generic.",
+   "bn": "এভাবে সাজাও: requirement → layer (edge, proxy, app, data) → failure scenario → trade-off, আর request-এর পথটা এঁকে দেখাও। নির্দিষ্ট সংখ্যা বলো (TTL ১–৫ সেকেন্ড, একটা 429 limit), যাতে design-টা বাস্তব মনে হয়, গৎবাঁধা না।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_realip_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_realip_module.html"
+   },
+   {
+    "title": "NGINX — ngx_http_limit_req_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"
+   },
+   {
+    "title": "NGINX — ngx_http_upstream_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_upstream_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement a virtual waiting room in front of checkout?",
+    "bn": "Checkout-এর সামনে একটা virtual waiting room কীভাবে implement করবে?"
+   },
+   {
+    "en": "How do you prevent overselling when thousands of users buy the last 100 items at once?",
+    "bn": "হাজার হাজার user একসাথে শেষ ১০০টা item কিনতে চাইলে overselling কীভাবে আটকাবে?"
+   },
+   {
+    "en": "Why might per-IP rate limiting be unfair to some users?",
+    "bn": "Per-IP rate limiting কেন কিছু user-এর প্রতি অন্যায্য হতে পারে?"
+   }
+  ],
+  "related": [
+   "nginx-023",
+   "nginx-001"
+  ],
+  "commonMistakes": {
+   "en": "Relying on autoscaling alone for a cliff-edge spike, rate-limiting on the CDN's IP instead of the real client IP, and caching personalised or checkout responses.",
+   "bn": "হঠাৎ খাড়া spike-এর জন্য শুধু autoscaling-এর উপর ভরসা করা, আসল client IP-র বদলে CDN-এর IP দিয়ে rate-limit করা, আর personalised বা checkout response cache করা।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "http {\n    # Real client IP from the CDN (use the CDN's published ranges)\n    set_real_ip_from  203.0.113.0/24;\n    real_ip_header    X-Forwarded-For;\n    real_ip_recursive on;\n\n    limit_req_zone $binary_remote_addr zone=api_ip:20m      rate=20r/s;\n    limit_req_zone $cookie_session     zone=checkout_s:10m  rate=2r/s;\n    limit_req_status 429;\n\n    proxy_cache_path /var/cache/nginx/catalog keys_zone=catalog:50m max_size=1g inactive=5m;\n\n    upstream app {\n        least_conn;\n        server 10.0.1.11:3000 max_fails=3 fail_timeout=10s;\n        server 10.0.1.12:3000 max_fails=3 fail_timeout=10s;\n        server 10.0.1.13:3000 max_fails=3 fail_timeout=10s;\n        keepalive 64;              # default is 32 per worker since 1.29.7\n    }\n\n    server {\n        listen 443 ssl;\n        http2 on;\n        server_name shop.example.com;\n\n        location /api/catalog/ {\n            limit_req zone=api_ip burst=40 nodelay;\n            proxy_cache catalog;\n            proxy_cache_valid 200 3s;\n            proxy_cache_lock on;\n            proxy_cache_use_stale error timeout updating http_502 http_503 http_504;\n            proxy_pass http://app;\n        }\n\n        location /api/checkout/ {\n            limit_req zone=checkout_s burst=5;\n            limit_req zone=api_ip burst=20 nodelay;\n            proxy_read_timeout 15s;\n            proxy_pass http://app;     # never cached; POSTs are not retried by default\n        }\n\n        location = /nginx_status {\n            stub_status;\n            allow 10.0.0.0/8;\n            deny all;\n        }\n    }\n}"
+  },
+  "technology": "nginx"
+ }
+]

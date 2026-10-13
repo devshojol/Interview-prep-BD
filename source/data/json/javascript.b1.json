@@ -1,0 +1,527 @@
+[
+ {
+  "id": "js-001",
+  "subtopic": "Variables & Data Types",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "typeof",
+   "data-types",
+   "primitives",
+   "null"
+  ],
+  "technologyVersion": "Version-independent concept (ECMAScript 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does this line print?",
+   "bn": "এই line-টি কী print করবে?"
+  },
+  "answer": {
+   "en": "It prints `object object function number undefined`.\n\n`typeof null` returns `\"object\"` — a bug from the very first JavaScript implementation that was never fixed because fixing it would break the web. Arrays are ordinary objects, so `typeof []` is `\"object\"`. Functions are objects too, but `typeof` gives them a special `\"function\"` result. `NaN` (\"not a number\") is still a value of the `number` type.",
+   "bn": "Output হবে `object object function number undefined`।\n\n`typeof null` দেয় `\"object\"` — এটা JavaScript-এর একদম প্রথম implementation-এর একটা bug, যেটা ঠিক করলে পুরনো website ভেঙে যাবে বলে আর fix করা হয়নি। Array আসলে সাধারণ object, তাই `typeof []` হলো `\"object\"`। Function-ও object, কিন্তু `typeof` এদের জন্য আলাদা করে `\"function\"` দেয়। আর `NaN` (\"not a number\") নাম শুনে অদ্ভুত লাগলেও এটা `number` type-এরই একটা value।"
+  },
+  "explanation": {
+   "en": "JavaScript has **8 data types**: 7 primitives (`string`, `number`, `bigint`, `boolean`, `undefined`, `symbol`, `null`) and `object` (which includes arrays, functions, dates, maps, etc.).\n\n- Option C is the most tempting trap: `typeof` **never** returns `\"array\"`. Use `Array.isArray(value)` to detect arrays.\n- Option A assumes `typeof null` is `\"null\"` — it isn't. Check null with `value === null`.\n- For `NaN`, use `Number.isNaN(value)`. The global `isNaN('abc')` returns `true` because it coerces the string to a number first.\n- A safe \"is this a non-null object?\" check is `value !== null && typeof value === 'object'`.",
+   "bn": "JavaScript-এ **৮টি data type** আছে: ৭টি primitive (`string`, `number`, `bigint`, `boolean`, `undefined`, `symbol`, `null`) আর `object` (array, function, date, map সবই এর মধ্যে পড়ে)।\n\n- সবচেয়ে বড় ফাঁদ হলো option C: `typeof` **কখনোই** `\"array\"` return করে না। Array চেনার জন্য `Array.isArray(value)` ব্যবহার করতে হয়।\n- Option A ধরে নেয় `typeof null` হলো `\"null\"` — এটা ভুল। Null check করতে `value === null` লেখো।\n- `NaN` check করতে `Number.isNaN(value)` ব্যবহার করো। Global `isNaN('abc')` `true` দেয়, কারণ সে আগে string-টাকে number-এ coerce করে।\n- \"এটা কি null নয় এমন object?\" — নিরাপদ check হলো `value !== null && typeof value === 'object'`।"
+  },
+  "interviewTip": {
+   "en": "After answering, list the 8 data types and the reliable checks (`=== null`, `Array.isArray`, `Number.isNaN`). Interviewers like hearing *why* `typeof null` is `\"object\"` (historical bug kept for compatibility).",
+   "bn": "উত্তর দেওয়ার পর ৮টি data type আর নির্ভরযোগ্য check-গুলো (`=== null`, `Array.isArray`, `Number.isNaN`) বলো। `typeof null` কেন `\"object\"` (backward compatibility-র জন্য রেখে দেওয়া পুরনো bug) — এটা বললে interviewer খুশি হয়।"
+  },
+  "references": [
+   {
+    "title": "MDN — typeof",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof"
+   },
+   {
+    "title": "MDN — JavaScript data types and data structures",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you reliably check whether a value is a plain object?",
+    "bn": "একটা value plain object কিনা সেটা নির্ভরযোগ্যভাবে কীভাবে check করবে?"
+   },
+   {
+    "en": "What is the difference between `null` and `undefined`?",
+    "bn": "`null` আর `undefined`-এর মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "js-005"
+  ],
+  "commonMistakes": {
+   "en": "Writing `if (typeof data === 'object')` and then reading `data.length` — it crashes when `data` is `null`. Also using the global `isNaN()` instead of `Number.isNaN()`.",
+   "bn": "`if (typeof data === 'object')` লিখে তারপর `data.length` পড়া — `data` যদি `null` হয় তাহলে crash করবে। আরেকটা ভুল হলো `Number.isNaN()`-এর বদলে global `isNaN()` ব্যবহার করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "console.log(typeof null, typeof [], typeof function () {}, typeof NaN, typeof undefined);",
+   "output": "object object function number undefined"
+  },
+  "options": [
+   {
+    "en": "`null object function NaN undefined`",
+    "bn": "`null object function NaN undefined`"
+   },
+   {
+    "en": "`object object function number undefined`",
+    "bn": "`object object function number undefined`"
+   },
+   {
+    "en": "`object array function number undefined`",
+    "bn": "`object array function number undefined`"
+   },
+   {
+    "en": "`null array object number undefined`",
+    "bn": "`null array object number undefined`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "javascript"
+ },
+ {
+  "id": "js-002",
+  "subtopic": "Scope & Hoisting",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "hoisting",
+   "function-declaration",
+   "var",
+   "function-expression"
+  ],
+  "technologyVersion": "Version-independent concept (ECMAScript 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the output of this code? Explain what hoisting does to each declaration.",
+   "bn": "এই code-এর output কী হবে? প্রতিটি declaration-এর উপর hoisting কী প্রভাব ফেলে, ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "Before any line runs, the engine sets up the scope: the **function declaration** `add` is hoisted together with its body, while the `var` declarations `total` and `multiply` are hoisted but initialised to `undefined`. The assignments stay where they are written.\n\nSo `add(2, 3)` already works (`5`), `typeof multiply` is `\"undefined\"`, `total` is `undefined`, and calling `multiply` before the assignment throws a `TypeError` (\"multiply is not a function\"). At the end both assignments have run, so we get `6 10`.",
+   "bn": "কোনো line চলার আগেই engine scope তৈরি করে ফেলে: **function declaration** `add` তার পুরো body সহ hoist হয়, আর `var` দিয়ে declare করা `total` ও `multiply` hoist হয় কিন্তু `undefined` দিয়ে initialize হয়। Assignment-গুলো যেখানে লেখা, সেখানেই চলে।\n\nতাই `add(2, 3)` শুরুতেই কাজ করে (`5`), `typeof multiply` হয় `\"undefined\"`, `total` হয় `undefined`, আর assignment-এর আগে `multiply` call করলে `TypeError` (\"multiply is not a function\") throw হয়। শেষে দুটো assignment-ই হয়ে গেছে, তাই output `6 10`।"
+  },
+  "explanation": {
+   "en": "Step by step:\n\n1. **Creation phase:** `add` → full function object; `total` → `undefined`; `multiply` → `undefined`.\n2. `add(2, 3)` → `5`.\n3. `typeof multiply` → `\"undefined\"` (the variable exists, its value is `undefined`).\n4. `total` → `undefined` — no ReferenceError, because `var` is hoisted and initialised.\n5. `multiply(2, 3)` → calling `undefined` throws `TypeError`, so the `catch` prints `err.name`.\n6. `total = 10` and `multiply = function...` run.\n7. Last line → `6 10`.\n\nWhy `TypeError` and not `ReferenceError`? The binding exists, but its value is not callable. If `multiply` were declared with `let` or `const`, line 2 would already throw a `ReferenceError` because of the temporal dead zone. Arrow functions and function expressions follow the hoisting rules of the variable they are assigned to — only function **declarations** are hoisted with their body.",
+   "bn": "ধাপে ধাপে:\n\n1. **Creation phase:** `add` → পুরো function object; `total` → `undefined`; `multiply` → `undefined`।\n2. `add(2, 3)` → `5`।\n3. `typeof multiply` → `\"undefined\"` (variable আছে, কিন্তু value `undefined`)।\n4. `total` → `undefined` — ReferenceError হয় না, কারণ `var` hoist হয়ে initialize হয়ে আছে।\n5. `multiply(2, 3)` → `undefined`-কে call করায় `TypeError` throw হয়, তাই `catch` block `err.name` print করে।\n6. এরপর `total = 10` আর `multiply = function...` চলে।\n7. শেষ line → `6 10`।\n\n`ReferenceError` না হয়ে `TypeError` কেন? কারণ binding আছে, শুধু তার value call করা যায় না। `multiply` যদি `let` বা `const` দিয়ে declare করা হতো, তাহলে temporal dead zone-এর কারণে দ্বিতীয় line-এই `ReferenceError` হতো। Arrow function বা function expression যে variable-এ assign করা হয়, সেই variable-এর hoisting নিয়ম মেনে চলে — শুধু function **declaration** body সহ hoist হয়।"
+  },
+  "interviewTip": {
+   "en": "Talk in terms of the \"creation phase\" vs \"execution phase\" — it shows you understand *why* hoisting happens instead of memorising rules. Then mention how the answer changes with `let`/`const`.",
+   "bn": "\"Creation phase\" আর \"execution phase\" — এই দুই ভাগে ব্যাখ্যা করো। এতে বোঝা যায় তুমি নিয়ম মুখস্থ না করে hoisting *কেন* হয় সেটা বোঝো। শেষে `let`/`const` হলে উত্তর কীভাবে বদলাত, সেটাও বলো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Hoisting (glossary)",
+    "url": "https://developer.mozilla.org/en-US/docs/Glossary/Hoisting"
+   },
+   {
+    "title": "MDN — function declaration",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function"
+   },
+   {
+    "title": "MDN — var",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What would change if `multiply` were declared with `const`?",
+    "bn": "`multiply` যদি `const` দিয়ে declare করা হতো, তাহলে কী বদলাত?"
+   },
+   {
+    "en": "Are class declarations hoisted?",
+    "bn": "Class declaration কি hoist হয়?"
+   }
+  ],
+  "related": [
+   "js-025",
+   "js-003"
+  ],
+  "commonMistakes": {
+   "en": "Saying the code \"physically moves to the top\", or assuming function expressions are hoisted like function declarations.",
+   "bn": "Code \"physically উপরে চলে যায়\" বলা, অথবা ধরে নেওয়া যে function expression-ও function declaration-এর মতো body সহ hoist হয়।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "console.log(add(2, 3));\nconsole.log(typeof multiply);\nconsole.log(total);\n\ntry {\n  multiply(2, 3);\n} catch (err) {\n  console.log(err.name);\n}\n\nvar total = 10;\n\nfunction add(a, b) {\n  return a + b;\n}\n\nvar multiply = function (a, b) {\n  return a * b;\n};\n\nconsole.log(multiply(2, 3), total);",
+   "output": "5\nundefined\nundefined\nTypeError\n6 10"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-003",
+  "subtopic": "Closures",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "closures",
+   "var",
+   "let",
+   "settimeout",
+   "loops"
+  ],
+  "technologyVersion": "Version-independent concept (ES2015+ for let)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does this code print, and why do the two loops behave differently?",
+   "bn": "এই code কী print করবে, আর দুটো loop আলাদা আচরণ করে কেন?"
+  },
+  "answer": {
+   "en": "The `var` loop prints `3` three times; the `let` loop prints `0`, `1`, `2`.\n\nEach arrow function is a **closure** — it remembers the variable, not a snapshot of its value. With `var` there is only **one** `i` for the whole function scope, and the callbacks run only after the loop has finished (setTimeout schedules a task), when `i` is already `3`. With `let`, the loop creates a **new binding for every iteration**, so each callback closes over its own `j`.",
+   "bn": "`var` loop তিনবার `3` print করে; `let` loop print করে `0`, `1`, `2`।\n\nপ্রতিটি arrow function একটা **closure** — সে variable-টাকে মনে রাখে, value-র কোনো snapshot নয়। `var` হলে পুরো function scope-এ `i` মাত্র **একটা**, আর callback-গুলো চলে loop শেষ হওয়ার পরে (setTimeout একটা task schedule করে), তখন `i` ইতিমধ্যে `3`। `let` হলে loop **প্রতিটি iteration-এর জন্য নতুন binding** তৈরি করে, তাই প্রতিটি callback নিজের আলাদা `j` ধরে রাখে।"
+  },
+  "explanation": {
+   "en": "- The loop body runs synchronously and only *schedules* six callbacks. They run later, in order, after the call stack is empty.\n- `var i` is function-scoped (or global here), so all three closures share it. After the last `i++`, the condition `i < 3` fails with `i === 3`.\n- For `let` in a `for` header, the spec copies the current value into a fresh per-iteration environment before each iteration, so the three closures see `0`, `1` and `2`.\n- The order is `var` first because those timers were registered first and have the same delay.\n\nBefore ES2015 the fix was an IIFE (or `setTimeout`'s extra arguments) to capture the value; today just use `let`.",
+   "bn": "- Loop-এর body synchronously চলে এবং শুধু ছয়টা callback *schedule* করে। এগুলো পরে, call stack খালি হলে, ক্রমানুসারে চলে।\n- `var i` function-scoped (এখানে global), তাই তিনটা closure-ই একই `i` share করে। শেষ `i++`-এর পর `i === 3` হয়ে `i < 3` condition fail করে।\n- `for` header-এ `let` থাকলে spec অনুযায়ী প্রতিটি iteration-এর আগে current value একটা নতুন per-iteration environment-এ copy হয়, তাই তিনটা closure যথাক্রমে `0`, `1`, `2` দেখে।\n- `var`-এর লাইনগুলো আগে আসে কারণ ওই timer-গুলো আগে register হয়েছে এবং delay একই।\n\nES2015-এর আগে value ধরে রাখতে IIFE (বা `setTimeout`-এর extra argument) ব্যবহার করা হতো; এখন শুধু `let` ব্যবহার করলেই হয়।"
+  },
+  "interviewTip": {
+   "en": "Use the phrase \"closures capture variables, not values\". Then explain the per-iteration binding of `let` — that's the part most candidates can't explain precisely.",
+   "bn": "\"Closure value নয়, variable capture করে\" — এই কথাটা বলো। তারপর `let`-এর per-iteration binding ব্যাখ্যা করো; বেশিরভাগ candidate এই অংশটা ঠিকভাবে বোঝাতে পারে না।"
+  },
+  "references": [
+   {
+    "title": "MDN — Closures",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures"
+   },
+   {
+    "title": "MDN — let",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you fix the `var` version without changing `var` to `let`?",
+    "bn": "`var`-কে `let` না করে `var` version-টা কীভাবে ঠিক করবে?"
+   },
+   {
+    "en": "Why do the callbacks run only after the loop finishes?",
+    "bn": "Callback-গুলো loop শেষ হওয়ার পরেই কেন চলে?"
+   }
+  ],
+  "related": [
+   "js-004",
+   "js-016"
+  ],
+  "commonMistakes": {
+   "en": "Saying the `var` loop prints `0 1 2` \"because setTimeout has 0 delay\", or thinking `let` works because it is \"not hoisted\".",
+   "bn": "\"setTimeout-এর delay 0, তাই `var` loop `0 1 2` print করবে\" — এমন ভাবা, অথবা মনে করা `let` কাজ করে কারণ এটা \"hoist হয় না\"।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "for (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log('var', i), 0);\n}\n\nfor (let j = 0; j < 3; j++) {\n  setTimeout(() => console.log('let', j), 0);\n}",
+   "output": "var 3\nvar 3\nvar 3\nlet 0\nlet 1\nlet 2"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "for (var i = 0; i < 3; i++) {\n  (function (captured) {\n    setTimeout(function () {\n      console.log('var', captured); // 0, 1, 2\n    }, 0);\n  })(i);\n}",
+    "label": {
+     "en": "Pre-ES2015 fix with an IIFE",
+     "bn": "ES2015-এর আগের সমাধান (IIFE দিয়ে)"
+    }
+   }
+  ],
+  "technology": "javascript"
+ },
+ {
+  "id": "js-004",
+  "subtopic": "Closures",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "closures",
+   "lexical-scope",
+   "encapsulation",
+   "factory-functions"
+  ],
+  "technologyVersion": "Version-independent concept (ECMAScript 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a closure in JavaScript? Give a practical example of where you would use one.",
+   "bn": "JavaScript-এ closure কী? কোথায় closure ব্যবহার করবে, একটা বাস্তব উদাহরণ দাও।"
+  },
+  "answer": {
+   "en": "A closure is a function together with a reference to the scope it was **created** in. Because of that reference, the function can keep reading and updating those outer variables even after the outer function has returned.\n\nA common practical use is private state. In the example, `count` can't be reached from outside — only through the functions returned by `createCounter`. I also use closures every day without naming them: event handlers that use a component's variables, `debounce`/`memoize` helpers that keep a timer or cache, and factory functions like `makeLogger('auth')`.",
+   "bn": "Closure হলো একটা function আর সে যে scope-এ **তৈরি** হয়েছে, সেই scope-এর reference — দুটো মিলে। এই reference-এর কারণে outer function return করার পরেও function-টা বাইরের variable-গুলো পড়তে ও update করতে পারে।\n\nবাস্তবে সবচেয়ে common ব্যবহার হলো private state রাখা। উদাহরণে `count` বাইরে থেকে access করা যায় না — শুধু `createCounter`-এর return করা function-গুলোর মাধ্যমে। নাম না নিয়েও আমি প্রতিদিন closure ব্যবহার করি: component-এর variable ব্যবহার করা event handler, timer বা cache ধরে রাখা `debounce`/`memoize` helper, আর `makeLogger('auth')`-এর মতো factory function।"
+  },
+  "explanation": {
+   "en": "- **Lexical scoping:** what a function can see is decided by *where it is written*, not where it is called. Each function object keeps a hidden link (`[[Environment]]`) to its outer lexical environment.\n- **Live, not copied:** a closure sees the current value of the variable. Two closures created in the same call share the same variables (`increment` and `reset` below share `count`).\n- **Each call creates a new scope:** `createCounter(5)` and `createCounter(0)` produce independent counters.\n- **Memory:** captured variables stay alive as long as the closure is reachable. A long-lived listener or timer that closes over a big object keeps it in memory — a classic leak source.\n- Closures are the basis of the module pattern, partial application/currying, memoization and React hooks (where *stale* closures are a common bug).",
+   "bn": "- **Lexical scoping:** একটা function কী দেখতে পাবে সেটা ঠিক হয় function-টা *কোথায় লেখা হয়েছে* তা দিয়ে, কোথায় call হচ্ছে তা দিয়ে নয়। প্রতিটি function object তার outer lexical environment-এর একটা hidden link (`[[Environment]]`) রাখে।\n- **Copy নয়, live:** closure variable-এর current value দেখে। একই call-এ তৈরি দুটো closure একই variable share করে (নিচে `increment` আর `reset` একই `count` share করছে)।\n- **প্রতিটি call নতুন scope তৈরি করে:** `createCounter(5)` আর `createCounter(0)` দুটো আলাদা, স্বাধীন counter দেয়।\n- **Memory:** closure যতক্ষণ reachable, capture করা variable-গুলোও ততক্ষণ memory-তে থাকে। দীর্ঘ সময় বেঁচে থাকা listener বা timer যদি বড় কোনো object ধরে রাখে, সেটা memory leak-এর একটা classic কারণ।\n- Module pattern, partial application/currying, memoization আর React hooks — সবকিছুর ভিত্তি closure (React-এ *stale* closure একটা common bug)।"
+  },
+  "interviewTip": {
+   "en": "Give the one-sentence definition, show a 5-line counter, then name 2–3 real uses (debounce, event handlers, private state). Mentioning the memory trade-off shows maturity.",
+   "bn": "এক লাইনের definition দাও, ৫ লাইনের একটা counter দেখাও, তারপর ২–৩টা বাস্তব ব্যবহার (debounce, event handler, private state) বলো। Memory-র trade-off উল্লেখ করলে তোমাকে অভিজ্ঞ মনে হবে।"
+  },
+  "references": [
+   {
+    "title": "MDN — Closures",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is a stale closure and where have you seen one?",
+    "bn": "Stale closure কী, আর তুমি কোথায় এটা দেখেছ?"
+   },
+   {
+    "en": "Can closures cause memory leaks? How?",
+    "bn": "Closure কি memory leak ঘটাতে পারে? কীভাবে?"
+   }
+  ],
+  "related": [
+   "js-003",
+   "js-025",
+   "js-022"
+  ],
+  "commonMistakes": {
+   "en": "Defining a closure as \"a function inside a function\" (nesting alone isn't the point — the retained scope is), or believing closures copy values at creation time.",
+   "bn": "Closure-কে শুধু \"function-এর ভেতরে function\" বলা (nesting মূল কথা নয় — scope ধরে রাখাটাই আসল), অথবা ভাবা যে closure তৈরি হওয়ার সময় value copy করে রাখে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function createCounter(start = 0) {\n  let count = start; // private: not reachable from outside\n\n  return {\n    increment: () => ++count,\n    reset: () => (count = start),\n    get value() {\n      return count;\n    },\n  };\n}\n\nconst counter = createCounter(5);\ncounter.increment();\ncounter.increment();\nconsole.log(counter.value); // 7\nconsole.log(counter.count); // undefined — no direct access\n\nconst other = createCounter();\nconsole.log(other.value); // 0 — independent scope"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-005",
+  "subtopic": "Type Coercion & Equality",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "coercion",
+   "equality",
+   "nan",
+   "operators"
+  ],
+  "technologyVersion": "Version-independent concept (ECMAScript 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Predict the output of each line.",
+   "bn": "প্রতিটি line-এর output কী হবে, বলো।"
+  },
+  "answer": {
+   "en": "The key rule: `+` concatenates as soon as one operand (after conversion to a primitive) is a string; every other arithmetic operator converts to numbers. `==` converts types before comparing, `===` does not.\n\nSo `1 + '2'` is `'12'`, `'5' - 2` is `3`, `'5' * '2'` is `10`, `true + 1` is `2`. Objects become strings: `[]` → `''`, `{}` → `'[object Object]'`, `[1, 2]` → `'1,2'`. `null == undefined` is a special case that is `true`. `NaN` is never equal to itself, but `Object.is` treats it as the same value. Finally `'0' == false` is `true` (both become `0`), even though `'0'` itself is truthy.",
+   "bn": "মূল নিয়ম: primitive-এ convert করার পর যেকোনো একটা operand string হলেই `+` concatenation করে; বাকি সব arithmetic operator number-এ convert করে। `==` compare করার আগে type convert করে, `===` করে না।\n\nতাই `1 + '2'` হয় `'12'`, `'5' - 2` হয় `3`, `'5' * '2'` হয় `10`, `true + 1` হয় `2`। Object string হয়ে যায়: `[]` → `''`, `{}` → `'[object Object]'`, `[1, 2]` → `'1,2'`। `null == undefined` একটা special case, ফল `true`। `NaN` কখনো নিজের সমান নয়, কিন্তু `Object.is` এটাকে একই value ধরে। শেষে `'0' == false` হয় `true` (দুটোই `0` হয়ে যায়), যদিও `'0'` নিজে truthy।"
+  },
+  "explanation": {
+   "en": "Line by line:\n\n1. `1 + '2'` → one side is a string → concatenation → `12`.\n2. `'5' - 2` → `-` is numeric only → `5 - 2` → `3`.\n3. `'5' * '2'` → both converted to numbers → `10`.\n4. `true + 1` → `true` becomes `1` → `2`.\n5. `[] + {}` → both objects go through ToPrimitive: `''` + `'[object Object]'`.\n6. `[1, 2] + [3]` → `'1,2'` + `'3'` → `1,23`.\n7. `null == undefined` → `true` by a dedicated rule; `===` → `false` (different types).\n8. `NaN === NaN` → `false` (IEEE 754); `Object.is(NaN, NaN)` → `true`.\n9. `'0' == false` → `false` → `0`, `'0'` → `0` → `true`; `Boolean('0')` → non-empty string → `true`.\n\nLine 9 shows why `==` is dangerous: a value can be \"equal to false\" and truthy at the same time.",
+   "bn": "Line ধরে ধরে:\n\n1. `1 + '2'` → এক পাশে string → concatenation → `12`।\n2. `'5' - 2` → `-` শুধু number নিয়ে কাজ করে → `5 - 2` → `3`।\n3. `'5' * '2'` → দুটোই number-এ convert হয় → `10`।\n4. `true + 1` → `true` হয়ে যায় `1` → `2`।\n5. `[] + {}` → দুটো object-ই ToPrimitive-এর মধ্য দিয়ে যায়: `''` + `'[object Object]'`।\n6. `[1, 2] + [3]` → `'1,2'` + `'3'` → `1,23`।\n7. `null == undefined` → আলাদা একটা নিয়মে `true`; `===` → `false` (type আলাদা)।\n8. `NaN === NaN` → `false` (IEEE 754 অনুযায়ী); `Object.is(NaN, NaN)` → `true`।\n9. `'0' == false` → `false` → `0`, `'0'` → `0` → `true`; `Boolean('0')` → খালি নয় এমন string → `true`।\n\n৯ নম্বর line দেখায় কেন `==` বিপজ্জনক: একটা value একই সাথে \"false-এর সমান\" আবার truthy-ও হতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Don't just recite results — state the two rules (`+` with a string concatenates; other operators convert to number) and derive each line from them. Close by saying you use `===` everywhere, except the `x == null` idiom that catches both `null` and `undefined` on purpose.",
+   "bn": "শুধু ফলাফল মুখস্থ বলো না — দুটো নিয়ম (`+`-এর সাথে string থাকলে concatenation; বাকি operator number-এ convert করে) বলে প্রতিটি line সেখান থেকে বের করো। শেষে বলো যে তুমি সব জায়গায় `===` ব্যবহার করো, শুধু `null` আর `undefined` দুটো একসাথে ধরার জন্য ইচ্ছাকৃতভাবে `x == null` idiom ছাড়া।"
+  },
+  "references": [
+   {
+    "title": "MDN — Equality comparisons and sameness",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness"
+   },
+   {
+    "title": "MDN — Addition (+)",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Addition"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When, if ever, would you use `==` in production code?",
+    "bn": "Production code-এ কখনো `==` ব্যবহার করবে কি? করলে কখন?"
+   },
+   {
+    "en": "What is the difference between `===` and `Object.is`?",
+    "bn": "`===` আর `Object.is`-এর মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "js-001"
+  ],
+  "commonMistakes": {
+   "en": "Expecting `'5' - 2` to be `'52'`, or thinking `[] + {}` throws an error. Another trap: using `arr.includes(NaN)` vs `arr.indexOf(NaN)` — `includes` finds `NaN`, `indexOf` does not.",
+   "bn": "`'5' - 2`-এর ফল `'52'` আশা করা, অথবা ভাবা `[] + {}` error throw করবে। আরেকটা ফাঁদ: `arr.includes(NaN)` আর `arr.indexOf(NaN)` — `includes` `NaN` খুঁজে পায়, `indexOf` পায় না।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "console.log(1 + '2');\nconsole.log('5' - 2);\nconsole.log('5' * '2');\nconsole.log(true + 1);\nconsole.log([] + {});\nconsole.log([1, 2] + [3]);\nconsole.log(null == undefined, null === undefined);\nconsole.log(NaN === NaN, Object.is(NaN, NaN));\nconsole.log('0' == false, Boolean('0'));",
+   "output": "12\n3\n10\n2\n[object Object]\n1,23\ntrue false\nfalse true\ntrue true"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-006",
+  "subtopic": "Arrow Functions",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "arrow-functions",
+   "this",
+   "arguments",
+   "functions"
+  ],
+  "technologyVersion": "Version-independent concept (ES2015+)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How are arrow functions different from regular functions? When should you NOT use an arrow function?",
+   "bn": "Arrow function আর regular function-এর মধ্যে পার্থক্য কী? কখন arrow function ব্যবহার করা উচিত নয়?"
+  },
+  "answer": {
+   "en": "The big difference is `this`. A regular function gets its `this` from **how it is called**; an arrow function has no `this` of its own and uses the `this` of the surrounding scope (lexical `this`).\n\nOther differences:\n- Arrow functions have no own `arguments` object — use rest parameters (`...args`).\n- They can't be used with `new` and have no `prototype` property.\n- They can't be generators (`function*`).\n- Concise syntax with implicit return: `x => x * 2`.\n\nI don't use arrows for object methods or prototype/class methods that need `this` from the call site, for constructors, or for DOM handlers where I want `this` to be the element. I do use them for callbacks (`map`, `then`, `setTimeout`) inside methods, where lexical `this` is exactly what I want.",
+   "bn": "সবচেয়ে বড় পার্থক্য `this`-এ। Regular function-এর `this` ঠিক হয় **কীভাবে call করা হলো** তা দিয়ে; arrow function-এর নিজের কোনো `this` নেই, সে চারপাশের scope-এর `this` ব্যবহার করে (lexical `this`)।\n\nআরও পার্থক্য:\n- Arrow function-এর নিজস্ব `arguments` object নেই — rest parameter (`...args`) ব্যবহার করতে হয়।\n- `new` দিয়ে call করা যায় না, `prototype` property-ও নেই।\n- Generator (`function*`) হিসেবে লেখা যায় না।\n- ছোট syntax, implicit return সহ: `x => x * 2`।\n\nযেসব object method বা prototype/class method-এ call site থেকে `this` দরকার, constructor-এ, বা যে DOM handler-এ `this` হিসেবে element চাই — সেখানে আমি arrow ব্যবহার করি না। কিন্তু method-এর ভেতরের callback-এ (`map`, `then`, `setTimeout`) arrow ব্যবহার করি, কারণ সেখানে lexical `this`-ই দরকার।"
+  },
+  "explanation": {
+   "en": "Regular function vs arrow function, point by point:\n\n- **`this`:** dynamic (method call → the object; plain call → `undefined` in strict mode / global object in sloppy mode; `call`/`apply`/`bind` → what you pass) vs lexical (fixed at creation; `call`/`bind` can't change it).\n- **`arguments`:** available vs not available (refers to the outer function's `arguments` if any).\n- **Constructor:** `new Fn()` works vs `TypeError: ... is not a constructor`.\n- **Hoisting:** function declarations are hoisted with their body; arrows are expressions, so they follow `const`/`let` rules.\n- **Object literal trap:** `const obj = { name: 'A', hi: () => this.name }` — `this` is the outer (module/global) `this`, not `obj`.\n- **Class fields:** `handleClick = () => {...}` as a class field *is* a valid pattern: the arrow is created per instance, so `this` is bound to the instance (costs one function per instance).",
+   "bn": "Regular function বনাম arrow function, পয়েন্ট ধরে ধরে:\n\n- **`this`:** regular function-এ dynamic (method call → সেই object; সাধারণ call → strict mode-এ `undefined` / sloppy mode-এ global object; `call`/`apply`/`bind` → যা pass করবে) আর arrow-এ lexical (তৈরির সময় ঠিক হয়ে যায়; `call`/`bind` দিয়ে বদলানো যায় না)।\n- **`arguments`:** regular-এ পাওয়া যায়, arrow-এ যায় না (থাকলে outer function-এর `arguments`-কে নির্দেশ করে)।\n- **Constructor:** `new Fn()` কাজ করে বনাম `TypeError: ... is not a constructor`।\n- **Hoisting:** function declaration body সহ hoist হয়; arrow হলো expression, তাই `const`/`let`-এর নিয়ম মেনে চলে।\n- **Object literal-এর ফাঁদ:** `const obj = { name: 'A', hi: () => this.name }` — এখানে `this` হলো বাইরের (module/global) `this`, `obj` নয়।\n- **Class field:** class field হিসেবে `handleClick = () => {...}` একটা valid pattern: প্রতিটি instance-এর জন্য আলাদা arrow তৈরি হয়, তাই `this` instance-এ bind থাকে (খরচ: প্রতি instance-এ একটা করে function)।"
+  },
+  "interviewTip": {
+   "en": "Lead with lexical `this` — it's the answer interviewers are waiting for — then list the rest quickly. A short \"method with a callback inside\" example makes it concrete.",
+   "bn": "শুরুতেই lexical `this`-এর কথা বলো — interviewer মূলত এটাই শুনতে চান — তারপর বাকিগুলো দ্রুত বলে যাও। \"Method-এর ভেতরে callback\" ধরনের ছোট একটা উদাহরণ দিলে ব্যাপারটা পরিষ্কার হয়।"
+  },
+  "references": [
+   {
+    "title": "MDN — Arrow function expressions",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions"
+   },
+   {
+    "title": "MDN — this",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can you change an arrow function's `this` with `bind`?",
+    "bn": "`bind` দিয়ে কি arrow function-এর `this` বদলানো যায়?"
+   },
+   {
+    "en": "Why are arrow functions in class fields popular for event handlers?",
+    "bn": "Event handler-এর জন্য class field-এ arrow function কেন জনপ্রিয়?"
+   }
+  ],
+  "related": [
+   "js-015"
+  ],
+  "commonMistakes": {
+   "en": "Saying arrow functions \"bind `this` to the object they are defined in\" — they don't bind anything; an arrow in an object literal does not see that object as `this`.",
+   "bn": "বলা যে arrow function \"যে object-এ define করা, সেই object-এ `this` bind করে\" — আসলে arrow কিছুই bind করে না; object literal-এর ভেতরের arrow সেই object-কে `this` হিসেবে দেখে না।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const team = {\n  name: 'Dhaka Devs',\n  members: ['Rafi', 'Mitu'],\n\n  listWithRegular() {\n    // `this` inside the callback depends on how map calls it → undefined (strict mode)\n    return this.members.map(function (m) {\n      return `${m} @ ${this?.name}`;\n    });\n  },\n\n  listWithArrow() {\n    // arrow uses listWithArrow's `this` → team\n    return this.members.map((m) => `${m} @ ${this.name}`);\n  },\n\n  broken: () => typeof this, // NOT team — outer (module) `this`\n};\n\nconsole.log(team.listWithArrow()); // ['Rafi @ Dhaka Devs', 'Mitu @ Dhaka Devs']\n\nconst Person = (name) => {\n  this.name = name;\n};\n// new Person('Asif'); // TypeError: Person is not a constructor"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-007",
+  "subtopic": "Array Methods",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "arrays",
+   "tosorted",
+   "sort",
+   "immutability",
+   "es2023"
+  ],
+  "technologyVersion": "ECMAScript 2023+ (`toSorted`, change-array-by-copy); Baseline widely available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Given the array below, what is logged after calling `toSorted()` and `reverse()`?",
+   "bn": "নিচের array-তে `toSorted()` আর `reverse()` call করার পর কী log হবে?"
+  },
+  "answer": {
+   "en": "`[1, 100, 40, 5]` and `[5, 1, 100, 40]`.\n\nTwo things are being tested. First, without a compare function, `sort`/`toSorted` compare elements **as strings**, so `\"100\"` comes before `\"40\"`. Second, `toSorted()` (ES2023) returns a **new** array and leaves `scores` alone, while `reverse()` **mutates** `scores` in place.",
+   "bn": "`[1, 100, 40, 5]` এবং `[5, 1, 100, 40]`।\n\nএখানে দুটো জিনিস যাচাই হচ্ছে। প্রথমত, compare function না দিলে `sort`/`toSorted` element-গুলোকে **string হিসেবে** compare করে, তাই `\"100\"` আসে `\"40\"`-এর আগে। দ্বিতীয়ত, `toSorted()` (ES2023) একটা **নতুন** array return করে এবং `scores`-কে বদলায় না, কিন্তু `reverse()` `scores`-কে সরাসরি **mutate** করে।"
+  },
+  "explanation": {
+   "en": "- The tempting option A assumes numeric sorting. For numbers always pass a comparator: `scores.toSorted((a, b) => a - b)` → `[1, 5, 40, 100]`.\n- Options C/D assume `reverse()` returns a copy. It doesn't — `sort`, `reverse`, `splice`, `fill`, `copyWithin`, `push/pop/shift/unshift` all mutate.\n- ES2023 added non-mutating twins: `toSorted`, `toReversed`, `toSpliced`, and `with(index, value)`. They are Baseline widely available and very handy for immutable state updates (e.g. React state, Redux reducers).\n- Mutating a shared array is a common bug source: if `scores` came from props or a store, `reverse()` silently changes the caller's data.",
+   "bn": "- লোভনীয় option A ধরে নেয় যে sort numeric হবে। Number sort করতে সবসময় comparator দাও: `scores.toSorted((a, b) => a - b)` → `[1, 5, 40, 100]`।\n- Option C/D ধরে নেয় `reverse()` একটা copy return করে। আসলে করে না — `sort`, `reverse`, `splice`, `fill`, `copyWithin`, `push/pop/shift/unshift` সবই original array mutate করে।\n- ES2023 এদের non-mutating জোড়া যোগ করেছে: `toSorted`, `toReversed`, `toSpliced` আর `with(index, value)`। এগুলো Baseline widely available, আর immutable state update-এ (যেমন React state, Redux reducer) খুব কাজে লাগে।\n- Shared array mutate করা bug-এর একটা common উৎস: `scores` যদি props বা store থেকে আসে, `reverse()` চুপচাপ caller-এর data বদলে দেয়।"
+  },
+  "interviewTip": {
+   "en": "Name both traps explicitly (string comparison + mutation) and mention the ES2023 change-array-by-copy methods — it shows you keep up with the language.",
+   "bn": "দুটো ফাঁদই (string comparison + mutation) স্পষ্ট করে বলো, আর ES2023-এর change-array-by-copy method-গুলোর কথা উল্লেখ করো — এতে বোঝা যায় তুমি language-এর আপডেট খোঁজ রাখো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Array.prototype.toSorted()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted"
+   },
+   {
+    "title": "MDN — Array.prototype.sort()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you sort an array of objects by price, then by name?",
+    "bn": "Object-এর array-কে আগে price, তারপর name অনুযায়ী কীভাবে sort করবে?"
+   }
+  ],
+  "related": [
+   "js-013",
+   "js-014"
+  ],
+  "commonMistakes": {
+   "en": "Using `arr.sort()` on numbers without a comparator, or calling `sort()` on an array you don't own (props/state) instead of `toSorted()` or `[...arr].sort()`.",
+   "bn": "Comparator ছাড়া number-এর array-তে `arr.sort()` ব্যবহার করা, অথবা নিজের নয় এমন array-তে (props/state) `toSorted()` বা `[...arr].sort()`-এর বদলে সরাসরি `sort()` call করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const scores = [40, 100, 1, 5];\nconst sorted = scores.toSorted();\nscores.reverse();\nconsole.log(sorted, scores);",
+   "output": "[ 1, 100, 40, 5 ] [ 5, 1, 100, 40 ]"
+  },
+  "options": [
+   {
+    "en": "`[1, 5, 40, 100]` and `[5, 1, 100, 40]`",
+    "bn": "`[1, 5, 40, 100]` এবং `[5, 1, 100, 40]`"
+   },
+   {
+    "en": "`[1, 100, 40, 5]` and `[5, 1, 100, 40]`",
+    "bn": "`[1, 100, 40, 5]` এবং `[5, 1, 100, 40]`"
+   },
+   {
+    "en": "`[1, 100, 40, 5]` and `[40, 100, 1, 5]`",
+    "bn": "`[1, 100, 40, 5]` এবং `[40, 100, 1, 5]`"
+   },
+   {
+    "en": "`[1, 5, 40, 100]` and `[40, 100, 1, 5]`",
+    "bn": "`[1, 5, 40, 100]` এবং `[40, 100, 1, 5]`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "javascript"
+ }
+]

@@ -1,0 +1,514 @@
+[
+ {
+  "id": "express-001",
+  "subtopic": "Middleware",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "middleware",
+   "next",
+   "request-pipeline",
+   "express-basics"
+  ],
+  "technologyVersion": "Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is middleware in Express, and how does a request flow through the middleware stack?",
+   "bn": "Express-এ middleware কী, আর একটি request middleware stack-এর মধ্য দিয়ে কীভাবে যায়?"
+  },
+  "answer": {
+   "en": "Middleware is a function with the signature `(req, res, next)` that runs as part of the request pipeline. Express keeps an ordered list of middleware and route handlers, and for each request it runs the matching ones **in the order they were registered**.\n\nEach middleware can do one of three things:\n- read or modify `req`/`res` (parse the body, attach `req.user`, set headers),\n- **end the response** (`res.json()`, `res.send()`, `res.sendStatus()`), or\n- call `next()` to hand control to the next matching middleware — or `next(err)` to jump straight to error-handling middleware.\n\nIf a middleware neither responds nor calls `next()`, the request just hangs. Typical examples are built-ins like `express.json()` and `express.static()`, third-party ones like `helmet` and `cors`, and my own auth or logging middleware.",
+   "bn": "Middleware হলো `(req, res, next)` signature-এর একটি function, যা request pipeline-এর অংশ হিসেবে চলে। Express middleware আর route handler-এর একটি ক্রমানুসারী তালিকা রাখে, আর প্রতিটি request-এর জন্য মিলে যাওয়া handler-গুলো **যে ক্রমে register করা হয়েছে সেই ক্রমে** চালায়।\n\nপ্রতিটি middleware তিনটির একটি করতে পারে:\n- `req`/`res` পড়া বা বদলানো (body parse করা, `req.user` যোগ করা, header set করা),\n- **response শেষ করা** (`res.json()`, `res.send()`, `res.sendStatus()`), অথবা\n- `next()` call করে পরের মিলে যাওয়া middleware-কে নিয়ন্ত্রণ দেওয়া — বা `next(err)` দিয়ে সরাসরি error-handling middleware-এ চলে যাওয়া।\n\nকোনো middleware যদি response-ও না দেয়, `next()`-ও call না করে, তাহলে request ঝুলে থাকে। সাধারণ উদাহরণ: `express.json()` ও `express.static()`-এর মতো built-in, `helmet` ও `cors`-এর মতো third-party, আর আমার নিজের auth বা logging middleware।"
+  },
+  "explanation": {
+   "en": "- **Mount paths:** `app.use('/api', mw)` runs `mw` for every path that *starts with* `/api`; `app.get('/x', mw)` matches only that method and path.\n- **Order is the whole game:** body parsers and security middleware go first, routes in the middle, the 404 handler and error handler last.\n- **Passing data:** attach request-scoped data to `req` (e.g. `req.user`) or `res.locals`, not to module-level variables.\n- **`next('route')`** skips the remaining handlers of the current route; `next('router')` leaves the current router.\n- **Express 5:** if an `async` middleware's promise rejects, Express calls `next(err)` for you. A resolved promise does *not* call `next()` automatically — you still call it yourself.",
+   "bn": "- **Mount path:** `app.use('/api', mw)` `/api` দিয়ে *শুরু হওয়া* প্রতিটি path-এ `mw` চালায়; `app.get('/x', mw)` শুধু ওই method আর path মেলায়।\n- **ক্রমই আসল খেলা:** body parser আর security middleware আগে, route মাঝখানে, 404 handler আর error handler সবার শেষে।\n- **Data পাঠানো:** request-নির্দিষ্ট data `req`-এ (যেমন `req.user`) বা `res.locals`-এ রাখো, module-level variable-এ নয়।\n- **`next('route')`** current route-এর বাকি handler বাদ দেয়; `next('router')` current router থেকে বেরিয়ে যায়।\n- **Express 5:** `async` middleware-এর promise reject হলে Express নিজেই `next(err)` call করে। কিন্তু promise resolve হলে `next()` স্বয়ংক্রিয়ভাবে call হয় না — সেটা তোমাকেই করতে হবে।"
+  },
+  "interviewTip": {
+   "en": "Describe it as a pipeline and give the three possible outcomes (modify, respond, pass on). Mentioning \"order of registration matters\" up front is what interviewers listen for.",
+   "bn": "একে একটি pipeline হিসেবে বর্ণনা করো এবং তিনটি সম্ভাব্য ফলাফল বলো (বদলানো, response দেওয়া, পরের জনকে দেওয়া)। শুরুতেই \"register করার ক্রম গুরুত্বপূর্ণ\" বলাটাই interviewer শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "Express — Using middleware",
+    "url": "https://expressjs.com/en/guide/using-middleware.html"
+   },
+   {
+    "title": "Express — Writing middleware",
+    "url": "https://expressjs.com/en/guide/writing-middleware.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens if a middleware never calls `next()` and never responds?",
+    "bn": "কোনো middleware যদি কখনো `next()` call না করে এবং response-ও না দেয়, তাহলে কী হয়?"
+   },
+   {
+    "en": "What's the difference between `app.use()` and `app.get()` for mounting middleware?",
+    "bn": "Middleware mount করার জন্য `app.use()` আর `app.get()`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "express-004",
+   "express-010"
+  ],
+  "commonMistakes": {
+   "en": "Calling `next()` after already sending a response, or thinking Express runs middleware in parallel.",
+   "bn": "Response পাঠানোর পরেও `next()` call করা, অথবা মনে করা যে Express middleware parallel-এ চালায়।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import express from 'express';\n\nconst app = express();\n\n// 1) Runs for every request\napp.use((req, res, next) => {\n  req.startedAt = Date.now();\n  next(); // pass control on\n});\n\n// 2) Built-in body parser\napp.use(express.json());\n\n// 3) Route handler: ends the response\napp.get('/ping', (req, res) => {\n  res.json({ pong: true, tookMs: Date.now() - req.startedAt });\n});\n\napp.listen(3000);"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-002",
+  "subtopic": "Routing (Express 5 Path Syntax)",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "routing",
+   "path-to-regexp",
+   "wildcard",
+   "express-5"
+  ],
+  "technologyVersion": "Express 5.x (path-to-regexp v8)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "In Express 5, you need a catch-all `GET` route that matches every path, **including `/` itself** (for example to serve a single-page app's `index.html`). Which definition is correct?",
+   "bn": "Express 5-এ তোমার এমন একটি catch-all `GET` route দরকার যা প্রতিটি path মেলাবে, **`/` নিজেকেও সহ** (যেমন single-page app-এর `index.html` serve করতে)। কোন definition সঠিক?"
+  },
+  "answer": {
+   "en": "`app.get('/{*splat}', handler)`. Express 5 uses path-to-regexp v8, where a wildcard must have a name (`*splat`), and wrapping it in braces makes it optional — so it matches `/` as well as any deeper path.",
+   "bn": "`app.get('/{*splat}', handler)`। Express 5 path-to-regexp v8 ব্যবহার করে, যেখানে wildcard-এর একটি নাম থাকতে হয় (`*splat`), আর brace-এর ভেতরে রাখলে সেটা optional হয় — ফলে এটা `/` এবং যেকোনো গভীর path দুটোই মেলায়।"
+  },
+  "explanation": {
+   "en": "- `'*'` and `'/*'` are Express 4 syntax. In Express 5 they **throw at startup** (`Missing parameter name`), so the app won't even boot — verified on Express 5.3.\n- `'/*splat'` is the tempting answer: it's valid, but it requires at least one character after `/`, so a request for `/` itself doesn't match.\n- `req.params.splat` is an **array of segments**: `GET /a/b` → `['a', 'b']`. For `/` the parameter is omitted entirely.\n- Related v8 rules: optional parts use braces (`/:file{.:ext}` instead of `/:ext?`), regex characters like `()[]?+!` are reserved in string paths (use an array of paths or a `RegExp` object instead), and the name `splat` is just a convention.",
+   "bn": "- `'*'` আর `'/*'` হলো Express 4-এর syntax। Express 5-এ এগুলো **startup-এর সময়ই throw করে** (`Missing parameter name`), তাই app boot-ই হয় না — Express 5.3-এ যাচাই করা।\n- `'/*splat'` হলো প্রলোভনের উত্তর: এটা valid, কিন্তু `/`-এর পরে অন্তত একটি character লাগে, তাই `/` নিজে মেলে না।\n- `req.params.splat` হলো **segment-এর array**: `GET /a/b` → `['a', 'b']`। `/`-এর ক্ষেত্রে parameter-টি পুরোপুরি বাদ যায়।\n- v8-এর আরও নিয়ম: optional অংশ brace দিয়ে (`/:ext?`-এর বদলে `/:file{.:ext}`), string path-এ `()[]?+!`-এর মতো regex character reserved (এর বদলে path-এর array বা `RegExp` object ব্যবহার করো), আর `splat` নামটা শুধু একটি প্রথা।"
+  },
+  "interviewTip": {
+   "en": "Mention that the Express 4 syntax doesn't just \"not match\" — it crashes at startup. That's the practical migration gotcha interviewers like to hear.",
+   "bn": "উল্লেখ করো যে Express 4-এর syntax শুধু \"মেলে না\" তা নয় — startup-এই crash করে। এটাই migration-এর বাস্তব gotcha যা interviewer শুনতে পছন্দ করে।"
+  },
+  "references": [
+   {
+    "title": "Express — Migrating to Express 5",
+    "url": "https://expressjs.com/en/guide/migrating-5.html"
+   },
+   {
+    "title": "Express — Routing",
+    "url": "https://expressjs.com/en/guide/routing.html"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "`app.get('*', handler)`",
+    "bn": "`app.get('*', handler)`"
+   },
+   {
+    "en": "`app.get('/*', handler)`",
+    "bn": "`app.get('/*', handler)`"
+   },
+   {
+    "en": "`app.get('/*splat', handler)`",
+    "bn": "`app.get('/*splat', handler)`"
+   },
+   {
+    "en": "`app.get('/{*splat}', handler)`",
+    "bn": "`app.get('/{*splat}', handler)`"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "express"
+ },
+ {
+  "id": "express-003",
+  "subtopic": "Request & Response Lifecycle",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "req-params",
+   "req-query",
+   "req-body",
+   "express-5",
+   "body-parser"
+  ],
+  "technologyVersion": "Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `req.params`, `req.query` and `req.body` in Express, and what changed about them in Express 5?",
+   "bn": "Express-এ `req.params`, `req.query` আর `req.body`-এর পার্থক্য কী, আর Express 5-এ এগুলোর ব্যাপারে কী বদলেছে?"
+  },
+  "answer": {
+   "en": "- **`req.params`** — values from the route path: for `/users/:id`, a request to `/users/42` gives `req.params.id === '42'`. Always strings.\n- **`req.query`** — the parsed query string: `?page=2&tag=a&tag=b` → `{ page: '2', tag: ['a', 'b'] }`. Also strings (or arrays of strings).\n- **`req.body`** — the parsed request body, which exists only if a body-parsing middleware ran: `express.json()`, `express.urlencoded()`, or multer for multipart.\n\nExpress 5 changes:\n- `req.body` is **`undefined`** when no parser ran (Express 4 gave `{}`), so destructuring it crashes instead of silently giving `undefined` fields.\n- `req.query` is now a **getter** — you can't reassign it, and the default parser is **`'simple'`**, so nested syntax like `?filter[price]=10` stays a flat key `'filter[price]'`.\n- `req.param(name)` was removed; use the specific object instead.",
+   "bn": "- **`req.params`** — route path-এর value: `/users/:id`-এর জন্য `/users/42`-এ request এলে `req.params.id === '42'`। সবসময় string।\n- **`req.query`** — parse করা query string: `?page=2&tag=a&tag=b` → `{ page: '2', tag: ['a', 'b'] }`। এগুলোও string (বা string-এর array)।\n- **`req.body`** — parse করা request body, যা শুধু তখনই থাকে যখন কোনো body-parsing middleware চলেছে: `express.json()`, `express.urlencoded()`, বা multipart-এর জন্য multer।\n\nExpress 5-এর পরিবর্তন:\n- কোনো parser না চললে `req.body` **`undefined`** (Express 4-এ ছিল `{}`), তাই destructure করলে চুপচাপ `undefined` field না দিয়ে crash করে।\n- `req.query` এখন একটি **getter** — এটা reassign করা যায় না, আর default parser **`'simple'`**, তাই `?filter[price]=10`-এর মতো nested syntax একটি flat key `'filter[price]'` হিসেবেই থাকে।\n- `req.param(name)` সরিয়ে দেওয়া হয়েছে; নির্দিষ্ট object-টাই ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "- **Everything is a string:** `req.params.id` and `req.query.page` must be converted and validated (`Number(...)`, a zod schema) before use.\n- **`req.query` is recomputed on access**, so `req.query.page = 1` is silently lost and `req.query = {...}` throws a `TypeError` in strict-mode code (ES modules). Store parsed/validated values in `res.locals` or a custom property such as `req.validated`.\n- **Need nested query objects?** Opt in with `app.set('query parser', 'extended')` — but nested parsing increases attack surface (deep objects, prototype keys), so validate strictly.\n- **`req.params`** has a null prototype for string paths in Express 5, wildcard params are arrays, and unmatched optional params are omitted rather than `undefined`.\n- Content-type matters: `express.json()` only parses `application/json`; a form post to a JSON-only app leaves `req.body` `undefined`.",
+   "bn": "- **সবকিছুই string:** ব্যবহারের আগে `req.params.id` আর `req.query.page` convert ও validate করতে হবে (`Number(...)`, একটি zod schema)।\n- **`req.query` প্রতিবার access-এ নতুন করে তৈরি হয়**, তাই `req.query.page = 1` চুপচাপ হারিয়ে যায় আর strict-mode code-এ (ES module) `req.query = {...}` একটি `TypeError` throw করে। Parse/validate করা value `res.locals`-এ বা `req.validated`-এর মতো নিজস্ব property-তে রাখো।\n- **Nested query object দরকার?** `app.set('query parser', 'extended')` দিয়ে চালু করো — তবে nested parsing attack surface বাড়ায় (গভীর object, prototype key), তাই কড়াভাবে validate করো।\n- Express 5-এ string path-এর জন্য **`req.params`**-এর prototype null, wildcard param array হয়, আর মেলেনি এমন optional param `undefined` না হয়ে পুরোপুরি বাদ যায়।\n- Content-type গুরুত্বপূর্ণ: `express.json()` শুধু `application/json` parse করে; JSON-only app-এ form post করলে `req.body` `undefined` থাকে।"
+  },
+  "interviewTip": {
+   "en": "Give a one-line example URL for each, then list the Express 5 changes. Knowing that `req.body` is now `undefined` without a parser instantly shows you've worked with v5, not just v4 tutorials.",
+   "bn": "প্রতিটির জন্য এক লাইনের উদাহরণ URL দাও, তারপর Express 5-এর পরিবর্তনগুলো বলো। Parser ছাড়া `req.body` এখন `undefined` — এটা জানলেই বোঝা যায় তুমি শুধু v4 tutorial নয়, v5 নিয়ে কাজ করেছ।"
+  },
+  "references": [
+   {
+    "title": "Express — Migrating to Express 5",
+    "url": "https://expressjs.com/en/guide/migrating-5.html"
+   },
+   {
+    "title": "Express 5.x — API reference",
+    "url": "https://expressjs.com/en/5x/api.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you safely parse `?page=` into a positive integer with a default?",
+    "bn": "`?page=`-কে default সহ positive integer-এ নিরাপদে কীভাবে parse করবে?"
+   },
+   {
+    "en": "Why might enabling the 'extended' query parser be a security concern?",
+    "bn": "'extended' query parser চালু করা কেন security-র দিক থেকে উদ্বেগের হতে পারে?"
+   }
+  ],
+  "related": [
+   "express-012",
+   "express-028"
+  ],
+  "commonMistakes": {
+   "en": "Treating `req.query.page` as a number, or writing validated values back into `req.query` in Express 5.",
+   "bn": "`req.query.page`-কে number হিসেবে ব্যবহার করা, অথবা Express 5-এ validate করা value আবার `req.query`-তে লিখে দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import express from 'express';\n\nconst app = express();\napp.use(express.json()); // without this, req.body is undefined in Express 5\n\n// PUT /users/42?notify=true&tag=a&tag=b   body: {\"name\":\"Rahim\"}\napp.put('/users/:id', (req, res) => {\n  const id = Number(req.params.id);          // '42' -> 42\n  const notify = req.query.notify === 'true'; // query values are strings\n  const tags = [req.query.tag].flat().filter(Boolean); // 'a' or ['a','b'] -> array\n  res.json({ id, notify, tags, name: req.body?.name });\n});"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-004",
+  "subtopic": "Middleware",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "middleware-order",
+   "body-parser",
+   "authentication",
+   "express-5",
+   "debugging"
+  ],
+  "technologyVersion": "Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "After upgrading to Express 5, `POST /api/users` returns 500 with `Cannot destructure property 'name' of 'req.body' as it is undefined`. A security review also found that the `/api` routes accept requests without any token. Find and fix the bugs.",
+   "bn": "Express 5-এ upgrade করার পর `POST /api/users` 500 return করছে, error: `Cannot destructure property 'name' of 'req.body' as it is undefined`। একটি security review-তে আরও দেখা গেছে যে `/api` route-গুলো কোনো token ছাড়াই request নিচ্ছে। Bug-গুলো খুঁজে বের করে ঠিক করো।"
+  },
+  "answer": {
+   "en": "Both bugs are **middleware order** problems — Express runs middleware strictly in the order it was registered.\n\n1. The router is mounted **before** `express.json()`. When `POST /api/users` arrives, the router's handler runs first and sends the response, so the JSON parser never runs for it. In Express 5 an unparsed body is `undefined`, so destructuring throws. (In Express 4 `req.body` was `{}`, so the same bug silently produced `undefined` name and email — arguably worse.)\n2. `authenticate` is registered **after** the router, so for any route the router handles, the response is already sent before authentication would run. The routes are effectively public.\n\nFix: register in this order — security/global middleware → body parser → authentication → routes → 404 handler → error handler. Mounting `authenticate` together with the router (`app.use('/api', authenticate, apiRouter)`) also makes the dependency explicit.",
+   "bn": "দুটো bug-ই **middleware order**-এর সমস্যা — Express ঠিক যে ক্রমে register করা হয়েছে সেই ক্রমেই middleware চালায়।\n\n1. Router mount করা হয়েছে `express.json()`-এর **আগে**। `POST /api/users` এলে router-এর handler আগে চলে এবং response পাঠিয়ে দেয়, তাই JSON parser এই request-এর জন্য কখনো চলে না। Express 5-এ parse না হওয়া body `undefined`, তাই destructure করলে throw হয়। (Express 4-এ `req.body` ছিল `{}`, ফলে একই bug চুপচাপ `undefined` name আর email দিত — যা আরও খারাপ বলা যায়।)\n2. `authenticate` register করা হয়েছে router-এর **পরে**, তাই router যে route handle করে, সেখানে authentication চলার আগেই response চলে যায়। Route-গুলো কার্যত public।\n\nFix: এই ক্রমে register করো — security/global middleware → body parser → authentication → route → 404 handler → error handler। Router-এর সাথে একসাথে `authenticate` mount করলে (`app.use('/api', authenticate, apiRouter)`) dependency-টাও স্পষ্ট হয়।"
+  },
+  "explanation": {
+   "en": "- **How to spot order bugs quickly:** read `app.use` calls top to bottom and ask \"has X already happened when this runs?\" Logging `req.body` at the start of the handler or setting `DEBUG=express:*,router` also shows which layers ran.\n- **Body parser scope:** you can apply `express.json()` only where needed (e.g. `apiRouter.use(express.json())`) — but it must still come before the handlers that read `req.body`.\n- **Auth placement:** public routes (login, health checks) should be mounted *before* the auth middleware or on a separate router; everything after it is protected.\n- **404 and error handlers must be last** — a 404 handler registered early would swallow every request.\n- The verified fixed version returns 401 without a token, 201 with a valid token, 400 for malformed JSON (from the body parser), and 404 for unknown routes.",
+   "bn": "- **Order bug দ্রুত ধরার উপায়:** `app.use` call-গুলো উপর থেকে নিচে পড়ো আর জিজ্ঞেস করো \"এটা চলার সময় X কি ইতিমধ্যে ঘটেছে?\" Handler-এর শুরুতে `req.body` log করলে বা `DEBUG=express:*,router` set করলেও কোন layer চলেছে বোঝা যায়।\n- **Body parser-এর scope:** `express.json()` শুধু যেখানে দরকার সেখানেও লাগানো যায় (যেমন `apiRouter.use(express.json())`) — কিন্তু `req.body` পড়া handler-এর আগেই থাকতে হবে।\n- **Auth-এর অবস্থান:** public route (login, health check) auth middleware-এর *আগে* বা আলাদা router-এ mount করো; এর পরের সবকিছু protected।\n- **404 আর error handler সবার শেষে** — আগে register করা 404 handler সব request গিলে ফেলবে।\n- যাচাই করা fixed version token ছাড়া 401, valid token-এ 201, malformed JSON-এ 400 (body parser থেকে), আর অজানা route-এ 404 দেয়।"
+  },
+  "interviewTip": {
+   "en": "Point out that Express 5 made this bug *louder* (crash instead of silent `undefined`) — and that the auth bug is the more dangerous one. Prioritising the security issue shows judgement.",
+   "bn": "উল্লেখ করো যে Express 5 এই bug-কে *জোরালো* করেছে (চুপচাপ `undefined`-এর বদলে crash) — আর auth bug-টাই বেশি বিপজ্জনক। Security issue-কে অগ্রাধিকার দেওয়া তোমার বিচারবুদ্ধি দেখায়।"
+  },
+  "references": [
+   {
+    "title": "Express — Using middleware",
+    "url": "https://expressjs.com/en/guide/using-middleware.html"
+   },
+   {
+    "title": "Express — Migrating to Express 5",
+    "url": "https://expressjs.com/en/guide/migrating-5.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Where would you put `helmet()` and `cors()` in this stack, and why?",
+    "bn": "এই stack-এ `helmet()` আর `cors()` কোথায় রাখবে, এবং কেন?"
+   },
+   {
+    "en": "How would you write a test that catches this ordering bug?",
+    "bn": "এই ordering bug ধরার জন্য কীভাবে test লিখবে?"
+   }
+  ],
+  "related": [
+   "express-001",
+   "express-003",
+   "express-010"
+  ],
+  "commonMistakes": {
+   "en": "\"Fixing\" the crash with `req.body ?? {}` in the handler, which hides the ordering bug, or adding auth checks inside every handler instead of fixing the order.",
+   "bn": "Handler-এ `req.body ?? {}` দিয়ে crash \"ঠিক\" করা, যা ordering bug লুকিয়ে ফেলে, অথবা order ঠিক না করে প্রতিটি handler-এর ভেতরে auth check বসানো।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import express from 'express';\nimport { authenticate } from './auth.js';\nimport { apiRouter } from './routes/api.js'; // contains POST /users\n\nconst app = express();\n\napp.use('/api', apiRouter);\napp.use(express.json());\napp.use('/api', authenticate);\n\napp.use((err, req, res, next) => {\n  res.status(500).json({ error: err.message });\n});\n\napp.listen(3000);"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "const app = express();\n\napp.use(express.json({ limit: '100kb' }));        // 1. parse bodies first\napp.post('/auth/login', loginHandler);            // 2. public routes before auth\napp.use('/api', authenticate, apiRouter);         // 3. auth, then protected routes\n\napp.use((req, res) => {                           // 4. 404 for anything unmatched\n  res.status(404).json({ error: 'Not Found' });\n});\n\napp.use((err, req, res, next) => {                // 5. error handler last\n  res.status(err.status ?? 500).json({ error: err.expose ? err.message : 'Internal Server Error' });\n});",
+    "label": {
+     "en": "Fixed version (correct order)",
+     "bn": "সংশোধিত version (সঠিক ক্রম)"
+    }
+   }
+  ],
+  "technology": "express"
+ },
+ {
+  "id": "express-005",
+  "subtopic": "Error-Handling Middleware",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "async-errors",
+   "express-5",
+   "error-handling",
+   "promises"
+  ],
+  "technologyVersion": "Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "In Express 5, what happens when `db.users.findById()` rejects (e.g. the database refuses the connection)?",
+   "bn": "Express 5-এ `db.users.findById()` reject করলে (যেমন database connection refuse করলে) কী হবে?"
+  },
+  "answer": {
+   "en": "Express forwards it. In Express 5, when a route handler or middleware returns a rejected promise (an `async` function that throws or awaits a rejection), Express calls `next(err)` with the rejection value, so the error-handling middleware sends the 500 JSON response.",
+   "bn": "Express এটা forward করবে। Express 5-এ কোনো route handler বা middleware rejected promise return করলে (যে `async` function throw করে বা rejection-এর জন্য await করে), Express rejection value দিয়ে `next(err)` call করে, ফলে error-handling middleware 500 JSON response পাঠায়।"
+  },
+  "explanation": {
+   "en": "Options A and B describe **Express 4**: it ignored the returned promise, so the rejection was unhandled — which on Node 15+ crashes the process, and on older setups left the request hanging. That's why Express 4 code used `try/catch` + `next(err)` in every handler or wrappers like `express-async-handler`. In Express 5 those wrappers are unnecessary.\n\nWhat Express 5 still **cannot** catch:\n- errors thrown inside callbacks that run later (`setTimeout`, event listeners, old callback APIs),\n- promises you don't `await` or return (fire-and-forget calls),\n- stream `'error'` events you didn't wire up (use `pipeline`).\n\nThose still crash the process or hang, so keep everything on the awaited promise chain.",
+   "bn": "Option A আর B হলো **Express 4**-এর আচরণ: সে return করা promise ignore করত, ফলে rejection unhandled থাকত — Node 15+-এ এতে process crash করে, আর পুরনো setup-এ request ঝুলে থাকত। এজন্যই Express 4-এর code-এ প্রতিটি handler-এ `try/catch` + `next(err)` বা `express-async-handler`-এর মতো wrapper ব্যবহার হতো। Express 5-এ এসব wrapper অপ্রয়োজনীয়।\n\nExpress 5 এখনও যা **ধরতে পারে না**:\n- পরে চলা callback-এর ভেতরে throw হওয়া error (`setTimeout`, event listener, পুরনো callback API),\n- যে promise তুমি `await` বা return করো না (fire-and-forget call),\n- যে stream `'error'` event তুমি সংযুক্ত করোনি (`pipeline` ব্যবহার করো)।\n\nএগুলো এখনও process crash করায় বা ঝুলিয়ে রাখে, তাই সবকিছু await করা promise chain-এর মধ্যে রাখো।"
+  },
+  "interviewTip": {
+   "en": "Contrast v4 and v5 in one sentence, then list what v5 still doesn't catch. The \"still doesn't catch\" list is what separates a memorised answer from real understanding.",
+   "bn": "এক বাক্যে v4 আর v5-এর তুলনা করো, তারপর v5 এখনও যা ধরে না তার তালিকা দাও। এই \"এখনও ধরে না\" তালিকাটাই মুখস্থ উত্তর আর সত্যিকারের বোঝাপড়ার পার্থক্য গড়ে দেয়।"
+  },
+  "references": [
+   {
+    "title": "Express — Error handling",
+    "url": "https://expressjs.com/en/guide/error-handling.html"
+   },
+   {
+    "title": "Express — Migrating to Express 5",
+    "url": "https://expressjs.com/en/guide/migrating-5.html"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "code": {
+   "language": "javascript",
+   "source": "app.get('/users/:id', async (req, res) => {\n  const user = await db.users.findById(req.params.id);\n  res.json(user);\n});\n\napp.use((err, req, res, next) => {\n  res.status(500).json({ error: 'Internal Server Error' });\n});"
+  },
+  "options": [
+   {
+    "en": "The process crashes with an unhandled promise rejection",
+    "bn": "Unhandled promise rejection-এ process crash করবে"
+   },
+   {
+    "en": "The request hangs until the client times out",
+    "bn": "Client timeout না হওয়া পর্যন্ত request ঝুলে থাকবে"
+   },
+   {
+    "en": "Express forwards the rejection to the error-handling middleware, which responds with 500 JSON",
+    "bn": "Express rejection-টি error-handling middleware-এ পাঠাবে, যা 500 JSON response দেবে"
+   },
+   {
+    "en": "Express retries the handler once and then responds with 502",
+    "bn": "Express handler-টি একবার retry করবে, তারপর 502 response দেবে"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "express"
+ },
+ {
+  "id": "express-006",
+  "subtopic": "Centralized Error Handling",
+  "difficulty": "hard",
+  "type": "architecture",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 12,
+  "tags": [
+   "error-handling",
+   "app-error",
+   "problem-details",
+   "express-5",
+   "architecture"
+  ],
+  "technologyVersion": "Express 5.x; zod 4.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Design centralized error handling for an Express 5 REST API. How do you represent expected errors, map library errors (validation, malformed JSON, duplicate keys) to proper HTTP responses, avoid leaking internals, and keep handlers clean?",
+   "bn": "একটি Express 5 REST API-এর জন্য centralized error handling design করো। প্রত্যাশিত error কীভাবে represent করবে, library error (validation, malformed JSON, duplicate key) কীভাবে সঠিক HTTP response-এ map করবে, internal তথ্য ফাঁস হওয়া কীভাবে আটকাবে, আর handler-গুলো কীভাবে পরিষ্কার রাখবে?"
+  },
+  "answer": {
+   "en": "I separate **operational errors** (expected: not found, validation failed, conflict, unauthorized) from **programmer/unknown errors** (bugs, outages), and handle both in one place.\n\n- **`AppError` class:** carries `status`, a stable machine-readable `code` (`NOT_FOUND`, `VALIDATION_FAILED`), a client-safe message, optional `details`, and an `expose` flag (true for 4xx). Handlers simply `throw AppError.notFound('User')`.\n- **No try/catch in handlers:** in Express 5, a thrown error or rejected promise in an `async` handler goes straight to the error middleware.\n- **One mapping function** converts known library errors: `ZodError` → 400 with field errors, body-parser `entity.parse.failed` → 400, `entity.too.large` → 413, PostgreSQL `23505` / MongoDB `11000` → 409, JWT errors → 401. Everything unknown becomes a generic 500.\n- **Consistent format:** RFC 9457 problem details (`application/problem+json` with `type`, `title`, `status`, plus my `code` and `errors`).\n- **No leaks:** for 5xx, the client sees only \"Internal Server Error\"; the real error, stack and request ID go to the logs.\n- **Order and edge cases:** a 404 handler (creates an `AppError`) then the 4-argument error handler, registered last; if `res.headersSent` is true, delegate to Express's default handler with `next(err)` so it closes the connection.",
+   "bn": "আমি **operational error** (প্রত্যাশিত: not found, validation failed, conflict, unauthorized) আর **programmer/অজানা error** (bug, outage) আলাদা করি, আর দুটোই এক জায়গায় handle করি।\n\n- **`AppError` class:** এতে থাকে `status`, একটি স্থির machine-readable `code` (`NOT_FOUND`, `VALIDATION_FAILED`), client-কে দেখানো নিরাপদ message, optional `details`, আর একটি `expose` flag (4xx-এ true)। Handler শুধু `throw AppError.notFound('User')` করে।\n- **Handler-এ try/catch নেই:** Express 5-এ `async` handler-এ throw হওয়া error বা rejected promise সরাসরি error middleware-এ যায়।\n- **একটি mapping function** পরিচিত library error রূপান্তর করে: `ZodError` → field error সহ 400, body-parser-এর `entity.parse.failed` → 400, `entity.too.large` → 413, PostgreSQL `23505` / MongoDB `11000` → 409, JWT error → 401। অজানা সবকিছু একটি সাধারণ 500।\n- **একই format:** RFC 9457 problem details (`application/problem+json`, যাতে `type`, `title`, `status`, আর আমার `code` ও `errors`)।\n- **কোনো leak নয়:** 5xx-এ client শুধু \"Internal Server Error\" দেখে; আসল error, stack আর request ID যায় log-এ।\n- **ক্রম ও edge case:** একটি 404 handler (`AppError` তৈরি করে), তারপর 4-argument error handler, সবার শেষে register করা; `res.headersSent` true হলে `next(err)` দিয়ে Express-এর default handler-কে দাও, যাতে সে connection বন্ধ করে।"
+  },
+  "explanation": {
+   "en": "- **Why stable `code`s:** clients (mobile apps, frontends) branch on `code`, not on message text — messages can be translated or reworded without breaking them.\n- **Logging policy:** 4xx are usually `warn` or not logged individually (they're client mistakes); 5xx are `error` with the full error object and `cause` chain.\n- **Unknown errors are bugs:** after an `uncaughtException` outside the request chain, log and restart the process — don't keep serving in an unknown state.\n- **`headersSent` case:** if a stream fails halfway through a response, you can't send a new status code; Express's default handler destroys the socket so the client sees a broken response instead of corrupted data.\n- **Testing:** each mapping is easy to unit-test with supertest (verified: 404, 400 validation, 409 duplicate, 400 malformed JSON, 413 large body, and a generic 500 that hides the message).\n- Express 4 note (legacy): the same design works, but every `async` handler needed a wrapper or `try/catch` + `next(err)`.",
+   "bn": "- **স্থির `code` কেন:** client (mobile app, frontend) message text নয়, `code` দেখে সিদ্ধান্ত নেয় — তাই message অনুবাদ বা পরিবর্তন করলেও কিছু ভাঙে না।\n- **Logging policy:** 4xx সাধারণত `warn` বা আলাদা করে log হয় না (এগুলো client-এর ভুল); 5xx হয় `error`, পুরো error object আর `cause` chain সহ।\n- **অজানা error মানে bug:** request chain-এর বাইরে `uncaughtException` হলে log করে process restart করো — অজানা অবস্থায় serve করতে থাকো না।\n- **`headersSent`-এর ক্ষেত্র:** response-এর মাঝপথে stream fail করলে নতুন status code পাঠানো যায় না; Express-এর default handler socket destroy করে দেয়, ফলে client নষ্ট data নয়, ভাঙা response দেখে।\n- **Testing:** প্রতিটি mapping supertest দিয়ে সহজে unit-test করা যায় (যাচাই করা: 404, 400 validation, 409 duplicate, 400 malformed JSON, 413 বড় body, আর message লুকানো সাধারণ 500)।\n- Express 4 নোট (legacy): একই design কাজ করে, কিন্তু প্রতিটি `async` handler-এ wrapper বা `try/catch` + `next(err)` লাগত।"
+  },
+  "interviewTip": {
+   "en": "Structure it as: error types → where they're thrown → one mapping layer → response format → logging. Mentioning RFC 9457 and the `headersSent` edge case are strong senior signals.",
+   "bn": "এভাবে সাজাও: error-এর ধরন → কোথায় throw হয় → একটি mapping layer → response format → logging। RFC 9457 আর `headersSent` edge case-এর উল্লেখ senior হওয়ার শক্ত ইঙ্গিত।"
+  },
+  "references": [
+   {
+    "title": "Express — Error handling",
+    "url": "https://expressjs.com/en/guide/error-handling.html"
+   },
+   {
+    "title": "RFC 9457 — Problem Details for HTTP APIs",
+    "url": "https://www.rfc-editor.org/rfc/rfc9457"
+   },
+   {
+    "title": "OWASP — Error Handling Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add the request ID to every error response and log line?",
+    "bn": "প্রতিটি error response আর log line-এ request ID কীভাবে যোগ করবে?"
+   },
+   {
+    "en": "What should happen on an `uncaughtException` that happens outside any request?",
+    "bn": "কোনো request-এর বাইরে `uncaughtException` হলে কী হওয়া উচিত?"
+   },
+   {
+    "en": "How do you map JWT verification errors?",
+    "bn": "JWT verification error কীভাবে map করবে?"
+   }
+  ],
+  "related": [
+   "express-005",
+   "express-008",
+   "express-012"
+  ],
+  "commonMistakes": {
+   "en": "Sending `err.message` and `err.stack` to clients for 500s, writing `try/catch` in every Express 5 handler, or registering the error handler before the routes.",
+   "bn": "500-এর ক্ষেত্রে client-কে `err.message` আর `err.stack` পাঠানো, Express 5-এর প্রতিটি handler-এ `try/catch` লেখা, অথবা route-এর আগে error handler register করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import { z, ZodError } from 'zod';\n\nexport class AppError extends Error {\n  constructor(status, code, message, { details, cause } = {}) {\n    super(message, { cause });\n    this.name = 'AppError';\n    this.status = status;\n    this.code = code;\n    this.details = details;\n    this.expose = status < 500; // safe to show the message to clients\n  }\n  static notFound(what = 'Resource') {\n    return new AppError(404, 'NOT_FOUND', `${what} not found`);\n  }\n  static conflict(message) {\n    return new AppError(409, 'CONFLICT', message);\n  }\n}\n\nfunction toAppError(err) {\n  if (err instanceof AppError) return err;\n  if (err instanceof ZodError) {\n    return new AppError(400, 'VALIDATION_FAILED', 'Invalid request', {\n      details: z.flattenError(err).fieldErrors,\n    });\n  }\n  if (err.type === 'entity.parse.failed') return new AppError(400, 'INVALID_JSON', 'Malformed JSON body');\n  if (err.type === 'entity.too.large') return new AppError(413, 'PAYLOAD_TOO_LARGE', 'Request body too large');\n  if (err.code === '23505') return AppError.conflict('Resource already exists'); // Postgres unique_violation\n  return new AppError(500, 'INTERNAL', 'Internal Server Error', { cause: err });\n}\n\nexport function notFoundHandler(req, res, next) {\n  next(AppError.notFound(`Route ${req.method} ${req.path}`));\n}\n\nexport function errorHandler(err, req, res, next) {\n  if (res.headersSent) return next(err); // response already started: let Express abort it\n\n  const appErr = toAppError(err);\n  if (appErr.status >= 500) (req.log ?? console).error({ err }, 'unhandled error');\n\n  res\n    .status(appErr.status)\n    .type('application/problem+json') // RFC 9457 problem details\n    .json({\n      type: `https://api.example.com/problems/${appErr.code.toLowerCase()}`,\n      title: appErr.expose ? appErr.message : 'Internal Server Error',\n      status: appErr.status,\n      code: appErr.code,\n      ...(appErr.details && { errors: appErr.details }),\n      instance: req.originalUrl,\n    });\n}\n\n// In a route (Express 5): no try/catch needed\n// app.get('/users/:id', async (req, res) => {\n//   const user = await users.findById(req.params.id);\n//   if (!user) throw AppError.notFound('User');\n//   res.json(user);\n// });\n// ...after all routes:\n// app.use(notFoundHandler);\n// app.use(errorHandler);"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-007",
+  "subtopic": "Deployment",
+  "difficulty": "extreme",
+  "type": "system-design",
+  "market": "international",
+  "priority": "high",
+  "estimatedMinutes": 20,
+  "tags": [
+   "system-design",
+   "architecture",
+   "multi-tenant",
+   "scalability",
+   "observability",
+   "express-5"
+  ],
+  "technologyVersion": "Express 5.x; Node.js 24 LTS / 26",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Design the backend for a multi-tenant B2B SaaS REST API built with Express 5: about 3,000 requests per second at peak, strict tenant data isolation, 99.9% availability, and a small team that must ship features quickly. Describe the application structure, the middleware stack, how it scales, and how you'd operate it in production.",
+   "bn": "Express 5 দিয়ে একটি multi-tenant B2B SaaS REST API-এর backend design করো: peak-এ প্রায় প্রতি সেকেন্ডে 3,000 request, কঠোর tenant data isolation, 99.9% availability, আর একটি ছোট team যাদের দ্রুত feature ship করতে হবে। Application structure, middleware stack, কীভাবে scale করবে, আর production-এ কীভাবে চালাবে — বর্ণনা করো।"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level answer.)*\n\n**Application structure** — a modular monolith first (fastest for a small team): feature modules (`billing`, `users`, `projects`), each with routes → controllers (HTTP only) → services (business rules) → repositories (DB access). A `createApp(deps)` factory builds the Express app with injected dependencies, so tests and workers can reuse it without `listen()`.\n\n**Middleware stack (order matters):** request ID + `pino-http` logging → `helmet` → `cors` with an allow-list → `express.json({ limit })` → health routes (public) → rate limiting (Redis store, per tenant and per IP) → authentication (JWT verification) → **tenant resolution** (tenant from the token, never from a client-controlled header alone) → versioned routers (`/v1`) with per-route validation (zod) and authorization → 404 → centralized error handler.\n\n**Tenant isolation:** every table has `tenant_id`; repositories always scope queries by the tenant from the request context (AsyncLocalStorage), and PostgreSQL Row-Level Security acts as a second guard. Large tenants can later move to a dedicated database without changing the API.\n\n**Scaling:** stateless containers (one Node process each) behind an ALB/NGINX with `trust proxy` set correctly; autoscale on CPU and p95 latency. PostgreSQL primary + read replicas behind PgBouncer; Redis for cache, rate limits and sessions/token deny-lists. Slow or heavy work (emails, exports, webhooks) goes to a queue and separate workers.\n\n**Operations:** health/readiness endpoints and graceful shutdown; structured logs, metrics (RED: rate, errors, duration) and OpenTelemetry traces with request IDs; SLO-based alerts; zero-downtime rolling deploys with expand/contract migrations; feature flags; OpenAPI contract tests in CI; dependency and container scanning.",
+   "bn": "*(Advanced, senior-level উত্তর।)*\n\n**Application structure** — শুরুতে একটি modular monolith (ছোট team-এর জন্য সবচেয়ে দ্রুত): feature module (`billing`, `users`, `projects`), প্রতিটিতে route → controller (শুধু HTTP) → service (business rule) → repository (DB access)। একটি `createApp(deps)` factory inject করা dependency দিয়ে Express app বানায়, ফলে test আর worker `listen()` ছাড়াই এটা পুনরায় ব্যবহার করতে পারে।\n\n**Middleware stack (ক্রম গুরুত্বপূর্ণ):** request ID + `pino-http` logging → `helmet` → allow-list সহ `cors` → `express.json({ limit })` → health route (public) → rate limiting (Redis store, tenant ও IP অনুযায়ী) → authentication (JWT verification) → **tenant resolution** (token থেকে tenant, কখনো শুধু client-নিয়ন্ত্রিত header থেকে নয়) → per-route validation (zod) আর authorization সহ versioned router (`/v1`) → 404 → centralized error handler।\n\n**Tenant isolation:** প্রতিটি table-এ `tenant_id`; repository সবসময় request context (AsyncLocalStorage) থেকে পাওয়া tenant দিয়ে query scope করে, আর দ্বিতীয় পাহারা হিসেবে PostgreSQL Row-Level Security। বড় tenant-কে পরে API না বদলেই আলাদা database-এ সরানো যায়।\n\n**Scaling:** stateless container (প্রতিটিতে একটি Node process), ALB/NGINX-এর পেছনে সঠিকভাবে `trust proxy` set করে; CPU আর p95 latency দেখে autoscale। PgBouncer-এর পেছনে PostgreSQL primary + read replica; cache, rate limit আর session/token deny-list-এর জন্য Redis। ধীর বা ভারী কাজ (email, export, webhook) queue আর আলাদা worker-এ যায়।\n\n**Operations:** health/readiness endpoint আর graceful shutdown; structured log, metric (RED: rate, errors, duration) আর request ID সহ OpenTelemetry trace; SLO-ভিত্তিক alert; expand/contract migration সহ zero-downtime rolling deploy; feature flag; CI-তে OpenAPI contract test; dependency আর container scanning।"
+  },
+  "explanation": {
+   "en": "**Capacity sanity check:** 3,000 rps across, say, 6–10 instances is a few hundred rps per Node process — comfortable for I/O-bound handlers if nothing blocks the event loop. The database is usually the bottleneck, so caching hot reads and keeping queries indexed matters more than the framework.\n\n**Failure scenarios:**\n- Redis down → rate limiter and cache must fail in a defined way (fail-open for cache, a decision for rate limits) with timeouts, not hang requests.\n- One noisy tenant → per-tenant rate limits and quotas; move heavy tenants to dedicated workers or databases.\n- Bad deploy → canary + automatic rollback on error-rate SLO.\n- DB failover → connection retry with backoff; idempotency keys on unsafe POSTs so client retries are safe.\n\n**Trade-offs:** a modular monolith keeps deployment simple; split out a service only when a module needs independent scaling or ownership. RLS adds safety but complicates connection pooling (set the tenant per transaction).\n\n**Security:** OWASP API Top 10 — broken object-level authorization is the classic multi-tenant bug, so every repository call takes the tenant and checks ownership.",
+   "bn": "**Capacity-র মোটা হিসাব:** ধরো 6–10টি instance-এ 3,000 rps মানে প্রতি Node process-এ কয়েকশো rps — event loop block না হলে I/O-bound handler-এর জন্য এটা স্বচ্ছন্দ। সাধারণত database-ই bottleneck, তাই framework-এর চেয়ে hot read cache করা আর query indexed রাখা বেশি গুরুত্বপূর্ণ।\n\n**Failure scenario:**\n- Redis down → rate limiter আর cache-কে নির্ধারিত উপায়ে fail করতে হবে (cache-এর জন্য fail-open, rate limit-এর জন্য একটি সিদ্ধান্ত), timeout সহ — request ঝুলিয়ে নয়।\n- একটি noisy tenant → per-tenant rate limit আর quota; ভারী tenant-কে dedicated worker বা database-এ সরানো।\n- খারাপ deploy → canary + error-rate SLO দেখে স্বয়ংক্রিয় rollback।\n- DB failover → backoff সহ connection retry; unsafe POST-এ idempotency key, যাতে client retry নিরাপদ হয়।\n\n**Trade-off:** modular monolith deployment সহজ রাখে; কোনো module-এর আলাদা scaling বা ownership দরকার হলেই কেবল আলাদা service বানাও। RLS নিরাপত্তা বাড়ায় কিন্তু connection pooling জটিল করে (প্রতি transaction-এ tenant set করতে হয়)।\n\n**Security:** OWASP API Top 10 — broken object-level authorization হলো multi-tenant-এর classic bug, তাই প্রতিটি repository call tenant নেয় এবং ownership check করে।"
+  },
+  "interviewTip": {
+   "en": "Start with requirements and a rough capacity estimate, then walk the request path through the middleware stack, then data isolation, then scaling and operations. Naming failure modes (Redis down, noisy tenant) is what makes it senior.",
+   "bn": "Requirement আর মোটা capacity হিসাব দিয়ে শুরু করো, তারপর middleware stack ধরে request-এর পথ দেখাও, তারপর data isolation, তারপর scaling আর operations। Failure mode-এর নাম বলা (Redis down, noisy tenant) উত্তরটাকে senior মানের করে।"
+  },
+  "references": [
+   {
+    "title": "Express — Production best practices: performance and reliability",
+    "url": "https://expressjs.com/en/advanced/best-practice-performance.html"
+   },
+   {
+    "title": "Express — Production best practices: security",
+    "url": "https://expressjs.com/en/advanced/best-practice-security.html"
+   },
+   {
+    "title": "OWASP — REST Security Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you enforce tenant isolation if a developer forgets the `tenant_id` filter?",
+    "bn": "কোনো developer `tenant_id` filter দিতে ভুলে গেলে tenant isolation কীভাবে নিশ্চিত করবে?"
+   },
+   {
+    "en": "When would you split this modular monolith into services?",
+    "bn": "কখন এই modular monolith-কে আলাদা service-এ ভাগ করবে?"
+   },
+   {
+    "en": "How do you decide whether the rate limiter fails open or closed when Redis is down?",
+    "bn": "Redis down হলে rate limiter fail-open নাকি fail-closed হবে কীভাবে ঠিক করবে?"
+   }
+  ],
+  "related": [
+   "express-006",
+   "express-014",
+   "express-018"
+  ],
+  "commonMistakes": {
+   "en": "Starting with microservices for a small team, trusting an `X-Tenant-Id` header from the client, or keeping sessions/rate-limit counters in process memory while running many instances.",
+   "bn": "ছোট team নিয়ে microservices দিয়ে শুরু করা, client-এর পাঠানো `X-Tenant-Id` header বিশ্বাস করা, অথবা অনেক instance চালিয়েও session/rate-limit counter process memory-তে রাখা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// app.js — composition root (no listen() here, so tests and workers can import it)\nimport express from 'express';\nimport helmet from 'helmet';\nimport cors from 'cors';\nimport { pinoHttp } from 'pino-http';\nimport { rateLimit } from 'express-rate-limit';\n\nexport function createApp({ config, logger, deps }) {\n  const app = express();\n  app.set('trust proxy', 1); // exactly one proxy (ALB/NGINX) in front\n\n  app.use(pinoHttp({ logger, genReqId: deps.requestId }));\n  app.use(helmet());\n  app.use(cors({ origin: config.corsOrigins, credentials: true }));\n  app.use(express.json({ limit: '1mb' }));\n\n  app.use('/health', deps.healthRouter);                // public, cheap\n  app.use('/v1', rateLimit({\n    windowMs: 60_000, limit: 600, standardHeaders: 'draft-8', legacyHeaders: false,\n    store: deps.rateLimitStore,                         // Redis-backed, shared by all instances\n  }));\n  app.use('/v1', deps.authenticate, deps.resolveTenant, deps.v1Router);\n\n  app.use(deps.notFoundHandler);\n  app.use(deps.errorHandler);\n  return app;\n}"
+  },
+  "technology": "express"
+ }
+]

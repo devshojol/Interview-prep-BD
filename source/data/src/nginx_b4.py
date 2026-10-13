@@ -1,0 +1,721 @@
+# NGINX — batch 4: nginx-011 (easy), nginx-020..022 (medium), nginx-027..029 (hard), nginx-032 (extreme)
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools"))
+from qb import Q, save  # noqa: E402
+
+N_UPSTREAM = ("NGINX — ngx_http_upstream_module", "https://nginx.org/en/docs/http/ngx_http_upstream_module.html")
+N_LB = ("NGINX — Using nginx as HTTP load balancer", "https://nginx.org/en/docs/http/load_balancing.html")
+N_HEADERS = ("NGINX — ngx_http_headers_module", "https://nginx.org/en/docs/http/ngx_http_headers_module.html")
+N_HTTP_CORE = ("NGINX — ngx_http_core_module", "https://nginx.org/en/docs/http/ngx_http_core_module.html")
+N_V2 = ("NGINX — ngx_http_v2_module", "https://nginx.org/en/docs/http/ngx_http_v2_module.html")
+N_QUIC = ("NGINX — Support for QUIC and HTTP/3", "https://nginx.org/en/docs/quic.html")
+N_PROXY = ("NGINX — ngx_http_proxy_module", "https://nginx.org/en/docs/http/ngx_http_proxy_module.html")
+N_SSL = ("NGINX — ngx_http_ssl_module", "https://nginx.org/en/docs/http/ngx_http_ssl_module.html")
+N_SERVER_NAMES = ("NGINX — Server names", "https://nginx.org/en/docs/http/server_names.html")
+N_CORE_MAIN = ("NGINX — Core functionality (worker_connections, worker_rlimit_nofile)", "https://nginx.org/en/docs/ngx_core_module.html")
+N_STUB = ("NGINX — ngx_http_stub_status_module", "https://nginx.org/en/docs/http/ngx_http_stub_status_module.html")
+N_BEGIN = ("NGINX — Beginner's Guide", "https://nginx.org/en/docs/beginners_guide.html")
+OWASP_HEADERS = ("OWASP — HTTP Security Response Headers Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html")
+MDN_CACHE = ("MDN — Cache-Control", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control")
+SOCKETIO_NODES = ("Socket.IO — Using multiple nodes", "https://socket.io/docs/v4/using-multiple-nodes/")
+SOCKETIO_REDIS = ("Socket.IO — Redis adapter", "https://socket.io/docs/v4/redis-adapter/")
+NODE_CLUSTER = ("Node.js — Cluster", "https://nodejs.org/api/cluster.html")
+EXPRESS_PROD = ("Express — Production best practices: performance", "https://expressjs.com/en/advanced/best-practice-performance.html")
+
+QUESTIONS = [
+    # ------------------------------------------------------------------ nginx-011
+    Q(
+        id="nginx-011", sub="Load Balancing", diff="easy", type="mcq",
+        prio="high", market="bangladesh", mins=1,
+        tags=["round-robin", "upstream", "load-balancing"],
+        ver="Version-independent (NGINX 1.30 / 1.31)", vs=False, status="stable",
+        q_en=r"""With this upstream block and no other directives, how does NGINX distribute requests across the three servers?""",
+        q_bn=r"""এই upstream block-এ অন্য কোনো directive না থাকলে NGINX তিনটা server-এর মধ্যে request কীভাবে ভাগ করে?""",
+        code=r"""
+            upstream app {
+                server 10.0.1.11:3000;
+                server 10.0.1.12:3000;
+                server 10.0.1.13:3000;
+            }
+        """,
+        lang="nginx",
+        options=[
+            ("Round-robin: each server in turn, weighted by `weight` (all weights are 1 here)",
+             "Round-robin: পালাক্রমে প্রতিটা server-এ, `weight` অনুযায়ী (এখানে সবার weight 1)"),
+            ("Least connections: to the server with the fewest active connections",
+             "Least connections: যে server-এ সবচেয়ে কম active connection, সেখানে"),
+            ("IP hash: each client IP always goes to the same server",
+             "IP hash: প্রতিটা client IP সবসময় একই server-এ যায়"),
+            ("Random: a randomly chosen server for each request",
+             "Random: প্রতিটা request-এর জন্য random-ভাবে বাছাই করা একটা server"),
+        ],
+        correct=0,
+        a_en=r"""The default method is **weighted round-robin**. Requests go to each server in turn in proportion to its `weight` (default 1), so here each server gets about a third of the traffic. Servers that failed recently (per `max_fails`/`fail_timeout`) are skipped temporarily.""",
+        a_bn=r"""Default পদ্ধতি হলো **weighted round-robin**। Request পালাক্রমে প্রতিটা server-এ যায়, প্রত্যেকের `weight` (default 1) অনুপাতে, তাই এখানে প্রতিটা server মোটামুটি এক-তৃতীয়াংশ traffic পায়। সম্প্রতি fail করা server (`max_fails`/`fail_timeout` অনুযায়ী) সাময়িকভাবে বাদ দেওয়া হয়।""",
+        ex_en=r"""
+            The tempting wrong answer is "least connections", because people assume the default is the "smart" one. You have to opt in with `least_conn;`, and similarly `ip_hash;`, `hash …;` or `random;`.
+
+            Round-robin works well when requests take roughly the same time. If some requests are much slower (reports, uploads), `least_conn` spreads load better. With `server 10.0.1.11:3000 weight=2;`, that server would receive two out of every four requests.
+        """,
+        ex_bn=r"""
+            বিভ্রান্তিকর ভুল উত্তর হলো "least connections", কারণ অনেকে ধরে নেয় default-টাই "smart" পদ্ধতি। এটা নিজেকে চালু করতে হয় `least_conn;` দিয়ে, একইভাবে `ip_hash;`, `hash …;` বা `random;`।
+
+            Request-গুলো মোটামুটি একই সময় নিলে round-robin ভালো কাজ করে। কিছু request অনেক ধীর হলে (report, upload) `least_conn` load ভালোভাবে ছড়ায়। `server 10.0.1.11:3000 weight=2;` দিলে প্রতি চারটা request-এর দুটো ওই server পেত।
+        """,
+        tip_en=r"""Answer "weighted round-robin", then add when you'd switch to `least_conn`. A one-line trade-off turns a recall question into a judgement answer.""",
+        tip_bn=r"""উত্তর দাও "weighted round-robin", তারপর যোগ করো কখন তুমি `least_conn`-এ যাবে। এক লাইনের একটা trade-off মুখস্থের প্রশ্নকে বিচারবুদ্ধির উত্তরে পরিণত করে।""",
+        related=["nginx-018"],
+        refs=[N_LB, N_UPSTREAM],
+    ),
+    # ------------------------------------------------------------------ nginx-020
+    Q(
+        id="nginx-020", sub="Static File Serving", diff="medium", type="scenario",
+        prio="high", market="both", mins=7,
+        tags=["cache-control", "immutable", "spa", "deploy", "static-assets"],
+        ver="NGINX 1.30 stable / 1.31 mainline", vs=False, status="stable",
+        q_en=r"""After every frontend deploy, some users get a blank page and `404`s for JavaScript chunks until they hard-refresh. NGINX serves the Vite build with `expires 7d;` for every file. What's happening, and how should the caching headers be configured?""",
+        q_bn=r"""প্রতিটা frontend deploy-এর পর কিছু user hard-refresh না করা পর্যন্ত একটা ফাঁকা page আর JavaScript chunk-এর `404` পায়। NGINX Vite build serve করছে প্রতিটা file-এ `expires 7d;` দিয়ে। কী ঘটছে, আর caching header কীভাবে configure করা উচিত?""",
+        a_en=r"""
+            **What's happening:** `index.html` is cached by browsers (and maybe a CDN) for 7 days. It references hashed bundles such as `/assets/index-3f9a1c.js`. The deploy replaced them with new hashes and deleted the old files, so a user with a cached `index.html` requests chunks that no longer exist: 404, then a blank page.
+
+            **Fix: treat the two kinds of files differently.**
+            - **Hashed assets** (`/assets/*-[hash].js|css`, fonts, images with hashes): `Cache-Control: public, max-age=31536000, immutable`. The URL changes whenever the content changes, so caching "forever" is safe and makes repeat visits instant.
+            - **Entry points** (`index.html`, `/`, `sw.js`, `manifest.webmanifest`): `Cache-Control: no-cache`. The browser may store the file but must revalidate each time, which costs only a cheap `304` thanks to ETag/Last-Modified. Users always get the latest HTML.
+            - **Deploy hygiene:** keep the previous release's assets available for a while (overlapping or atomic releases), because tabs opened before the deploy still request old chunks. If a CDN caches HTML, purge it on deploy.
+        """,
+        a_bn=r"""
+            **কী ঘটছে:** `index.html` browser-এ (আর হয়তো CDN-এও) ৭ দিনের জন্য cache হয়ে থাকে। এটা `/assets/index-3f9a1c.js`-এর মতো hashed bundle-কে reference করে। Deploy-এ নতুন hash-ওয়ালা file এসেছে আর পুরনোগুলো মুছে গেছে, তাই cached `index.html`-ওয়ালা user এমন chunk চায় যেগুলো আর নেই: 404, তারপর ফাঁকা page।
+
+            **সমাধান: দুই ধরনের file আলাদাভাবে সামলাও।**
+            - **Hashed asset** (`/assets/*-[hash].js|css`, hash-ওয়ালা font আর image): `Cache-Control: public, max-age=31536000, immutable`। Content বদলালেই URL বদলায়, তাই "চিরদিনের জন্য" cache করা নিরাপদ, আর বারবার visit-এ page সাথে সাথে load হয়।
+            - **Entry point** (`index.html`, `/`, `sw.js`, `manifest.webmanifest`): `Cache-Control: no-cache`। Browser file রাখতে পারে, কিন্তু প্রতিবার revalidate করতে হয়, ETag/Last-Modified-এর কারণে যেটা শুধু একটা সস্তা `304`। ফলে user সবসময় সর্বশেষ HTML পায়।
+            - **Deploy-এর পরিচ্ছন্নতা:** আগের release-এর asset কিছুদিন রেখে দাও (overlapping বা atomic release), কারণ deploy-এর আগে খোলা tab এখনো পুরনো chunk চাইবে। CDN HTML cache করলে deploy-এর সময় সেটা purge করো।
+        """,
+        ex_en=r"""
+            - **`expires` vs `add_header`:** `expires 1y` sets both `Expires` and `Cache-Control: max-age`. To add `immutable`, use `add_header Cache-Control …` instead. Using both produces two `Cache-Control` headers.
+            - **The `add_header` inheritance trap:** adding `add_header Cache-Control` inside a location drops server-level headers such as HSTS for those responses. On NGINX 1.29.3+ use `add_header_inherit merge;`, or repeat the security headers through a shared `include`.
+            - **`no-cache` ≠ `no-store`:** `no-cache` means "revalidate before use". `no-store` forbids storing at all and would make every visit download the full HTML.
+            - **Next.js:** files under `/_next/static/` are content-hashed and Next.js already sends immutable caching headers for them. Don't override them, and don't cache dynamic HTML at the proxy without understanding the app's caching model.
+        """,
+        ex_bn=r"""
+            - **`expires` বনাম `add_header`:** `expires 1y` `Expires` আর `Cache-Control: max-age` দুটোই set করে। `immutable` যোগ করতে চাইলে এর বদলে `add_header Cache-Control …` ব্যবহার করো। দুটো একসাথে দিলে দুটো `Cache-Control` header তৈরি হয়।
+            - **`add_header` inheritance-এর ফাঁদ:** location-এর ভেতরে `add_header Cache-Control` যোগ করলে ওই response-গুলো থেকে HSTS-এর মতো server-level header বাদ পড়ে যায়। NGINX 1.29.3+-এ `add_header_inherit merge;` ব্যবহার করো, অথবা একটা shared `include` দিয়ে security header আবার লেখো।
+            - **`no-cache` ≠ `no-store`:** `no-cache` মানে "ব্যবহারের আগে revalidate করো"। `no-store` store করাই নিষেধ করে, তাতে প্রতিটা visit-এ পুরো HTML download হবে।
+            - **Next.js:** `/_next/static/`-এর file-গুলো content-hashed, আর Next.js নিজেই এগুলোর জন্য immutable caching header পাঠায়। এগুলো override কোরো না, আর app-এর caching model না বুঝে proxy-তে dynamic HTML cache কোরো না।
+        """,
+        tip_en=r"""Name the root cause precisely ("stale HTML referencing deleted hashed chunks") before proposing headers. Then the two-tier rule (immutable assets, revalidated HTML) plus "keep old assets during rollout" makes a complete senior-sounding answer.""",
+        tip_bn=r"""Header প্রস্তাব করার আগে root cause নির্দিষ্ট করে বলো ("পুরনো HTML মুছে ফেলা hashed chunk-কে reference করছে")। তারপর দুই স্তরের নিয়ম (immutable asset, revalidate করা HTML) আর "rollout-এর সময় পুরনো asset রেখে দাও", এই দুটো মিলে একটা পূর্ণাঙ্গ, senior-সুলভ উত্তর হয়।""",
+        mist_en=r"""Caching `index.html` for days, using `no-store` everywhere "to be safe" (slow site), deleting old assets the instant a deploy finishes, and adding `?v=123` query strings instead of content hashes.""",
+        mist_bn=r"""`index.html` কয়েক দিনের জন্য cache করা, "নিরাপদ থাকতে" সব জায়গায় `no-store` দেওয়া (site ধীর হয়), deploy শেষ হওয়া মাত্র পুরনো asset মুছে ফেলা, আর content hash-এর বদলে `?v=123` query string যোগ করা।""",
+        code=r"""
+            server {
+                listen 443 ssl;
+                http2 on;
+                server_name app.example.com;
+                root /var/www/app/current/dist;     # "current" symlink -> releases/<timestamp>
+
+                # Content-hashed files: cache for a year, never revalidate
+                location /assets/ {
+                    add_header Cache-Control "public, max-age=31536000, immutable";
+                    try_files $uri =404;
+                }
+
+                # The HTML shell: always revalidate (cheap 304 via ETag/Last-Modified)
+                location = /index.html {
+                    add_header Cache-Control "no-cache";
+                }
+
+                # SPA routes fall back to /index.html, which hits the location above
+                location / {
+                    try_files $uri $uri/ /index.html;
+                }
+            }
+        """,
+        lang="nginx",
+        follow=[
+            ("How would you deploy so that users with an old tab open don't hit missing chunks?", "পুরনো tab খোলা রাখা user-রা যেন হারিয়ে যাওয়া chunk-এ না আটকায়, সেভাবে কীভাবে deploy করবে?"),
+            ("What's the difference between `no-cache`, `no-store` and `max-age=0`?", "`no-cache`, `no-store` আর `max-age=0`-এর মধ্যে পার্থক্য কী?"),
+        ],
+        related=["nginx-006", "nginx-014"],
+        refs=[N_HEADERS, MDN_CACHE],
+    ),
+    # ------------------------------------------------------------------ nginx-021
+    Q(
+        id="nginx-021", sub="HTTP and HTTPS", diff="medium", type="mcq",
+        prio="medium", market="both", mins=2,
+        tags=["http2", "http3", "quic", "deprecation", "tls"],
+        ver="NGINX 1.30 stable / 1.31 mainline (`http2` directive since 1.25.1)", vs=True, status="stable",
+        q_en=r"""You're writing a new TLS server block for NGINX 1.30. What is the current, non-deprecated way to enable HTTP/2 for clients?""",
+        q_bn=r"""তুমি NGINX 1.30-এর জন্য নতুন একটা TLS server block লিখছ। Client-দের জন্য HTTP/2 চালু করার বর্তমান, deprecated না এমন উপায় কোনটা?""",
+        options=[
+            ("`listen 443 ssl http2;`", "`listen 443 ssl http2;`"),
+            ("`proxy_http_version 2;`", "`proxy_http_version 2;`"),
+            ("`listen 443 ssl;` plus `http2 on;`", "`listen 443 ssl;` আর সাথে `http2 on;`"),
+            ("`listen 443 ssl;` plus `spdy on;`", "`listen 443 ssl;` আর সাথে `spdy on;`"),
+        ],
+        correct=2,
+        a_en=r"""Use `listen 443 ssl;` together with the **`http2 on;`** directive, available since NGINX 1.25.1. The older `http2` **parameter** on the `listen` line is deprecated: it still works, but NGINX logs a deprecation warning. HTTP/2 is then negotiated with browsers via TLS ALPN.""",
+        a_bn=r"""`listen 443 ssl;`-এর সাথে **`http2 on;`** directive ব্যবহার করো, যেটা NGINX 1.25.1 থেকে আছে। `listen` line-এর পুরনো `http2` **parameter** deprecated: এটা এখনো কাজ করে, কিন্তু NGINX একটা deprecation warning log করে। এরপর browser-এর সাথে TLS ALPN দিয়ে HTTP/2 negotiate হয়।""",
+        ex_en=r"""
+            The tempting wrong answer is `listen 443 ssl http2;`, because most tutorials written before 2023 use it. It's deprecated, not removed, so it's a "works but outdated" answer.
+
+            `proxy_http_version 2;` is a different feature. Since 1.29.4 it controls the protocol NGINX uses **to the backend**, not to clients. `spdy` is HTTP/2's long-removed predecessor.
+
+            **HTTP/3:** add `listen 443 quic reuseport;` and `http3 on;` alongside the TCP listener, advertise it with `add_header Alt-Svc 'h3=":443"; ma=86400';` and open **UDP** 443 in the firewall. The `reuseport` parameter can appear only once per address:port across all server blocks.
+        """,
+        ex_bn=r"""
+            বিভ্রান্তিকর ভুল উত্তর হলো `listen 443 ssl http2;`, কারণ ২০২৩-এর আগের বেশিরভাগ tutorial এটাই ব্যবহার করে। এটা deprecated, সরানো হয়নি, তাই এটা "কাজ করে কিন্তু পুরনো" ধরনের উত্তর।
+
+            `proxy_http_version 2;` আলাদা feature। 1.29.4 থেকে এটা ঠিক করে NGINX **backend-এর সাথে** কোন protocol ব্যবহার করবে, client-এর সাথে না। `spdy` হলো HTTP/2-এর অনেক আগেই সরিয়ে দেওয়া পূর্বসূরি।
+
+            **HTTP/3:** TCP listener-এর পাশাপাশি `listen 443 quic reuseport;` আর `http3 on;` যোগ করো, `add_header Alt-Svc 'h3=":443"; ma=86400';` দিয়ে এটা জানিয়ে দাও, আর firewall-এ **UDP** 443 খোলো। সব server block মিলিয়ে একটা address:port-এ `reuseport` parameter শুধু একবারই দেওয়া যায়।
+        """,
+        tip_en=r"""Saying "the `http2` listen parameter has been deprecated since 1.25.1; use `http2 on`" signals you work with current versions, a small detail that interviewers notice.""",
+        tip_bn=r""""`http2` listen parameter 1.25.1 থেকে deprecated; `http2 on` ব্যবহার করো", এটা বললে বোঝা যায় তুমি বর্তমান version নিয়ে কাজ করো। ছোট একটা detail, কিন্তু interviewer খেয়াল করে।""",
+        related=["nginx-008"],
+        refs=[N_V2, N_QUIC],
+    ),
+    # ------------------------------------------------------------------ nginx-022
+    Q(
+        id="nginx-022", sub="NGINX with Node.js", diff="medium", type="scenario",
+        prio="high", market="bangladesh", mins=8,
+        tags=["pm2", "systemd", "vps", "deployment", "ufw"],
+        ver="NGINX 1.30 stable, Node.js 24 LTS, PM2 / systemd", vs=False, status="stable",
+        q_en=r"""A client wants their Express API and React frontend running on a single Ubuntu VPS behind NGINX. It must survive crashes and reboots and, ideally, update without downtime. Describe your setup: how Node runs, how NGINX fits in, and what you'd lock down.""",
+        q_bn=r"""একজন client তাদের Express API আর React frontend একটা Ubuntu VPS-এ NGINX-এর পেছনে চালাতে চায়। Crash আর reboot-এর পরেও চালু থাকতে হবে, আর সম্ভব হলে downtime ছাড়া update করা যাবে। তোমার setup বর্ণনা করো: Node কীভাবে চলবে, NGINX কোথায় বসবে, আর কী কী lock down করবে।""",
+        a_en=r"""
+            **Request flow:** internet → **NGINX on 80/443** (TLS via certbot, serves the React `dist/` from disk, proxies `/api/`) → **Node on `127.0.0.1:3000`**, never exposed directly.
+
+            **Running Node: pick one process manager.**
+            - **systemd:** a unit file with `Restart=always`, a dedicated non-root user, an `EnvironmentFile` for secrets, logs in journald and start on boot. Simple and native to the OS.
+            - **PM2:** `exec_mode: 'cluster'` with `instances: 'max'` runs one worker per CPU core on the same port (Node's cluster module). **`pm2 reload`** restarts workers one by one for zero-downtime updates. `pm2 startup` plus `pm2 save` restores the apps on boot, and `max_memory_restart` gives a safety net for leaks.
+            - **Alternative:** two or more instances on different ports in an NGINX `upstream`, restarted one at a time. NGINX then does the balancing and passive failover.
+
+            **The app's part:** handle SIGINT/SIGTERM gracefully (stop accepting, finish requests, close DB pools), read config from env, and log to stdout.
+
+            **Lock down:**
+            - `ufw` allows only OpenSSH and "Nginx Full";
+            - SSH keys only (no password login, no root login);
+            - unattended security upgrades;
+            - a non-root app user;
+            - secrets in a `chmod 600` env file outside the repo;
+            - NGINX security headers and `client_max_body_size`;
+            - backups of the database and uploads;
+            - uptime and disk monitoring.
+        """,
+        a_bn=r"""
+            **Request-এর প্রবাহ:** internet → **80/443-এ NGINX** (certbot দিয়ে TLS, disk থেকে React-এর `dist/` serve করে, `/api/` proxy করে) → **`127.0.0.1:3000`-এ Node**, যেটা কখনো সরাসরি expose হয় না।
+
+            **Node চালানো: একটা process manager বেছে নাও।**
+            - **systemd:** `Restart=always`-সহ একটা unit file, আলাদা non-root user, secret-এর জন্য `EnvironmentFile`, log থাকে journald-এ, আর boot-এ start হয়। সহজ, আর OS-এর নিজস্ব ব্যবস্থা।
+            - **PM2:** `exec_mode: 'cluster'` আর `instances: 'max'` দিলে একই port-এ প্রতি CPU core-এ একটা worker চলে (Node-এর cluster module)। **`pm2 reload`** worker-গুলোকে একটা একটা করে restart করে, ফলে downtime ছাড়া update হয়। `pm2 startup` আর `pm2 save` boot-এর পর app ফিরিয়ে আনে, আর `max_memory_restart` leak-এর বিরুদ্ধে একটা নিরাপত্তা জাল।
+            - **বিকল্প:** NGINX-এর `upstream`-এ আলাদা আলাদা port-এ দুই বা ততোধিক instance, একটা একটা করে restart। তখন balancing আর passive failover NGINX করে।
+
+            **App-এর দায়িত্ব:** SIGINT/SIGTERM gracefully সামলানো (নতুন request নেওয়া বন্ধ, চলমান request শেষ, DB pool বন্ধ), env থেকে config পড়া, আর stdout-এ log করা।
+
+            **Lock down:**
+            - `ufw`-এ শুধু OpenSSH আর "Nginx Full" অনুমোদিত;
+            - শুধু SSH key (password login আর root login বন্ধ);
+            - unattended security upgrade;
+            - non-root app user;
+            - repo-র বাইরে `chmod 600` করা env file-এ secret;
+            - NGINX security header আর `client_max_body_size`;
+            - database আর upload-এর backup;
+            - uptime আর disk monitoring।
+        """,
+        ex_en=r"""
+            - **systemd vs PM2:** systemd has no extra dependency and integrates with the OS (journald, resource limits, sandboxing options such as `NoNewPrivileges`). PM2 adds cluster mode, rolling reloads and a friendly CLI. Both are fine; don't run **both** for the same app.
+            - **PM2 stop signal:** PM2 sends SIGINT and waits `kill_timeout` (1.6 s by default) before SIGKILL. Raise it if graceful shutdown needs longer.
+            - **Cluster mode and state:** each worker is a separate process. In-memory sessions, caches or rate-limit counters aren't shared, so move them to Redis. WebSockets across workers need sticky sessions.
+            - **Node installation:** install Node from a stable system-wide source (official binaries or a package repository), not per-user `nvm`, which systemd units can't find reliably.
+            - **When to outgrow this:** once you need more than one server, add a load balancer and stateless app servers, or move to containers and a managed platform.
+        """,
+        ex_bn=r"""
+            - **systemd বনাম PM2:** systemd-এর বাড়তি কোনো dependency নেই, আর এটা OS-এর সাথে মিশে থাকে (journald, resource limit, `NoNewPrivileges`-এর মতো sandboxing option)। PM2 দেয় cluster mode, rolling reload আর ব্যবহারবান্ধব CLI। দুটোই ঠিক আছে; শুধু একই app-এর জন্য **দুটোই** একসাথে চালিয়ো না।
+            - **PM2-এর stop signal:** PM2 SIGINT পাঠায়, তারপর SIGKILL-এর আগে `kill_timeout` (default 1.6 সেকেন্ড) অপেক্ষা করে। Graceful shutdown-এ বেশি সময় লাগলে এটা বাড়াও।
+            - **Cluster mode আর state:** প্রতিটা worker আলাদা process। In-memory session, cache বা rate-limit counter share হয় না, তাই এগুলো Redis-এ সরাও। একাধিক worker জুড়ে WebSocket চালাতে sticky session লাগে।
+            - **Node install:** স্থিতিশীল system-wide উৎস থেকে Node install করো (official binary বা package repository), per-user `nvm` থেকে না, কারণ systemd unit ওটা নির্ভরযোগ্যভাবে খুঁজে পায় না।
+            - **কখন এই setup ছাড়িয়ে যাবে:** একটার বেশি server লাগলে load balancer আর stateless app server যোগ করো, অথবা container আর managed platform-এ চলে যাও।
+        """,
+        tip_en=r"""Draw the request flow first, then justify each layer (NGINX for TLS/static/proxy, a process manager for restarts and boot). Finish with a short hardening list. Concrete commands (`pm2 reload`, `ufw allow 'Nginx Full'`) make it credible.""",
+        tip_bn=r"""আগে request-এর প্রবাহ এঁকে দেখাও, তারপর প্রতিটা layer-এর যুক্তি দাও (TLS/static/proxy-র জন্য NGINX, restart আর boot-এর জন্য process manager)। শেষ করো ছোট একটা hardening তালিকা দিয়ে। নির্দিষ্ট command (`pm2 reload`, `ufw allow 'Nginx Full'`) উত্তরটাকে বিশ্বাসযোগ্য করে।""",
+        mist_en=r"""Running `node server.js` inside `screen`/`tmux`, running the app as root on port 80, exposing port 3000 publicly, and keeping in-memory sessions with PM2 cluster mode.""",
+        mist_bn=r"""`screen`/`tmux`-এর ভেতরে `node server.js` চালানো, root হিসেবে port 80-এ app চালানো, port 3000 public করে রাখা, আর PM2 cluster mode-এর সাথে in-memory session রাখা।""",
+        code=r"""
+            server {
+                listen 443 ssl;
+                http2 on;
+                server_name shop.example.com;
+                ssl_certificate     /etc/letsencrypt/live/shop.example.com/fullchain.pem;
+                ssl_certificate_key /etc/letsencrypt/live/shop.example.com/privkey.pem;
+
+                root /srv/shop-web/current;              # React build output
+
+                location / {
+                    try_files $uri $uri/ /index.html;
+                }
+
+                location /api/ {
+                    proxy_pass http://127.0.0.1:3000;    # Node bound to localhost only
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                }
+            }
+        """,
+        lang="nginx",
+        extra=[
+            dict(lang="text", label_en="Option 1: systemd unit (/etc/systemd/system/shop-api.service)", label_bn="বিকল্প ১: systemd unit (/etc/systemd/system/shop-api.service)", src=r"""
+                [Unit]
+                Description=Shop API (Node.js)
+                After=network.target
+
+                [Service]
+                User=shop
+                WorkingDirectory=/srv/shop-api/current
+                EnvironmentFile=/etc/shop-api.env
+                ExecStart=/usr/bin/node dist/server.js
+                Restart=always
+                RestartSec=3
+                TimeoutStopSec=30
+                NoNewPrivileges=true
+
+                [Install]
+                WantedBy=multi-user.target
+            """),
+            dict(lang="javascript", label_en="Option 2: PM2 cluster mode (ecosystem.config.cjs)", label_bn="বিকল্প ২: PM2 cluster mode (ecosystem.config.cjs)", src=r"""
+                // pm2 start ecosystem.config.cjs && pm2 save && pm2 startup
+                // zero-downtime update: pm2 reload shop-api
+                module.exports = {
+                  apps: [{
+                    name: 'shop-api',
+                    script: 'dist/server.js',
+                    exec_mode: 'cluster',
+                    instances: 'max',            // one worker per CPU core
+                    env: { NODE_ENV: 'production', PORT: 3000 },
+                    max_memory_restart: '400M',
+                    kill_timeout: 10000,         // ms between SIGINT and SIGKILL
+                  }],
+                };
+            """),
+        ],
+        follow=[
+            ("How does `pm2 reload` achieve zero downtime, and what must the app do for it to work?", "`pm2 reload` কীভাবে zero downtime দেয়, আর এটা কাজ করার জন্য app-কে কী করতে হয়?"),
+            ("What breaks when you move from one Node process to PM2 cluster mode?", "একটা Node process থেকে PM2 cluster mode-এ গেলে কী কী ভেঙে যায়?"),
+        ],
+        related=["nginx-005", "nginx-008"],
+        refs=[N_PROXY, NODE_CLUSTER, EXPRESS_PROD],
+    ),
+    # ------------------------------------------------------------------ nginx-027
+    Q(
+        id="nginx-027", sub="TLS Termination", diff="hard", type="security-performance",
+        prio="high", market="both", mins=10,
+        tags=["tls", "security-headers", "hsts", "default-server", "add_header_inherit"],
+        ver="NGINX 1.30 stable (add_header_inherit since 1.29.3; ssl_reject_handshake since 1.19.4)", vs=True, status="stable",
+        q_en=r"""A security review of your NGINX edge reports four findings: TLS 1.0/1.1 are enabled; security headers are missing on some routes; the NGINX version is visible in responses; and requests with an unknown `Host` header (or to the bare IP) are served your main site. Harden the configuration and explain each change.""",
+        q_bn=r"""তোমার NGINX edge-এর security review-তে চারটা সমস্যা পাওয়া গেছে: TLS 1.0/1.1 চালু; কিছু route-এ security header নেই; response-এ NGINX-এর version দেখা যাচ্ছে; আর অচেনা `Host` header-ওয়ালা request (বা সরাসরি IP-তে request) main site-টাই পাচ্ছে। Configuration hardening করো আর প্রতিটা পরিবর্তন ব্যাখ্যা করো।""",
+        a_en=r"""
+            1. **TLS versions:** `ssl_protocols TLSv1.2 TLSv1.3;`. Set it explicitly rather than relying on defaults, which have changed across versions and builds. For TLS 1.2 ciphers, follow a maintained profile (the Mozilla SSL Configuration Generator's "intermediate"). Enable a shared session cache (`ssl_session_cache shared:SSL:10m`) for faster resumption.
+            2. **Security headers on every response:** HSTS (`max-age=31536000; includeSubDomains`, once every subdomain supports HTTPS), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and a `Content-Security-Policy` (at least `frame-ancestors 'self'` against clickjacking). Use the **`always`** parameter so they're also added to 4xx/5xx responses.
+            3. **Why headers vanished on some routes:** `add_header` is inherited **only if the inner level defines none**. Any location with its own `add_header` (e.g. for `Cache-Control`) silently dropped the server-level security headers. On NGINX ≥ 1.29.3 (so 1.30), set `add_header_inherit merge;` at the `http`/`server` level. On older versions, put the headers in a snippet and `include` it in every such location.
+            4. **Version disclosure:** `server_tokens off;` removes the version number from the `Server` header and error pages. It's minor hardening; patching is what actually protects you.
+            5. **Unknown hosts:** add an explicit catch-all `default_server`. On port 80 it uses `return 444;` (close without a response). On 443 it uses `ssl_reject_handshake on;`, which refuses TLS for unknown SNI names without needing a certificate, so IP scanners can't even learn which domains you host. Only requests for your real `server_name`s reach the app, which blocks Host-header attacks such as password-reset link poisoning.
+        """,
+        a_bn=r"""
+            1. **TLS version:** `ssl_protocols TLSv1.2 TLSv1.3;`। Default-এর উপর ভরসা না করে এটা স্পষ্টভাবে set করো, কারণ default বিভিন্ন version আর build-এ বদলেছে। TLS 1.2-এর cipher-এর জন্য একটা হালনাগাদ রাখা profile অনুসরণ করো (Mozilla SSL Configuration Generator-এর "intermediate")। দ্রুত resumption-এর জন্য shared session cache চালু করো (`ssl_session_cache shared:SSL:10m`)।
+            2. **প্রতিটা response-এ security header:** HSTS (`max-age=31536000; includeSubDomains`, যখন সব subdomain HTTPS support করবে), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, আর একটা `Content-Security-Policy` (clickjacking ঠেকাতে অন্তত `frame-ancestors 'self'`)। **`always`** parameter ব্যবহার করো, যাতে 4xx/5xx response-এও এগুলো যোগ হয়।
+            3. **কিছু route-এ header কেন হারিয়েছিল:** `add_header` inherit হয় **শুধু তখন, যখন ভেতরের স্তরে কোনো `add_header` নেই**। নিজস্ব `add_header` আছে এমন যেকোনো location (যেমন `Cache-Control`-এর জন্য) চুপচাপ server-level security header বাদ দিয়ে দিয়েছে। NGINX ≥ 1.29.3-এ (অর্থাৎ 1.30-এ) `http`/`server` স্তরে `add_header_inherit merge;` set করো। পুরনো version-এ header-গুলো একটা snippet-এ রেখে প্রতিটা এমন location-এ `include` করো।
+            4. **Version প্রকাশ হওয়া:** `server_tokens off;` `Server` header আর error page থেকে version number সরিয়ে দেয়। এটা ছোট hardening; আসল সুরক্ষা আসে patch করা থেকে।
+            5. **অচেনা host:** স্পষ্টভাবে একটা catch-all `default_server` যোগ করো। Port 80-এ এটা `return 444;` ব্যবহার করে (কোনো response ছাড়াই connection বন্ধ)। 443-এ ব্যবহার করে `ssl_reject_handshake on;`, যেটা certificate ছাড়াই অচেনা SNI নামের জন্য TLS প্রত্যাখ্যান করে, ফলে IP scanner জানতেই পারে না তুমি কোন domain host করছ। শুধু তোমার আসল `server_name`-এর request app-এ পৌঁছায়, এতে password-reset link poisoning-এর মতো Host-header attack আটকে যায়।
+        """,
+        ex_en=r"""
+            - **Why a catch-all matters:** without an explicit `default_server`, NGINX uses the **first** server block for a given `listen` address as the default. That's often your main app, so any Host value, including an attacker's, gets served by it. Apps that build absolute URLs from the Host header (reset emails, redirects) become exploitable.
+            - **HSTS caution:** `includeSubDomains` and especially `preload` are hard to undo. A forgotten HTTP-only subdomain becomes unreachable, so roll out with a short `max-age` first.
+            - **OCSP stapling:** Let's Encrypt shut down its OCSP service in 2025, so stapling no longer applies to its certificates. It's still relevant for CAs that provide OCSP.
+            - **Headers belong where they're understood:** CSP is application-specific and often better set by the app (e.g. helmet in Express). NGINX is a good place for universal ones such as HSTS and `nosniff`. Avoid sending the same header from both layers.
+            - **Verify** with `curl -I`, an online TLS scanner and `nginx -T | grep add_header` after every change.
+        """,
+        ex_bn=r"""
+            - **Catch-all কেন জরুরি:** স্পষ্ট `default_server` না থাকলে NGINX একটা `listen` address-এর **প্রথম** server block-কে default ধরে। প্রায়ই সেটাই তোমার main app, তাই যেকোনো Host value, attacker-এরটাও, সেটাই serve করে। যেসব app Host header থেকে absolute URL বানায় (reset email, redirect), সেগুলো exploit-যোগ্য হয়ে যায়।
+            - **HSTS-এ সতর্কতা:** `includeSubDomains` আর বিশেষ করে `preload` উল্টানো কঠিন। ভুলে যাওয়া কোনো HTTP-only subdomain তখন আর পৌঁছানো যায় না, তাই প্রথমে ছোট `max-age` দিয়ে চালু করো।
+            - **OCSP stapling:** Let's Encrypt ২০২৫ সালে তাদের OCSP service বন্ধ করেছে, তাই তাদের certificate-এর ক্ষেত্রে stapling আর প্রযোজ্য না। OCSP দেয় এমন CA-এর জন্য এটা এখনো প্রাসঙ্গিক।
+            - **Header থাকবে সেখানে, যেখানে সেটা বোঝা যায়:** CSP application-নির্দিষ্ট, তাই প্রায়ই app থেকে set করা ভালো (যেমন Express-এ helmet)। HSTS আর `nosniff`-এর মতো সর্বজনীন header-এর জন্য NGINX ভালো জায়গা। একই header দুই layer থেকে পাঠানো এড়িয়ে চলো।
+            - **যাচাই করো:** প্রতিটা পরিবর্তনের পর `curl -I`, একটা online TLS scanner আর `nginx -T | grep add_header` দিয়ে।
+        """,
+        tip_en=r"""Treat it like a real review: restate each finding, give the fix, and explain the **mechanism** (the inheritance rule, first-server-as-default). Mentioning `add_header_inherit` (1.29.3+) and `ssl_reject_handshake` shows current, deep NGINX knowledge.""",
+        tip_bn=r"""এটাকে আসল review-এর মতো সামলাও: প্রতিটা finding আবার বলো, সমাধান দাও, আর **mechanism**-টা ব্যাখ্যা করো (inheritance-এর নিয়ম, প্রথম server-ই default)। `add_header_inherit` (1.29.3+) আর `ssl_reject_handshake` উল্লেখ করলে NGINX নিয়ে তোমার হালনাগাদ, গভীর জ্ঞান বোঝা যায়।""",
+        mist_en=r"""Adding headers without `always` (missing on error pages), assuming server-level `add_header` applies everywhere, relying on `server_tokens off` as "security", and enabling HSTS preload before auditing all subdomains.""",
+        mist_bn=r"""`always` ছাড়া header যোগ করা (error page-এ থাকে না), ধরে নেওয়া যে server-level `add_header` সব জায়গায় প্রযোজ্য, `server_tokens off`-কেই "security" ভাবা, আর সব subdomain যাচাই না করেই HSTS preload চালু করা।""",
+        code=r"""
+            http {
+                server_tokens off;
+                add_header_inherit merge;          # 1.29.3+: inner add_header no longer drops these
+
+                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+                add_header Content-Security-Policy "frame-ancestors 'self'" always;
+
+                ssl_protocols TLSv1.2 TLSv1.3;
+                ssl_session_cache shared:SSL:10m;
+                ssl_session_timeout 1d;
+
+                # Catch-all: unknown Host / bare IP / unknown SNI
+                server {
+                    listen 80 default_server;
+                    listen [::]:80 default_server;
+                    listen 443 ssl default_server;
+                    listen [::]:443 ssl default_server;
+                    server_name _;
+                    ssl_reject_handshake on;       # no certificate needed
+                    return 444;                    # close the connection, no response
+                }
+
+                server {
+                    listen 443 ssl;
+                    listen [::]:443 ssl;
+                    http2 on;
+                    server_name shop.example.com;
+                    ssl_certificate     /etc/letsencrypt/live/shop.example.com/fullchain.pem;
+                    ssl_certificate_key /etc/letsencrypt/live/shop.example.com/privkey.pem;
+
+                    location /assets/ {
+                        add_header Cache-Control "public, max-age=31536000, immutable";  # merged, not replacing
+                        root /srv/shop-web/current;
+                    }
+
+                    location / {
+                        proxy_pass http://127.0.0.1:3000;
+                        proxy_set_header Host $host;
+                    }
+                }
+            }
+        """,
+        lang="nginx",
+        extra=[
+            dict(lang="nginx", label_en="NGINX older than 1.29.3: include a shared snippet instead of add_header_inherit", label_bn="1.29.3-এর পুরনো NGINX: add_header_inherit-এর বদলে shared snippet include করা", src=r"""
+                # /etc/nginx/snippets/security-headers.conf
+                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+                # in every location that has its own add_header:
+                location /assets/ {
+                    include snippets/security-headers.conf;
+                    add_header Cache-Control "public, max-age=31536000, immutable";
+                }
+            """),
+        ],
+        follow=[
+            ("What is a Host-header attack, and how does a catch-all server block prevent it?", "Host-header attack কী, আর catch-all server block কীভাবে এটা আটকায়?"),
+            ("Should CSP be set in NGINX or in the application? Why?", "CSP NGINX-এ set করা উচিত, নাকি application-এ? কেন?"),
+        ],
+        related=["nginx-008", "nginx-003", "nginx-020"],
+        refs=[N_SSL, N_HEADERS, OWASP_HEADERS],
+    ),
+    # ------------------------------------------------------------------ nginx-028
+    Q(
+        id="nginx-028", sub="Web Server Fundamentals", diff="hard", type="mcq",
+        prio="medium", market="both", mins=3,
+        tags=["worker_connections", "capacity", "reverse-proxy", "file-descriptors"],
+        ver="Version-independent (NGINX 1.30 / 1.31)", vs=False, status="stable",
+        q_en=r"""NGINX runs with this configuration, and every request is reverse-proxied to Node.js upstreams. Ignoring keepalive pools and OS file-descriptor limits, roughly how many clients can be served **simultaneously**?""",
+        q_bn=r"""NGINX এই configuration দিয়ে চলছে, আর প্রতিটা request Node.js upstream-এ reverse-proxy হয়। Keepalive pool আর OS-এর file-descriptor limit বাদ দিলে মোটামুটি কতজন client-কে **একসাথে** serve করা যাবে?""",
+        code=r"""
+            worker_processes 4;
+
+            events {
+                worker_connections 1024;
+            }
+        """,
+        lang="nginx",
+        options=[
+            ("About 1,024 — `worker_connections` is a global limit for the whole server",
+             "প্রায় ১,০২৪ — `worker_connections` পুরো server-এর জন্য একটা global limit"),
+            ("About 4,096 — 4 workers × 1,024 client connections each",
+             "প্রায় ৪,০৯৬ — ৪টা worker × প্রত্যেকের ১,০২৪টা client connection"),
+            ("Unlimited — NGINX is event-driven, so only RAM limits concurrency",
+             "সীমাহীন — NGINX event-driven, তাই concurrency শুধু RAM দিয়ে সীমিত"),
+            ("About 2,048 — each proxied client needs a client connection plus an upstream connection",
+             "প্রায় ২,০৪৮ — প্রতিটা proxied client-এর একটা client connection আর একটা upstream connection লাগে"),
+        ],
+        correct=3,
+        a_en=r"""About **2,048**. `worker_connections` is **per worker** and counts **all** connections the worker holds, including connections to upstream servers, not only client connections. A proxied request occupies one client connection plus one upstream connection, so 4 × 1,024 / 2 ≈ 2,048 simultaneous proxied clients.""",
+        a_bn=r"""প্রায় **২,০৪৮**। `worker_connections` হলো **প্রতি worker-এর** limit, আর worker যত connection ধরে রাখে **সব** এর মধ্যে গোনা হয়, upstream server-এর connection-সহ, শুধু client connection না। একটা proxied request একটা client connection আর একটা upstream connection দখল করে, তাই 4 × 1,024 / 2 ≈ ২,০৪৮ জন proxied client একসাথে।""",
+        ex_en=r"""
+            The tempting wrong answer is 4,096, which forgets the upstream side. That's correct only for pure static file serving. The docs explicitly say the number includes connections with proxied servers.
+
+            **Real-world adjustments:**
+            - Idle upstream **keepalive** connections (32 per worker by default since 1.29.7) also consume slots.
+            - With HTTP/2, one client connection can carry many concurrent streams, and each proxied stream needs its own upstream connection.
+            - Every connection is a file descriptor. If `worker_rlimit_nofile` (or systemd's `LimitNOFILE`) is lower than needed, you hit "Too many open files" before `worker_connections`.
+
+            When the limit is reached, the error log shows `worker_connections are not enough` and clients see failures. Size it from the expected peak concurrency, with headroom.
+        """,
+        ex_bn=r"""
+            বিভ্রান্তিকর ভুল উত্তর হলো ৪,০৯৬, যেখানে upstream-এর দিকটা ভুলে যাওয়া হয়েছে। এটা শুধু pure static file serving-এর ক্ষেত্রে সঠিক। Docs-এ স্পষ্ট বলা আছে যে এই সংখ্যার মধ্যে proxied server-এর connection-ও আছে।
+
+            **বাস্তবের হিসাব-নিকাশ:**
+            - Idle upstream **keepalive** connection-ও (1.29.7 থেকে default-এ প্রতি worker-এ ৩২টা) slot দখল করে।
+            - HTTP/2-এ একটা client connection-এ একসাথে অনেকগুলো stream চলতে পারে, আর প্রতিটা proxied stream-এর নিজস্ব upstream connection লাগে।
+            - প্রতিটা connection একটা file descriptor। `worker_rlimit_nofile` (বা systemd-এর `LimitNOFILE`) দরকারের চেয়ে কম হলে `worker_connections`-এর আগেই "Too many open files"-এ আটকে যাবে।
+
+            Limit-এ পৌঁছালে error log-এ `worker_connections are not enough` দেখা যায়, আর client-রা failure পায়। প্রত্যাশিত peak concurrency থেকে বাড়তি জায়গা রেখে এটা ঠিক করো।
+        """,
+        tip_en=r"""Show the arithmetic out loud ("per worker, and proxying doubles connections"), then mention file descriptors. Capacity reasoning like this is exactly what senior interviewers probe.""",
+        tip_bn=r"""হিসাবটা মুখে মুখে দেখাও ("প্রতি worker-এ, আর proxying-এ connection দ্বিগুণ হয়"), তারপর file descriptor-এর কথা বলো। এই ধরনের capacity-র যুক্তিই senior interviewer খুঁটিয়ে দেখে।""",
+        related=["nginx-001", "nginx-025"],
+        refs=[N_CORE_MAIN],
+    ),
+    # ------------------------------------------------------------------ nginx-029
+    Q(
+        id="nginx-029", sub="WebSocket Proxying", diff="hard", type="debugging",
+        prio="medium", market="both", mins=8,
+        tags=["socket.io", "sticky-sessions", "ip_hash", "redis-adapter", "websocket"],
+        ver="NGINX 1.30 stable (open-source `sticky` since 1.29.6), Socket.IO 4.x", vs=True, status="stable",
+        q_en=r"""
+            You scaled a Socket.IO chat server from one Node.js process to three behind NGINX. Now clients reconnect constantly, the browser console shows HTTP 400 responses with `{"code":1,"message":"Session ID unknown"}`, and messages sent by one user often don't reach users connected to other instances. Here is the upstream. Find the problems and fix them.
+        """,
+        q_bn=r"""
+            তুমি একটা Socket.IO chat server একটা Node.js process থেকে NGINX-এর পেছনে তিনটায় scale করেছ। এখন client-রা বারবার reconnect করছে, browser console-এ `{"code":1,"message":"Session ID unknown"}`-সহ HTTP 400 response দেখা যাচ্ছে, আর একজন user-এর পাঠানো message প্রায়ই অন্য instance-এ connect থাকা user-দের কাছে পৌঁছায় না। নিচে upstream দেওয়া আছে। সমস্যাগুলো খুঁজে বের করে ঠিক করো।
+        """,
+        code=r"""
+            upstream realtime {
+                server 10.0.1.11:4000;
+                server 10.0.1.12:4000;
+                server 10.0.1.13:4000;
+            }
+
+            server {
+                listen 443 ssl;
+                http2 on;
+                server_name chat.example.com;
+
+                location /socket.io/ {
+                    proxy_pass http://realtime;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                }
+            }
+        """,
+        lang="nginx",
+        extra=[
+            dict(lang="nginx", label_en="Fixed NGINX: session affinity + correct upgrade headers", label_bn="সংশোধিত NGINX: session affinity আর সঠিক upgrade header", src=r"""
+                map $http_upgrade $connection_upgrade {
+                    default upgrade;
+                    ''      close;
+                }
+
+                upstream realtime {
+                    # Option A (any version): affinity by the full client IP
+                    hash $remote_addr consistent;
+                    # Option B (NGINX >= 1.29.6 open source): cookie affinity, robust to shared IPs
+                    # sticky cookie rt_srv expires=1h path=/ httponly secure;
+
+                    server 10.0.1.11:4000;
+                    server 10.0.1.12:4000;
+                    server 10.0.1.13:4000;
+                }
+
+                server {
+                    listen 443 ssl;
+                    http2 on;
+                    server_name chat.example.com;
+
+                    location /socket.io/ {
+                        proxy_pass http://realtime;
+                        proxy_http_version 1.1;              # default since 1.29.7
+                        proxy_set_header Upgrade $http_upgrade;
+                        proxy_set_header Connection $connection_upgrade;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    }
+                }
+            """),
+            dict(lang="javascript", label_en="Node.js: Redis adapter so broadcasts reach every instance", label_bn="Node.js: Redis adapter, যাতে broadcast সব instance-এ পৌঁছায়", src=r"""
+                import { createServer } from 'node:http';
+                import { Server } from 'socket.io';
+                import { createClient } from 'redis';
+                import { createAdapter } from '@socket.io/redis-adapter';
+
+                const pubClient = createClient({ url: process.env.REDIS_URL });
+                const subClient = pubClient.duplicate();
+                await Promise.all([pubClient.connect(), subClient.connect()]);
+
+                const httpServer = createServer();
+                const io = new Server(httpServer, { adapter: createAdapter(pubClient, subClient) });
+
+                io.on('connection', (socket) => {
+                  socket.on('chat:message', (msg) => {
+                    io.emit('chat:message', msg);   // fanned out to clients on all instances
+                  });
+                });
+
+                httpServer.listen(4000, '0.0.0.0');
+            """),
+        ],
+        a_en=r"""
+            There are two separate problems.
+
+            **1. No session affinity → "Session ID unknown".** A Socket.IO connection usually starts with **HTTP long-polling** (a series of separate HTTP requests) before upgrading to WebSocket. All of those requests must reach the **same** Node process, because only that process knows the session ID. Round-robin spreads them across three instances, so two of them answer 400 "Session ID unknown", and the client keeps reconnecting.
+            - **Fix:** sticky routing in the upstream. `hash $remote_addr consistent;` works on any version, and on NGINX ≥ 1.29.6 (so 1.30) open-source `sticky cookie` gives cookie-based affinity. Also fix the hard-coded `Connection "upgrade"` with the usual `map`.
+
+            **2. No shared adapter → lost broadcasts.** Each Socket.IO server only knows its own connected sockets. `io.emit` on instance A never reaches clients on B or C.
+            - **Fix:** add the **Redis adapter** (`@socket.io/redis-adapter`), which relays events between instances through Redis Pub/Sub.
+
+            Stickiness solves the handshake; the adapter solves cross-instance messaging. You need both.
+        """,
+        a_bn=r"""
+            এখানে দুটো আলাদা সমস্যা।
+
+            **১. Session affinity নেই → "Session ID unknown"।** একটা Socket.IO connection সাধারণত WebSocket-এ upgrade হওয়ার আগে **HTTP long-polling** দিয়ে শুরু হয় (পরপর কয়েকটা আলাদা HTTP request)। এই সব request-কে **একই** Node process-এ পৌঁছাতে হবে, কারণ শুধু ওই process-ই session ID জানে। Round-robin এগুলো তিনটা instance-এ ছড়িয়ে দেয়, ফলে দুটো instance 400 "Session ID unknown" দেয়, আর client বারবার reconnect করে।
+            - **সমাধান:** upstream-এ sticky routing। `hash $remote_addr consistent;` যেকোনো version-এ চলে, আর NGINX ≥ 1.29.6-এ (অর্থাৎ 1.30-এ) open-source `sticky cookie` cookie-ভিত্তিক affinity দেয়। সাথে hard-code করা `Connection "upgrade"`-ও সাধারণ `map` দিয়ে ঠিক করো।
+
+            **২. Shared adapter নেই → broadcast হারিয়ে যায়।** প্রতিটা Socket.IO server শুধু নিজের connect থাকা socket-গুলো চেনে। Instance A-তে `io.emit` B বা C-এর client-দের কাছে কখনো পৌঁছায় না।
+            - **সমাধান:** **Redis adapter** (`@socket.io/redis-adapter`) যোগ করো, যেটা Redis Pub/Sub-এর মাধ্যমে instance-গুলোর মধ্যে event পৌঁছে দেয়।
+
+            Stickiness handshake-এর সমস্যা মেটায়; adapter মেটায় instance-গুলোর মধ্যে messaging। দুটোই লাগবে।
+        """,
+        ex_en=r"""
+            - **`ip_hash` vs `hash $remote_addr consistent`:** `ip_hash` uses only the first three octets of an IPv4 address, so an entire /24 (an office, or a carrier's NAT pool) sticks to one server and load becomes uneven. Hashing the full address, or using cookies, spreads load better.
+            - **Behind a CDN or load balancer,** `$remote_addr` is the proxy's IP, so every client lands on one instance. Restore the real client IP with the `realip` module first, or use cookie affinity.
+            - **Cookie affinity caveat:** for cross-origin Socket.IO, the client needs `withCredentials: true` and CORS must allow credentials, or the cookie isn't sent on polling requests.
+            - **WebSocket-only alternative:** with `transports: ['websocket']` on the client, there's no polling phase, so the handshake doesn't need stickiness. You lose the fallback for networks that block WebSockets, though, and you still need the adapter.
+            - **Same issue inside one host:** Node's cluster module or PM2 cluster mode distributes connections across workers too. Socket.IO provides `@socket.io/sticky` and a cluster adapter for that case.
+        """,
+        ex_bn=r"""
+            - **`ip_hash` বনাম `hash $remote_addr consistent`:** `ip_hash` IPv4 address-এর শুধু প্রথম তিনটা octet ব্যবহার করে, ফলে পুরো একটা /24 (একটা অফিস, বা carrier-এর NAT pool) একটা server-এ আটকে যায়, আর load অসমান হয়। পুরো address hash করলে, বা cookie ব্যবহার করলে, load ভালোভাবে ছড়ায়।
+            - **CDN বা load balancer-এর পেছনে** `$remote_addr` হলো proxy-র IP, তাই সব client একটা instance-এই যায়। আগে `realip` module দিয়ে আসল client IP ফিরিয়ে আনো, অথবা cookie affinity ব্যবহার করো।
+            - **Cookie affinity-র সতর্কতা:** cross-origin Socket.IO-তে client-এ `withCredentials: true` লাগে আর CORS-কে credential অনুমোদন দিতে হয়, নইলে polling request-এ cookie যায় না।
+            - **শুধু-WebSocket বিকল্প:** client-এ `transports: ['websocket']` দিলে polling ধাপ থাকে না, তাই handshake-এ stickiness লাগে না। তবে WebSocket block করা network-এর জন্য fallback হারাতে হয়, আর adapter তখনো লাগে।
+            - **এক host-এর ভেতরেও একই সমস্যা:** Node-এর cluster module বা PM2 cluster mode-ও connection worker-দের মধ্যে ভাগ করে দেয়। এর জন্য Socket.IO `@socket.io/sticky` আর একটা cluster adapter দেয়।
+        """,
+        tip_en=r"""Separate the two symptoms and their two root causes clearly ("handshake routing" vs "cross-instance fan-out"). Candidates who only add `ip_hash` and stop there miss half the problem.""",
+        tip_bn=r"""দুটো লক্ষণ আর তাদের দুটো root cause স্পষ্টভাবে আলাদা করো ("handshake routing" বনাম "instance-গুলোর মধ্যে fan-out")। যারা শুধু `ip_hash` যোগ করে থেমে যায়, তারা সমস্যার অর্ধেক ধরতে পারে না।""",
+        mist_en=r"""Adding only stickiness (broadcasts still break), using `ip_hash` behind a CDN, and storing room membership in a plain in-memory `Map` across instances.""",
+        mist_bn=r"""শুধু stickiness যোগ করা (broadcast তখনো ভাঙা থাকে), CDN-এর পেছনে `ip_hash` ব্যবহার করা, আর একাধিক instance থাকা অবস্থায় room membership সাধারণ in-memory `Map`-এ রাখা।""",
+        follow=[
+            ("Why does Socket.IO start with long-polling instead of connecting with WebSocket directly?", "Socket.IO সরাসরি WebSocket দিয়ে connect না করে long-polling দিয়ে কেন শুরু করে?"),
+            ("What happens to connected users when one of the three instances is restarted?", "তিনটা instance-এর একটা restart হলে connect থাকা user-দের কী হয়?"),
+        ],
+        related=["nginx-016", "nginx-018"],
+        refs=[SOCKETIO_NODES, SOCKETIO_REDIS, N_UPSTREAM],
+    ),
+    # ------------------------------------------------------------------ nginx-032
+    Q(
+        id="nginx-032", sub="Troubleshooting 502 and 504", diff="extreme", type="scenario",
+        prio="medium", market="international", mins=20,
+        tags=["incident", "worker_connections", "file-descriptors", "ephemeral-ports", "capacity"],
+        ver="NGINX 1.30 stable / 1.31 mainline (upstream keepalive default since 1.29.7)", vs=True, status="stable",
+        q_en=r"""During a marketing campaign, users see a wave of 502s and 504s, and NGINX's error log fills with the messages below. Walk through how you'd stabilise the system during the incident, identify the root causes, and prevent a repeat.""",
+        q_bn=r"""একটা marketing campaign চলাকালীন user-রা একের পর এক 502 আর 504 দেখছে, আর NGINX-এর error log নিচের message-গুলোতে ভরে যাচ্ছে। Incident চলাকালীন system কীভাবে স্থিতিশীল করবে, root cause কীভাবে খুঁজে বের করবে, আর আবার যাতে না ঘটে তার জন্য কী করবে, ধাপে ধাপে বলো।""",
+        code=r"""
+            2026/10/10 21:04:11 [alert] 2201#2201: 1024 worker_connections are not enough while connecting to upstream
+            2026/10/10 21:04:12 [crit] 2203#2203: accept4() failed (24: Too many open files)
+            2026/10/10 21:04:15 [crit] 2202#2202: connect() to 10.0.1.12:3000 failed (99: Cannot assign requested address) while connecting to upstream
+            2026/10/10 21:04:31 [error] 2204#2204: upstream timed out (110: Connection timed out) while reading response header from upstream, upstream: "http://10.0.1.11:3000/api/cart"
+        """,
+        lang="text",
+        extra=[
+            dict(lang="bash", label_en="Evidence gathering during the incident", label_bn="Incident চলাকালীন প্রমাণ সংগ্রহ", src=r"""
+                curl -s http://127.0.0.1/nginx_status                  # active / reading / writing / waiting
+                ss -s                                                  # socket summary incl. TIME_WAIT
+                ss -tan state time-wait '( dport = :3000 )' | wc -l    # TIME_WAIT sockets to the upstream port
+                cat /proc/$(pgrep -f 'nginx: worker' | head -n 1)/limits | grep 'open files'
+                sysctl net.ipv4.ip_local_port_range
+                awk '{print $NF}' /var/log/nginx/access.log | sort -n | tail   # if urt is the last field
+            """),
+            dict(lang="nginx", label_en="Capacity and resilience fixes", label_bn="Capacity আর resilience-এর সমাধান", src=r"""
+                worker_processes auto;
+                worker_rlimit_nofile 65535;              # also raise LimitNOFILE in the systemd unit
+
+                events {
+                    worker_connections 16384;
+                }
+
+                http {
+                    upstream app {
+                        least_conn;
+                        server 10.0.1.11:3000 max_fails=3 fail_timeout=10s;
+                        server 10.0.1.12:3000 max_fails=3 fail_timeout=10s;
+                        keepalive 64;                    # reuse upstream connections (default 32 since 1.29.7)
+                    }
+
+                    proxy_connect_timeout 3s;
+                    proxy_next_upstream error timeout;
+                    proxy_next_upstream_tries 2;         # no retry storms
+                    proxy_next_upstream_timeout 5s;
+                }
+            """),
+        ],
+        a_en=r"""
+            **(Advanced incident response.)**
+
+            **1. Stabilise first, investigate second.** Add app capacity (start more instances or VMs), serve hot read endpoints from micro-cache with `proxy_cache_use_stale`, tighten rate limits on expensive endpoints so excess traffic gets a fast 429 instead of a slow timeout, switch off non-critical features with flags, and tell stakeholders and support what's happening.
+
+            **2. Read the log: each line is a different bottleneck.**
+            - **`worker_connections are not enough`:** NGINX's per-worker connection budget is exhausted. Remember it counts client **and** upstream connections.
+            - **`(24: Too many open files)`:** the OS file-descriptor limit for the workers is lower than the connection count needs. `worker_connections` can't be used without enough FDs.
+            - **`(99: Cannot assign requested address)`:** **ephemeral port exhaustion** towards one upstream IP:port. Without connection reuse, every proxied request opens a new TCP connection, and closed ones sit in TIME_WAIT. Tens of thousands of short connections to the same backend exhaust the local port range.
+            - **`upstream timed out … /api/cart`:** the app itself is saturated (slow DB queries, exhausted pool, blocked event loop). Slow responses hold connections longer, which feeds all of the above. This is often the **original** cause.
+
+            **3. Fix the root causes.**
+            - Make sure **upstream keepalive** is active (default since 1.29.7; on older versions add `keepalive` + HTTP/1.1 + clear `Connection`). That removes most new connections and TIME_WAIT sockets.
+            - Raise limits **coherently**: `worker_rlimit_nofile` plus systemd `LimitNOFILE`, then `worker_connections`.
+            - Fix the slow `/api/cart` path: indexes, pool size, caching.
+            - Prevent amplification: bound retries (`proxy_next_upstream_tries`/`_timeout`), use short connect timeouts, and have clients back off exponentially.
+
+            **4. Prevent a repeat.** Load-test at 2× the expected campaign peak with production-like config. Alert on NGINX active connections (`stub_status`), FD usage, TIME_WAIT counts, upstream p95 latency and 5xx rate. Pre-scale before campaigns, and write a blameless postmortem with owners and deadlines.
+        """,
+        a_bn=r"""
+            **(Advanced incident response।)**
+
+            **১. আগে স্থিতিশীল করো, তারপর তদন্ত।** App-এর capacity বাড়াও (আরও instance বা VM চালু করো), জনপ্রিয় read endpoint micro-cache থেকে `proxy_cache_use_stale` দিয়ে serve করো, ব্যয়বহুল endpoint-এ rate limit কড়া করো যাতে বাড়তি traffic ধীর timeout-এর বদলে দ্রুত 429 পায়, flag দিয়ে অপ্রয়োজনীয় feature বন্ধ করো, আর stakeholder ও support-কে কী ঘটছে জানাও।
+
+            **২. Log পড়ো: প্রতিটা line আলাদা একটা bottleneck।**
+            - **`worker_connections are not enough`:** NGINX-এর প্রতি worker-এর connection বাজেট শেষ। মনে রেখো, এতে client **আর** upstream দুই connection-ই গোনা হয়।
+            - **`(24: Too many open files)`:** worker-দের OS file-descriptor limit connection-এর সংখ্যার তুলনায় কম। যথেষ্ট FD না থাকলে `worker_connections` ব্যবহারই করা যায় না।
+            - **`(99: Cannot assign requested address)`:** একটা upstream IP:port-এর দিকে **ephemeral port exhaustion**। Connection reuse না থাকলে প্রতিটা proxied request নতুন TCP connection খোলে, আর বন্ধগুলো TIME_WAIT-এ পড়ে থাকে। একই backend-এ কয়েক দশ হাজার ছোট connection local port range শেষ করে দেয়।
+            - **`upstream timed out … /api/cart`:** app নিজেই saturated (ধীর DB query, pool শেষ, block হয়ে থাকা event loop)। ধীর response connection বেশিক্ষণ ধরে রাখে, যা উপরের সবগুলোকে আরও বাড়িয়ে দেয়। প্রায়ই এটাই **আসল** কারণ।
+
+            **৩. Root cause ঠিক করো।**
+            - নিশ্চিত করো যে **upstream keepalive** চালু আছে (1.29.7 থেকে default; পুরনো version-এ `keepalive` + HTTP/1.1 + `Connection` খালি করা যোগ করো)। এতে বেশিরভাগ নতুন connection আর TIME_WAIT socket দূর হয়।
+            - Limit **সামঞ্জস্য রেখে** বাড়াও: `worker_rlimit_nofile` আর systemd-এর `LimitNOFILE`, তারপর `worker_connections`।
+            - ধীর `/api/cart` path ঠিক করো: index, pool-এর আকার, caching।
+            - বাড়িয়ে তোলা (amplification) ঠেকাও: retry সীমিত রাখো (`proxy_next_upstream_tries`/`_timeout`), connect timeout ছোট রাখো, আর client-কে exponential back-off করাও।
+
+            **৪. আবার যাতে না ঘটে।** Production-এর মতো config দিয়ে campaign-এর প্রত্যাশিত peak-এর দ্বিগুণে load test করো। NGINX-এর active connection (`stub_status`), FD-এর ব্যবহার, TIME_WAIT-এর সংখ্যা, upstream-এর p95 latency আর 5xx rate-এর উপর alert রাখো। Campaign-এর আগে pre-scale করো, আর দায়িত্বপ্রাপ্ত ব্যক্তি ও সময়সীমাসহ একটা blameless postmortem লেখো।
+        """,
+        ex_en=r"""
+            **How the failure cascades:** a slow endpoint means requests take longer, so more concurrent connections are held, then `worker_connections`/FD limits are hit, then new connections fail with 502, then clients retry, which adds even more load. Breaking any link (faster app, caching, shedding load, bounded retries) stops the spiral, which is why mitigation can start before the root cause is fully known.
+
+            **Why keepalive matters so much here:** without reuse, each request costs a new TCP handshake **and** a TIME_WAIT socket that lasts about a minute. At 1,000 requests/second to one backend that's about 60,000 sockets in TIME_WAIT, more than the default Linux ephemeral port range (32768–60999, roughly 28,000 ports) can supply for a single destination IP:port. Keepalive turns this into a few dozen long-lived connections.
+
+            **Trade-offs:** raising limits only moves the bottleneck to the app or database if their capacity doesn't grow too. Aggressive rate limits protect the system but reject real customers during a sale. Decide in advance which endpoints get priority (checkout over browsing).
+        """,
+        ex_bn=r"""
+            **Failure কীভাবে ধাপে ধাপে ছড়ায়:** একটা ধীর endpoint মানে request বেশি সময় নেয়, ফলে একসাথে বেশি connection আটকে থাকে, তারপর `worker_connections`/FD limit ছুঁয়ে ফেলে, তারপর নতুন connection 502 দিয়ে fail করে, তারপর client retry করে, যা load আরও বাড়ায়। যেকোনো একটা কড়ি ভাঙলেই (দ্রুত app, caching, load ঝেড়ে ফেলা, সীমিত retry) এই ঘূর্ণি থামে। এজন্যই root cause পুরোপুরি জানার আগেই mitigation শুরু করা যায়।
+
+            **এখানে keepalive কেন এত গুরুত্বপূর্ণ:** reuse না থাকলে প্রতিটা request-এ একটা নতুন TCP handshake **আর** প্রায় এক মিনিট ধরে থাকা একটা TIME_WAIT socket লাগে। একটা backend-এ প্রতি সেকেন্ডে ১,০০০ request হলে TIME_WAIT-এ প্রায় ৬০,০০০ socket জমে, অথচ একটা নির্দিষ্ট destination IP:port-এর জন্য Linux-এর default ephemeral port range (32768–60999, মোটামুটি ২৮,০০০ port) এর চেয়ে কম port দিতে পারে। Keepalive এটাকে কয়েক ডজন দীর্ঘস্থায়ী connection-এ নামিয়ে আনে।
+
+            **Trade-off:** app বা database-এর capacity না বাড়ালে শুধু limit বাড়ালে bottleneck সেখানে সরে যায়। কড়া rate limit system বাঁচায়, কিন্তু sale-এর সময় আসল customer-দেরও ফিরিয়ে দেয়। আগে থেকেই ঠিক করে রাখো কোন endpoint অগ্রাধিকার পাবে (browsing-এর চেয়ে checkout)।
+        """,
+        tip_en=r"""Narrate it like an incident commander: mitigate → diagnose (map each log line to a resource) → fix → prevent. Explicitly decoding errno 24 and 99 shows Linux-level depth that very few candidates bring.""",
+        tip_bn=r"""একজন incident commander-এর মতো বর্ণনা করো: mitigate → diagnose (প্রতিটা log line-কে একটা resource-এর সাথে মেলাও) → fix → prevent। errno 24 আর 99 স্পষ্টভাবে ব্যাখ্যা করলে Linux পর্যায়ের গভীরতা দেখা যায়, যেটা খুব কম candidate দেখাতে পারে।""",
+        mist_en=r"""Restarting NGINX repeatedly as the "fix", raising `worker_connections` without raising file-descriptor limits, ignoring the slow upstream that started the cascade, and letting unbounded retries amplify the load.""",
+        mist_bn=r"""বারবার NGINX restart করাকেই "সমাধান" ভাবা, file-descriptor limit না বাড়িয়ে শুধু `worker_connections` বাড়ানো, যে ধীর upstream থেকে পুরো ধস শুরু হয়েছে সেটা উপেক্ষা করা, আর সীমাহীন retry-কে load বাড়িয়ে তুলতে দেওয়া।""",
+        follow=[
+            ("How would you detect ephemeral port exhaustion before it causes errors?", "Ephemeral port exhaustion error তৈরি করার আগেই কীভাবে ধরবে?"),
+            ("What would you put in the postmortem's action items for this incident?", "এই incident-এর postmortem-এর action item-এ কী কী রাখবে?"),
+        ],
+        related=["nginx-028", "nginx-025", "nginx-019", "nginx-030"],
+        refs=[N_CORE_MAIN, N_UPSTREAM, N_STUB],
+    ),
+]
+
+if __name__ == "__main__":
+    save("nginx", "b4", QUESTIONS)

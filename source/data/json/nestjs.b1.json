@@ -1,0 +1,552 @@
+[
+ {
+  "id": "nest-001",
+  "subtopic": "Modules",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "modules",
+   "imports",
+   "exports",
+   "encapsulation"
+  ],
+  "technologyVersion": "NestJS 12.1 (concept unchanged since early versions)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a module in NestJS, and what do the `imports`, `controllers`, `providers` and `exports` arrays in `@Module()` do?",
+   "bn": "NestJS-এ module কী? `@Module()`-এর `imports`, `controllers`, `providers` আর `exports` array গুলো কী কাজ করে?"
+  },
+  "answer": {
+   "en": "A module is a class decorated with `@Module()` that groups the controllers and providers of one feature — `UsersModule`, `OrdersModule` and so on. Every app has a root `AppModule`, and Nest builds its dependency graph starting from there.\n\n- `controllers` — the classes that handle incoming requests for this feature.\n- `providers` — services, repositories and factories that Nest creates and can inject **inside** this module.\n- `exports` — the providers other modules are allowed to use. Providers are private by default, which gives you encapsulation.\n- `imports` — other modules whose exported providers this module needs.\n\nSo if `OrdersService` needs `UsersService`, `UsersModule` exports it and `OrdersModule` imports `UsersModule`.",
+   "bn": "Module হলো `@Module()` decorator দেওয়া একটা class, যেটা একটা feature-এর controller আর provider গুলোকে একসাথে রাখে — যেমন `UsersModule`, `OrdersModule`। প্রতিটা app-এ একটা root `AppModule` থাকে, আর Nest সেখান থেকে শুরু করে পুরো dependency graph তৈরি করে।\n\n- `controllers` — এই feature-এর incoming request handle করে যে class গুলো।\n- `providers` — service, repository, factory ইত্যাদি, যেগুলো Nest তৈরি করে এবং এই module-এর **ভেতরে** inject করতে পারে।\n- `exports` — কোন provider গুলো অন্য module ব্যবহার করতে পারবে। Default-এ provider private থাকে, এটাই encapsulation।\n- `imports` — অন্য যেসব module-এর exported provider এই module-এর দরকার।\n\nতাই `OrdersService`-এর যদি `UsersService` লাগে, তাহলে `UsersModule` সেটা export করবে আর `OrdersModule`, `UsersModule`-কে import করবে।"
+  },
+  "explanation": {
+   "en": "- **Encapsulation is enforced.** If `UsersModule` forgets `exports: [UsersService]`, injecting it in `OrdersService` fails at startup with \"Nest can't resolve dependencies of the OrdersService (?)\".\n- **Modules are singletons.** Importing `UsersModule` in five modules still gives one shared `UsersService` instance. But if you also list `UsersService` directly in `OrdersModule.providers`, you get a *second* instance — a common source of \"my cache/state is not shared\" bugs.\n- **Re-exporting:** a module can export a module it imports (`exports: [UsersModule]`) to build a shared \"core\" module.\n- **Global modules:** `@Global()` (or `isGlobal: true` on modules like `ConfigModule`) removes the need to import everywhere. Use it sparingly — config, database, logger — otherwise dependencies become invisible.\n- In NestJS 12, new projects are generated as ES modules, which is why relative imports in the example end with `.js`.",
+   "bn": "- **Encapsulation সত্যিই enforce হয়।** `UsersModule` যদি `exports: [UsersService]` দিতে ভুলে যায়, তাহলে `OrdersService`-এ inject করতে গেলে startup-এই \"Nest can't resolve dependencies of the OrdersService (?)\" error আসবে।\n- **Module singleton।** পাঁচটা module-এ `UsersModule` import করলেও একটাই shared `UsersService` instance থাকে। কিন্তু যদি `OrdersModule.providers`-এ সরাসরি `UsersService` আবার লিখে দাও, তাহলে *দ্বিতীয়* একটা instance তৈরি হয় — \"আমার cache/state share হচ্ছে না\" ধরনের bug-এর common কারণ এটা।\n- **Re-export:** একটা module তার import করা module-কে export করতে পারে (`exports: [UsersModule]`), এভাবে shared \"core\" module বানানো যায়।\n- **Global module:** `@Global()` (বা `ConfigModule`-এর মতো module-এ `isGlobal: true`) দিলে সব জায়গায় import করতে হয় না। তবে কম ব্যবহার করা উচিত — config, database, logger-এর মতো জিনিসে — নাহলে dependency গুলো চোখের আড়ালে চলে যায়।\n- NestJS 12-এ নতুন project ES module হিসেবে generate হয়, তাই example-এর relative import-এ `.js` extension আছে।"
+  },
+  "interviewTip": {
+   "en": "Explain modules as \"feature boundaries with a public API (exports)\". Then give the Users/Orders example — interviewers like hearing the word encapsulation and the \"can't resolve dependencies\" error.",
+   "bn": "Module-কে \"public API (exports) সহ একটা feature boundary\" হিসেবে ব্যাখ্যা করো। তারপর Users/Orders example দাও — interviewer encapsulation শব্দটা আর \"can't resolve dependencies\" error-এর কথা শুনতে পছন্দ করে।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Modules",
+    "url": "https://docs.nestjs.com/modules"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use `@Global()`, and what is the downside?",
+    "bn": "কখন `@Global()` ব্যবহার করবে, আর এর অসুবিধা কী?"
+   },
+   {
+    "en": "What is a dynamic module (e.g. `forRoot()`)?",
+    "bn": "Dynamic module (যেমন `forRoot()`) কী?"
+   }
+  ],
+  "related": [
+   "nest-003",
+   "nest-019"
+  ],
+  "commonMistakes": {
+   "en": "Re-declaring another module's service in your own `providers` instead of importing the module; marking every module `@Global()`; thinking `imports` takes classes like services.",
+   "bn": "Module import না করে অন্য module-এর service নিজের `providers`-এ আবার declare করা; সব module-কে `@Global()` করে ফেলা; ভাবা যে `imports`-এ service-এর মতো class দেওয়া যায়।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "// users/users.module.ts\nimport { Module } from '@nestjs/common';\nimport { UsersController } from './users.controller.js';\nimport { UsersService } from './users.service.js';\n\n@Module({\n  controllers: [UsersController],\n  providers: [UsersService],\n  exports: [UsersService], // the module's public API\n})\nexport class UsersModule {}\n\n// orders/orders.module.ts\nimport { Module } from '@nestjs/common';\nimport { UsersModule } from '../users/users.module.js';\nimport { OrdersController } from './orders.controller.js';\nimport { OrdersService } from './orders.service.js';\n\n@Module({\n  imports: [UsersModule], // OrdersService can now inject UsersService\n  controllers: [OrdersController],\n  providers: [OrdersService],\n})\nexport class OrdersModule {}"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-002",
+  "subtopic": "Controllers & REST APIs",
+  "difficulty": "easy",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "controllers",
+   "rest",
+   "parseintpipe",
+   "httpcode",
+   "crud"
+  ],
+  "technologyVersion": "NestJS 12.1 (Express 5 adapter)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write a `UsersController` for a REST resource at `/users`:\n\n- `GET /users` — list users, with an optional `?role=` filter\n- `GET /users/:id` — the id must be numeric (`/users/abc` → 400); unknown id → 404\n- `POST /users` — create a user from a validated body, respond with 201\n- `PATCH /users/:id` — partial update\n- `DELETE /users/:id` — respond with 204 and no body\n\nKeep the business logic in a `UsersService` (an in-memory store is fine).",
+   "bn": "`/users` resource-এর জন্য একটা REST `UsersController` লেখো:\n\n- `GET /users` — user list, optional `?role=` filter সহ\n- `GET /users/:id` — id অবশ্যই numeric হবে (`/users/abc` → 400); না পাওয়া গেলে → 404\n- `POST /users` — validated body থেকে user তৈরি করবে, response 201\n- `PATCH /users/:id` — partial update\n- `DELETE /users/:id` — 204, কোনো body ছাড়া\n\nBusiness logic `UsersService`-এ রাখো (in-memory store হলেই চলবে)।"
+  },
+  "answer": {
+   "en": "The controller only maps HTTP to service calls; the service owns the data and throws HTTP exceptions.\n\n- `@Controller('users')` sets the route prefix; `@Get()`, `@Post()`, `@Patch(':id')`, `@Delete(':id')` define the routes.\n- `@Param('id', ParseIntPipe)` converts the id to a number and returns 400 for non-numeric input before my code runs.\n- `@Query('role')` reads the optional filter; `@Body()` gets the DTO, which a global `ValidationPipe` validates.\n- `POST` returns 201 by default; for `DELETE` I add `@HttpCode(HttpStatus.NO_CONTENT)` and return nothing.\n- The service throws `NotFoundException`, which Nest turns into a 404 JSON response.\n- `UpdateUserDto extends PartialType(CreateUserDto)` reuses the same validation rules with every field optional.",
+   "bn": "Controller শুধু HTTP-কে service call-এ map করে; data-র দায়িত্ব service-এর, আর HTTP exception-ও service throw করে।\n\n- `@Controller('users')` route prefix ঠিক করে; `@Get()`, `@Post()`, `@Patch(':id')`, `@Delete(':id')` দিয়ে route define হয়।\n- `@Param('id', ParseIntPipe)` id-কে number-এ convert করে, আর non-numeric হলে আমার code চলার আগেই 400 দেয়।\n- `@Query('role')` optional filter পড়ে; `@Body()` DTO নেয়, যেটা global `ValidationPipe` validate করে।\n- `POST` default-এ 201 দেয়; `DELETE`-এর জন্য `@HttpCode(HttpStatus.NO_CONTENT)` দিই আর কিছু return করি না।\n- Service `NotFoundException` throw করে, Nest সেটাকে 404 JSON response বানায়।\n- `UpdateUserDto extends PartialType(CreateUserDto)` একই validation rule reuse করে, শুধু সব field optional হয়ে যায়।"
+  },
+  "explanation": {
+   "en": "- **Thin controllers:** keeping logic in the service makes it reusable (from a queue consumer or CLI) and easy to unit-test without HTTP.\n- **Status codes:** Nest defaults to 200 for everything except `POST` (201). Use `@HttpCode()` for 204/202. Avoid injecting `@Res()` just to set a status — it switches the route to manual response mode and you lose interceptors' response mapping unless you pass `{ passthrough: true }`.\n- **Validation:** the DTO classes use `class-validator`; the example assumes `app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))` in `main.ts`.\n- **Edge cases:** `PATCH` merges only provided fields; `DELETE` of an already-deleted id returns 404 (a valid design; some teams prefer idempotent 204).\n- `PartialType` comes from `@nestjs/mapped-types` (or `@nestjs/swagger` if you use OpenAPI, so the docs stay in sync).",
+   "bn": "- **Thin controller:** logic service-এ রাখলে সেটা reuse করা যায় (queue consumer বা CLI থেকেও), আর HTTP ছাড়াই unit test করা সহজ হয়।\n- **Status code:** `POST` (201) ছাড়া বাকি সব কিছুর default 200। 204/202-এর জন্য `@HttpCode()` ব্যবহার করো। শুধু status set করতে `@Res()` inject করো না — এতে route manual response mode-এ চলে যায়, `{ passthrough: true }` না দিলে interceptor-এর response mapping আর কাজ করে না।\n- **Validation:** DTO class গুলো `class-validator` ব্যবহার করে; example ধরে নিচ্ছে `main.ts`-এ `app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))` আছে।\n- **Edge case:** `PATCH` শুধু দেওয়া field গুলো merge করে; already-deleted id `DELETE` করলে 404 আসে (এটা valid design; কিছু team idempotent 204 পছন্দ করে)।\n- `PartialType` আসে `@nestjs/mapped-types` থেকে (OpenAPI ব্যবহার করলে `@nestjs/swagger` থেকে, যাতে docs sync থাকে)।"
+  },
+  "interviewTip": {
+   "en": "Talk through the route table first (method, path, status code), then write code. Mentioning `ParseIntPipe`, `@HttpCode(204)` and \"thin controller, fat service\" signals real project experience.",
+   "bn": "আগে route table মুখে বলো (method, path, status code), তারপর code লেখো। `ParseIntPipe`, `@HttpCode(204)` আর \"thin controller, fat service\"-এর কথা বললে বোঝা যায় তোমার real project অভিজ্ঞতা আছে।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Controllers",
+    "url": "https://docs.nestjs.com/controllers"
+   },
+   {
+    "title": "NestJS docs — Pipes",
+    "url": "https://docs.nestjs.com/pipes"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add pagination and sorting to `GET /users`?",
+    "bn": "`GET /users`-এ pagination আর sorting কীভাবে যোগ করবে?"
+   },
+   {
+    "en": "When would you use `@Res({ passthrough: true })`?",
+    "bn": "কখন `@Res({ passthrough: true })` ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "nest-003",
+   "nest-006",
+   "nest-008"
+  ],
+  "commonMistakes": {
+   "en": "Using `@Param('id') id: number` and assuming it's a number (it's a string); putting database logic in the controller; using `@Res()` and forgetting to send a response, which hangs the request.",
+   "bn": "`@Param('id') id: number` লিখে ধরে নেওয়া যে এটা number (আসলে string); controller-এ database logic রাখা; `@Res()` ব্যবহার করে response পাঠাতে ভুলে যাওয়া, ফলে request hang হয়ে থাকে।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "// users/dto/create-user.dto.ts\nimport { IsEmail, IsIn, IsString, Length } from 'class-validator';\nimport { PartialType } from '@nestjs/mapped-types';\n\nexport class CreateUserDto {\n  @IsEmail() email: string;\n  @IsString() @Length(2, 50) name: string;\n  @IsIn(['user', 'admin']) role: 'user' | 'admin';\n}\nexport class UpdateUserDto extends PartialType(CreateUserDto) {}\n\n// users/users.service.ts\nimport { Injectable, NotFoundException } from '@nestjs/common';\n\nexport interface User extends CreateUserDto { id: number }\n\n@Injectable()\nexport class UsersService {\n  private readonly users = new Map<number, User>();\n  private nextId = 1;\n\n  findAll(role?: string): User[] {\n    const all = [...this.users.values()];\n    return role ? all.filter((u) => u.role === role) : all;\n  }\n\n  findOne(id: number): User {\n    const user = this.users.get(id);\n    if (!user) throw new NotFoundException(`User ${id} not found`);\n    return user;\n  }\n\n  create(dto: CreateUserDto): User {\n    const user: User = { id: this.nextId++, ...dto };\n    this.users.set(user.id, user);\n    return user;\n  }\n\n  update(id: number, dto: UpdateUserDto): User {\n    const user: User = { ...this.findOne(id), ...dto };\n    this.users.set(id, user);\n    return user;\n  }\n\n  remove(id: number): void {\n    this.findOne(id); // throws 404 if missing\n    this.users.delete(id);\n  }\n}\n\n// users/users.controller.ts\nimport {\n  Body, Controller, Delete, Get, HttpCode, HttpStatus,\n  Param, ParseIntPipe, Patch, Post, Query,\n} from '@nestjs/common';\n\n@Controller('users')\nexport class UsersController {\n  constructor(private readonly usersService: UsersService) {}\n\n  @Get()\n  findAll(@Query('role') role?: string) {\n    return this.usersService.findAll(role);\n  }\n\n  @Get(':id')\n  findOne(@Param('id', ParseIntPipe) id: number) {\n    return this.usersService.findOne(id);\n  }\n\n  @Post()\n  create(@Body() dto: CreateUserDto) {\n    return this.usersService.create(dto); // 201 by default\n  }\n\n  @Patch(':id')\n  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {\n    return this.usersService.update(id, dto);\n  }\n\n  @Delete(':id')\n  @HttpCode(HttpStatus.NO_CONTENT)\n  remove(@Param('id', ParseIntPipe) id: number): void {\n    this.usersService.remove(id);\n  }\n}"
+  },
+  "complexity": {
+   "time": "O(1) per lookup/insert/delete (Map); O(n) for the filtered list",
+   "space": "O(n) for n stored users"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-003",
+  "subtopic": "Providers & Dependency Injection",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "providers",
+   "dependency-injection",
+   "services",
+   "ioc"
+  ],
+  "technologyVersion": "NestJS 12.1 (concept unchanged since early versions)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a provider in NestJS, and how does dependency injection work when a controller needs a service?",
+   "bn": "NestJS-এ provider কী? একটা controller-এর যখন একটা service দরকার হয়, তখন dependency injection কীভাবে কাজ করে?"
+  },
+  "answer": {
+   "en": "A provider is anything Nest's IoC container can create and inject. Most often it's a class marked `@Injectable()` — a service, repository or helper — but it can also be a plain value or a factory.\n\nWhen I list `UsersService` in a module's `providers`, Nest registers it under a token (the class itself). When Nest creates `UsersController`, it reads the constructor parameter types from TypeScript's decorator metadata, finds the matching providers, creates them (once, by default) and passes them in. So I just write `constructor(private readonly usersService: UsersService) {}` and never call `new` myself.\n\nServices are simply providers that hold business logic, so controllers stay thin.",
+   "bn": "Provider হলো এমন যেকোনো কিছু যেটা Nest-এর IoC container তৈরি করে inject করতে পারে। সাধারণত এটা `@Injectable()` দেওয়া একটা class — service, repository বা helper — তবে plain value বা factory-ও হতে পারে।\n\nModule-এর `providers`-এ `UsersService` লিখলে Nest সেটাকে একটা token (class-টাই token) দিয়ে register করে। `UsersController` তৈরির সময় Nest TypeScript-এর decorator metadata থেকে constructor parameter-এর type পড়ে, matching provider খুঁজে বের করে, সেগুলো তৈরি করে (default-এ একবারই) এবং pass করে দেয়। তাই আমি শুধু `constructor(private readonly usersService: UsersService) {}` লিখি, নিজে কখনো `new` call করি না।\n\nService আসলে business logic রাখার provider, যাতে controller হালকা থাকে।"
+  },
+  "explanation": {
+   "en": "- **Why it matters:** loose coupling (the controller depends on an injected instance, not a concrete construction), lifecycle management by the framework, and easy testing — you swap a provider for a mock in `Test.createTestingModule()`.\n- **How Nest knows the types:** `emitDecoratorMetadata` stores `design:paramtypes`. That's why `import type { UsersService }` breaks injection — the type is erased and Nest sees `undefined`. The NestJS 12 error message even suggests checking for `import type`.\n- **Interfaces can't be tokens** because they don't exist at runtime. For \"inject an implementation of an interface\", use a custom token (string/symbol) with `@Inject(TOKEN)`.\n- `@Injectable()` is what makes Nest emit metadata for a class's own dependencies; add it to every provider class.",
+   "bn": "- **কেন গুরুত্বপূর্ণ:** loose coupling (controller একটা inject করা instance-এর উপর নির্ভর করে, নিজে বানায় না), lifecycle framework manage করে, আর test সহজ — `Test.createTestingModule()`-এ provider-কে mock দিয়ে বদলে দেওয়া যায়।\n- **Nest type কীভাবে জানে:** `emitDecoratorMetadata`, `design:paramtypes` save করে রাখে। এজন্যই `import type { UsersService }` লিখলে injection ভেঙে যায় — type erase হয়ে যায়, Nest পায় `undefined`। NestJS 12-এর error message-ও `import type` check করতে বলে।\n- **Interface token হতে পারে না**, কারণ runtime-এ interface থাকে না। \"Interface-এর একটা implementation inject করতে\" custom token (string/symbol) আর `@Inject(TOKEN)` ব্যবহার করো।\n- `@Injectable()` দিলেই Nest ওই class-এর নিজের dependency-র metadata emit করে; তাই প্রতিটা provider class-এ এটা দাও।"
+  },
+  "interviewTip": {
+   "en": "Use the phrase \"inversion of control\": the framework creates and wires objects; my classes just declare what they need. Then mention testing with mocks as the practical benefit.",
+   "bn": "\"Inversion of control\" কথাটা ব্যবহার করো: framework object তৈরি করে জোড়া লাগায়, আমার class শুধু বলে তার কী লাগবে। তারপর practical সুবিধা হিসেবে mock দিয়ে testing-এর কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Providers",
+    "url": "https://docs.nestjs.com/providers"
+   },
+   {
+    "title": "NestJS docs — Common errors",
+    "url": "https://docs.nestjs.com/faq/common-errors"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you inject something that isn't a class, like a config object?",
+    "bn": "Class নয় এমন কিছু (যেমন config object) কীভাবে inject করবে?"
+   },
+   {
+    "en": "What are provider scopes?",
+    "bn": "Provider scope কী?"
+   }
+  ],
+  "related": [
+   "nest-001",
+   "nest-004",
+   "nest-018"
+  ],
+  "commonMistakes": {
+   "en": "Creating services manually with `new`; using `import type` for injected classes; trying to inject a TypeScript interface without a token.",
+   "bn": "`new` দিয়ে নিজে service তৈরি করা; inject করা class-এর জন্য `import type` ব্যবহার করা; token ছাড়া TypeScript interface inject করার চেষ্টা করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { Controller, Get, Injectable, Module } from '@nestjs/common';\n\n@Injectable()\nexport class GreetingService {\n  greet(name: string) {\n    return `Hello, ${name}`;\n  }\n}\n\n@Controller('greet')\nexport class GreetingController {\n  // Nest resolves GreetingService from the module's providers\n  constructor(private readonly greeting: GreetingService) {}\n\n  @Get()\n  hello() {\n    return this.greeting.greet('Dhaka');\n  }\n}\n\n@Module({\n  controllers: [GreetingController],\n  providers: [GreetingService],\n})\nexport class GreetingModule {}"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-004",
+  "subtopic": "Dependency Injection Scopes",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "scopes",
+   "singleton",
+   "providers"
+  ],
+  "technologyVersion": "NestJS 12.1",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A class is decorated with plain `@Injectable()` and listed in one module's `providers`. What is its lifetime by default?",
+   "bn": "একটা class-এ শুধু `@Injectable()` দেওয়া আছে আর একটা module-এর `providers`-এ রাখা আছে। Default-এ এর lifetime কী?"
+  },
+  "answer": {
+   "en": "Singleton (`Scope.DEFAULT`): Nest creates one instance when the app bootstraps and shares it with every consumer, across all modules that import the provider's module.",
+   "bn": "Singleton (`Scope.DEFAULT`): app bootstrap-এর সময় Nest একটা instance তৈরি করে এবং provider-এর module যারা import করে, সব module-এর সব consumer-এর সাথে সেটাই share করে।"
+  },
+  "explanation": {
+   "en": "Singleton is the default because it's the cheapest: no per-request allocation, and Node's single-threaded model makes sharing safe as long as you don't store request-specific data in fields.\n\nThe tempting wrong answer is the last one. Importing a module many times does **not** duplicate its providers — modules are singletons too. You only get a second instance if the same class is declared in the `providers` array of **another** module as well.\n\n`REQUEST` and `TRANSIENT` must be opted into with `@Injectable({ scope: Scope.REQUEST })` / `Scope.TRANSIENT`, and request scope has a performance cost because it \"bubbles up\" to every consumer.",
+   "bn": "Singleton default কারণ এটাই সবচেয়ে সস্তা: per-request allocation নেই, আর Node-এর single-threaded model-এ share করা নিরাপদ — যতক্ষণ না field-এ request-specific data রাখছ।\n\nলোভনীয় ভুল উত্তর হলো শেষেরটা। একটা module অনেকবার import করলে তার provider duplicate **হয় না** — module-ও singleton। দ্বিতীয় instance তখনই হয় যখন একই class **অন্য** module-এর `providers` array-তেও declare করা হয়।\n\n`REQUEST` আর `TRANSIENT` আলাদা করে `@Injectable({ scope: Scope.REQUEST })` / `Scope.TRANSIENT` দিয়ে চালু করতে হয়, আর request scope-এর performance cost আছে কারণ এটা সব consumer পর্যন্ত \"bubble up\" করে।"
+  },
+  "interviewTip": {
+   "en": "After answering \"singleton\", add one sentence on why you must not keep per-request state (like the current user) in a singleton's fields. That shows you understand the consequence, not just the default.",
+   "bn": "\"Singleton\" বলার পর এক লাইনে যোগ করো কেন singleton-এর field-এ per-request state (যেমন current user) রাখা যাবে না। এতে বোঝা যায় তুমি শুধু default না, তার ফলাফলও বোঝো।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Injection scopes",
+    "url": "https://docs.nestjs.com/fundamentals/injection-scopes"
+   },
+   {
+    "title": "NestJS docs — Providers",
+    "url": "https://docs.nestjs.com/providers"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-003",
+   "nest-023"
+  ],
+  "options": [
+   {
+    "en": "A new instance is created for every incoming request (`Scope.REQUEST`)",
+    "bn": "প্রতিটা incoming request-এর জন্য নতুন instance তৈরি হয় (`Scope.REQUEST`)"
+   },
+   {
+    "en": "Every class that injects it receives its own private instance (`Scope.TRANSIENT`)",
+    "bn": "যে class-ই inject করুক, প্রত্যেকে নিজের আলাদা instance পায় (`Scope.TRANSIENT`)"
+   },
+   {
+    "en": "One shared instance for the whole application, created at bootstrap (`Scope.DEFAULT`, singleton)",
+    "bn": "পুরো application-এ একটাই shared instance, bootstrap-এর সময় তৈরি হয় (`Scope.DEFAULT`, singleton)"
+   },
+   {
+    "en": "One instance per module that imports the provider's module",
+    "bn": "Provider-এর module যতগুলো module import করে, প্রত্যেকটার জন্য একটা করে instance"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-005",
+  "subtopic": "Pipes & Validation",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "validationpipe",
+   "transform",
+   "query-params",
+   "pipes"
+  ],
+  "technologyVersion": "NestJS 12.1 (class-validator ValidationPipe)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`main.ts` registers `app.useGlobalPipes(new ValidationPipe())` with default options. What does `GET /products?page=2` return for the handler shown?",
+   "bn": "`main.ts`-এ default option সহ `app.useGlobalPipes(new ValidationPipe())` register করা আছে। দেখানো handler-এ `GET /products?page=2` call করলে কী return করবে?"
+  },
+  "answer": {
+   "en": "`{\"type\":\"string\",\"next\":\"21\"}`. Query values always arrive as strings, the `: number` annotation is compile-time only, and `ValidationPipe` without `transform: true` returns the original value — so `\"2\" + 1` is string concatenation.",
+   "bn": "`{\"type\":\"string\",\"next\":\"21\"}`। Query value সবসময় string হিসেবে আসে, `: number` annotation শুধু compile-time-এর জিনিস, আর `transform: true` ছাড়া `ValidationPipe` original value-ই ফেরত দেয় — তাই `\"2\" + 1` string concatenation হয়ে যায়।"
+  },
+  "explanation": {
+   "en": "The tempting answer is the first one, because TypeScript \"says\" `page` is a number. But types are erased; at runtime Nest only has the metadata type `Number`. `ValidationPipe` validates **class** metatypes (DTOs) and skips primitives, so nothing is checked or converted.\n\nFixes:\n- `new ValidationPipe({ transform: true })` → primitives are converted using the metadata, so `page` becomes `2` and the response is `{\"type\":\"number\",\"next\":3}`. Careful: `?page=abc` then becomes `NaN` (serialised as `null`) **without** an error.\n- `@Query('page', ParseIntPipe) page: number` → converts and returns 400 for `abc`. Use `new DefaultValuePipe(1)` before it for an optional param.\n- For query DTOs: `@Type(() => Number) @IsInt() @Min(1) page: number` plus `transform: true`.",
+   "bn": "লোভনীয় উত্তর হলো প্রথমটা, কারণ TypeScript \"বলছে\" `page` একটা number। কিন্তু type erase হয়ে যায়; runtime-এ Nest-এর কাছে শুধু metadata type `Number` থাকে। `ValidationPipe` শুধু **class** metatype (DTO) validate করে, primitive skip করে — তাই কিছুই check বা convert হয় না।\n\nসমাধান:\n- `new ValidationPipe({ transform: true })` → metadata দেখে primitive convert হয়, `page` হয়ে যায় `2`, response `{\"type\":\"number\",\"next\":3}`। সাবধান: তখন `?page=abc` কোনো error **ছাড়াই** `NaN` হয়ে যায় (JSON-এ `null`)।\n- `@Query('page', ParseIntPipe) page: number` → convert করে, আর `abc` হলে 400 দেয়। Optional param হলে আগে `new DefaultValuePipe(1)` দাও।\n- Query DTO-র জন্য: `@Type(() => Number) @IsInt() @Min(1) page: number` আর সাথে `transform: true`।"
+  },
+  "interviewTip": {
+   "en": "Say the key sentence: \"TypeScript types don't exist at runtime; HTTP gives strings.\" Then mention `ParseIntPipe` as the strict option — that's what interviewers want to hear.",
+   "bn": "মূল কথাটা বলো: \"TypeScript type runtime-এ থাকে না; HTTP সবসময় string দেয়।\" তারপর strict option হিসেবে `ParseIntPipe`-এর কথা বলো — interviewer এটাই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Validation",
+    "url": "https://docs.nestjs.com/application/validation"
+   },
+   {
+    "title": "NestJS docs — Pipes",
+    "url": "https://docs.nestjs.com/pipes"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-002",
+   "nest-016"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "@Controller('products')\nexport class ProductsController {\n  @Get()\n  list(@Query('page') page: number) {\n    return { type: typeof page, next: page + 1 };\n  }\n}"
+  },
+  "options": [
+   {
+    "en": "`{\"type\":\"number\",\"next\":3}`",
+    "bn": "`{\"type\":\"number\",\"next\":3}`"
+   },
+   {
+    "en": "`{\"type\":\"string\",\"next\":\"21\"}`",
+    "bn": "`{\"type\":\"string\",\"next\":\"21\"}`"
+   },
+   {
+    "en": "`400 Bad Request`, because `page` is not a number",
+    "bn": "`400 Bad Request`, কারণ `page` number নয়"
+   },
+   {
+    "en": "`{\"type\":\"number\",\"next\":null}`",
+    "bn": "`{\"type\":\"number\",\"next\":null}`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-006",
+  "subtopic": "DTOs",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "dto",
+   "class-validator",
+   "metadata",
+   "typescript"
+  ],
+  "technologyVersion": "NestJS 12.1 (class-validator ValidationPipe)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Why do NestJS developers usually write DTOs as **classes** rather than TypeScript interfaces when using `ValidationPipe`?",
+   "bn": "`ValidationPipe` ব্যবহার করার সময় NestJS developer-রা সাধারণত DTO কেন TypeScript interface না লিখে **class** হিসেবে লেখে?"
+  },
+  "answer": {
+   "en": "Because interfaces disappear after compilation. `ValidationPipe` needs a real class at runtime: it uses `class-transformer` to turn the plain body into an instance and `class-validator` to read the decorators (`@IsEmail()`, `@Length()`) attached to that class.",
+   "bn": "কারণ compile-এর পরে interface আর থাকে না। `ValidationPipe`-এর runtime-এ একটা আসল class দরকার: `class-transformer` দিয়ে plain body-কে instance বানায়, আর `class-validator` দিয়ে ওই class-এ লাগানো decorator (`@IsEmail()`, `@Length()`) পড়ে।"
+  },
+  "explanation": {
+   "en": "A DTO (Data Transfer Object) defines the shape of data crossing a boundary — usually the request body. With an interface, the handler parameter's metadata type becomes `Object`, so the pipe silently skips validation and any payload gets through. That's the dangerous part: no error, just no validation.\n\nThe second option is tempting because some people remember \"Nest needs classes\", but nothing fails at compile time — it just doesn't validate. Interfaces can describe optional and nested properties perfectly well, so option three is wrong too.\n\nNote: in NestJS 12 you can also validate with a Standard Schema (e.g. a zod schema) via the `schema` option on `@Body()`. Then the DTO type can be inferred from the schema (`z.infer`) and doesn't need to be a class.",
+   "bn": "DTO (Data Transfer Object) একটা boundary পার হওয়া data-র shape ঠিক করে — সাধারণত request body। Interface দিলে handler parameter-এর metadata type হয় `Object`, ফলে pipe চুপচাপ validation skip করে আর যেকোনো payload ঢুকে যায়। বিপদটা এখানেই: কোনো error নেই, শুধু validation নেই।\n\nদ্বিতীয় option-টা লোভনীয়, কারণ অনেকের মনে থাকে \"Nest-এর class লাগে\" — কিন্তু compile-এ কিছু fail করে না, শুধু validate হয় না। Interface দিয়ে optional আর nested property ভালোভাবেই বোঝানো যায়, তাই তৃতীয় option-ও ভুল।\n\nনোট: NestJS 12-এ `@Body()`-এর `schema` option দিয়ে Standard Schema (যেমন zod schema) দিয়েও validate করা যায়। তখন DTO type schema থেকে infer করা যায় (`z.infer`), class হওয়ার দরকার নেই।"
+  },
+  "interviewTip": {
+   "en": "Mention the silent failure: \"with an interface, validation is skipped without any error\". That's the practical risk interviewers care about.",
+   "bn": "চুপচাপ fail হওয়ার কথাটা বলো: \"interface দিলে কোনো error ছাড়াই validation skip হয়ে যায়\"। Interviewer এই practical ঝুঁকিটাই জানতে চায়।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Validation",
+    "url": "https://docs.nestjs.com/application/validation"
+   },
+   {
+    "title": "NestJS docs — Pipes",
+    "url": "https://docs.nestjs.com/pipes"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-005",
+   "nest-016",
+   "nest-017"
+  ],
+  "options": [
+   {
+    "en": "Classes are serialised to JSON faster than interfaces",
+    "bn": "Interface-এর চেয়ে class দ্রুত JSON-এ serialise হয়"
+   },
+   {
+    "en": "NestJS refuses to compile a handler whose parameter is typed with an interface",
+    "bn": "Handler-এর parameter interface দিয়ে type করলে NestJS compile হতে দেয় না"
+   },
+   {
+    "en": "Interfaces cannot describe optional properties or nested objects",
+    "bn": "Interface দিয়ে optional property বা nested object বোঝানো যায় না"
+   },
+   {
+    "en": "Interfaces are erased at compile time, so the pipe has no runtime class to read `class-validator` decorators from; classes exist at runtime and carry that metadata",
+    "bn": "Interface compile-এর সময় মুছে যায়, তাই pipe runtime-এ কোনো class পায় না যেখান থেকে `class-validator` decorator পড়বে; class runtime-এ থাকে এবং সেই metadata বহন করে"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-007",
+  "subtopic": "Guards",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "guards",
+   "canactivate",
+   "executioncontext",
+   "authorization"
+  ],
+  "technologyVersion": "NestJS 12.1",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a guard in NestJS, and what happens when `canActivate()` returns `false`?",
+   "bn": "NestJS-এ guard কী? `canActivate()` যদি `false` return করে তাহলে কী হয়?"
+  },
+  "answer": {
+   "en": "A guard is a class implementing `CanActivate` that decides whether the current request may reach the route handler. It's the standard place for authentication and authorization checks.\n\n`canActivate(context)` receives an `ExecutionContext` (request, handler, controller class) and returns a `boolean`, `Promise<boolean>` or `Observable<boolean>`. If it returns `false`, Nest throws a `ForbiddenException`, so the client gets **403** with `{\"message\":\"Forbidden resource\",\"error\":\"Forbidden\",\"statusCode\":403}`. If I want 401 instead, I throw `UnauthorizedException` myself.\n\nI bind guards with `@UseGuards()` on a controller or method, or globally with the `APP_GUARD` provider.",
+   "bn": "Guard হলো `CanActivate` implement করা একটা class, যেটা ঠিক করে current request route handler পর্যন্ত যেতে পারবে কি না। Authentication আর authorization check-এর standard জায়গা এটাই।\n\n`canActivate(context)` একটা `ExecutionContext` পায় (request, handler, controller class) এবং `boolean`, `Promise<boolean>` বা `Observable<boolean>` return করে। `false` return করলে Nest একটা `ForbiddenException` throw করে, তাই client পায় **403** — `{\"message\":\"Forbidden resource\",\"error\":\"Forbidden\",\"statusCode\":403}`। 401 দিতে চাইলে আমি নিজেই `UnauthorizedException` throw করি।\n\nGuard bind করি controller বা method-এ `@UseGuards()` দিয়ে, অথবা globally `APP_GUARD` provider দিয়ে।"
+  },
+  "explanation": {
+   "en": "- **Why guards and not middleware for auth?** A guard has the `ExecutionContext`, so it knows *which handler* will run and can read metadata like `@Roles('admin')` via `Reflector`. Middleware runs before routing decisions and doesn't know that.\n- **Order:** guards run after middleware and before interceptors and pipes. So the body hasn't been validated yet when a guard runs.\n- **DI:** guards are injectable. `app.useGlobalGuards(new MyGuard())` creates the instance yourself (no injection); `{ provide: APP_GUARD, useClass: MyGuard }` lets Nest inject `ConfigService`, `Reflector`, etc.\n- **Transport-agnostic:** the same guard can work for HTTP, WebSockets (`context.switchToWs()`) and microservices (`switchToRpc()`).\n- In the example I compare secrets with `timingSafeEqual` to avoid timing attacks.",
+   "bn": "- **Auth-এর জন্য middleware না দিয়ে guard কেন?** Guard-এর কাছে `ExecutionContext` থাকে, তাই সে জানে *কোন handler* চলবে, এবং `Reflector` দিয়ে `@Roles('admin')`-এর মতো metadata পড়তে পারে। Middleware routing-এর আগে চলে, এটা জানে না।\n- **Order:** guard চলে middleware-এর পরে, interceptor আর pipe-এর আগে। তাই guard চলার সময় body এখনো validate হয়নি।\n- **DI:** guard injectable। `app.useGlobalGuards(new MyGuard())` দিলে instance তুমি নিজে বানাচ্ছ (injection নেই); `{ provide: APP_GUARD, useClass: MyGuard }` দিলে Nest `ConfigService`, `Reflector` ইত্যাদি inject করতে পারে।\n- **Transport-agnostic:** একই guard HTTP, WebSocket (`context.switchToWs()`) আর microservice (`switchToRpc()`)-এ কাজ করতে পারে।\n- Example-এ timing attack এড়াতে secret compare করেছি `timingSafeEqual` দিয়ে।"
+  },
+  "interviewTip": {
+   "en": "Give the 403 vs 401 detail — returning `false` gives 403, throwing `UnauthorizedException` gives 401. It's a small detail that shows hands-on experience.",
+   "bn": "403 আর 401-এর পার্থক্যটা বলো — `false` return করলে 403, `UnauthorizedException` throw করলে 401। ছোট detail, কিন্তু hands-on অভিজ্ঞতা বোঝায়।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Guards",
+    "url": "https://docs.nestjs.com/guards"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you build a role-based guard with a `@Roles()` decorator?",
+    "bn": "`@Roles()` decorator দিয়ে role-based guard কীভাবে বানাবে?"
+   },
+   {
+    "en": "How do you make a guard global but still skip it for public routes?",
+    "bn": "Guard global করেও public route-এর জন্য কীভাবে skip করবে?"
+   }
+  ],
+  "related": [
+   "nest-015",
+   "nest-021"
+  ],
+  "commonMistakes": {
+   "en": "Expecting `false` to produce 401; registering a guard that needs dependencies with `useGlobalGuards(new Guard())`; reading the validated DTO inside a guard (pipes haven't run yet).",
+   "bn": "ভাবা যে `false` দিলে 401 আসবে; dependency লাগে এমন guard `useGlobalGuards(new Guard())` দিয়ে register করা; guard-এর ভেতরে validated DTO পড়ার চেষ্টা করা (pipe তখনো চলেনি)।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import {\n  CanActivate, Controller, ExecutionContext, Injectable, UnauthorizedException, UseGuards,\n} from '@nestjs/common';\nimport { ConfigService } from '@nestjs/config';\nimport { timingSafeEqual } from 'node:crypto';\nimport type { Request } from 'express';\n\n@Injectable()\nexport class ApiKeyGuard implements CanActivate {\n  constructor(private readonly config: ConfigService) {}\n\n  canActivate(context: ExecutionContext): boolean {\n    const req = context.switchToHttp().getRequest<Request>();\n    const provided = Buffer.from(req.header('x-api-key') ?? '');\n    const expected = Buffer.from(this.config.getOrThrow<string>('INTERNAL_API_KEY'));\n    if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {\n      throw new UnauthorizedException('Invalid API key'); // 401 instead of default 403\n    }\n    return true;\n  }\n}\n\n@UseGuards(ApiKeyGuard)\n@Controller('internal/reports')\nexport class InternalReportsController {}"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-008",
+  "subtopic": "Exception Filters",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "exceptions",
+   "httpexception",
+   "exception-filters",
+   "error-response"
+  ],
+  "technologyVersion": "NestJS 12.1 (built-in global exception filter)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "No custom exception filters are registered. What status code and JSON body does the client receive for `GET /users/missing` and for `GET /users/crash`?",
+   "bn": "কোনো custom exception filter register করা নেই। `GET /users/missing` আর `GET /users/crash` call করলে client কোন status code আর কোন JSON body পাবে?"
+  },
+  "answer": {
+   "en": "`/users/missing` returns **404** with `{\"message\":\"User 42 not found\",\"error\":\"Not Found\",\"statusCode\":404}`. `/users/crash` returns **500** with `{\"statusCode\":500,\"message\":\"Internal server error\"}` — the original error message is not sent to the client.\n\nNest's built-in global exception filter handles every unhandled exception. `HttpException` subclasses are serialised from their response; anything else is treated as an unknown error, logged on the server and replaced by a generic 500 body.",
+   "bn": "`/users/missing` দেয় **404**, body `{\"message\":\"User 42 not found\",\"error\":\"Not Found\",\"statusCode\":404}`। `/users/crash` দেয় **500**, body `{\"statusCode\":500,\"message\":\"Internal server error\"}` — আসল error message client-এর কাছে যায় না।\n\nNest-এর built-in global exception filter সব unhandled exception handle করে। `HttpException`-এর subclass হলে তার response serialise করে; অন্য যেকোনো কিছু unknown error ধরা হয় — server-এ log হয় আর generic 500 body দিয়ে replace হয়।"
+  },
+  "explanation": {
+   "en": "Step by step:\n1. `NotFoundException` extends `HttpException` with status 404. Passing a string sets `message`; Nest adds the standard `error` text (`\"Not Found\"`) and `statusCode`.\n2. The plain `Error` is not an `HttpException`, so the base filter can't know a safe status or message. It logs the stack trace and sends the generic 500 body.\n\nWhy this matters: internal details like `ECONNREFUSED 10.0.0.5:5432` (an internal IP and port) never leak to clients. That's good default security behaviour.\n\nYou can customise the body by passing an object: `new BadRequestException({ code: 'EMAIL_TAKEN', message: '...' })`, or attach a cause: `new NotFoundException('User 42 not found', { cause: err })`. For a consistent error format across the API, write a global exception filter.",
+   "bn": "ধাপে ধাপে:\n1. `NotFoundException`, `HttpException`-কে extend করে, status 404। String দিলে সেটা `message` হয়; Nest standard `error` text (`\"Not Found\"`) আর `statusCode` যোগ করে।\n2. Plain `Error` কোনো `HttpException` নয়, তাই base filter জানে না কোন status বা message দেওয়া নিরাপদ। সে stack trace log করে আর generic 500 body পাঠায়।\n\nকেন গুরুত্বপূর্ণ: `ECONNREFUSED 10.0.0.5:5432`-এর মতো internal detail (internal IP আর port) কখনো client-এর কাছে leak হয় না। এটা ভালো default security behaviour।\n\nObject pass করে body customise করা যায়: `new BadRequestException({ code: 'EMAIL_TAKEN', message: '...' })`, অথবা cause যোগ করা যায়: `new NotFoundException('User 42 not found', { cause: err })`। পুরো API-তে একই error format চাইলে একটা global exception filter লেখো।"
+  },
+  "interviewTip": {
+   "en": "Point out the security angle: unknown errors become a generic 500 so stack traces and connection strings don't leak. That turns a trivia answer into a design answer.",
+   "bn": "Security দিকটা বলো: unknown error generic 500 হয়ে যায়, তাই stack trace বা connection string leak হয় না। এতে একটা মুখস্থ উত্তর design-এর উত্তরে পরিণত হয়।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Exception filters",
+    "url": "https://docs.nestjs.com/exception-filters"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you write a global filter that maps a database unique-violation to 409?",
+    "bn": "Database unique-violation-কে 409-এ map করতে global filter কীভাবে লিখবে?"
+   },
+   {
+    "en": "Where in the request lifecycle do exception filters run?",
+    "bn": "Request lifecycle-এর কোথায় exception filter চলে?"
+   }
+  ],
+  "related": [
+   "nest-002",
+   "nest-025"
+  ],
+  "commonMistakes": {
+   "en": "Expecting the raw `Error` message in the response; returning error objects with status 200 instead of throwing; catching errors in every controller with try/catch instead of using filters.",
+   "bn": "ভাবা যে raw `Error`-এর message response-এ যাবে; throw না করে status 200 দিয়ে error object return করা; filter ব্যবহার না করে প্রতিটা controller-এ try/catch দিয়ে error ধরা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { Controller, Get, NotFoundException } from '@nestjs/common';\n\n@Controller('users')\nexport class UsersController {\n  @Get('missing')\n  missing() {\n    throw new NotFoundException('User 42 not found');\n  }\n\n  @Get('crash')\n  crash() {\n    throw new Error('connect ECONNREFUSED 10.0.0.5:5432');\n  }\n}",
+   "output": "GET /users/missing -> 404\n{\"message\":\"User 42 not found\",\"error\":\"Not Found\",\"statusCode\":404}\n\nGET /users/crash -> 500\n{\"statusCode\":500,\"message\":\"Internal server error\"}"
+  },
+  "technology": "nestjs"
+ }
+]

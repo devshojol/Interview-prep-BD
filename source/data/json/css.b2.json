@@ -1,0 +1,557 @@
+[
+ {
+  "id": "css-004",
+  "subtopic": "Positioning",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "position",
+   "absolute",
+   "fixed",
+   "sticky",
+   "containing-block"
+  ],
+  "technologyVersion": "Version-independent (CSS)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Explain the values of the `position` property: `static`, `relative`, `absolute`, `fixed` and `sticky`. What is each one positioned relative to?",
+   "bn": "`position` property-র value-গুলো ব্যাখ্যা করো: `static`, `relative`, `absolute`, `fixed` আর `sticky`। প্রতিটা কোন জিনিসের সাপেক্ষে position হয়?"
+  },
+  "answer": {
+   "en": "- **`static`** (default): normal document flow. `top`/`left` have no effect, and neither does `z-index` (except on flex and grid items).\n- **`relative`**: stays in the flow and keeps its original space, but can be nudged with `top`/`left`. Its most common job is to become the **containing block** for absolutely positioned children.\n- **`absolute`**: removed from the flow (other elements act as if it isn't there) and positioned relative to the nearest **positioned ancestor** (any `position` other than `static`), or the initial containing block if there is none.\n- **`fixed`**: removed from the flow and positioned relative to the **viewport**, so it stays put while scrolling — headers, chat buttons.\n- **`sticky`**: behaves like `relative` until the user scrolls past a threshold (e.g. `top: 0`), then sticks within its scroll container — but only while its parent is still on screen.\n\nTypical example: a \"−20%\" badge on a product card — the card is `position: relative`, the badge is `position: absolute; top: 8px; right: 8px`.",
+   "bn": "- **`static`** (default): সাধারণ document flow। `top`/`left`-এর কোনো প্রভাব নেই, `z-index`-এরও নেই (তবে flex আর grid item-এ `z-index` কাজ করে)।\n- **`relative`**: flow-তেই থাকে আর নিজের আসল জায়গা ধরে রাখে, তবে `top`/`left` দিয়ে একটু সরানো যায়। এর সবচেয়ে প্রচলিত কাজ হলো absolutely positioned children-এর **containing block** হওয়া।\n- **`absolute`**: flow থেকে বাদ পড়ে (অন্য element-গুলো এমন আচরণ করে যেন এটা নেই), আর সবচেয়ে কাছের **positioned ancestor**-এর (যার `position` `static` নয়) সাপেক্ষে বসে; এমন কেউ না থাকলে initial containing block-এর সাপেক্ষে।\n- **`fixed`**: flow থেকে বাদ পড়ে আর **viewport**-এর সাপেক্ষে বসে, তাই scroll করলেও একই জায়গায় থাকে — header, chat button।\n- **`sticky`**: user একটা সীমা (যেমন `top: 0`) পার হয়ে scroll না করা পর্যন্ত `relative`-এর মতো আচরণ করে, তারপর তার scroll container-এর মধ্যে আটকে থাকে — তবে কেবল যতক্ষণ এর parent screen-এ থাকে।\n\nসাধারণ উদাহরণ: product card-এর উপর \"−20%\" badge — card-এ `position: relative`, badge-এ `position: absolute; top: 8px; right: 8px`।"
+  },
+  "explanation": {
+   "en": "- **The `fixed` gotcha:** if any ancestor has `transform`, `filter`, `perspective`, `contain: paint` or `will-change: transform`, that ancestor becomes the containing block. Your \"fixed\" header or modal then scrolls with that ancestor — a common bug when a page wrapper gets an animation.\n- **Sticky gotchas:** it needs an inset (`top`, `bottom`…), it stops working if an ancestor between it and the scrolling element has `overflow: hidden/auto`, and it can't stick beyond its parent's box.\n- **Absolute + percentage:** `width: 50%` on an absolute element is 50% of the containing block's padding box, not of its direct parent if the parent isn't positioned.\n- **Stacking:** `fixed` and `sticky` always create a stacking context; `relative`/`absolute` do when combined with a `z-index` other than `auto`.",
+   "bn": "- **`fixed`-এর ফাঁদ:** কোনো ancestor-এ `transform`, `filter`, `perspective`, `contain: paint` বা `will-change: transform` থাকলে সেই ancestor-ই containing block হয়ে যায়। তখন তোমার \"fixed\" header বা modal ওই ancestor-এর সাথে scroll করে — page wrapper-এ animation যোগ করলে এটা খুব সাধারণ bug।\n- **Sticky-র ফাঁদ:** এর একটা inset (`top`, `bottom`…) লাগে, এটা আর scroll হওয়া element-এর মাঝে কোনো ancestor-এ `overflow: hidden/auto` থাকলে কাজ করে না, আর এটা parent-এর box-এর বাইরে আটকে থাকতে পারে না।\n- **Absolute + percentage:** absolute element-এ `width: 50%` মানে containing block-এর padding box-এর 50%, parent positioned না হলে সরাসরি parent-এর নয়।\n- **Stacking:** `fixed` আর `sticky` সবসময় stacking context তৈরি করে; `relative`/`absolute` তৈরি করে যখন সাথে `auto` ছাড়া অন্য কোনো `z-index` থাকে।"
+  },
+  "interviewTip": {
+   "en": "For each value, answer two things: \"is it still in the flow?\" and \"relative to what?\". That compact structure covers everything; add the `transform` + `fixed` gotcha for bonus points.",
+   "bn": "প্রতিটা value-র জন্য দুটো প্রশ্নের উত্তর দাও: \"এটা কি এখনো flow-তে আছে?\" আর \"কীসের সাপেক্ষে?\"। এই ছোট কাঠামোতেই সব কভার হয়; বাড়তি নম্বরের জন্য `transform` + `fixed`-এর ফাঁদটা যোগ করো।"
+  },
+  "references": [
+   {
+    "title": "MDN — position",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/position"
+   },
+   {
+    "title": "MDN — Layout and the containing block",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why might a `position: fixed` modal scroll with the page?",
+    "bn": "`position: fixed` modal কেন page-এর সাথে scroll করতে পারে?"
+   },
+   {
+    "en": "What's the difference between `position: absolute` and using CSS Grid to overlap elements?",
+    "bn": "`position: absolute` আর CSS Grid দিয়ে element একটার উপর আরেকটা বসানোর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "css-020",
+   "css-019"
+  ],
+  "commonMistakes": {
+   "en": "Saying `absolute` is relative to the parent (it's the nearest *positioned* ancestor), or thinking `fixed` is always relative to the viewport.",
+   "bn": "`absolute` parent-এর সাপেক্ষে বলা (আসলে সবচেয়ে কাছের *positioned* ancestor-এর সাপেক্ষে), অথবা `fixed` সবসময় viewport-এর সাপেক্ষে ভাবা।"
+  },
+  "code": {
+   "language": "css",
+   "source": ".product-card { position: relative; }\n\n.product-card .discount {\n  position: absolute;\n  top: 8px;\n  right: 8px;\n}\n\n.site-header {\n  position: sticky;\n  top: 0;\n  z-index: 10;\n}\n\n.chat-button {\n  position: fixed;\n  right: 16px;\n  bottom: 16px;\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-005",
+  "subtopic": "Flexbox",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "flexbox",
+   "flex-shorthand",
+   "flex-grow",
+   "flex-basis"
+  ],
+  "technologyVersion": "Version-independent (CSS Flexbox)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `flex: 1` on a flex item expand to?",
+   "bn": "Flex item-এ `flex: 1` দিলে সেটা কীসের সমান হয়?"
+  },
+  "answer": {
+   "en": "`flex: 1` means grow 1, shrink 1, **basis 0** (browsers serialize it as `0%`). Because every item starts from zero, the free space is shared equally — that's why `flex: 1` on all items gives equal-width columns.",
+   "bn": "`flex: 1` মানে grow 1, shrink 1, **basis 0** (browser এটাকে `0%` হিসেবে দেখায়)। প্রতিটা item শূন্য থেকে শুরু করে বলে ফাঁকা জায়গা সমানভাবে ভাগ হয় — এজন্যই সব item-এ `flex: 1` দিলে সমান চওড়া column পাওয়া যায়।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is C — that's `flex: auto` (`1 1 auto`). With basis `auto`, each item starts at its content size and only the *leftover* space is shared, so items with longer text end up wider.\n\nOther keywords worth knowing: `flex: none` = `0 0 auto` (rigid), `flex: initial` = `0 1 auto` (the default: don't grow, may shrink). The shorthand also resets the parts you don't mention, which is why D is wrong.\n\nOne caveat: even with `flex: 1`, items won't shrink below their min-content width because of `min-width: auto`. A long unbreakable word makes \"equal\" columns unequal — add `min-width: 0` when that matters.",
+   "bn": "প্রলোভনজনক ভুল উত্তর C — ওটা আসলে `flex: auto` (`1 1 auto`)। Basis `auto` হলে প্রতিটা item তার content-এর মাপ থেকে শুরু করে, আর শুধু *বাকি থাকা* জায়গা ভাগ হয়, ফলে লম্বা text-এর item বেশি চওড়া হয়।\n\nআরও কিছু keyword জানা দরকার: `flex: none` = `0 0 auto` (অনমনীয়), `flex: initial` = `0 1 auto` (default: বড় হয় না, ছোট হতে পারে)। Shorthand যে অংশগুলো বলোনি সেগুলোও reset করে — এজন্যই D ভুল।\n\nএকটা সতর্কতা: `flex: 1` থাকলেও `min-width: auto`-এর কারণে item তার min-content width-এর চেয়ে ছোট হয় না। ভাঙা যায় না এমন একটা লম্বা শব্দ থাকলে \"সমান\" column-গুলো অসমান হয়ে যায় — দরকার হলে `min-width: 0` যোগ করো।"
+  },
+  "interviewTip": {
+   "en": "Contrast `flex: 1` with `flex: auto` in one sentence — \"basis 0 shares all space, basis auto shares leftover space\". That's the real understanding being tested.",
+   "bn": "এক বাক্যে `flex: 1` আর `flex: auto`-এর তুলনা করো — \"basis 0 পুরো জায়গা ভাগ করে, basis auto বাকি জায়গা ভাগ করে\"। আসলে এই বোঝাপড়াটাই যাচাই করা হচ্ছে।"
+  },
+  "references": [
+   {
+    "title": "MDN — flex",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/flex"
+   },
+   {
+    "title": "web.dev — Learn CSS: Flexbox",
+    "url": "https://web.dev/learn/css/flexbox"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`",
+    "bn": "`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`"
+   },
+   {
+    "en": "`flex-grow: 1; flex-shrink: 0; flex-basis: auto`",
+    "bn": "`flex-grow: 1; flex-shrink: 0; flex-basis: auto`"
+   },
+   {
+    "en": "`flex-grow: 1; flex-shrink: 1; flex-basis: auto`",
+    "bn": "`flex-grow: 1; flex-shrink: 1; flex-basis: auto`"
+   },
+   {
+    "en": "Only `flex-grow: 1`; shrink and basis keep their current values",
+    "bn": "শুধু `flex-grow: 1`; shrink আর basis আগের মানেই থাকে"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "css"
+ },
+ {
+  "id": "css-006",
+  "subtopic": "CSS Grid",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "flexbox",
+   "grid",
+   "fr-unit",
+   "layout"
+  ],
+  "technologyVersion": "Version-independent (CSS Flexbox & Grid)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "When do you reach for Flexbox and when for CSS Grid? What does the `fr` unit mean?",
+   "bn": "কখন Flexbox আর কখন CSS Grid ব্যবহার করবে? `fr` unit মানে কী?"
+  },
+  "answer": {
+   "en": "- **Flexbox is one-dimensional** — it lays items out along a single row *or* column, and sizes are driven by the content (\"content-out\"). Great for navigation bars, toolbars, a button row, centring something, or chips that wrap.\n- **Grid is two-dimensional** — you define rows *and* columns and place items into that structure (\"layout-in\"). Great for page layouts, product galleries, dashboards and forms where labels and inputs must line up in both directions.\n\nThey combine well: Grid for the page and the card gallery, Flexbox inside each card for the price-and-button row.\n\n**`fr`** is a fraction of the **free space** in the grid container after fixed-size tracks and gaps are subtracted. `grid-template-columns: 200px 1fr 2fr` gives 200px to the first column and splits the rest 1 : 2.",
+   "bn": "- **Flexbox হলো এক-মাত্রিক** — item-গুলোকে একটা row *অথবা* column বরাবর সাজায়, আর মাপ ঠিক হয় content দেখে (\"content-out\")। Navigation bar, toolbar, button-এর সারি, কিছু center করা, বা wrap হওয়া chip-এর জন্য দারুণ।\n- **Grid হলো দ্বি-মাত্রিক** — row *এবং* column দুটোই নির্ধারণ করে item-গুলো সেই কাঠামোয় বসাও (\"layout-in\")। Page layout, product gallery, dashboard আর এমন form-এর জন্য দারুণ যেখানে label আর input দুই দিকেই সারিবদ্ধ হতে হবে।\n\nদুটো একসাথে ভালো কাজ করে: page আর card gallery-র জন্য Grid, আর প্রতিটা card-এর ভেতরে দাম ও button-এর সারির জন্য Flexbox।\n\n**`fr`** হলো fixed-size track আর gap বাদ দেওয়ার পর grid container-এর **ফাঁকা জায়গার** একটা ভগ্নাংশ। `grid-template-columns: 200px 1fr 2fr` দিলে প্রথম column 200px পায়, আর বাকি জায়গা 1 : 2 অনুপাতে ভাগ হয়।"
+  },
+  "explanation": {
+   "en": "- **Alignment across items:** in a wrapping flex row, each line is independent, so items in different lines don't align into columns. If you find yourself fighting that, you want Grid.\n- **`gap`** works in both Flexbox and Grid today, so margin hacks aren't needed.\n- **`1fr` has a minimum:** it's really `minmax(auto, 1fr)`, so long content can push a column wider than its share. Use `minmax(0, 1fr)` for strict proportions.\n- **Source order and accessibility:** both can visually reorder items (`order`, grid placement), but keyboard and screen-reader order follow the DOM — don't create a mismatch.",
+   "bn": "- **Item-গুলোর মধ্যে সারিবদ্ধতা:** wrap হওয়া flex row-এ প্রতিটা line স্বাধীন, তাই ভিন্ন line-এর item-গুলো column বরাবর মেলে না। এই নিয়ে লড়াই করতে হলে বুঝবে তোমার আসলে Grid দরকার।\n- **`gap`** এখন Flexbox আর Grid দুটোতেই কাজ করে, তাই margin hack লাগে না।\n- **`1fr`-এর একটা minimum আছে:** এটা আসলে `minmax(auto, 1fr)`, তাই লম্বা content একটা column-কে তার ভাগের চেয়ে চওড়া করে দিতে পারে। কড়া অনুপাত চাইলে `minmax(0, 1fr)` ব্যবহার করো।\n- **Source order আর accessibility:** দুটো দিয়েই দৃশ্যত item-এর ক্রম বদলানো যায় (`order`, grid placement), কিন্তু keyboard আর screen reader DOM-এর ক্রম মেনে চলে — অমিল তৈরি কোরো না।"
+  },
+  "interviewTip": {
+   "en": "Use \"one dimension vs two\" and \"content-out vs layout-in\" as your two anchors, then give one concrete UI example of each. Mentioning that you combine them shows practical judgement.",
+   "bn": "\"এক মাত্রা বনাম দুই মাত্রা\" আর \"content-out বনাম layout-in\" — এই দুটোকে মূল ভিত্তি করো, তারপর প্রতিটার একটা করে বাস্তব UI উদাহরণ দাও। দুটো যে একসাথে ব্যবহার করো, তা বললে তোমার বাস্তব বিচারবুদ্ধি বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "web.dev — Learn CSS: Grid",
+    "url": "https://web.dev/learn/css/grid"
+   },
+   {
+    "title": "web.dev — Learn CSS: Flexbox",
+    "url": "https://web.dev/learn/css/flexbox"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you build a layout that's 1 column on phones and 3 on desktops without media queries?",
+    "bn": "Media query ছাড়া phone-এ 1 column আর desktop-এ 3 column layout কীভাবে বানাবে?"
+   },
+   {
+    "en": "What does `minmax(0, 1fr)` fix?",
+    "bn": "`minmax(0, 1fr)` কোন সমস্যা ঠিক করে?"
+   }
+  ],
+  "related": [
+   "css-015",
+   "css-025"
+  ],
+  "commonMistakes": {
+   "en": "Saying \"Grid replaces Flexbox\", or thinking `1fr` is a fraction of the *total* width (it's of the remaining free space).",
+   "bn": "\"Grid Flexbox-কে প্রতিস্থাপন করে\" বলা, অথবা `1fr`-কে *মোট* width-এর ভগ্নাংশ ভাবা (আসলে এটা বাকি ফাঁকা জায়গার ভগ্নাংশ)।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* Grid: page and gallery structure */\n.page {\n  display: grid;\n  grid-template-columns: 240px 1fr;   /* sidebar + main */\n  gap: 24px;\n}\n.gallery {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 16px;\n}\n\n/* Flexbox: a row inside a card */\n.card-footer {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-015",
+  "subtopic": "CSS Grid",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "grid",
+   "auto-fill",
+   "auto-fit",
+   "minmax",
+   "responsive"
+  ],
+  "technologyVersion": "Version-independent (CSS Grid)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What's the difference between `repeat(auto-fill, minmax(200px, 1fr))` and `repeat(auto-fit, minmax(200px, 1fr))`? Describe what happens with only two cards in a 1000px-wide container (gap 16px).",
+   "bn": "`repeat(auto-fill, minmax(200px, 1fr))` আর `repeat(auto-fit, minmax(200px, 1fr))`-এর পার্থক্য কী? 1000px চওড়া container-এ (gap 16px) মাত্র দুটো card থাকলে কী হয়, বর্ণনা করো।"
+  },
+  "answer": {
+   "en": "Both create as many columns of at least 200px as fit in the container, which gives a responsive grid without media queries. The difference is what happens to **empty tracks**:\n- **`auto-fill`** keeps the empty columns. Four columns fit (4 × 200 + 3 × 16 = 848 ≤ 1000), so each is (1000 − 48) / 4 = **238px**; the two cards take two of them and the other two stay empty.\n- **`auto-fit`** collapses empty columns to zero (and the gaps around them), so the remaining tracks absorb the space: the two cards become (1000 − 16) / 2 = **492px** each.\n\nWith enough items to fill a row, both behave the same. I use `auto-fill` when cards should keep a consistent size (a product grid where a lonely last card shouldn't balloon), and `auto-fit` when a few items should stretch to fill the row.",
+   "bn": "দুটোই container-এ যতগুলো কমপক্ষে 200px-এর column আঁটে ততগুলো বানায়, ফলে media query ছাড়াই responsive grid পাওয়া যায়। পার্থক্য হলো **খালি track**-এর কী হয়:\n- **`auto-fill`** খালি column রেখে দেয়। চারটা column আঁটে (4 × 200 + 3 × 16 = 848 ≤ 1000), তাই প্রতিটা হয় (1000 − 48) / 4 = **238px**; দুটো card দুটো column নেয়, বাকি দুটো খালি থাকে।\n- **`auto-fit`** খালি column-গুলো (আর তাদের আশেপাশের gap) শূন্যে নামিয়ে দেয়, ফলে বাকি track-গুলো পুরো জায়গা নেয়: দুটো card প্রতিটা হয় (1000 − 16) / 2 = **492px**।\n\nএকটা row পূরণ করার মতো যথেষ্ট item থাকলে দুটো একই আচরণ করে। Card-এর মাপ একরকম রাখতে চাইলে আমি `auto-fill` ব্যবহার করি (product grid, যেখানে শেষের একা card হঠাৎ বিশাল হওয়া উচিত নয়), আর কয়েকটা item দিয়ে পুরো row ভরাতে চাইলে `auto-fit`।"
+  },
+  "explanation": {
+   "en": "- **`minmax(200px, 1fr)`** means \"never narrower than 200px, otherwise share the free space equally\".\n- **Narrow containers:** on a 180px-wide container, a 200px minimum overflows. The robust version is `minmax(min(200px, 100%), 1fr)` — the minimum shrinks to the container width when needed.\n- **Why it beats media queries for galleries:** it reacts to the *container* width, so the same component works in a sidebar and in the main area. For more complex component changes (layout switches, not just column counts), use container queries.\n- **DevTools:** the Grid overlay shows the implicit tracks, including empty `auto-fill` columns, which makes the difference obvious.",
+   "bn": "- **`minmax(200px, 1fr)`** মানে \"কখনো 200px-এর চেয়ে সরু নয়, নইলে ফাঁকা জায়গা সমানভাবে ভাগ করো\"।\n- **সরু container:** 180px চওড়া container-এ 200px-এর minimum overflow করে। নির্ভরযোগ্য রূপ হলো `minmax(min(200px, 100%), 1fr)` — দরকার হলে minimum container-এর width পর্যন্ত ছোট হয়।\n- **Gallery-র জন্য media query-র চেয়ে কেন ভালো:** এটা *container*-এর width-এ সাড়া দেয়, তাই একই component sidebar আর main area দুই জায়গাতেই কাজ করে। আরও জটিল component পরিবর্তনের জন্য (শুধু column সংখ্যা নয়, layout বদলানো) container query ব্যবহার করো।\n- **DevTools:** Grid overlay implicit track দেখায়, খালি `auto-fill` column-সহ — এতে পার্থক্যটা চোখের সামনে পরিষ্কার হয়।"
+  },
+  "interviewTip": {
+   "en": "Do the arithmetic out loud (238px vs 492px). Concrete numbers prove you understand track collapsing, not just the slogan \"auto-fit stretches\".",
+   "bn": "হিসাবটা মুখে করে দেখাও (238px বনাম 492px)। নির্দিষ্ট সংখ্যা প্রমাণ করে তুমি track collapse আসলেই বোঝো, শুধু \"auto-fit stretch করে\" slogan মুখস্থ নয়।"
+  },
+  "references": [
+   {
+    "title": "MDN — repeat()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/repeat"
+   },
+   {
+    "title": "MDN — minmax()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/minmax"
+   },
+   {
+    "title": "web.dev — Learn CSS: Grid",
+    "url": "https://web.dev/learn/css/grid"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why does `minmax(min(200px, 100%), 1fr)` prevent overflow?",
+    "bn": "`minmax(min(200px, 100%), 1fr)` কেন overflow ঠেকায়?"
+   },
+   {
+    "en": "When would you choose container queries over this pattern?",
+    "bn": "কখন এই pattern-এর বদলে container query বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "css-006",
+   "css-016"
+  ],
+  "commonMistakes": {
+   "en": "Saying the two are identical, forgetting that gaps around collapsed tracks also collapse, or using a fixed `minmax(300px, 1fr)` that overflows on 320px phones.",
+   "bn": "দুটোকে একই বলা, collapse হওয়া track-এর আশেপাশের gap-ও যে collapse হয় তা ভুলে যাওয়া, অথবা নির্দিষ্ট `minmax(300px, 1fr)` ব্যবহার করা যা 320px phone-এ overflow করে।"
+  },
+  "code": {
+   "language": "css",
+   "source": ".grid-fill {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));\n  gap: 16px;\n}\n\n.grid-fit {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));\n  gap: 16px;\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-016",
+  "subtopic": "Container Queries",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "container-queries",
+   "responsive",
+   "components",
+   "cqi",
+   "style-queries"
+  ],
+  "technologyVersion": "CSS Containment 3; size queries Baseline widely available; style queries Baseline newly available (May 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What problem do container queries solve that media queries can't? Show how you'd use them for a product card, and explain the rules and pitfalls.",
+   "bn": "Container query এমন কোন সমস্যার সমাধান করে যা media query পারে না? একটা product card-এ কীভাবে ব্যবহার করবে দেখাও, আর এর নিয়ম ও ফাঁদগুলো ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "Media queries look at the **viewport**. But a reusable component doesn't care how wide the screen is — it cares how much space **its slot** has. The same product card might sit in a wide main column and in a narrow sidebar on the same desktop page. Container queries let the card respond to its **container's** size.\n\nHow it works:\n1. Mark an ancestor as a container: `container-type: inline-size` (optionally named with `container-name`).\n2. Write `@container (min-width: 420px) { … }` — the rules apply to **descendants** of that container when it matches.\n3. Use container units like `cqi` (1% of the container's inline size) for fluid sizing inside the component.\n\nSize queries are Baseline widely available. **Style queries** — `@container style(--variant: sale)`, which react to a custom property's value — became Baseline newly available in May 2026, so I treat them as progressive enhancement for now.",
+   "bn": "Media query দেখে **viewport**। কিন্তু একটা reusable component-এর কাছে screen কত চওড়া তা গুরুত্বপূর্ণ নয় — গুরুত্বপূর্ণ হলো **তার নিজের জায়গায়** কতটা space আছে। একই desktop page-এ একই product card চওড়া main column-এও থাকতে পারে, আবার সরু sidebar-এও। Container query card-কে তার **container**-এর মাপ অনুযায়ী সাড়া দিতে দেয়।\n\nকীভাবে কাজ করে:\n1. একটা ancestor-কে container হিসেবে চিহ্নিত করো: `container-type: inline-size` (চাইলে `container-name` দিয়ে নামও দাও)।\n2. `@container (min-width: 420px) { … }` লেখো — container match করলে তার **descendant**-দের উপর rule-গুলো প্রযোজ্য হয়।\n3. Component-এর ভেতরে fluid sizing-এর জন্য `cqi`-এর মতো container unit ব্যবহার করো (container-এর inline size-এর 1%)।\n\nSize query Baseline widely available। **Style query** — `@container style(--variant: sale)`, যা কোনো custom property-র value-তে সাড়া দেয় — May 2026-এ Baseline newly available হয়েছে, তাই আপাতত আমি এটাকে progressive enhancement হিসেবে ব্যবহার করি।"
+  },
+  "explanation": {
+   "en": "**Rules and pitfalls:**\n- **A container can't query itself.** `@container` rules style its descendants. Put `container-type` on a wrapper (the slot), not on the card you want to restyle.\n- **Containment side effects:** `inline-size` containment means the container's width can't depend on its children. On a shrink-to-fit element (an inline-block, a flex item without a set width, an absolutely positioned box) the container can collapse to zero width. Put it on elements whose width comes from the layout.\n- **`container-type: size`** also contains the block axis, so the element needs an explicit height — rarely what you want for content components.\n- **Media vs container:** keep media queries for page-level (macro) layout and user preferences (`prefers-reduced-motion`, `prefers-color-scheme`); use container queries for component (micro) layout.\n- **Style queries** currently work with custom properties; they're handy for variants (`--variant: sale`) without adding modifier classes everywhere.",
+   "bn": "**নিয়ম আর ফাঁদ:**\n- **Container নিজেকে query করতে পারে না।** `@container` rule তার descendant-দের style করে। যে card-এর style বদলাতে চাও তাতে নয়, বরং wrapper-এ (অর্থাৎ slot-এ) `container-type` দাও।\n- **Containment-এর পার্শ্বপ্রতিক্রিয়া:** `inline-size` containment মানে container-এর width তার children-এর উপর নির্ভর করতে পারে না। Shrink-to-fit element-এ (inline-block, width ঠিক করা নেই এমন flex item, absolutely positioned box) container-এর width শূন্যে নেমে যেতে পারে। যেসব element-এর width layout থেকে আসে, সেগুলোতে এটা দাও।\n- **`container-type: size`** block axis-ও contain করে, তাই element-এর স্পষ্ট height লাগে — content component-এর জন্য খুব কমই এটা চাওয়া হয়।\n- **Media বনাম container:** page-level (macro) layout আর user preference-এর (`prefers-reduced-motion`, `prefers-color-scheme`) জন্য media query রাখো; component-এর (micro) layout-এর জন্য container query ব্যবহার করো।\n- **Style query** এখন custom property-র সাথে কাজ করে; সব জায়গায় modifier class না যোগ করে variant (`--variant: sale`) সামলাতে এটা কাজের।"
+  },
+  "interviewTip": {
+   "en": "Open with the \"same card in a sidebar and in the main column\" example — it makes the problem obvious in one sentence. Then mention \"a container can't query itself\"; that's the mistake almost everyone makes first.",
+   "bn": "\"একই card sidebar-এও, main column-এও\" — এই উদাহরণ দিয়ে শুরু করো, এক বাক্যেই সমস্যাটা পরিষ্কার হয়ে যায়। তারপর বলো \"container নিজেকে query করতে পারে না\"; প্রায় সবাই প্রথমে এই ভুলটাই করে।"
+  },
+  "references": [
+   {
+    "title": "MDN — CSS container queries",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries"
+   },
+   {
+    "title": "MDN — @container",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@container"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why might an element with `container-type: inline-size` suddenly collapse to zero width?",
+    "bn": "`container-type: inline-size` দেওয়া element কেন হঠাৎ শূন্য width-এ নেমে আসতে পারে?"
+   },
+   {
+    "en": "When would you still use a media query instead of a container query?",
+    "bn": "কখন container query-র বদলে এখনো media query ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "css-015",
+   "css-032"
+  ],
+  "commonMistakes": {
+   "en": "Putting `container-type` on the element you're trying to restyle, using `container-type: size` without a height, or replacing all media queries with container queries.",
+   "bn": "যে element-এর style বদলাতে চাও তাতেই `container-type` দেওয়া, height ছাড়া `container-type: size` ব্যবহার করা, অথবা সব media query container query দিয়ে বদলে ফেলা।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* The slot is the container, not the card */\n.main-column,\n.sidebar {\n  container-type: inline-size;\n}\n\n.card { display: grid; gap: 0.5rem; }\n.card-title { font-size: clamp(1rem, 0.9rem + 2cqi, 1.375rem); }\n\n@container (min-width: 420px) {\n  .card {\n    grid-template-columns: 140px 1fr;\n    align-items: start;\n  }\n}\n\n/* Style query (Baseline newly available): react to a custom property */\n.promo-slot { --variant: sale; }\n@container style(--variant: sale) {\n  .card-badge { display: inline-block; }\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-017",
+  "subtopic": "CSS Variables",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "custom-properties",
+   "sass",
+   "theming",
+   "variables"
+  ],
+  "technologyVersion": "Version-independent (CSS Custom Properties; Sass)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How are CSS custom properties (`--brand`) different from preprocessor variables like Sass `$brand`? When would you use each?",
+   "bn": "CSS custom property (`--brand`) আর Sass-এর `$brand`-এর মতো preprocessor variable-এর মধ্যে পার্থক্য কী? কখন কোনটা ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "**Sass variables are compile-time constants.** The build replaces `$brand` with its value; the browser never sees the variable. They follow Sass's lexical scope, can be used anywhere in the source (including media query conditions and selectors) and support build-time maths, loops and mixins.\n\n**Custom properties are runtime values in the cascade.** They're set on elements, **inherit** down the DOM, can be overridden per component, per media query or per theme, can be read and changed with JavaScript (`el.style.setProperty('--brand', …)`), and show up in DevTools. But they can't be used in media query conditions (`@media (min-width: var(--bp))` doesn't work) or in selectors.\n\nI use **custom properties for anything that changes at runtime or by context** — themes, dark mode, design tokens, component variants — and Sass (if the project uses it) for build-time concerns like breakpoint constants and mixins.",
+   "bn": "**Sass variable হলো compile-time constant।** Build-এর সময় `$brand` তার value দিয়ে বদলে যায়; browser কখনো variable-টা দেখেই না। এগুলো Sass-এর lexical scope মেনে চলে, source-এর যেকোনো জায়গায় ব্যবহার করা যায় (media query-র condition আর selector-সহ), আর build-time-এর হিসাব, loop আর mixin support করে।\n\n**Custom property হলো cascade-এর ভেতরের runtime value।** এগুলো element-এ set হয়, DOM ধরে নিচে **inherit** হয়, প্রতিটা component, media query বা theme অনুযায়ী override করা যায়, JavaScript দিয়ে পড়া ও বদলানো যায় (`el.style.setProperty('--brand', …)`), আর DevTools-এ দেখা যায়। তবে media query-র condition-এ (`@media (min-width: var(--bp))` কাজ করে না) বা selector-এ এগুলো ব্যবহার করা যায় না।\n\n**Runtime-এ বা context অনুযায়ী যা বদলায়** — theme, dark mode, design token, component variant — তার জন্য আমি custom property ব্যবহার করি, আর project-এ Sass থাকলে build-time-এর কাজের জন্য (breakpoint constant, mixin) Sass।"
+  },
+  "explanation": {
+   "en": "- **Dark mode shows the difference best:** with Sass you'd compile two stylesheets or duplicate rules; with custom properties you override a handful of tokens under `[data-theme=\"dark\"]` and every component updates instantly.\n- **Invalid values behave differently:** if `--gap: red` is used in `margin: var(--gap)`, the declaration becomes \"invalid at computed-value time\" and the property falls back to its inherited or initial value — not to the `var()` fallback. `@property` can register a type to make this stricter and enable animation.\n- **Performance note:** changing a custom property high in the tree (on `:root`) restyles everything that inherits it. Usually fine, but avoid animating root-level custom properties every frame; register with `inherits: false` where inheritance isn't needed.\n- **Native CSS has caught up on many Sass features** — nesting, `color-mix()`, `calc()`, cascade layers — so many new projects use plain CSS plus a bundler.",
+   "bn": "- **Dark mode-এ পার্থক্যটা সবচেয়ে ভালো বোঝা যায়:** Sass-এ দুটো stylesheet compile করতে হতো বা rule duplicate করতে হতো; custom property দিয়ে `[data-theme=\"dark\"]`-এর নিচে কয়েকটা token override করলেই প্রতিটা component সঙ্গে সঙ্গে আপডেট হয়।\n- **Invalid value-এর আচরণ আলাদা:** `margin: var(--gap)`-এ যদি `--gap: red` ব্যবহার হয়, declaration-টা \"invalid at computed-value time\" হয়ে যায় আর property তার inherited বা initial value-তে ফিরে যায় — `var()`-এর fallback-এ নয়। `@property` দিয়ে type register করলে এটা আরও কড়া হয় আর animation-ও সম্ভব হয়।\n- **Performance-এর কথা:** tree-এর উঁচুতে (`:root`-এ) একটা custom property বদলালে যারা এটা inherit করে তাদের সবার style আবার হিসাব হয়। সাধারণত ঠিক আছে, কিন্তু প্রতি frame-এ root-level custom property animate কোরো না; inheritance দরকার না হলে `inherits: false` দিয়ে register করো।\n- **Native CSS এখন Sass-এর অনেক feature ধরে ফেলেছে** — nesting, `color-mix()`, `calc()`, cascade layer — তাই অনেক নতুন project শুধু plain CSS আর একটা bundler ব্যবহার করে।"
+  },
+  "interviewTip": {
+   "en": "Use the words \"compile-time\" vs \"runtime + cascade\" early, then prove it with dark mode. Mentioning that custom properties can't be used in media query conditions shows you've hit the limit in practice.",
+   "bn": "শুরুতেই \"compile-time\" বনাম \"runtime + cascade\" শব্দগুলো ব্যবহার করো, তারপর dark mode দিয়ে প্রমাণ করো। Custom property যে media query-র condition-এ ব্যবহার করা যায় না — এটা বললে বোঝা যায় তুমি বাস্তবে এই সীমায় ধাক্কা খেয়েছ।"
+  },
+  "references": [
+   {
+    "title": "MDN — var()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/var"
+   },
+   {
+    "title": "MDN — @property",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@property"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why doesn't `@media (min-width: var(--bp))` work?",
+    "bn": "`@media (min-width: var(--bp))` কেন কাজ করে না?"
+   },
+   {
+    "en": "What does \"invalid at computed-value time\" mean for custom properties?",
+    "bn": "Custom property-র ক্ষেত্রে \"invalid at computed-value time\" মানে কী?"
+   }
+  ],
+  "related": [
+   "css-009",
+   "css-026"
+  ],
+  "commonMistakes": {
+   "en": "Calling custom properties \"global variables\" (they're scoped to elements and inherit), trying `@media (min-width: var(--bp))`, or expecting the `var()` fallback to rescue a value of the wrong type.",
+   "bn": "Custom property-কে \"global variable\" বলা (এগুলো element-ভিত্তিক scope-এ থাকে আর inherit হয়), `@media (min-width: var(--bp))` চেষ্টা করা, অথবা ভুল type-এর value-কে `var()`-এর fallback রক্ষা করবে বলে আশা করা।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* Sass (compile-time): fine for build constants */\n$bp-tablet: 48rem;\n@media (min-width: $bp-tablet) { .grid { grid-template-columns: 1fr 1fr; } }\n\n/* CSS custom properties (runtime, cascade-aware) */\n:root {\n  --brand: #0b6e4f;\n  --surface: #ffffff;\n  --text: #1a1a1a;\n}\n[data-theme=\"dark\"] {\n  --surface: #121212;\n  --text: #f1f1f1;\n}\n.card {\n  background: var(--surface);\n  color: var(--text);\n  border-top: 4px solid var(--brand);\n}\n.card.is-sale { --brand: #c1121f; }   /* per-component override */"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-024",
+  "subtopic": "Performance",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "rendering-pipeline",
+   "reflow",
+   "repaint",
+   "compositing",
+   "will-change"
+  ],
+  "technologyVersion": "Version-independent concept (browser rendering)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Walk me through the browser's rendering pipeline from a CSS point of view. Which property changes trigger layout, which trigger paint, and which only compositing? Why is `will-change` so often misused?",
+   "bn": "CSS-এর দৃষ্টিকোণ থেকে browser-এর rendering pipeline ব্যাখ্যা করো। কোন property বদলালে layout হয়, কোনটায় paint, আর কোনটায় শুধু compositing? `will-change` কেন এত বেশি ভুলভাবে ব্যবহার হয়?"
+  },
+  "answer": {
+   "en": "The pipeline after a change is roughly **Style → Layout → Paint → Composite**, and you pay for every stage from the first one your change touches:\n- **Layout (reflow):** geometry changes — `width`, `height`, `top`/`left`, `margin`, `padding`, `font-size`, `border-width`, adding/removing elements. The browser recalculates positions and sizes, often for ancestors and siblings too, then repaints.\n- **Paint (repaint):** visual-only changes — `color`, `background`, `box-shadow`, `border-radius`, `outline`. No geometry change, but pixels must be redrawn.\n- **Composite only:** `transform` and `opacity` on an element that has its own compositor layer. The compositor just moves or fades an existing bitmap, often off the main thread, so it stays smooth even when JavaScript is busy.\n\nSo for animations I use `transform: translate()` instead of animating `left`, `scale()` instead of `width`, and `opacity` for fades.\n\n**`will-change`** tells the browser in advance that a property will change, so it can promote the element to its own layer. It's misused when applied broadly or permanently:\n- every layer costs GPU memory — hundreds of `will-change: transform` cards can exhaust memory on low-end phones and make things slower;\n- it creates a **stacking context** and, for `transform`, a **containing block** for fixed-position descendants — which can break `z-index` and `position: fixed` layouts;\n- browsers already promote elements that are actively animating `transform`/`opacity`.\n\nUse it sparingly, just before an animation starts, and remove it afterwards.",
+   "bn": "কোনো পরিবর্তনের পর pipeline মোটামুটি এরকম: **Style → Layout → Paint → Composite**, আর তোমার পরিবর্তন যে ধাপ থেকে শুরু হয়, সেখান থেকে পরের প্রতিটা ধাপের খরচ দিতে হয়:\n- **Layout (reflow):** geometry-র পরিবর্তন — `width`, `height`, `top`/`left`, `margin`, `padding`, `font-size`, `border-width`, element যোগ/বাদ দেওয়া। Browser অবস্থান আর মাপ আবার হিসাব করে, প্রায়ই ancestor আর sibling-দেরও, তারপর আবার paint করে।\n- **Paint (repaint):** শুধু দেখার পরিবর্তন — `color`, `background`, `box-shadow`, `border-radius`, `outline`। Geometry বদলায় না, কিন্তু pixel আবার আঁকতে হয়।\n- **শুধু Composite:** যে element-এর নিজস্ব compositor layer আছে তাতে `transform` আর `opacity`। Compositor শুধু আগে থেকে তৈরি bitmap সরায় বা ঝাপসা করে, প্রায়ই main thread-এর বাইরে, তাই JavaScript ব্যস্ত থাকলেও এটা মসৃণ থাকে।\n\nতাই animation-এর জন্য আমি `left` animate না করে `transform: translate()`, `width`-এর বদলে `scale()`, আর fade-এর জন্য `opacity` ব্যবহার করি।\n\n**`will-change`** browser-কে আগেই জানায় যে একটা property বদলাবে, যাতে সে element-টাকে নিজস্ব layer-এ নিয়ে যেতে পারে। ব্যাপকভাবে বা স্থায়ীভাবে দিলে এটা অপব্যবহার হয়:\n- প্রতিটা layer GPU memory খায় — শত শত `will-change: transform` card low-end phone-এর memory শেষ করে দিতে পারে আর সবকিছু আরও ধীর করে দেয়;\n- এটা একটা **stacking context** তৈরি করে, আর `transform`-এর ক্ষেত্রে fixed-position descendant-দের জন্য একটা **containing block**-ও — ফলে `z-index` আর `position: fixed` layout ভেঙে যেতে পারে;\n- যে element সক্রিয়ভাবে `transform`/`opacity` animate করছে, browser এমনিতেই সেটাকে promote করে।\n\nএটা কম ব্যবহার করো — animation শুরুর ঠিক আগে দাও, আর পরে সরিয়ে ফেলো।"
+  },
+  "explanation": {
+   "en": "- **Layout thrashing:** reading layout (`offsetHeight`, `getBoundingClientRect()`) right after writing styles forces a synchronous layout. Doing that in a loop multiplies the cost — batch all reads, then all writes.\n- **\"Cheap\" isn't free:** a large blurred `box-shadow`, `filter: blur()` or `backdrop-filter` can make *paint* or *composite* expensive, especially on mobile GPUs.\n- **Scope the work:** `contain: layout paint` (or `content-visibility: auto` for off-screen sections) limits how far a change propagates.\n- **Measure, don't guess:** the DevTools Performance panel shows Layout/Paint blocks and forced-reflow warnings; the Rendering tab's *Paint flashing* and *Layer borders*, and the Layers panel, show what repaints and what got promoted.",
+   "bn": "- **Layout thrashing:** style লেখার ঠিক পরেই layout পড়লে (`offsetHeight`, `getBoundingClientRect()`) browser-কে synchronous layout করতে বাধ্য করা হয়। Loop-এর ভেতরে এটা করলে খরচ বহুগুণ বাড়ে — সব read একসাথে, তারপর সব write।\n- **\"সস্তা\" মানে ফ্রি নয়:** বড় ঝাপসা `box-shadow`, `filter: blur()` বা `backdrop-filter` *paint* বা *composite*-কে ব্যয়বহুল করে তুলতে পারে, বিশেষ করে mobile GPU-তে।\n- **কাজের পরিধি সীমিত করো:** `contain: layout paint` (বা screen-এর বাইরের section-এর জন্য `content-visibility: auto`) একটা পরিবর্তন কতদূর ছড়াবে তা সীমিত করে।\n- **আন্দাজ নয়, মাপো:** DevTools-এর Performance panel Layout/Paint block আর forced-reflow warning দেখায়; Rendering tab-এর *Paint flashing* আর *Layer borders*, আর Layers panel দেখায় কী আবার paint হচ্ছে আর কী promote হয়েছে।"
+  },
+  "interviewTip": {
+   "en": "Draw the four boxes (Style → Layout → Paint → Composite) and map each property group to its entry point. Then name *two* concrete downsides of `will-change` — memory and stacking/containing-block side effects — rather than just \"don't overuse it\".",
+   "bn": "চারটা ধাপ এঁকে দেখাও (Style → Layout → Paint → Composite), আর প্রতিটা property-গোষ্ঠী কোন ধাপ থেকে শুরু হয় তা মিলিয়ে দাও। তারপর শুধু \"বেশি ব্যবহার কোরো না\" না বলে `will-change`-এর *দুটো* নির্দিষ্ট অসুবিধা বলো — memory আর stacking/containing-block-এর পার্শ্বপ্রতিক্রিয়া।"
+  },
+  "references": [
+   {
+    "title": "web.dev — Rendering performance",
+    "url": "https://web.dev/articles/rendering-performance"
+   },
+   {
+    "title": "web.dev — Stick to compositor-only properties and manage layer count",
+    "url": "https://web.dev/articles/stick-to-compositor-only-properties-and-manage-layer-count"
+   },
+   {
+    "title": "MDN — will-change",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/will-change"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is layout thrashing, and how do you fix it in JavaScript?",
+    "bn": "Layout thrashing কী, আর JavaScript-এ কীভাবে ঠিক করবে?"
+   },
+   {
+    "en": "Why can `will-change: transform` break a `position: fixed` child?",
+    "bn": "`will-change: transform` কেন একটা `position: fixed` child ভেঙে দিতে পারে?"
+   }
+  ],
+  "related": [
+   "css-019",
+   "css-031"
+  ],
+  "commonMistakes": {
+   "en": "Adding `will-change: transform` (or `translateZ(0)`) to everything \"for GPU acceleration\", animating `top`/`left` or `height`, and assuming composited properties have no cost at all.",
+   "bn": "\"GPU acceleration-এর জন্য\" সবকিছুতে `will-change: transform` (বা `translateZ(0)`) দেওয়া, `top`/`left` বা `height` animate করা, আর ধরে নেওয়া যে composited property-র কোনো খরচই নেই।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* Janky: animates layout every frame */\n.drawer-bad { transition: left 300ms ease; left: -320px; }\n.drawer-bad.open { left: 0; }\n\n/* Smooth: compositor-only */\n.drawer {\n  transform: translateX(-100%);\n  transition: transform 300ms ease;\n}\n.drawer.open { transform: translateX(0); }\n\n/* will-change only while it's about to animate */\n.menu-button:hover + .drawer,\n.menu-button:focus-visible + .drawer {\n  will-change: transform;\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-025",
+  "subtopic": "CSS Grid",
+  "difficulty": "hard",
+  "type": "scenario",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 8,
+  "tags": [
+   "subgrid",
+   "grid",
+   "alignment",
+   "cards"
+  ],
+  "technologyVersion": "CSS Grid Level 2; subgrid Baseline widely available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Product cards in a responsive grid each have an image, a title (1–3 lines), a price and an \"Add to cart\" button. The designer complains that titles, prices and buttons don't line up across cards in the same row. How would you fix this with CSS only?",
+   "bn": "একটা responsive grid-এর প্রতিটা product card-এ আছে একটা image, একটা title (1–3 লাইন), দাম আর \"Add to cart\" button। Designer অভিযোগ করছে, একই row-এর card-গুলোতে title, দাম আর button এক লাইনে মিলছে না। শুধু CSS দিয়ে কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**The cause:** each card is laid out independently, so a card with a three-line title pushes its price and button lower than its neighbours.\n\n**The fix: subgrid.** Let each card span several rows of the *parent* grid and adopt those rows as its own:\n- The parent grid defines the columns (e.g. `repeat(auto-fill, minmax(min(14rem, 100%), 1fr))`); rows are created implicitly.\n- Each card gets `grid-row: span 4` (image, title, price, button), `display: grid` and `grid-template-rows: subgrid`.\n- Now the internal rows of every card in the same visual row share **the same track sizes** — the tallest title in that row sets the title row's height for all cards, so prices and buttons line up.\n\nSubgrid is Baseline widely available, so this is production-safe.\n\n**Before subgrid,** people used fixed heights with title truncation (loses content), JavaScript that equalised heights on resize (fragile, causes layout shift), or a flex column with `margin-top: auto` on the button (aligns the buttons but not titles or prices).",
+   "bn": "**কারণ:** প্রতিটা card আলাদাভাবে layout হয়, তাই তিন লাইনের title থাকা card তার দাম আর button-কে পাশের card-গুলোর চেয়ে নিচে ঠেলে দেয়।\n\n**সমাধান: subgrid।** প্রতিটা card-কে *parent* grid-এর কয়েকটা row জুড়ে বসাও, আর সেই row-গুলোকেই নিজের row হিসেবে নিতে দাও:\n- Parent grid column ঠিক করে (যেমন `repeat(auto-fill, minmax(min(14rem, 100%), 1fr))`); row তৈরি হয় implicitly।\n- প্রতিটা card পায় `grid-row: span 4` (image, title, দাম, button), `display: grid` আর `grid-template-rows: subgrid`।\n- এখন একই দৃশ্যমান row-এর প্রতিটা card-এর ভেতরের row-গুলো **একই track size** ভাগ করে — ওই row-এর সবচেয়ে লম্বা title সব card-এর title row-এর height ঠিক করে, ফলে দাম আর button এক লাইনে চলে আসে।\n\nSubgrid Baseline widely available, তাই production-এ নিরাপদ।\n\n**Subgrid-এর আগে** মানুষ ব্যবহার করত title কেটে দিয়ে fixed height (content হারায়), resize-এ height সমান করা JavaScript (ভঙ্গুর, layout shift ঘটায়), অথবা button-এ `margin-top: auto`-সহ flex column (button মেলে, কিন্তু title বা দাম মেলে না)।"
+  },
+  "explanation": {
+   "en": "- **Gaps:** a subgrid inherits the parent's gaps. If the parent uses a large `row-gap` between card rows, set a smaller `row-gap` on the card to override it inside the card.\n- **Count must match:** the `span` must equal the number of child rows. An extra element (e.g. a \"Sale\" badge) needs its own row, or must be positioned so it doesn't create a new track.\n- **Card padding and borders** still work — they sit outside the subgridded tracks.\n- **Why not `display: contents`?** Dropping the card's box loses its background, border and, historically in some browsers, its semantics/accessibility role — subgrid keeps the card as a real box.\n- **Mixed content:** cards without an image should still output an (empty) image row, or the alignment shifts.",
+   "bn": "- **Gap:** subgrid parent-এর gap inherit করে। Parent যদি card-এর row-গুলোর মাঝে বড় `row-gap` ব্যবহার করে, তাহলে card-এর ভেতরে override করতে card-এ ছোট একটা `row-gap` দাও।\n- **সংখ্যা মিলতে হবে:** `span` অবশ্যই child row-এর সংখ্যার সমান হতে হবে। বাড়তি কোনো element (যেমন \"Sale\" badge)-এর নিজের row লাগবে, অথবা এমনভাবে position করতে হবে যাতে নতুন track তৈরি না হয়।\n- **Card-এর padding আর border** তখনো কাজ করে — এগুলো subgrid করা track-গুলোর বাইরে থাকে।\n- **`display: contents` কেন নয়?** Card-এর box বাদ দিলে তার background, border, আর কিছু browser-এ অতীতে তার semantics/accessibility role-ও হারিয়ে যেত — subgrid card-কে আসল box হিসেবেই রাখে।\n- **মিশ্র content:** যে card-এ image নেই, তাকেও একটা (খালি) image row রাখতে হবে, নইলে সারিবদ্ধতা সরে যায়।"
+  },
+  "interviewTip": {
+   "en": "Explain the cause before the fix (\"each card is its own layout context\"), then show subgrid. Briefly listing the pre-subgrid workarounds and their downsides shows why subgrid is the right tool.",
+   "bn": "সমাধানের আগে কারণটা ব্যাখ্যা করো (\"প্রতিটা card নিজস্ব layout context\"), তারপর subgrid দেখাও। Subgrid-এর আগের workaround আর তাদের অসুবিধা সংক্ষেপে বললে বোঝা যায় কেন subgrid-ই সঠিক tool।"
+  },
+  "references": [
+   {
+    "title": "MDN — Subgrid",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Subgrid"
+   },
+   {
+    "title": "web.dev — Learn CSS: Grid",
+    "url": "https://web.dev/learn/css/grid"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you handle a card that sometimes has an extra 'Sale' badge row?",
+    "bn": "যে card-এ মাঝে মাঝে বাড়তি একটা 'Sale' badge row থাকে, সেটা কীভাবে সামলাবে?"
+   },
+   {
+    "en": "Can subgrid be used for columns as well as rows? Give an example.",
+    "bn": "Subgrid কি row-এর মতো column-এর জন্যও ব্যবহার করা যায়? উদাহরণ দাও।"
+   }
+  ],
+  "related": [
+   "css-006",
+   "css-015"
+  ],
+  "commonMistakes": {
+   "en": "Fixing it with fixed heights or JavaScript, forgetting `grid-row: span N` on the card (then `subgrid` has only one row to inherit), or a mismatch between the span and the number of children.",
+   "bn": "Fixed height বা JavaScript দিয়ে ঠিক করা, card-এ `grid-row: span N` দিতে ভুলে যাওয়া (তখন `subgrid`-এর inherit করার মতো মাত্র একটা row থাকে), অথবা span আর children-এর সংখ্যায় অমিল।"
+  },
+  "code": {
+   "language": "html",
+   "source": "<ul class=\"products\">\n  <li class=\"card\">\n    <img src=\"/p/panjabi.jpg\" alt=\"Navy cotton panjabi\" width=\"320\" height=\"400\">\n    <h3>Cotton Panjabi — Navy, Slim Fit, Eid Collection 2026</h3>\n    <p class=\"price\">৳1,850</p>\n    <button type=\"button\">Add to cart</button>\n  </li>\n  <!-- more cards -->\n</ul>\n\n<style>\n  .products {\n    display: grid;\n    grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));\n    gap: 1.5rem 1rem;\n    list-style: none;\n    padding: 0;\n  }\n  .card {\n    display: grid;\n    grid-row: span 4;              /* image, title, price, button */\n    grid-template-rows: subgrid;\n    row-gap: 0.5rem;               /* tighter than the parent's 1.5rem */\n    padding: 0.75rem;\n    border: 1px solid #ddd;\n    border-radius: 12px;\n  }\n  .card img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }\n  .card .price { align-self: end; }\n</style>"
+  },
+  "technology": "css"
+ }
+]

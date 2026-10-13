@@ -1,0 +1,600 @@
+[
+ {
+  "id": "mongoose-001",
+  "subtopic": "Schemas & Models",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "schema",
+   "model",
+   "document",
+   "basics"
+  ],
+  "technologyVersion": "Mongoose 9.11 (concept unchanged since early versions)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In Mongoose, what is the difference between a schema, a model and a document?",
+   "bn": "Mongoose-এ schema, model আর document-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "- A **schema** describes the shape of your data: fields and their types, validators, defaults, indexes, plus middleware, virtuals and methods. It lives only in your Node.js app — MongoDB itself doesn't know about it.\n- A **model** is compiled from a schema with `mongoose.model(\"User\", userSchema)`. It's a class bound to a collection (by default the lowercased plural, `users`) and gives you the query API: `find`, `create`, `updateOne`, and so on.\n- A **document** is an instance of a model — one record. It knows which fields changed, can validate itself, has `save()`, and exposes your virtuals and instance methods.\n\nIn short: schema = blueprint, model = the class/collection API, document = one object built from it.",
+   "bn": "- **Schema** data-র shape বর্ণনা করে: field আর তাদের type, validator, default, index — সাথে middleware, virtual আর method। এটা শুধু তোমার Node.js app-এ থাকে — MongoDB নিজে এ সম্পর্কে কিছু জানে না।\n- **Model** তৈরি হয় schema থেকে compile করে, `mongoose.model(\"User\", userSchema)` দিয়ে। এটা একটা class যেটা একটা collection-এর সাথে যুক্ত (default-ভাবে lowercase plural নাম, `users`), আর query API দেয়: `find`, `create`, `updateOne` ইত্যাদি।\n- **Document** হলো model-এর একটা instance — একটা record। কোন field বদলেছে তা জানে, নিজেকে validate করতে পারে, এর `save()` আছে, আর তোমার virtual ও instance method ব্যবহার করা যায়।\n\nসংক্ষেপে: schema = নকশা, model = class/collection API, document = সেখান থেকে তৈরি একটা object।"
+  },
+  "explanation": {
+   "en": "- **Compile once:** call `mongoose.model()` once per name. Re-compiling in hot-reload environments (e.g. Next.js dev) throws `OverwriteModelError`, which is why you often see `mongoose.models.User || mongoose.model(\"User\", userSchema)`.\n- **Collection name:** override pluralisation with the third argument or the `collection` schema option.\n- **Schema is app-level:** another service writing to the same collection with the native driver bypasses your Mongoose validation — add MongoDB `$jsonSchema` validation if several apps write.\n- **Change tracking:** documents remember modified paths, so `save()` sends only `$set` for what changed (`doc.isModified(\"email\")`).",
+   "bn": "- **একবারই compile করো:** প্রতিটি নামের জন্য একবারই `mongoose.model()` call করো। Hot-reload environment-এ (যেমন Next.js dev) আবার compile করলে `OverwriteModelError` হয় — এজন্যই প্রায়ই `mongoose.models.User || mongoose.model(\"User\", userSchema)` দেখা যায়।\n- **Collection-এর নাম:** তৃতীয় argument বা `collection` schema option দিয়ে pluralisation override করা যায়।\n- **Schema app-level:** অন্য কোনো service native driver দিয়ে একই collection-এ লিখলে তোমার Mongoose validation bypass হয়ে যায় — একাধিক app লিখলে MongoDB-র `$jsonSchema` validation যোগ করো।\n- **Change tracking:** document মনে রাখে কোন path বদলেছে, তাই `save()` শুধু বদলানো অংশের জন্য `$set` পাঠায় (`doc.isModified(\"email\")`)।"
+  },
+  "interviewTip": {
+   "en": "Point out that the schema is enforced by Mongoose, not MongoDB — it shows you understand where validation actually happens.",
+   "bn": "বলো যে schema Mongoose enforce করে, MongoDB না — এতে বোঝা যায় validation আসলে কোথায় হয় সেটা তুমি জানো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   },
+   {
+    "title": "Mongoose — Models",
+    "url": "https://mongoosejs.com/docs/models.html"
+   },
+   {
+    "title": "Mongoose — Documents",
+    "url": "https://mongoosejs.com/docs/documents.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why do Next.js projects use `mongoose.models.User || mongoose.model(...)`?",
+    "bn": "Next.js project-এ কেন `mongoose.models.User || mongoose.model(...)` ব্যবহার করা হয়?"
+   },
+   {
+    "en": "How would you enforce a schema if another service writes to the same collection?",
+    "bn": "অন্য একটা service একই collection-এ লিখলে schema কীভাবে enforce করবে?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Saying MongoDB \"stores the schema\", or calling `mongoose.model()` inside a request handler on every request.",
+   "bn": "MongoDB \"schema store করে\" বলা, অথবা প্রতিটি request-এ request handler-এর ভেতরে `mongoose.model()` call করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose from \"mongoose\";\n\nconst userSchema = new mongoose.Schema(\n  {\n    name: { type: String, required: true, trim: true },\n    email: { type: String, required: true, lowercase: true },\n    role: { type: String, enum: [\"customer\", \"admin\"], default: \"customer\" },\n  },\n  { timestamps: true }\n);\n\nconst User = mongoose.model(\"User\", userSchema);   // model → \"users\" collection\n\nconst user = new User({ name: \"Rafi\", email: \"RAFI@EXAMPLE.COM\" }); // document\nconsole.log(user.email, user.role);   // rafi@example.com customer\nawait user.save();"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-002",
+  "subtopic": "Schemas & Models",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "schematypes",
+   "schema-options",
+   "validation",
+   "defaults"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What are the common SchemaTypes and field options in Mongoose? Show them with a product schema.",
+   "bn": "Mongoose-এ common SchemaType আর field option কী কী? একটা product schema দিয়ে দেখাও।"
+  },
+  "answer": {
+   "en": "**SchemaTypes:** `String`, `Number`, `Boolean`, `Date`, `ObjectId` (`Schema.Types.ObjectId`, used for references), arrays like `[String]` or arrays of subdocuments, `Decimal128`, `Map`, `Buffer`, `UUID`, `BigInt` and `Mixed` (anything, no casting — use sparingly).\n\n**Options for all types:** `required`, `default`, `validate`, `select` (e.g. `select: false` to hide a field), `immutable`, `get`/`set`, and index helpers `index`, `unique`, `sparse`.\n\n**Type-specific options:** strings have `trim`, `lowercase`, `uppercase`, `match`, `enum`, `minLength`, `maxLength`; numbers have `min`, `max`; dates have `min`, `max` and `expires` (a TTL index).\n\n**Schema options** apply to the whole schema — `timestamps: true` adds `createdAt`/`updatedAt`, and `toJSON` controls serialisation.",
+   "bn": "**SchemaType:** `String`, `Number`, `Boolean`, `Date`, `ObjectId` (`Schema.Types.ObjectId`, reference-এর জন্য), `[String]`-এর মতো array বা subdocument-এর array, `Decimal128`, `Map`, `Buffer`, `UUID`, `BigInt` আর `Mixed` (যেকোনো কিছু, casting ছাড়া — কম ব্যবহার করো)।\n\n**সব type-এর option:** `required`, `default`, `validate`, `select` (যেমন field লুকাতে `select: false`), `immutable`, `get`/`set`, আর index helper `index`, `unique`, `sparse`।\n\n**Type-specific option:** string-এ `trim`, `lowercase`, `uppercase`, `match`, `enum`, `minLength`, `maxLength`; number-এ `min`, `max`; date-এ `min`, `max` আর `expires` (একটা TTL index)।\n\n**Schema option** পুরো schema-তে apply হয় — `timestamps: true` দিলে `createdAt`/`updatedAt` যোগ হয়, আর `toJSON` serialisation নিয়ন্ত্রণ করে।"
+  },
+  "explanation": {
+   "en": "- **Casting:** Mongoose converts values to the declared type — `\"42\"` becomes `42` for a Number path; a value that can't be cast (e.g. `\"abc\"` for a Number) produces a `CastError`.\n- **`lowercase`/`trim` are setters**, not validators: they transform the value before saving (and when casting query filters for those paths).\n- **`unique` and `index` are not validators** — they only ask Mongoose to create indexes.\n- **`select: false`** is the standard way to keep `passwordHash` out of normal queries; include it explicitly with `.select(\"+passwordHash\")` in the login flow.\n- **`Mixed`** loses change tracking for nested edits — you must call `doc.markModified(\"path\")`.\n- **Money:** store integer poisha in a `Number` (or use `Decimal128`) instead of floating-point taka.",
+   "bn": "- **Casting:** Mongoose value-কে declared type-এ রূপান্তর করে — Number path-এ `\"42\"` হয়ে যায় `42`; cast করা না গেলে (যেমন Number-এ `\"abc\"`) `CastError` হয়।\n- **`lowercase`/`trim` হলো setter**, validator না: save-এর আগে value বদলে দেয় (আর ওই path-এর query filter cast করার সময়ও)।\n- **`unique` আর `index` validator না** — এরা শুধু Mongoose-কে index বানাতে বলে।\n- **`select: false`** দিয়েই সাধারণত `passwordHash`-কে normal query থেকে দূরে রাখা হয়; login flow-তে `.select(\"+passwordHash\")` দিয়ে explicitly আনো।\n- **`Mixed`**-এ nested পরিবর্তনের change tracking থাকে না — `doc.markModified(\"path\")` call করতে হয়।\n- **টাকা:** floating-point টাকার বদলে `Number`-এ integer পয়সা রাখো (অথবা `Decimal128` ব্যবহার করো)।"
+  },
+  "interviewTip": {
+   "en": "Group your answer (types → common options → type-specific options → schema options) instead of listing randomly — structure makes even a basic answer sound senior.",
+   "bn": "এলোমেলো তালিকা না দিয়ে উত্তরটা ভাগ করে বলো (type → common option → type-specific option → schema option) — গোছানো উত্তর একটা basic প্রশ্নকেও senior-level শোনায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — SchemaTypes",
+    "url": "https://mongoosejs.com/docs/schematypes.html"
+   },
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use a `Map` instead of a nested object?",
+    "bn": "কখন nested object-এর বদলে `Map` ব্যবহার করবে?"
+   },
+   {
+    "en": "How do you return a field marked `select: false` when you need it?",
+    "bn": "`select: false` দেওয়া field দরকার হলে কীভাবে return করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-001"
+  ],
+  "commonMistakes": {
+   "en": "Treating `unique` as validation; using `Mixed` everywhere to \"avoid schema problems\"; storing prices as floating-point taka.",
+   "bn": "`unique`-কে validation মনে করা; \"schema-র ঝামেলা এড়াতে\" সব জায়গায় `Mixed` ব্যবহার করা; দাম floating-point টাকা হিসেবে রাখা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose, { Schema } from \"mongoose\";\n\nconst productSchema = new Schema(\n  {\n    name: { type: String, required: [true, \"Name is required\"], trim: true, maxLength: 120 },\n    slug: { type: String, required: true, unique: true, lowercase: true, match: /^[a-z0-9-]+$/ },\n    price: { type: Number, required: true, min: 0 },          // integer poisha\n    stock: { type: Number, min: 0, default: 0 },\n    category: { type: String, enum: [\"grocery\", \"electronics\", \"fashion\"], index: true },\n    tags: [String],\n    sku: { type: String, immutable: true },\n    seller: { type: Schema.Types.ObjectId, ref: \"Seller\", required: true },\n    attributes: { type: Map, of: String },                    // { color: \"black\", size: \"M\" }\n    costPrice: { type: Number, select: false },               // hidden by default\n  },\n  { timestamps: true }\n);\n\nexport const Product = mongoose.model(\"Product\", productSchema);"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-003",
+  "subtopic": "Validation",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "unique",
+   "indexes",
+   "validation",
+   "e11000"
+  ],
+  "technologyVersion": "Mongoose 9.11 (behaviour unchanged across versions)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A schema defines `email: { type: String, unique: true }`. Which statement is correct?",
+   "bn": "একটা schema-তে `email: { type: String, unique: true }` define করা আছে। কোন statement-টি সঠিক?"
+  },
+  "answer": {
+   "en": "`unique: true` is an **index helper, not a validator**. Mongoose asks MongoDB to create a unique index (via `autoIndex` or `syncIndexes()`), and it's the **server** that rejects a duplicate with an E11000 duplicate key error. If the index was never built — or failed to build because duplicates already existed — nothing stops duplicates.",
+   "bn": "`unique: true` হলো একটা **index helper, validator না**। Mongoose MongoDB-কে একটা unique index বানাতে বলে (`autoIndex` বা `syncIndexes()` দিয়ে), আর duplicate reject করে **server** — E11000 duplicate key error দিয়ে। Index কখনো build না হলে — বা আগে থেকেই duplicate থাকায় build fail করলে — duplicate আটকানোর কিছুই থাকে না।"
+  },
+  "explanation": {
+   "en": "The tempting answer is A, because `unique` sits next to `required` and `min` in the schema. The Mongoose docs explicitly call this a common beginner gotcha.\n\nOption C describes what the third-party `mongoose-unique-validator` plugin does — and that approach has a race condition (two requests can both pass the `findOne` check). The index is the only reliable guarantee. In practice: make sure the index exists in production (see `syncIndexes()`), normalise values (e.g. `lowercase: true` for emails), and translate `err.code === 11000` into a friendly 409 \"email already registered\" response.",
+   "bn": "সবচেয়ে বিভ্রান্তিকর উত্তর A, কারণ schema-তে `unique` থাকে `required` আর `min`-এর পাশেই। Mongoose docs নিজেই এটাকে beginner-দের common gotcha বলেছে।\n\nOption C হলো third-party `mongoose-unique-validator` plugin যা করে — আর সেই পদ্ধতিতে race condition আছে (দুইটা request একসাথে `findOne` check পার হয়ে যেতে পারে)। Index-ই একমাত্র নির্ভরযোগ্য guarantee। বাস্তবে: production-এ index আছে কি না নিশ্চিত করো (`syncIndexes()` দেখো), value normalise করো (যেমন email-এ `lowercase: true`), আর `err.code === 11000`-কে একটা friendly 409 \"email already registered\" response-এ রূপান্তর করো।"
+  },
+  "interviewTip": {
+   "en": "Mention the race condition of \"check then insert\" — it shows you understand why the database constraint, not application code, must enforce uniqueness.",
+   "bn": "\"আগে check, পরে insert\"-এর race condition-এর কথা বলো — এতে বোঝা যায় কেন uniqueness application code না, database constraint দিয়েই enforce করতে হয়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Validation",
+    "url": "https://mongoosejs.com/docs/validation.html"
+   },
+   {
+    "title": "Mongoose — FAQ",
+    "url": "https://mongoosejs.com/docs/faq.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you turn an E11000 error into a helpful API response?",
+    "bn": "E11000 error-কে কীভাবে একটা কাজের API response-এ রূপান্তর করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-002"
+  ],
+  "options": [
+   {
+    "en": "`unique` is a built-in validator, so `doc.validate()` rejects a duplicate email before any database write",
+    "bn": "`unique` একটা built-in validator, তাই database write-এর আগেই `doc.validate()` duplicate email reject করে"
+   },
+   {
+    "en": "`unique` only tells Mongoose to build a unique index; MongoDB rejects duplicates with an E11000 error — and only if that index actually exists",
+    "bn": "`unique` শুধু Mongoose-কে একটা unique index বানাতে বলে; MongoDB E11000 error দিয়ে duplicate reject করে — তাও শুধু যদি index-টা আসলেই থাকে"
+   },
+   {
+    "en": "`unique` makes Mongoose run a `findOne` before every save to check for duplicates",
+    "bn": "`unique` দিলে Mongoose প্রতিটি save-এর আগে duplicate check করতে একটা `findOne` চালায়"
+   },
+   {
+    "en": "`unique` has no effect unless the field is also `required: true`",
+    "bn": "Field-টা `required: true` না হলে `unique`-এর কোনো প্রভাব নেই"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-004",
+  "subtopic": "CRUD",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "crud",
+   "create",
+   "find",
+   "save",
+   "updateone",
+   "async-await"
+  ],
+  "technologyVersion": "Mongoose 9.11 (`returnDocument` replaces deprecated `new` since 9.2)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How do you do basic CRUD with Mongoose using async/await? For updates, what's the difference between changing a document and calling `save()` versus calling `Model.updateOne()`?",
+   "bn": "Mongoose-এ async/await দিয়ে basic CRUD কীভাবে করো? Update-এর ক্ষেত্রে document বদলে `save()` call করা আর `Model.updateOne()` call করার মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "- **Create:** `Model.create(data)` (or `new Model(data).save()`); `insertMany` for bulk.\n- **Read:** `find(filter)`, `findOne(filter)`, `findById(id)`, chained with `.select()`, `.sort()`, `.limit()`, and `.lean()` for read-only results.\n- **Update:** either load → modify → `save()`, or a direct update command: `updateOne`, `updateMany`, `findOneAndUpdate` / `findByIdAndUpdate`.\n- **Delete:** `deleteOne`, `deleteMany`, `findByIdAndDelete`.\n\n**`save()` vs `updateOne()`:** `save()` works on a loaded document — it runs full schema validation and `save` middleware, then sends only the changed paths. But it's read-modify-write, so two concurrent requests can overwrite each other. `updateOne()` sends one atomic command (e.g. `$inc`) without loading the document — faster and safe for counters — but `save` hooks don't run and validators run only if you pass `runValidators: true` (and even then only for operators like `$set`/`$push`, not `$inc`).",
+   "bn": "- **Create:** `Model.create(data)` (অথবা `new Model(data).save()`); bulk-এর জন্য `insertMany`।\n- **Read:** `find(filter)`, `findOne(filter)`, `findById(id)`, সাথে chain করে `.select()`, `.sort()`, `.limit()`, আর read-only result-এর জন্য `.lean()`।\n- **Update:** হয় load → modify → `save()`, নয়তো সরাসরি update command: `updateOne`, `updateMany`, `findOneAndUpdate` / `findByIdAndUpdate`।\n- **Delete:** `deleteOne`, `deleteMany`, `findByIdAndDelete`।\n\n**`save()` বনাম `updateOne()`:** `save()` load করা document-এর ওপর কাজ করে — পুরো schema validation আর `save` middleware চালায়, তারপর শুধু বদলানো path পাঠায়। কিন্তু এটা read-modify-write, তাই দুইটা concurrent request একে অপরের পরিবর্তন overwrite করতে পারে। `updateOne()` document load না করেই একটা atomic command (যেমন `$inc`) পাঠায় — দ্রুত আর counter-এর জন্য নিরাপদ — কিন্তু `save` hook চলে না, আর `runValidators: true` না দিলে validator-ও চলে না (দিলেও শুধু `$set`/`$push`-এর মতো operator-এ চলে, `$inc`-এ না)।"
+  },
+  "explanation": {
+   "en": "- **Return values:** `find()` → array (empty if nothing matches); `findOne()`/`findById()` → document or `null`; `updateOne()` → `{ acknowledged, matchedCount, modifiedCount, ... }`; `deleteOne()` → `{ deletedCount }`.\n- **Returning the updated document:** `findOneAndUpdate(filter, update, { returnDocument: \"after\" })`. The old `{ new: true }` option still works but has been deprecated since Mongoose 9.2.\n- **Queries are thenables:** `await Model.find()` executes it; `.exec()` gives a real Promise and better stack traces. Callbacks were removed in Mongoose 7.\n- **Counters, stock, balances:** prefer atomic operators (`$inc`, `$push`) over load-modify-save.",
+   "bn": "- **Return value:** `find()` → array (কিছু match না করলে খালি); `findOne()`/`findById()` → document বা `null`; `updateOne()` → `{ acknowledged, matchedCount, modifiedCount, ... }`; `deleteOne()` → `{ deletedCount }`।\n- **Update হওয়া document ফেরত পেতে:** `findOneAndUpdate(filter, update, { returnDocument: \"after\" })`। পুরনো `{ new: true }` option এখনো কাজ করে, কিন্তু Mongoose 9.2 থেকে deprecated।\n- **Query হলো thenable:** `await Model.find()` দিলেই execute হয়; `.exec()` আসল Promise আর ভালো stack trace দেয়। Mongoose 7-এ callback সরিয়ে দেওয়া হয়েছে।\n- **Counter, stock, balance:** load-modify-save-এর বদলে atomic operator (`$inc`, `$push`) ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "When comparing `save()` and `updateOne()`, mention concurrency (\"lost updates\") — that's the detail most juniors miss and interviewers listen for.",
+   "bn": "`save()` আর `updateOne()` তুলনা করার সময় concurrency (\"lost update\")-এর কথা বলো — বেশিরভাগ junior এটাই মিস করে, আর interviewer ঠিক এটাই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Models",
+    "url": "https://mongoosejs.com/docs/models.html"
+   },
+   {
+    "title": "Mongoose — Queries",
+    "url": "https://mongoosejs.com/docs/queries.html"
+   },
+   {
+    "title": "Mongoose — How to Use findOneAndUpdate()",
+    "url": "https://mongoosejs.com/docs/tutorials/findoneandupdate.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Two requests decrement stock at the same time using `save()`. What can go wrong?",
+    "bn": "দুইটা request একই সময়ে `save()` দিয়ে stock কমালে কী সমস্যা হতে পারে?"
+   },
+   {
+    "en": "When would you choose `insertMany` over `create` with an array?",
+    "bn": "কখন array সহ `create`-এর বদলে `insertMany` বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "mongoose-001",
+   "mongoose-002"
+  ],
+  "commonMistakes": {
+   "en": "Expecting `updateOne()` to trigger `pre('save')` hooks; using `{ new: true }` in new Mongoose 9 code; decrementing stock with `doc.stock -= 1; await doc.save()` under concurrency.",
+   "bn": "`updateOne()`-এ `pre('save')` hook চলবে আশা করা; নতুন Mongoose 9 code-এ `{ new: true }` ব্যবহার করা; concurrency থাকা অবস্থায় `doc.stock -= 1; await doc.save()` দিয়ে stock কমানো।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Create\nconst product = await Product.create({ name: \"Earbuds\", slug: \"earbuds\", price: 189900, stock: 10, seller });\n\n// Read\nconst one = await Product.findById(product._id);\nconst cheap = await Product.find({ price: { $lte: 200000 } }).sort({ price: 1 }).limit(20).lean();\n\n// Update (a): load → change → save  (full validation + save hooks)\none.name = \"QCY Earbuds\";\nawait one.save();\n\n// Update (b): one atomic command (no save hooks). Guard stock in the filter:\n// update validators (runValidators) don't check $inc, so min: 0 won't stop it\nawait Product.updateOne({ _id: product._id, stock: { $gte: 1 } }, { $inc: { stock: -1 } });\n\n// Update and get the new version back\nconst updated = await Product.findOneAndUpdate(\n  { _id: product._id },\n  { $set: { price: 179900 } },\n  { returnDocument: \"after\", runValidators: true }\n);\n\n// Delete\nawait Product.deleteOne({ _id: product._id });"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-005",
+  "subtopic": "Documents & Queries",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "findone",
+   "null",
+   "orfail",
+   "queries"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `await User.findOne({ email: \"nobody@example.com\" })` return when no document matches?",
+   "bn": "কোনো document match না করলে `await User.findOne({ email: \"nobody@example.com\" })` কী return করে?"
+  },
+  "answer": {
+   "en": "`findOne()` and `findById()` resolve to `null` when nothing matches; `find()` resolves to an empty array. Your code has to check for `null` — usually by returning a 404.",
+   "bn": "কিছু match না করলে `findOne()` আর `findById()` `null` দেয়; `find()` দেয় একটা খালি array। তাই code-এ `null` check করতে হয় — সাধারণত 404 return করে।"
+  },
+  "explanation": {
+   "en": "Option B is tempting because `DocumentNotFoundError` does exist — but it's only thrown when you opt in with `.orFail()` (or when `save()` can't find the document it's updating). `.orFail()` is handy in Express 5, where a thrown error in an async handler goes straight to your error middleware:\n\n`const user = await User.findById(id).orFail();`\n\nOption A is the `find()` behaviour. Forgetting the `null` check leads to the classic `TypeError: Cannot read properties of null` in production logs.",
+   "bn": "Option B বিভ্রান্তিকর, কারণ `DocumentNotFoundError` আসলেই আছে — কিন্তু এটা throw হয় শুধু তখনই যখন তুমি `.orFail()` দিয়ে opt in করো (অথবা `save()` যে document update করছে সেটা খুঁজে না পেলে)। Express 5-এ `.orFail()` কাজের, কারণ async handler-এ throw হওয়া error সরাসরি error middleware-এ চলে যায়:\n\n`const user = await User.findById(id).orFail();`\n\nOption A হলো `find()`-এর আচরণ। `null` check ভুলে গেলে production log-এ classic `TypeError: Cannot read properties of null` দেখা যায়।"
+  },
+  "interviewTip": {
+   "en": "Contrast all three — `find` → `[]`, `findOne` → `null`, `.orFail()` → throws — it shows you know the API surface, not just one method.",
+   "bn": "তিনটাই তুলনা করে বলো — `find` → `[]`, `findOne` → `null`, `.orFail()` → throw — এতে বোঝা যায় তুমি শুধু একটা method না, পুরো API জানো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose API — Query",
+    "url": "https://mongoosejs.com/docs/api/query.html"
+   },
+   {
+    "title": "Mongoose API — Model",
+    "url": "https://mongoosejs.com/docs/api/model.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you map `DocumentNotFoundError` to a 404 in Express?",
+    "bn": "Express-এ `DocumentNotFoundError`-কে কীভাবে 404-এ map করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-004"
+  ],
+  "options": [
+   {
+    "en": "An empty array `[]`",
+    "bn": "একটা খালি array `[]`"
+   },
+   {
+    "en": "It throws a `DocumentNotFoundError`",
+    "bn": "একটা `DocumentNotFoundError` throw করে"
+   },
+   {
+    "en": "An empty document `{}`",
+    "bn": "একটা খালি document `{}`"
+   },
+   {
+    "en": "`null`",
+    "bn": "`null`"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-012",
+  "subtopic": "Validation",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "update-validators",
+   "runvalidators",
+   "findbyidandupdate",
+   "returndocument",
+   "mass-assignment"
+  ],
+  "technologyVersion": "Mongoose 9.11 (`new` deprecated since 9.2), Express 5, zod 4",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "This PATCH endpoint accepts `{ \"price\": -500, \"status\": \"deleted\" }` and saves it without any error, even though the schema has `min: 0` and an `enum`. Why, and what else is wrong with it?",
+   "bn": "এই PATCH endpoint `{ \"price\": -500, \"status\": \"deleted\" }` নিয়ে কোনো error ছাড়াই save করে ফেলে, যদিও schema-তে `min: 0` আর `enum` আছে। কেন? আর এতে আর কী কী সমস্যা আছে?"
+  },
+  "answer": {
+   "en": "**Root cause:** schema validators run on `save()`/`create()`, but **update validators are off by default** for `updateOne`, `updateMany` and `findOneAndUpdate` (which `findByIdAndUpdate` uses). The update goes straight to MongoDB, so `min` and `enum` are never checked. Fix: pass `runValidators: true`.\n\n**Other problems:**\n1. `{ new: true }` is deprecated since Mongoose 9.2 — use `returnDocument: \"after\"`.\n2. **Mass assignment:** passing `req.body` as the update lets a client change any schema field, and even send operators like `$unset`. Validate and whitelist fields (zod), then wrap them in `$set`.\n3. **Missing document:** `findByIdAndUpdate` returns `null` if the ID doesn't exist, so the API answers `200 null` instead of 404.\n4. An invalid ID like `\"abc\"` throws a `CastError` — handle it as a 400 in error middleware (Express 5 forwards rejected promises automatically).",
+   "bn": "**Root cause:** schema validator চলে `save()`/`create()`-এ, কিন্তু `updateOne`, `updateMany` আর `findOneAndUpdate`-এ (`findByIdAndUpdate` এটাই ব্যবহার করে) **update validator default-ভাবে বন্ধ থাকে**। Update সরাসরি MongoDB-তে চলে যায়, তাই `min` আর `enum` কখনো check হয় না। Fix: `runValidators: true` দাও।\n\n**আরও সমস্যা:**\n1. `{ new: true }` Mongoose 9.2 থেকে deprecated — `returnDocument: \"after\"` ব্যবহার করো।\n2. **Mass assignment:** `req.body`-কে সরাসরি update হিসেবে দিলে client যেকোনো schema field বদলাতে পারে, এমনকি `$unset`-এর মতো operator-ও পাঠাতে পারে। Field validate আর whitelist করো (zod), তারপর `$set`-এ মুড়ে দাও।\n3. **Document না থাকা:** ID না থাকলে `findByIdAndUpdate` `null` return করে, তাই API 404-এর বদলে `200 null` দেয়।\n4. `\"abc\"`-এর মতো invalid ID দিলে `CastError` throw হয় — error middleware-এ এটাকে 400 হিসেবে handle করো (Express 5 rejected promise automatically forward করে)।"
+  },
+  "explanation": {
+   "en": "**How update validators differ from document validation:**\n- They only run on these operators: `$set`, `$unset`, `$push`, `$addToSet`, `$pull`, `$pullAll` — so a `$inc` that makes stock negative isn't caught by `min: 0`. Guard such cases in the filter instead (`{ stock: { $gte: qty } }`).\n- They only validate the **paths in the update**, not the whole document.\n- `required` validators only fail when you explicitly `$unset` the field.\n- Inside a custom validator, `this` is the **query**, not the document — validators that read other fields via `this.otherField` break in updates.\n\n**Alternative:** load the document, assign the allowed fields, and call `save()` — you get full validation and `save` hooks, at the cost of an extra read and read-modify-write semantics. Many teams also set `runValidators` globally with a plugin or `mongoose.set('runValidators', true)`.",
+   "bn": "**Update validator আর document validation-এর পার্থক্য:**\n- এরা শুধু এই operator-গুলোতে চলে: `$set`, `$unset`, `$push`, `$addToSet`, `$pull`, `$pullAll` — তাই stock negative করে ফেলা `$inc` `min: 0` দিয়ে ধরা পড়ে না। এমন ক্ষেত্রে filter-এই guard দাও (`{ stock: { $gte: qty } }`)।\n- এরা শুধু **update-এ থাকা path** validate করে, পুরো document না।\n- `required` validator শুধু তখনই fail করে যখন তুমি explicitly field-টা `$unset` করো।\n- Custom validator-এর ভেতরে `this` হলো **query**, document না — যেসব validator `this.otherField` দিয়ে অন্য field পড়ে, সেগুলো update-এ ভেঙে যায়।\n\n**বিকল্প:** document load করে allowed field assign করো, তারপর `save()` call করো — পুরো validation আর `save` hook পাবে, তবে একটা বাড়তি read আর read-modify-write-এর ঝুঁকি থাকবে। অনেক team plugin বা `mongoose.set('runValidators', true)` দিয়ে globally `runValidators` চালু করে।"
+  },
+  "interviewTip": {
+   "en": "Lead with the root cause in one sentence (\"update validators are opt-in\"), then list the secondary issues by severity. Spotting the mass-assignment risk unprompted is a strong signal.",
+   "bn": "এক বাক্যে root cause দিয়ে শুরু করো (\"update validator opt-in\"), তারপর গুরুত্ব অনুযায়ী বাকি সমস্যাগুলো বলো। নিজে থেকে mass-assignment-এর ঝুঁকি ধরতে পারলে খুব ভালো signal যায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Validation",
+    "url": "https://mongoosejs.com/docs/validation.html"
+   },
+   {
+    "title": "Mongoose — How to Use findOneAndUpdate()",
+    "url": "https://mongoosejs.com/docs/tutorials/findoneandupdate.html"
+   },
+   {
+    "title": "Mongoose — Migrating to 9",
+    "url": "https://mongoosejs.com/docs/migrating_to_9.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you validate a rule that compares two fields (e.g. `salePrice < price`) in both save and update paths?",
+    "bn": "দুইটা field তুলনা করে এমন rule (যেমন `salePrice < price`) save আর update — দুই পথেই কীভাবে validate করবে?"
+   },
+   {
+    "en": "Why might a team prefer load-and-save over `findByIdAndUpdate` for admin edits?",
+    "bn": "Admin edit-এর জন্য একটা team কেন `findByIdAndUpdate`-এর বদলে load-and-save পছন্দ করতে পারে?"
+   }
+  ],
+  "related": [
+   "mongoose-003",
+   "mongoose-004"
+  ],
+  "commonMistakes": {
+   "en": "Assuming schema validation always runs; relying on `runValidators` to catch `$inc` going negative; trusting `req.body` as an update document.",
+   "bn": "ধরে নেওয়া যে schema validation সবসময় চলে; `$inc` দিয়ে negative হওয়া ধরতে `runValidators`-এর ওপর ভরসা করা; `req.body`-কে update document হিসেবে বিশ্বাস করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const productSchema = new mongoose.Schema({\n  name: { type: String, required: true },\n  price: { type: Number, required: true, min: 0 },\n  status: { type: String, enum: [\"draft\", \"active\", \"archived\"], default: \"draft\" },\n});\nconst Product = mongoose.model(\"Product\", productSchema);\n\napp.patch(\"/products/:id\", async (req, res) => {\n  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });\n  res.json(product);\n});"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "import { z } from \"zod\";\n\nconst PatchProduct = z.strictObject({\n  name: z.string().min(1).max(120).optional(),\n  price: z.number().int().nonnegative().optional(),\n  status: z.enum([\"draft\", \"active\", \"archived\"]).optional(),\n});\n\napp.patch(\"/products/:id\", async (req, res) => {\n  const changes = PatchProduct.parse(req.body);   // ZodError → 400 in error middleware\n\n  const product = await Product.findByIdAndUpdate(\n    req.params.id,\n    { $set: changes },\n    { returnDocument: \"after\", runValidators: true }\n  );\n  if (!product) return res.status(404).json({ error: \"Product not found\" });\n  res.json(product);\n});",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-023",
+  "subtopic": "Transactions",
+  "difficulty": "hard",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "transactions",
+   "session",
+   "connection-transaction",
+   "promise-all",
+   "side-effects",
+   "inventory"
+  ],
+  "technologyVersion": "Mongoose 9.11 (Connection#transaction), MongoDB 9.0 replica set",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "This checkout function uses a Mongoose transaction, but in production the team sees stock decreasing for orders that were never created, occasional overselling, and customers receiving the \"order placed\" SMS two or three times. Find the bugs.",
+   "bn": "এই checkout function একটা Mongoose transaction ব্যবহার করে, কিন্তু production-এ team দেখছে যে কখনো তৈরিই হয়নি এমন order-এর জন্য stock কমে যাচ্ছে, মাঝে মাঝে overselling হচ্ছে, আর customer-রা \"order placed\" SMS দুই-তিনবার পাচ্ছে। Bug-গুলো খুঁজে বের করো।"
+  },
+  "answer": {
+   "en": "1. **Missing `{ session }` on `Product.updateOne`.** Without the session the stock update runs **outside** the transaction and commits immediately. If the transaction later aborts (or is retried), the order disappears but the stock stays decremented — that's the \"stock gone, no order\" symptom. Every operation inside must receive the session.\n2. **`Promise.all` inside a transaction.** Running operations in parallel on one transaction/session isn't supported — Mongoose's docs call it undefined behaviour. Use a sequential `for...of`.\n3. **Ignoring `matchedCount`.** When stock is insufficient, the conditional update matches nothing — no error — and the order is still created. That's the overselling. Check `matchedCount` and throw to abort.\n4. **SMS inside the callback.** `connection.transaction()` wraps `withTransaction()`, which **re-runs the whole callback** on transient errors (write conflicts are common during a sale). Each attempt sends another SMS, and if the commit ultimately fails the customer was told about an order that doesn't exist. Do side effects after commit, or write an \"outbox\" document in the transaction and let a worker send it exactly once.\n\n`Order.create([doc], { session })` itself is correct — passing options to `create()` requires the array form.",
+   "bn": "1. **`Product.updateOne`-এ `{ session }` নেই।** Session ছাড়া stock update transaction-এর **বাইরে** চলে আর সাথে সাথে commit হয়ে যায়। পরে transaction abort (বা retry) হলে order মুছে যায় কিন্তু stock কমেই থাকে — এটাই \"stock নেই, order নেই\" লক্ষণ। ভেতরের প্রতিটি operation-এ session দিতে হবে।\n2. **Transaction-এর ভেতরে `Promise.all`।** একটা transaction/session-এ parallel-ভাবে operation চালানো support করে না — Mongoose docs এটাকে undefined behaviour বলে। Sequential `for...of` ব্যবহার করো।\n3. **`matchedCount` উপেক্ষা করা।** Stock কম থাকলে conditional update কিছুই match করে না — কোনো error হয় না — তবুও order তৈরি হয়ে যায়। এটাই overselling। `matchedCount` check করে throw করো, যাতে abort হয়।\n4. **Callback-এর ভেতরে SMS।** `connection.transaction()` আসলে `withTransaction()`-কে wrap করে, যেটা transient error-এ **পুরো callback আবার চালায়** (sale-এর সময় write conflict খুব common)। প্রতিটি চেষ্টায় আরেকটা SMS যায়, আর শেষে commit fail করলে customer এমন order-এর খবর পায় যেটা আসলে নেই। Side effect commit-এর পরে করো, অথবা transaction-এর ভেতরে একটা \"outbox\" document লিখে worker দিয়ে ঠিক একবার পাঠাও।\n\n`Order.create([doc], { session })` নিজে ঠিক আছে — `create()`-এ option দিতে হলে array form-ই লাগে।"
+  },
+  "explanation": {
+   "en": "- **Why not rely on the return value?** The fixed version assigns `order` from inside the callback, so it doesn't depend on what `transaction()` resolves to, and each retry simply overwrites it.\n- **Document state on abort:** `connection.transaction()` also resets Mongoose's change tracking for documents saved in an aborted attempt, so a retry re-sends their changes — one advantage over calling `session.withTransaction()` directly.\n- **Forgetting sessions is easy:** `mongoose.set('transactionAsyncLocalStorage', true)` makes Mongoose pass the session automatically to operations inside `connection.transaction()`.\n- **Keep it short:** the transaction should contain only database writes. No HTTP calls (payment gateway, SMS) inside — they're slow, can't be rolled back, and may run multiple times.\n- **Testing:** run integration tests against a replica set (e.g. `mongodb-memory-server`'s replica set mode) and simulate concurrent checkouts for the last unit.",
+   "bn": "- **Return value-এর ওপর কেন নির্ভর না?** Fixed version-এ `order` callback-এর ভেতর থেকেই assign হয়, তাই `transaction()` কী resolve করে তার ওপর নির্ভর করে না, আর প্রতিটি retry শুধু value-টা overwrite করে।\n- **Abort-এ document-এর state:** `connection.transaction()` abort হওয়া চেষ্টায় save করা document-এর change tracking-ও reset করে, ফলে retry-তে সেই পরিবর্তন আবার পাঠানো হয় — সরাসরি `session.withTransaction()` call করার চেয়ে এটা একটা সুবিধা।\n- **Session ভুলে যাওয়া সহজ:** `mongoose.set('transactionAsyncLocalStorage', true)` দিলে `connection.transaction()`-এর ভেতরের operation-এ Mongoose নিজেই session পাঠিয়ে দেয়।\n- **ছোট রাখো:** transaction-এ শুধু database write থাকবে। ভেতরে কোনো HTTP call (payment gateway, SMS) না — এগুলো slow, rollback করা যায় না, আর একাধিকবার চলতে পারে।\n- **Testing:** replica set-এর বিরুদ্ধে integration test চালাও (যেমন `mongodb-memory-server`-এর replica set mode) আর শেষ unit-এর জন্য concurrent checkout simulate করো।"
+  },
+  "interviewTip": {
+   "en": "Map each symptom to its bug (\"stock gone, no order\" → missing session; \"duplicate SMS\" → retried callback). Symptom-to-cause reasoning is exactly what production debugging interviews test.",
+   "bn": "প্রতিটি লক্ষণকে তার bug-এর সাথে মেলাও (\"stock নেই, order নেই\" → session নেই; \"duplicate SMS\" → retry হওয়া callback)। লক্ষণ থেকে কারণ বের করার যুক্তিই production debugging interview-তে যাচাই করা হয়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Transactions",
+    "url": "https://mongoosejs.com/docs/transactions.html"
+   },
+   {
+    "title": "MongoDB Manual — Transactions",
+    "url": "https://www.mongodb.com/docs/manual/core/transactions/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement the outbox pattern for the SMS?",
+    "bn": "SMS-এর জন্য outbox pattern কীভাবে implement করবে?"
+   },
+   {
+    "en": "What happens to the stock if the payment fails after the order is created?",
+    "bn": "Order তৈরির পর payment fail করলে stock-এর কী হবে?"
+   }
+  ],
+  "related": [
+   "mongoose-004"
+  ],
+  "commonMistakes": {
+   "en": "Thinking that code inside the callback is automatically transactional; using `Promise.all` for speed; assuming the callback runs exactly once.",
+   "bn": "ভাবা যে callback-এর ভেতরের সব code automatically transactional; speed-এর জন্য `Promise.all` ব্যবহার করা; ধরে নেওয়া যে callback ঠিক একবারই চলে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "async function placeOrder(user, items) {\n  return mongoose.connection.transaction(async (session) => {\n    const [order] = await Order.create(\n      [{ user: user._id, items, status: \"pending\" }],\n      { session }\n    );\n\n    await Promise.all(items.map((item) =>\n      Product.updateOne(\n        { _id: item.productId, stock: { $gte: item.qty } },\n        { $inc: { stock: -item.qty } }\n      )\n    ));\n\n    await User.updateOne({ _id: user._id }, { $inc: { orderCount: 1 } }, { session });\n    await sms.send(user.phone, `Order ${order._id} placed`);\n    return order;\n  });\n}"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "async function placeOrder(user, items) {\n  let order;\n  await mongoose.connection.transaction(async (session) => {\n    for (const item of items) {                      // sequential — never Promise.all\n      const res = await Product.updateOne(\n        { _id: item.productId, stock: { $gte: item.qty } },\n        { $inc: { stock: -item.qty } },\n        { session }                                   // part of the transaction\n      );\n      if (res.matchedCount === 0) {\n        throw new OutOfStockError(item.productId);    // aborts everything\n      }\n    }\n\n    [order] = await Order.create(\n      [{ user: user._id, items, status: \"pending\" }],\n      { session }\n    );\n    await User.updateOne({ _id: user._id }, { $inc: { orderCount: 1 } }, { session });\n  });\n\n  // Side effects only after a successful commit (or via an outbox + worker)\n  await sms.send(user.phone, `Order ${order._id} placed`);\n  return order;\n}",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-030",
+  "subtopic": "Schema Design",
+  "difficulty": "extreme",
+  "type": "system-design",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "system-design",
+   "e-commerce",
+   "marketplace",
+   "discriminators",
+   "transactions",
+   "inventory"
+  ],
+  "technologyVersion": "Mongoose 9.11, MongoDB 9.0 replica set",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Design the Mongoose models and data-access approach for a multi-vendor marketplace: one customer checkout can contain items from several sellers, each seller ships their part separately, stock must not oversell during 11.11-style campaigns (≈20× normal traffic), and payments come via bKash, card or cash on delivery.",
+   "bn": "একটা multi-vendor marketplace-এর জন্য Mongoose model আর data-access পদ্ধতি design করো: একজন customer-এর এক checkout-এ কয়েকজন seller-এর item থাকতে পারে, প্রতিটি seller নিজের অংশ আলাদাভাবে ship করে, 11.11-এর মতো campaign-এ (স্বাভাবিকের ≈20 গুণ traffic) stock oversell হওয়া চলবে না, আর payment আসে bKash, card বা cash on delivery-তে।"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level design question.)*\n\n**Models:**\n- `Product` with a bounded array of embedded variants; **`Inventory`** as a separate small document per SKU (`available`, `reserved`). Keeping hot stock counters out of the big product document reduces write contention and document rewrites.\n- `Order` — the customer-level record: `checkoutId` (unique idempotency key), customer, shipping-address snapshot, totals, payment status. `optimisticConcurrency: true` so concurrent admin edits fail loudly instead of overwriting.\n- `SellerOrder` — one per seller per order, with item snapshots (name, SKU, unit price in poisha, qty) and its own status/tracking. Sellers update and query only their own part: index `{ sellerId: 1, status: 1, createdAt: -1 }`.\n- `Payment` — one collection with **discriminators** per method (`bkash`, `card`, `cod`) because each has different fields; a unique partial index on the gateway transaction ID makes webhook handling idempotent.\n\n**Checkout (one short transaction):** for each SKU, a conditional `$inc` on `Inventory` (`available ≥ qty`), checking `matchedCount`; then create `Order`, `SellerOrder`s and a pending `Payment` — all with the session, sequentially. Side effects (SMS, seller notifications) go through an outbox after commit.\n\n**Payment confirmation:** the bKash/card webhook updates `Payment` + `Order` in a transaction, guarded by the unique transaction ID so duplicate callbacks are harmless. Unpaid reservations are released by a worker after a timeout (re-increment `available`).\n\n**Read paths:** \"My orders\" `{ customerId: 1, createdAt: -1 }` with `.lean()` and projections; seller dashboards on `SellerOrder`; admin analytics from pre-aggregated stats or an analytics node, never by populating millions of documents.\n\n**Campaign scale:** cache product pages (Redis/CDN), size `maxPoolSize` per instance against the cluster's connection limit, rate-limit checkout, and consider a queue/waiting room for flash deals so the database sees a controlled write rate.",
+   "bn": "*(Advanced, senior-level design প্রশ্ন।)*\n\n**Model:**\n- `Product`-এ embedded variant-এর bounded array; আর প্রতিটি SKU-র জন্য আলাদা ছোট document হিসেবে **`Inventory`** (`available`, `reserved`)। Hot stock counter বড় product document-এর বাইরে রাখলে write contention আর document rewrite কমে।\n- `Order` — customer-level record: `checkoutId` (unique idempotency key), customer, shipping address-এর snapshot, total, payment status। `optimisticConcurrency: true`, যাতে concurrent admin edit চুপচাপ overwrite না করে স্পষ্টভাবে fail করে।\n- `SellerOrder` — প্রতি order-এ প্রতিটি seller-এর জন্য একটা, item snapshot (name, SKU, পয়সায় unit price, qty) আর নিজস্ব status/tracking সহ। Seller শুধু নিজের অংশ update আর query করে: index `{ sellerId: 1, status: 1, createdAt: -1 }`।\n- `Payment` — একটা collection, প্রতিটি method-এর জন্য **discriminator** (`bkash`, `card`, `cod`), কারণ প্রত্যেকের field আলাদা; gateway transaction ID-তে unique partial index থাকলে webhook handling idempotent হয়।\n\n**Checkout (একটা ছোট transaction):** প্রতিটি SKU-র জন্য `Inventory`-তে conditional `$inc` (`available ≥ qty`), `matchedCount` check সহ; তারপর `Order`, `SellerOrder` আর pending `Payment` তৈরি — সবগুলো session সহ, একটার পর একটা। Side effect (SMS, seller notification) commit-এর পরে outbox দিয়ে যায়।\n\n**Payment confirmation:** bKash/card webhook একটা transaction-এ `Payment` + `Order` update করে, unique transaction ID দিয়ে সুরক্ষিত, তাই duplicate callback ক্ষতি করে না। Pay না করা reservation একটা worker timeout-এর পর ছেড়ে দেয় (`available` আবার বাড়ায়)।\n\n**Read path:** \"My orders\"-এর জন্য `{ customerId: 1, createdAt: -1 }`, `.lean()` আর projection সহ; seller dashboard `SellerOrder`-এর ওপর; admin analytics pre-aggregated stats বা analytics node থেকে — লক্ষ লক্ষ document populate করে কখনো না।\n\n**Campaign-এর scale:** product page cache করো (Redis/CDN), cluster-এর connection limit অনুযায়ী প্রতিটি instance-এর `maxPoolSize` ঠিক করো, checkout rate-limit করো, আর flash deal-এর জন্য queue/waiting room ভাবো, যাতে database একটা নিয়ন্ত্রিত write rate দেখে।"
+  },
+  "explanation": {
+   "en": "**Trade-offs and failure scenarios:**\n- **Embedding vs separate `SellerOrder`:** embedding seller groups inside `Order` gives one-read order pages, but every seller update rewrites the shared document and seller dashboards need multikey queries. A separate collection isolates writes and indexes per seller.\n- **Hot SKUs:** a flash-deal SKU can get thousands of decrements per second on one document. Options: pre-split stock into N inventory shards (`sku#1..N`) and pick one randomly, or queue purchase requests and process them sequentially.\n- **Payment succeeded, order transaction failed:** run a reconciliation job against gateway records; never trust only the redirect URL — rely on the server-to-server callback or a status query.\n- **COD:** stock is reserved at checkout but cash is collected later; returns and failed deliveries must re-increment stock through the same idempotent path.\n- **Mongoose specifics:** `.lean()` for list endpoints, `select: false` for sensitive fields, `autoIndex: false` in production with indexes managed by migrations, and `discriminatorKey` chosen explicitly (`method`) instead of the default `__t`.",
+   "bn": "**Trade-off আর failure scenario:**\n- **Embed বনাম আলাদা `SellerOrder`:** seller group `Order`-এর ভেতরে embed করলে এক read-এ order page হয়, কিন্তু প্রতিটি seller update shared document rewrite করে, আর seller dashboard-এ multikey query লাগে। আলাদা collection প্রতিটি seller-এর write আর index আলাদা রাখে।\n- **Hot SKU:** flash-deal-এর একটা SKU-তে এক document-এ প্রতি second হাজার হাজার decrement আসতে পারে। উপায়: stock আগে থেকেই Nটা inventory shard-এ ভাগ করা (`sku#1..N`) আর random-ভাবে একটা বেছে নেওয়া, অথবা purchase request queue করে একটার পর একটা process করা।\n- **Payment সফল, order transaction fail:** gateway-র record-এর সাথে reconciliation job চালাও; শুধু redirect URL-এর ওপর ভরসা কোরো না — server-to-server callback বা status query-র ওপর নির্ভর করো।\n- **COD:** checkout-এ stock reserve হয় কিন্তু টাকা পরে আসে; return আর failed delivery-তে একই idempotent পথে stock আবার বাড়াতে হয়।\n- **Mongoose-এর দিক:** list endpoint-এ `.lean()`, sensitive field-এ `select: false`, production-এ `autoIndex: false` আর migration দিয়ে index management, আর default `__t`-এর বদলে explicitly বেছে নেওয়া `discriminatorKey` (`method`)।"
+  },
+  "interviewTip": {
+   "en": "Anchor the design on two invariants — \"never oversell\" and \"never charge without an order\" — and show how each model and transaction protects them. Naming failure scenarios unprompted is what makes it an extreme-level answer.",
+   "bn": "Design-টা দুইটা invariant-এর ওপর দাঁড় করাও — \"কখনো oversell না\" আর \"order ছাড়া কখনো charge না\" — আর দেখাও প্রতিটি model আর transaction কীভাবে এগুলো রক্ষা করে। নিজে থেকে failure scenario বলাই এটাকে extreme-level উত্তর বানায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Discriminators",
+    "url": "https://mongoosejs.com/docs/discriminators.html"
+   },
+   {
+    "title": "Mongoose — Transactions",
+    "url": "https://mongoosejs.com/docs/transactions.html"
+   },
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "A seller cancels one item from a three-seller order. Walk me through the data changes.",
+    "bn": "তিন seller-এর একটা order থেকে একজন seller একটা item cancel করল। Data-তে কী কী পরিবর্তন হবে, ধাপে ধাপে বলো।"
+   },
+   {
+    "en": "How would you make the bKash webhook handler idempotent and safe against forged callbacks?",
+    "bn": "bKash webhook handler-কে কীভাবে idempotent আর জাল callback থেকে নিরাপদ করবে?"
+   },
+   {
+    "en": "Where would you draw the line between Mongoose models and raw driver/aggregation code here?",
+    "bn": "এখানে Mongoose model আর raw driver/aggregation code-এর মধ্যে সীমারেখা কোথায় টানবে?"
+   }
+  ],
+  "related": [
+   "mongoose-023",
+   "mongoose-002"
+  ],
+  "commonMistakes": {
+   "en": "One giant `Order` document that every seller edits; stock checked with `findOne` then decremented with `save()`; calling the payment gateway inside the transaction; populating everything for admin reports.",
+   "bn": "এমন একটা বিশাল `Order` document, যেটা সব seller edit করে; `findOne` দিয়ে stock check করে `save()` দিয়ে কমানো; transaction-এর ভেতরে payment gateway call করা; admin report-এর জন্য সবকিছু populate করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose, { Schema, model } from \"mongoose\";\n\nconst itemSnapshot = new Schema({\n  productId: { type: Schema.Types.ObjectId, ref: \"Product\", required: true },\n  sku: { type: String, required: true },\n  name: String,\n  unitPrice: { type: Number, required: true },   // poisha, frozen at checkout\n  qty: { type: Number, required: true, min: 1 },\n}, { _id: false });\n\nconst Inventory = model(\"Inventory\", new Schema({\n  sku: { type: String, required: true, unique: true },\n  available: { type: Number, required: true, min: 0 },\n  reserved: { type: Number, default: 0 },\n}));\n\nconst orderSchema = new Schema({\n  checkoutId: { type: String, required: true, unique: true },   // idempotency key\n  customerId: { type: Schema.Types.ObjectId, ref: \"User\", required: true },\n  shipping: { name: String, phone: String, city: String, area: String },\n  totals: { subtotal: Number, delivery: Number, discount: Number, grandTotal: Number },\n  paymentStatus: { type: String, enum: [\"pending\", \"paid\", \"failed\", \"refunded\"], default: \"pending\" },\n}, { timestamps: true, optimisticConcurrency: true });\norderSchema.index({ customerId: 1, createdAt: -1 });\nconst Order = model(\"Order\", orderSchema);\n\nconst sellerOrderSchema = new Schema({\n  orderId: { type: Schema.Types.ObjectId, ref: \"Order\", required: true },\n  sellerId: { type: Schema.Types.ObjectId, ref: \"Seller\", required: true },\n  items: [itemSnapshot],\n  status: { type: String, enum: [\"pending\", \"packed\", \"shipped\", \"delivered\", \"cancelled\"], default: \"pending\" },\n}, { timestamps: true });\nsellerOrderSchema.index({ sellerId: 1, status: 1, createdAt: -1 });\nconst SellerOrder = model(\"SellerOrder\", sellerOrderSchema);\n\nconst paymentOpts = { timestamps: true, discriminatorKey: \"method\" };\nconst paymentSchema = new Schema({\n  orderId: { type: Schema.Types.ObjectId, ref: \"Order\", required: true },\n  amount: { type: Number, required: true },\n  status: { type: String, enum: [\"pending\", \"paid\", \"failed\"], default: \"pending\" },\n  gatewayTrxId: String,\n}, paymentOpts);\npaymentSchema.index(\n  { gatewayTrxId: 1 },\n  { unique: true, partialFilterExpression: { gatewayTrxId: { $type: \"string\" } } }\n);\nconst Payment = model(\"Payment\", paymentSchema);\nPayment.discriminator(\"bkash\", new Schema({ payerMsisdn: String }, paymentOpts));\nPayment.discriminator(\"card\", new Schema({ cardBrand: String, last4: String }, paymentOpts));\nPayment.discriminator(\"cod\", new Schema({ collectedBy: String }, paymentOpts));\n\n// Inside the checkout transaction, per SKU (sequentially, with the session):\nasync function reserve(item, session) {\n  const res = await Inventory.updateOne(\n    { sku: item.sku, available: { $gte: item.qty } },\n    { $inc: { available: -item.qty, reserved: item.qty } },\n    { session }\n  );\n  if (res.matchedCount === 0) throw new OutOfStockError(item.sku);\n}"
+  },
+  "technology": "mongoose"
+ }
+]

@@ -1,0 +1,566 @@
+[
+ {
+  "id": "drizzle-001",
+  "subtopic": "Drizzle Fundamentals",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "drizzle",
+   "orm",
+   "type-safety",
+   "typescript"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x (stable); v1.0 is a release candidate",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Drizzle ORM, and how is it different from traditional ORMs like TypeORM or Sequelize?",
+   "bn": "Drizzle ORM কী, আর TypeORM বা Sequelize-এর মতো traditional ORM থেকে এটা কীভাবে আলাদা?"
+  },
+  "answer": {
+   "en": "Drizzle is a TypeScript ORM for SQL databases (PostgreSQL, MySQL, SQLite and others). You define tables in TypeScript, and the query API mirrors SQL — `db.select().from(users).where(eq(users.id, 1))` reads almost like the SQL it generates.\n\nKey differences from traditional ORMs:\n- **TypeScript-first, no code generation:** types are inferred directly from the schema, so there's no separate \"generate the client\" step for types.\n- **SQL-like and explicit:** no entity manager, change tracking or lazy loading. Each call is one predictable query.\n- **Two query styles:** the SQL-like builder (selects, joins, upserts) and a relational API (`db.query.users.findMany({ with: { posts: true } })`) for nested results.\n- **Thin and driver-based:** it sits on top of drivers like `node-postgres`, `postgres.js` or Neon's serverless driver, which makes it light enough for serverless.\n\nMigrations are handled by the companion CLI, Drizzle Kit. The stable line is 0.45.x; v1.0 is still a release candidate.",
+   "bn": "Drizzle হলো SQL database-এর (PostgreSQL, MySQL, SQLite ইত্যাদি) জন্য একটা TypeScript ORM। Table TypeScript-এ define করা হয়, আর query API SQL-এর মতোই — `db.select().from(users).where(eq(users.id, 1))` পড়তে প্রায় তার তৈরি করা SQL-এর মতো।\n\nTraditional ORM থেকে মূল পার্থক্য:\n- **TypeScript-first, code generation নেই:** type সরাসরি schema থেকে infer হয়, তাই type-এর জন্য আলাদা \"client generate করো\" step লাগে না।\n- **SQL-এর মতো আর explicit:** entity manager, change tracking বা lazy loading নেই। প্রতিটা call একটা predictable query।\n- **দুই ধরনের query:** SQL-এর মতো builder (select, join, upsert) আর nested result-এর জন্য relational API (`db.query.users.findMany({ with: { posts: true } })`)।\n- **হালকা আর driver-based:** `node-postgres`, `postgres.js` বা Neon-এর serverless driver-এর উপর বসে, তাই serverless-এর জন্যও যথেষ্ট হালকা।\n\nMigration সামলায় সঙ্গী CLI, Drizzle Kit। Stable line হলো 0.45.x; v1.0 এখনো release candidate।"
+  },
+  "explanation": {
+   "en": "- **\"If you know SQL, you know Drizzle\"** is the design goal. The flip side: you need to understand joins, indexes and transactions yourself — Drizzle won't hide the database.\n- **No magic loading:** traditional ORMs can trigger hidden N+1 queries through lazy relations. With Drizzle you choose: a join, a relational query (compiled into one SQL statement), or separate queries.\n- **Escape hatch:** the `sql` template tag lets you write any SQL fragment with safe parameter binding when the builder doesn't cover something.\n- **Ecosystem:** Drizzle Kit (`generate`, `migrate`, `push`, `pull`, `studio`, `check`), and validator integrations such as `drizzle-zod` (in v1 RC these move into `drizzle-orm/zod`).\n- It's a library that builds SQL, not a database or a server; connection pooling and performance still depend on the driver and PostgreSQL.",
+   "bn": "- **\"SQL জানলে Drizzle জানো\"** — এটাই design-এর লক্ষ্য। উল্টো দিক হলো: join, index আর transaction নিজেকেই বুঝতে হবে — Drizzle database লুকিয়ে রাখে না।\n- **Magic loading নেই:** traditional ORM lazy relation-এর মাধ্যমে লুকানো N+1 query চালিয়ে দিতে পারে। Drizzle-এ তুমি বেছে নাও: join, relational query (একটা SQL statement-এ compile হয়), নাকি আলাদা query।\n- **Escape hatch:** builder কোনো কিছু cover না করলে `sql` template tag দিয়ে নিরাপদ parameter binding সহ যেকোনো SQL fragment লেখা যায়।\n- **Ecosystem:** Drizzle Kit (`generate`, `migrate`, `push`, `pull`, `studio`, `check`), আর `drizzle-zod`-এর মতো validator integration (v1 RC-তে এগুলো `drizzle-orm/zod`-এ চলে যাচ্ছে)।\n- এটা SQL তৈরি করা একটা library, database বা server না; connection pooling আর performance এখনো driver আর PostgreSQL-এর উপর নির্ভর করে।"
+  },
+  "interviewTip": {
+   "en": "Contrast \"explicit, SQL-like, inferred types\" with \"entity-based, implicit loading\". Mentioning that the stable line is 0.45 and v1 is an RC shows you track versions accurately.",
+   "bn": "\"Explicit, SQL-এর মতো, inferred type\" বনাম \"entity-based, implicit loading\" — এভাবে তুলনা করো। Stable line 0.45 আর v1 এখনো RC — এটা বললে বোঝা যায় তুমি version ঠিকঠাক খেয়াল রাখো।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Overview",
+    "url": "https://orm.drizzle.team/docs/overview"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you still prefer a traditional ORM over Drizzle?",
+    "bn": "কখন Drizzle-এর বদলে traditional ORM পছন্দ করবে?"
+   },
+   {
+    "en": "What are the two query APIs in Drizzle and when do you use each?",
+    "bn": "Drizzle-এর দুটো query API কী, আর কখন কোনটা ব্যবহার করো?"
+   }
+  ],
+  "related": [
+   "drizzle-011",
+   "drizzle-020"
+  ],
+  "commonMistakes": {
+   "en": "Calling Drizzle a \"query builder only\" (it also has a relational API and migrations tooling); claiming it needs a code-generation step like Prisma; saying v1.0 is already stable.",
+   "bn": "Drizzle-কে \"শুধু query builder\" বলা (এর relational API আর migration tooling-ও আছে); দাবি করা যে Prisma-র মতো code-generation step লাগে; বলা যে v1.0 আগেই stable।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { drizzle } from 'drizzle-orm/node-postgres';\nimport { eq } from 'drizzle-orm';\nimport { integer, pgTable, text } from 'drizzle-orm/pg-core';\n\nexport const users = pgTable('users', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  name: text().notNull(),\n});\n\nconst db = drizzle(process.env.DATABASE_URL!);\n\n// SQL: select \"id\", \"name\" from \"users\" where \"users\".\"id\" = $1\nconst rows = await db.select().from(users).where(eq(users.id, 1));\n//    ^? { id: number; name: string }[]  — inferred, no codegen"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-002",
+  "subtopic": "Schema Definitions",
+  "difficulty": "easy",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "schema",
+   "pgtable",
+   "identity",
+   "pgenum",
+   "timestamps"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x / drizzle-kit 0.31",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Define a PostgreSQL `users` table with Drizzle:\n\n- `id` — integer primary key, generated as an identity column\n- `email` — `varchar(255)`, required, unique\n- `name` — required text; `bio` — optional text\n- `role` — enum `user` / `admin`, default `user`\n- `created_at` — `timestamptz`, required, defaults to now\n\nAlso export the TypeScript types for a selected row and for an insert.",
+   "bn": "Drizzle দিয়ে একটা PostgreSQL `users` table define করো:\n\n- `id` — integer primary key, identity column হিসেবে generate হবে\n- `email` — `varchar(255)`, required, unique\n- `name` — required text; `bio` — optional text\n- `role` — enum `user` / `admin`, default `user`\n- `created_at` — `timestamptz`, required, default now\n\nসাথে select করা row আর insert-এর জন্য TypeScript type export করো।"
+  },
+  "answer": {
+   "en": "- Tables come from `pgTable(name, columns)` in `drizzle-orm/pg-core`; each column is a builder (`integer()`, `varchar({ length })`, `text()`, `timestamp()`), chained with modifiers like `.notNull()`, `.unique()`, `.default()`, `.defaultNow()`.\n- `integer().primaryKey().generatedAlwaysAsIdentity()` creates a SQL-standard identity column — the modern replacement for `serial`.\n- `pgEnum('role', ['user', 'admin'])` defines a PostgreSQL enum type; the column uses `roleEnum()`.\n- The TypeScript key becomes the column name unless you pass one, so `timestamp('created_at', { withTimezone: true })` maps `createdAt` to `created_at`.\n- `typeof users.$inferSelect` and `typeof users.$inferInsert` give the row and insert types with no code generation.\n\nThe expected output shows the SQL that `drizzle-kit generate` produces for this schema.",
+   "bn": "- Table আসে `drizzle-orm/pg-core`-এর `pgTable(name, columns)` থেকে; প্রতিটা column একটা builder (`integer()`, `varchar({ length })`, `text()`, `timestamp()`), যার সাথে `.notNull()`, `.unique()`, `.default()`, `.defaultNow()`-এর মতো modifier chain করা যায়।\n- `integer().primaryKey().generatedAlwaysAsIdentity()` একটা SQL-standard identity column বানায় — `serial`-এর আধুনিক বিকল্প।\n- `pgEnum('role', ['user', 'admin'])` একটা PostgreSQL enum type define করে; column-এ ব্যবহার হয় `roleEnum()`।\n- আলাদা নাম না দিলে TypeScript key-টাই column-এর নাম হয়, তাই `timestamp('created_at', { withTimezone: true })` দিয়ে `createdAt`-কে `created_at`-এ map করা হয়েছে।\n- `typeof users.$inferSelect` আর `typeof users.$inferInsert` কোনো code generation ছাড়াই row আর insert-এর type দেয়।\n\nExpected output-এ দেখানো আছে এই schema থেকে `drizzle-kit generate` কোন SQL তৈরি করে।"
+  },
+  "explanation": {
+   "en": "- **Identity vs serial:** identity columns are the SQL standard and PostgreSQL's recommendation. `generatedAlwaysAsIdentity()` rejects manual ids (and Drizzle removes `id` from the insert type); `generatedByDefaultAsIdentity()` allows overriding, which is handy for data imports.\n- **Always use `timestamptz`** (`withTimezone: true`) for points in time — it stores an absolute instant, so servers in Dhaka and Frankfurt agree. Plain `timestamp` silently drops the offset.\n- **Naming:** instead of naming every column, you can set `casing: 'snake_case'` on both `drizzle()` and the Drizzle Kit config so `createdAt` maps to `created_at` automatically.\n- **Enums:** adding a value later is easy; removing or renaming one is a real migration. For frequently changing lists, a lookup table or a text column with a `CHECK` constraint can be simpler.\n- Older tutorials always pass the column name first (`integer('id')`); in current versions it's optional and the object key is used.",
+   "bn": "- **Identity বনাম serial:** identity column SQL standard আর PostgreSQL-এর সুপারিশ। `generatedAlwaysAsIdentity()` হাতে দেওয়া id reject করে (আর Drizzle insert type থেকে `id` বাদ দেয়); `generatedByDefaultAsIdentity()` override করতে দেয়, data import-এর সময় কাজে লাগে।\n- **সময়ের মুহূর্তের জন্য সবসময় `timestamptz`** (`withTimezone: true`) — এটা absolute instant রাখে, তাই ঢাকা আর Frankfurt-এর server একমত থাকে। Plain `timestamp` চুপচাপ offset বাদ দেয়।\n- **Naming:** প্রতিটা column-এর নাম না দিয়ে `drizzle()` আর Drizzle Kit config দুটোতেই `casing: 'snake_case'` দিলে `createdAt` নিজে থেকেই `created_at`-এ map হয়।\n- **Enum:** পরে value যোগ করা সহজ; কিন্তু সরানো বা নাম বদলানো আসল migration। ঘনঘন বদলায় এমন list-এর জন্য lookup table বা `CHECK` constraint সহ text column সহজ হতে পারে।\n- পুরোনো tutorial-এ সবসময় প্রথমে column-এর নাম দেওয়া থাকে (`integer('id')`); এখনকার version-এ এটা optional, object key-টাই নাম হিসেবে ব্যবহার হয়।"
+  },
+  "interviewTip": {
+   "en": "Mention identity over serial and `timestamptz` over `timestamp` without being asked — these two choices quickly signal PostgreSQL maturity.",
+   "bn": "জিজ্ঞেস না করলেও serial-এর বদলে identity আর `timestamp`-এর বদলে `timestamptz`-এর কথা বলো — এই দুটো সিদ্ধান্ত দ্রুত PostgreSQL-এ তোমার পরিপক্বতা বোঝায়।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Schema declaration",
+    "url": "https://orm.drizzle.team/docs/sql-schema-declaration"
+   },
+   {
+    "title": "Drizzle ORM — Column types",
+    "url": "https://orm.drizzle.team/docs/column-types"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use `generatedByDefaultAsIdentity()` instead?",
+    "bn": "কখন এর বদলে `generatedByDefaultAsIdentity()` ব্যবহার করবে?"
+   },
+   {
+    "en": "How would you add a composite index on (role, created_at)?",
+    "bn": "(role, created_at)-এর উপর composite index কীভাবে যোগ করবে?"
+   }
+  ],
+  "related": [
+   "drizzle-006",
+   "drizzle-012"
+  ],
+  "commonMistakes": {
+   "en": "Using `serial` in new schemas; using `timestamp` without time zone for events; forgetting `.notNull()` (columns are nullable by default); defining the enum but not exporting it, so Drizzle Kit doesn't create the type.",
+   "bn": "নতুন schema-য় `serial` ব্যবহার করা; event-এর জন্য time zone ছাড়া `timestamp`; `.notNull()` ভুলে যাওয়া (default-এ column nullable); enum define করে export না করা, ফলে Drizzle Kit type-টা তৈরি করে না।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "// src/db/schema.ts\nimport { integer, pgEnum, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';\n\nexport const roleEnum = pgEnum('role', ['user', 'admin']);\n\nexport const users = pgTable('users', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  email: varchar({ length: 255 }).notNull().unique(),\n  name: text().notNull(),\n  bio: text(),\n  role: roleEnum().notNull().default('user'),\n  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),\n});\n\nexport type User = typeof users.$inferSelect;    // row returned by select\nexport type NewUser = typeof users.$inferInsert; // object accepted by insert",
+   "output": "-- generated by `drizzle-kit generate`\nCREATE TYPE \"public\".\"role\" AS ENUM('user', 'admin');--> statement-breakpoint\nCREATE TABLE \"users\" (\n  \"id\" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name \"users_id_seq\" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),\n  \"email\" varchar(255) NOT NULL,\n  \"name\" text NOT NULL,\n  \"bio\" text,\n  \"role\" \"role\" DEFAULT 'user' NOT NULL,\n  \"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n  CONSTRAINT \"users_email_unique\" UNIQUE(\"email\")\n);"
+  },
+  "complexity": {
+   "time": "Not applicable (schema definition)",
+   "space": "Not applicable"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-003",
+  "subtopic": "PostgreSQL Integration",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "node-postgres",
+   "postgres-js",
+   "connection",
+   "pool",
+   "drivers"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x / pg 8 / postgres.js 3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How do you connect Drizzle to PostgreSQL in a Node.js app? Which drivers can you use, and where should the `db` instance be created?",
+   "bn": "একটা Node.js app-এ Drizzle-কে PostgreSQL-এর সাথে কীভাবে connect করো? কোন কোন driver ব্যবহার করা যায়, আর `db` instance কোথায় তৈরি করা উচিত?"
+  },
+  "answer": {
+   "en": "Drizzle doesn't open connections itself — it wraps a PostgreSQL driver:\n\n- **node-postgres (`pg`)** via `drizzle-orm/node-postgres`. Shortest form: `drizzle(process.env.DATABASE_URL!)`, which creates a pool for you. For control over pool size and timeouts, create a `Pool` and pass it: `drizzle({ client: pool, schema })`.\n- **postgres.js** via `drizzle-orm/postgres-js`: `drizzle({ client: postgres(url, { max: 10 }) })`.\n- **Serverless drivers** (e.g. Neon's HTTP driver via `drizzle-orm/neon-http`) for edge/serverless runtimes.\n\nI create the `db` **once per process** in a module (or a NestJS provider) and reuse it everywhere — never per request. Passing `schema` (tables + relations) is required if I want the relational API `db.query.*`. On shutdown I close the pool (`pool.end()`).",
+   "bn": "Drizzle নিজে connection খোলে না — এটা একটা PostgreSQL driver-কে wrap করে:\n\n- **node-postgres (`pg`)**, `drizzle-orm/node-postgres` দিয়ে। সবচেয়ে ছোট রূপ: `drizzle(process.env.DATABASE_URL!)`, এটা নিজেই একটা pool বানায়। Pool size আর timeout নিয়ন্ত্রণ করতে নিজে একটা `Pool` বানিয়ে pass করো: `drizzle({ client: pool, schema })`।\n- **postgres.js**, `drizzle-orm/postgres-js` দিয়ে: `drizzle({ client: postgres(url, { max: 10 }) })`।\n- **Serverless driver** (যেমন `drizzle-orm/neon-http` দিয়ে Neon-এর HTTP driver) edge/serverless runtime-এর জন্য।\n\nআমি `db` একটা module-এ (বা NestJS provider-এ) **প্রতি process-এ একবার** তৈরি করি আর সব জায়গায় reuse করি — কখনো per request না। Relational API `db.query.*` চাইলে `schema` (table + relation) pass করা বাধ্যতামূলক। Shutdown-এর সময় pool বন্ধ করি (`pool.end()`)।"
+  },
+  "explanation": {
+   "en": "- **Why a single instance:** each `Pool` holds up to `max` connections. Creating one per request (or per hot-reload in dev) quickly hits PostgreSQL's `max_connections`.\n- **Choosing a driver:** `pg` is the most widely used and battle-tested; postgres.js is fast and has tagged-template ergonomics; both work well. Pick one and stay consistent.\n- **`schema` gotcha:** without `schema`, `db.query.users` is `undefined` at runtime (and a type error) — a very common \"why doesn't findMany exist?\" question.\n- **Pool errors:** node-postgres emits `error` on the pool if an idle connection dies (DB restart/failover). Attach `pool.on('error', ...)` so it's logged rather than crashing the process.\n- **Config:** keep the URL in env vars; enable TLS (`sslmode=require` or the driver's `ssl` option) for managed databases.",
+   "bn": "- **কেন একটাই instance:** প্রতিটা `Pool` সর্বোচ্চ `max`টা connection রাখে। প্রতি request-এ (বা dev-এ প্রতিটা hot-reload-এ) একটা করে বানালে খুব দ্রুত PostgreSQL-এর `max_connections` ছুঁয়ে ফেলে।\n- **Driver বাছাই:** `pg` সবচেয়ে বেশি ব্যবহৃত আর পরীক্ষিত; postgres.js দ্রুত আর tagged-template-এ সুবিধাজনক; দুটোই ভালো চলে। একটা বেছে consistent থাকো।\n- **`schema`-র ফাঁদ:** `schema` না দিলে runtime-এ `db.query.users` হয় `undefined` (আর type error) — \"findMany কেন নেই?\" খুব common প্রশ্ন।\n- **Pool error:** idle connection মারা গেলে (DB restart/failover) node-postgres pool-এ `error` emit করে। `pool.on('error', ...)` লাগাও, যাতে process crash না করে log হয়।\n- **Config:** URL env var-এ রাখো; managed database-এর জন্য TLS চালু করো (`sslmode=require` বা driver-এর `ssl` option)।"
+  },
+  "interviewTip": {
+   "en": "Say \"one pool per process, created at startup, closed on shutdown\" — it covers correctness, performance and operations in one sentence.",
+   "bn": "\"প্রতি process-এ একটা pool, startup-এ তৈরি, shutdown-এ বন্ধ\" — এক বাক্যেই correctness, performance আর operations কভার হয়।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Get started with PostgreSQL",
+    "url": "https://orm.drizzle.team/docs/get-started-postgresql"
+   },
+   {
+    "title": "Drizzle ORM — Database connection",
+    "url": "https://orm.drizzle.team/docs/connect-overview"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you size the pool when running 6 instances of the app?",
+    "bn": "App-এর ৬টা instance চললে pool size কীভাবে ঠিক করবে?"
+   },
+   {
+    "en": "What changes in a serverless environment?",
+    "bn": "Serverless environment-এ কী বদলায়?"
+   }
+  ],
+  "related": [
+   "drizzle-023",
+   "nest-022"
+  ],
+  "commonMistakes": {
+   "en": "Creating a new client or pool inside request handlers; forgetting to pass `schema` and then using `db.query`; never closing the pool, which keeps tests and scripts hanging.",
+   "bn": "Request handler-এর ভেতরে নতুন client বা pool তৈরি করা; `schema` pass না করে `db.query` ব্যবহার করা; pool কখনো বন্ধ না করা, ফলে test আর script আটকে থাকে।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "// src/db/index.ts — node-postgres with an explicit pool\nimport { drizzle } from 'drizzle-orm/node-postgres';\nimport { Pool } from 'pg';\nimport * as schema from './schema';\n\nexport const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10 });\npool.on('error', (err) => console.error('Idle PostgreSQL client error', err));\n\nexport const db = drizzle({ client: pool, schema }); // schema enables db.query.*\n\n// Shortest form — Drizzle creates the pool:\n// export const db = drizzle(process.env.DATABASE_URL!);\n\n// postgres.js alternative:\n// import postgres from 'postgres';\n// import { drizzle } from 'drizzle-orm/postgres-js';\n// export const db = drizzle({ client: postgres(process.env.DATABASE_URL!, { max: 10 }), schema });"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-004",
+  "subtopic": "CRUD Queries",
+  "difficulty": "easy",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "select",
+   "insert",
+   "update",
+   "delete",
+   "returning"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Using the `users` table (`id`, `email`, `name`, `bio`, `role`, `createdAt`), write Drizzle queries to:\n\n1. fetch the user with id 1;\n2. list admins whose email ends with `@example.com`, returning only `id` and `email`;\n3. insert a user and get the created row back;\n4. rename user 1 and return `id` and `name`;\n5. delete user 2 and return its id;\n6. count all users.",
+   "bn": "`users` table (`id`, `email`, `name`, `bio`, `role`, `createdAt`) ব্যবহার করে Drizzle query লেখো:\n\n1. id 1-এর user আনো;\n2. যেসব admin-এর email `@example.com` দিয়ে শেষ, তাদের list — শুধু `id` আর `email` return করবে;\n3. একটা user insert করে তৈরি হওয়া row ফেরত নাও;\n4. user 1-এর নাম বদলাও আর `id` ও `name` return করো;\n5. user 2 delete করে তার id return করো;\n6. মোট user count করো।"
+  },
+  "answer": {
+   "en": "- **Select:** `db.select().from(users).where(eq(users.id, 1))` returns an **array** — destructure `const [user] = ...` for a single row. Pass an object to `select({...})` for a partial selection; the result type follows it.\n- **Filters** come from `drizzle-orm`: `eq`, `and`, `or`, `ilike`, `inArray`, `gt`, `isNull` and more.\n- **Insert:** `db.insert(users).values({...}).returning()` — `returning()` gives back the inserted row(s) including defaults like `id` and `createdAt`. `values([...])` inserts many rows in one statement.\n- **Update:** `db.update(users).set({ name }).where(...)` — always with a `where`.\n- **Delete:** `db.delete(users).where(...)`, optionally `.returning({ id: users.id })`.\n- **Count:** `db.$count(users)` or `db.select({ total: count() }).from(users)`.\n\nEvery builder must be awaited — nothing runs until then.",
+   "bn": "- **Select:** `db.select().from(users).where(eq(users.id, 1))` একটা **array** return করে — একটা row-এর জন্য `const [user] = ...` দিয়ে destructure করো। Partial selection-এর জন্য `select({...})`-এ object দাও; result type সেটাই অনুসরণ করে।\n- **Filter** আসে `drizzle-orm` থেকে: `eq`, `and`, `or`, `ilike`, `inArray`, `gt`, `isNull` ইত্যাদি।\n- **Insert:** `db.insert(users).values({...}).returning()` — `returning()` insert হওয়া row ফেরত দেয়, `id` আর `createdAt`-এর মতো default সহ। `values([...])` এক statement-এ অনেক row insert করে।\n- **Update:** `db.update(users).set({ name }).where(...)` — সবসময় `where` সহ।\n- **Delete:** `db.delete(users).where(...)`, চাইলে `.returning({ id: users.id })`।\n- **Count:** `db.$count(users)` বা `db.select({ total: count() }).from(users)`।\n\nপ্রতিটা builder await করতে হবে — তার আগে কিছুই চলে না।"
+  },
+  "explanation": {
+   "en": "- **`returning()` is PostgreSQL-friendly:** it avoids a second round trip to read generated values. (MySQL doesn't support it; Drizzle offers `$returningId()` there.)\n- **Update/delete without `where`** affect every row. The official `eslint-plugin-drizzle` has `enforce-update-with-where` and `enforce-delete-with-where` rules to catch this in CI.\n- **Values are parameterised** (`$1`, `$2`), so user input in `eq()`/`ilike()` is safe from SQL injection.\n- **`count()` mapping:** PostgreSQL returns `count(*)` as `bigint`; Drizzle's `count()` maps it to a JS number for you, while a hand-written `count(*)` inside the `sql` tag needs `.mapWith(Number)`.\n- For \"find or 404\" in an API, check `if (!user)` after destructuring and throw your framework's NotFound error.",
+   "bn": "- **`returning()` PostgreSQL-এ খুব কাজের:** generated value পড়তে দ্বিতীয় round trip লাগে না। (MySQL এটা support করে না; সেখানে Drizzle `$returningId()` দেয়।)\n- **`where` ছাড়া update/delete** সব row-কে প্রভাবিত করে। Official `eslint-plugin-drizzle`-এর `enforce-update-with-where` আর `enforce-delete-with-where` rule CI-তে এটা ধরে।\n- **Value parameterised হয়** (`$1`, `$2`), তাই `eq()`/`ilike()`-এ user input SQL injection থেকে নিরাপদ।\n- **`count()` mapping:** PostgreSQL `count(*)`-কে `bigint` হিসেবে দেয়; Drizzle-এর `count()` তোমার জন্য JS number-এ map করে, কিন্তু `sql` tag-এর ভেতরে নিজে লেখা `count(*)`-এর জন্য `.mapWith(Number)` লাগে।\n- API-তে \"খুঁজে না পেলে 404\"-এর জন্য destructure করার পর `if (!user)` check করো আর framework-এর NotFound error throw করো।"
+  },
+  "interviewTip": {
+   "en": "Write the queries and say the SQL out loud for one of them (\"this becomes `UPDATE users SET name = $1 WHERE id = $2 RETURNING ...`\"). It shows you understand what Drizzle sends to the database.",
+   "bn": "Query লেখো আর একটার জন্য SQL-টা মুখে বলো (\"এটা হবে `UPDATE users SET name = $1 WHERE id = $2 RETURNING ...`\")। এতে বোঝা যায় Drizzle database-এ কী পাঠায় তুমি বোঝো।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Select",
+    "url": "https://orm.drizzle.team/docs/select"
+   },
+   {
+    "title": "Drizzle ORM — Insert",
+    "url": "https://orm.drizzle.team/docs/insert"
+   },
+   {
+    "title": "Drizzle ORM — Update",
+    "url": "https://orm.drizzle.team/docs/update"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you insert 10,000 rows efficiently?",
+    "bn": "১০,০০০ row কীভাবে efficient ভাবে insert করবে?"
+   },
+   {
+    "en": "How do you make the email search use an index?",
+    "bn": "Email search কীভাবে index ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "drizzle-005",
+   "drizzle-009",
+   "drizzle-022"
+  ],
+  "commonMistakes": {
+   "en": "Expecting `select()` to return a single object; forgetting `await`; update/delete without `where`; using `like` for case-insensitive search in PostgreSQL.",
+   "bn": "ভাবা যে `select()` একটা object return করবে; `await` ভুলে যাওয়া; `where` ছাড়া update/delete; PostgreSQL-এ case-insensitive search-এর জন্য `like` ব্যবহার করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { and, count, eq, ilike } from 'drizzle-orm';\nimport { db } from './db';\nimport { users } from './db/schema';\n\n// 1) by id — select returns an array\nconst [user] = await db.select().from(users).where(eq(users.id, 1));\n\n// 2) partial select with combined filters\nconst admins = await db\n  .select({ id: users.id, email: users.email })\n  .from(users)\n  .where(and(eq(users.role, 'admin'), ilike(users.email, '%@example.com')));\n\n// 3) insert and return the created row\nconst [created] = await db\n  .insert(users)\n  .values({ email: 'rahim@example.com', name: 'Rahim' })\n  .returning();\n\n// 4) update\nconst renamed = await db\n  .update(users)\n  .set({ name: 'Rahim Uddin' })\n  .where(eq(users.id, 1))\n  .returning({ id: users.id, name: users.name });\n\n// 5) delete\nconst deleted = await db.delete(users).where(eq(users.id, 2)).returning({ id: users.id });\n\n// 6) count\nconst total = await db.$count(users);\n// or: const [{ total }] = await db.select({ total: count() }).from(users);",
+   "output": "-- before: users 1 (karim@example.com), 2 (sumi@example.com), 3 (nadia@example.com, admin)\nuser     -> { id: 1, email: 'karim@example.com', name: 'Karim', bio: null, role: 'user', createdAt: 2026-10-12T... }\nadmins   -> [ { id: 3, email: 'nadia@example.com' } ]\ncreated  -> { id: 4, email: 'rahim@example.com', name: 'Rahim', bio: null, role: 'user', createdAt: 2026-10-12T... }\nrenamed  -> [ { id: 1, name: 'Rahim Uddin' } ]\ndeleted  -> [ { id: 2 } ]\ntotal    -> 3"
+  },
+  "complexity": {
+   "time": "O(log n) per indexed lookup; the email filter scans unless indexed for it",
+   "space": "O(k) for k returned rows"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-005",
+  "subtopic": "Type-safe Queries & Filters",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "operators",
+   "ilike",
+   "like",
+   "filters"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x / PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You need all users whose email ends with `@gmail.com`, regardless of letter case (`@Gmail.com` must match too), in PostgreSQL. Which Drizzle filter is correct?",
+   "bn": "PostgreSQL-এ এমন সব user দরকার যাদের email `@gmail.com` দিয়ে শেষ, letter case যাই হোক (`@Gmail.com`-ও match করতে হবে)। কোন Drizzle filter সঠিক?"
+  },
+  "answer": {
+   "en": "`ilike(users.email, '%@gmail.com')`. It compiles to `\"users\".\"email\" ilike $1` — PostgreSQL's case-insensitive `LIKE` — with the pattern sent as a bound parameter.",
+   "bn": "`ilike(users.email, '%@gmail.com')`। এটা compile হয় `\"users\".\"email\" ilike $1`-এ — PostgreSQL-এর case-insensitive `LIKE` — আর pattern-টা bound parameter হিসেবে যায়।"
+  },
+  "explanation": {
+   "en": "- `like` is the tempting option, but in PostgreSQL `LIKE` is **case-sensitive**, so `@Gmail.com` wouldn't match.\n- `eq` compares literally — `%` is not a wildcard there.\n- Drizzle filters are standalone functions imported from `drizzle-orm` (`eq`, `ilike`, `and`...), not methods on columns, so option D doesn't exist.\n\nPerformance note: a pattern starting with `%` can't use a normal B-tree index. For frequent suffix/contains searches, consider a `pg_trgm` GIN index, or store a normalised lower-case email with an index on it.",
+   "bn": "- `like` লোভনীয় option, কিন্তু PostgreSQL-এ `LIKE` **case-sensitive**, তাই `@Gmail.com` match করত না।\n- `eq` হুবহু তুলনা করে — সেখানে `%` wildcard না।\n- Drizzle filter হলো `drizzle-orm` থেকে import করা আলাদা function (`eq`, `ilike`, `and`...), column-এর method না, তাই option D-র অস্তিত্বই নেই।\n\nPerformance নোট: `%` দিয়ে শুরু হওয়া pattern সাধারণ B-tree index ব্যবহার করতে পারে না। ঘনঘন suffix/contains search হলে `pg_trgm` GIN index ভাবো, অথবা normalised lower-case email রেখে তার উপর index দাও।"
+  },
+  "interviewTip": {
+   "en": "Mention that `ilike` is PostgreSQL-specific and that leading wildcards defeat B-tree indexes — a small performance remark lifts an easy answer.",
+   "bn": "বলো যে `ilike` PostgreSQL-specific, আর শুরুতে wildcard থাকলে B-tree index কাজে লাগে না — ছোট একটা performance মন্তব্য সহজ উত্তরকেও উঁচু করে।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Filter operators",
+    "url": "https://orm.drizzle.team/docs/operators"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "drizzle-004",
+   "drizzle-028"
+  ],
+  "options": [
+   {
+    "en": "`like(users.email, '%@gmail.com')`",
+    "bn": "`like(users.email, '%@gmail.com')`"
+   },
+   {
+    "en": "`eq(users.email, '%@gmail.com')`",
+    "bn": "`eq(users.email, '%@gmail.com')`"
+   },
+   {
+    "en": "`ilike(users.email, '%@gmail.com')`",
+    "bn": "`ilike(users.email, '%@gmail.com')`"
+   },
+   {
+    "en": "`users.email.ilike('%@gmail.com')`",
+    "bn": "`users.email.ilike('%@gmail.com')`"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-006",
+  "subtopic": "Type Inference",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "type-inference",
+   "inferinsert",
+   "inferselect",
+   "typescript"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Given this table, which fields are **required** in `typeof users.$inferInsert`?",
+   "bn": "এই table অনুযায়ী `typeof users.$inferInsert`-এ কোন field গুলো **required**?"
+  },
+  "answer": {
+   "en": "Only `name`. The insert type is `{ name: string; bio?: string | null; createdAt?: Date | null }`: nullable columns and columns with defaults become optional, and an *always*-generated identity `id` is left out entirely.",
+   "bn": "শুধু `name`। Insert type হলো `{ name: string; bio?: string | null; createdAt?: Date | null }`: nullable column আর default থাকা column optional হয়ে যায়, আর *always*-generated identity `id` পুরোপুরি বাদ পড়ে।"
+  },
+  "explanation": {
+   "en": "- `$inferInsert` reflects what the **database** requires on insert: `NOT NULL` without a default → required.\n- `createdAt` has a default (`now()`), so it's optional — the tempting answer C forgets that defaults make fields optional. It's also nullable here because there's no `.notNull()`, so `$inferSelect` gives `Date | null` — a hint that you probably want `.notNull().defaultNow()`.\n- With `generatedAlwaysAsIdentity()`, passing `id` is a type error (PostgreSQL would reject it too). `generatedByDefaultAsIdentity()` would make `id` optional instead.\n- `$inferSelect` is the row you get back: `{ id: number; name: string; bio: string | null; createdAt: Date | null }`. The helper types `InferSelectModel` / `InferInsertModel` are equivalent.",
+   "bn": "- `$inferInsert` দেখায় insert-এর সময় **database** কী চায়: default ছাড়া `NOT NULL` → required।\n- `createdAt`-এর default আছে (`now()`), তাই optional — লোভনীয় উত্তর C ভুলে যায় যে default থাকলে field optional হয়। এখানে `.notNull()` নেই বলে এটা nullable-ও, তাই `$inferSelect` দেয় `Date | null` — ইঙ্গিত যে সম্ভবত `.notNull().defaultNow()` চাওয়া উচিত ছিল।\n- `generatedAlwaysAsIdentity()` থাকলে `id` দেওয়া type error (PostgreSQL-ও reject করত)। `generatedByDefaultAsIdentity()` হলে বরং `id` optional হতো।\n- `$inferSelect` হলো ফেরত পাওয়া row: `{ id: number; name: string; bio: string | null; createdAt: Date | null }`। Helper type `InferSelectModel` / `InferInsertModel` একই কাজ করে।"
+  },
+  "interviewTip": {
+   "en": "Explain the rule (\"required = NOT NULL and no default\") rather than memorising the answer. Then point out the nullable `createdAt` as a schema smell — that shows review instincts.",
+   "bn": "উত্তর মুখস্থ না করে নিয়মটা বলো (\"required = NOT NULL আর default নেই\")। তারপর nullable `createdAt`-কে schema-র দুর্বলতা হিসেবে দেখাও — এতে review করার দক্ষতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Goodies (type inference)",
+    "url": "https://orm.drizzle.team/docs/goodies"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "drizzle-002"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "export const users = pgTable('users', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  name: text().notNull(),\n  bio: text(),\n  createdAt: timestamp().defaultNow(),\n});\n\ntype NewUser = typeof users.$inferInsert;"
+  },
+  "options": [
+   {
+    "en": "All four: `id`, `name`, `bio`, `createdAt`",
+    "bn": "চারটাই: `id`, `name`, `bio`, `createdAt`"
+   },
+   {
+    "en": "Only `name`",
+    "bn": "শুধু `name`"
+   },
+   {
+    "en": "`name` and `createdAt`",
+    "bn": "`name` আর `createdAt`"
+   },
+   {
+    "en": "`name` and `bio`",
+    "bn": "`name` আর `bio`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-007",
+  "subtopic": "Drizzle Kit",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "drizzle-kit",
+   "migrations",
+   "generate"
+  ],
+  "technologyVersion": "drizzle-kit 0.31",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "You added a column in `schema.ts` and want a reviewable SQL migration file that you commit to git and apply in every environment. Which Drizzle Kit command creates that file?",
+   "bn": "তুমি `schema.ts`-এ একটা column যোগ করেছ, আর এমন একটা reviewable SQL migration file চাও যেটা git-এ commit করে প্রতিটা environment-এ apply করবে। কোন Drizzle Kit command সেই file তৈরি করে?"
+  },
+  "answer": {
+   "en": "`drizzle-kit generate`. It compares your TypeScript schema with the last snapshot in the migrations folder and writes a new SQL file (e.g. `drizzle/0001_add_phone.sql`) — no database connection needed.",
+   "bn": "`drizzle-kit generate`। এটা তোমার TypeScript schema-কে migrations folder-এর শেষ snapshot-এর সাথে তুলনা করে একটা নতুন SQL file লেখে (যেমন `drizzle/0001_add_phone.sql`) — database connection লাগে না।"
+  },
+  "explanation": {
+   "en": "- `migrate` **applies** already-generated files to a database and records them in the `drizzle.__drizzle_migrations` table. It's the second half of the workflow.\n- `push` (the tempting answer) applies schema changes **directly** without creating a file — great for prototyping and local dev, risky for production because there's nothing to review or replay.\n- `pull` does the reverse: introspects an existing database and generates `schema.ts`.\n- Others: `studio` (browser data viewer), `check` (consistency of the migration history — useful when several developers generate migrations on different branches), `export`.\n- In drizzle-kit 0.31 the folder holds numbered `.sql` files plus `meta/_journal.json` and snapshots; the v1 RC switches to one folder per migration without a journal.",
+   "bn": "- `migrate` আগে থেকে generate করা file database-এ **apply** করে আর `drizzle.__drizzle_migrations` table-এ record রাখে। এটা workflow-এর দ্বিতীয় অর্ধেক।\n- `push` (লোভনীয় উত্তর) কোনো file না বানিয়ে **সরাসরি** schema change apply করে — prototype আর local dev-এর জন্য দারুণ, production-এর জন্য ঝুঁকিপূর্ণ, কারণ review বা replay করার কিছু থাকে না।\n- `pull` উল্টো কাজ করে: existing database introspect করে `schema.ts` তৈরি করে।\n- বাকিগুলো: `studio` (browser-এ data দেখার tool), `check` (migration history-র consistency — কয়েকজন developer আলাদা branch-এ migration generate করলে কাজে লাগে), `export`।\n- drizzle-kit 0.31-এ folder-এ থাকে numbered `.sql` file আর `meta/_journal.json` ও snapshot; v1 RC-তে প্রতিটা migration-এর আলাদা folder, journal ছাড়া।"
+  },
+  "interviewTip": {
+   "en": "Describe the full loop in one breath: \"edit schema → `generate` → review SQL in the PR → `migrate` in CI/CD\". That's what interviewers want to hear.",
+   "bn": "পুরো চক্রটা এক নিঃশ্বাসে বলো: \"schema edit → `generate` → PR-এ SQL review → CI/CD-তে `migrate`\"। Interviewer এটাই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "Drizzle Kit — generate",
+    "url": "https://orm.drizzle.team/docs/drizzle-kit-generate"
+   },
+   {
+    "title": "Drizzle Kit — Overview",
+    "url": "https://orm.drizzle.team/docs/kit-overview"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "drizzle-017",
+   "drizzle-026"
+  ],
+  "options": [
+   {
+    "en": "`drizzle-kit push`",
+    "bn": "`drizzle-kit push`"
+   },
+   {
+    "en": "`drizzle-kit migrate`",
+    "bn": "`drizzle-kit migrate`"
+   },
+   {
+    "en": "`drizzle-kit pull`",
+    "bn": "`drizzle-kit pull`"
+   },
+   {
+    "en": "`drizzle-kit generate`",
+    "bn": "`drizzle-kit generate`"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-008",
+  "subtopic": "Security: SQL Injection",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "sql-injection",
+   "sql-template",
+   "sql-raw",
+   "security"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`name` comes straight from the query string. Which of the lines A–D is vulnerable to SQL injection?",
+   "bn": "`name` সরাসরি query string থেকে আসছে। A–D লাইনগুলোর মধ্যে কোনটা SQL injection-এর ঝুঁকিতে আছে?"
+  },
+  "answer": {
+   "en": "Only D. In A, B and C the value becomes a bound parameter (`$1`). `sql.raw()` inserts its argument verbatim into the SQL text, and here that argument is a JavaScript template string built from user input — classic injection.",
+   "bn": "শুধু D। A, B আর C-তে value একটা bound parameter (`$1`) হয়ে যায়। `sql.raw()` তার argument হুবহু SQL text-এ বসিয়ে দেয়, আর এখানে সেই argument user input দিয়ে বানানো একটা JavaScript template string — classic injection।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is B/C: they *look* like string interpolation, but `sql` is a **tagged template**. Drizzle receives the static parts and the values separately, and sends values as parameters — verified output for B: `where \"users\".\"name\" = $1` with `params: [\"x' OR 1=1 --\"]`.\n\n`sql.raw()` exists for trusted, static SQL fragments (e.g. a sort direction you chose from a whitelist). Never pass user input to it. For dynamic identifiers like a sort column, map the input to a known column object (`{ name: users.name, created: users.createdAt }[key]`) instead of building SQL text.\n\nOption D in the list (\"Drizzle escapes everything\") is the dangerous belief that leads to bugs like line D.",
+   "bn": "লোভনীয় ভুল উত্তর হলো B/C: দেখতে string interpolation-এর মতো, কিন্তু `sql` একটা **tagged template**। Drizzle static অংশ আর value আলাদাভাবে পায়, আর value parameter হিসেবে পাঠায় — B-এর যাচাই করা output: `where \"users\".\"name\" = $1`, `params: [\"x' OR 1=1 --\"]`।\n\n`sql.raw()` আছে বিশ্বস্ত, static SQL fragment-এর জন্য (যেমন whitelist থেকে বেছে নেওয়া sort direction)। এতে কখনো user input দিও না। Sort column-এর মতো dynamic identifier-এর জন্য SQL text না বানিয়ে input-কে একটা পরিচিত column object-এ map করো (`{ name: users.name, created: users.createdAt }[key]`)।\n\nList-এর option D (\"Drizzle সব escape করে\") হলো সেই বিপজ্জনক বিশ্বাস, যেটা line D-র মতো bug তৈরি করে।"
+  },
+  "interviewTip": {
+   "en": "Use the words \"tagged template\" and \"bound parameter\". Then mention the whitelist approach for dynamic column names — that's the real-world follow-up.",
+   "bn": "\"Tagged template\" আর \"bound parameter\" কথাগুলো ব্যবহার করো। তারপর dynamic column name-এর জন্য whitelist পদ্ধতির কথা বলো — বাস্তবে follow-up প্রশ্ন এটাই আসে।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — sql template",
+    "url": "https://orm.drizzle.team/docs/sql"
+   },
+   {
+    "title": "OWASP — SQL Injection Prevention Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "drizzle-011",
+   "drizzle-028"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "const name = String(req.query.name); // untrusted input\n\n// A\nawait db.select().from(users).where(eq(users.name, name));\n// B\nawait db.select().from(users).where(sql`${users.name} = ${name}`);\n// C\nawait db.execute(sql`select * from users where name = ${name}`);\n// D\nawait db.execute(sql.raw(`select * from users where name = '${name}'`));"
+  },
+  "options": [
+   {
+    "en": "Only D — `sql.raw()` puts the string into the SQL text without parameters",
+    "bn": "শুধু D — `sql.raw()` parameter ছাড়াই string-টা SQL text-এ বসিয়ে দেয়"
+   },
+   {
+    "en": "B and C — interpolating into the `sql` tag concatenates the value into the query",
+    "bn": "B আর C — `sql` tag-এ interpolate করলে value query-তে জুড়ে যায়"
+   },
+   {
+    "en": "Only C — `db.execute()` bypasses parameter binding",
+    "bn": "শুধু C — `db.execute()` parameter binding এড়িয়ে যায়"
+   },
+   {
+    "en": "None — Drizzle escapes all input automatically",
+    "bn": "কোনোটাই না — Drizzle সব input নিজে থেকেই escape করে"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "drizzle"
+ }
+]

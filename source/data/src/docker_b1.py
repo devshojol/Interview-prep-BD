@@ -1,0 +1,552 @@
+# Docker — batch 1: docker-001..004 (easy), docker-012..013 (medium), docker-023 (hard), docker-030 (extreme)
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools"))
+from qb import Q, save  # noqa: E402
+
+D_CONTAINER = ("Docker Docs — What is a container?", "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/")
+D_IMAGE = ("Docker Docs — What is an image?", "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/")
+D_LAYERS = ("Docker Docs — Understanding image layers", "https://docs.docker.com/get-started/docker-concepts/building-images/understanding-image-layers/")
+D_SECURITY = ("Docker Docs — Docker Engine security", "https://docs.docker.com/engine/security/")
+D_DOCKERFILE = ("Dockerfile reference", "https://docs.docker.com/reference/dockerfile/")
+D_BEST = ("Docker Docs — Building best practices", "https://docs.docker.com/build/building/best-practices/")
+D_CACHE_OPT = ("Docker Docs — Optimize cache usage in builds", "https://docs.docker.com/build/cache/optimize/")
+D_CACHE = ("Docker Docs — Docker build cache", "https://docs.docker.com/build/cache/")
+D_SECRETS = ("Docker Docs — Build secrets", "https://docs.docker.com/build/building/secrets/")
+D_COMPOSE_SECRETS = ("Docker Docs — Secrets in Compose", "https://docs.docker.com/compose/how-tos/use-secrets/")
+D_ATTEST = ("Docker Docs — Build attestations", "https://docs.docker.com/build/metadata/attestations/")
+D_SCOUT = ("Docker Docs — Docker Scout", "https://docs.docker.com/scout/")
+D_MULTIPLATFORM = ("Docker Docs — Multi-platform builds", "https://docs.docker.com/build/building/multi-platform/")
+
+QUESTIONS = [
+    # ------------------------------------------------------------------ docker-001
+    Q(
+        id="docker-001", sub="Containers vs VMs", diff="easy", type="conceptual",
+        prio="high", market="both", mins=3,
+        tags=["containers", "virtual-machines", "namespaces", "cgroups", "kernel"],
+        ver="Version-independent concept (Docker Engine 29)", vs=False, status="stable",
+        q_en=r"""What is the difference between a container and a virtual machine? How does Docker isolate containers?""",
+        q_bn=r"""Container আর virtual machine (VM)-এর মধ্যে পার্থক্য কী? Docker কীভাবে container-গুলোকে isolate করে?""",
+        a_en=r"""
+            A virtual machine virtualises **hardware**. A hypervisor runs complete guest operating systems, and each one has its own kernel. A container virtualises the **operating system**. It's an ordinary Linux process (or a group of processes) that the host kernel isolates with **namespaces** and limits with **cgroups**:
+
+            - **Namespaces** control what the process can **see**: its own PID tree, network stack, mount points, hostname, IPC and users.
+            - **cgroups** control how much it can **use**: CPU, memory, I/O and number of PIDs.
+
+            Every container on a host shares the host's kernel. That's why containers start in milliseconds and images are often tens of MB instead of GBs. The trade-off is a weaker isolation boundary than a VM. In practice the two work together: in the cloud my containers usually run **inside** VMs, such as EC2 instances.
+        """,
+        a_bn=r"""
+            Virtual machine **hardware** virtualize করে। একটা hypervisor পুরো guest operating system চালায়, আর প্রতিটা VM-এর নিজস্ব kernel থাকে। অন্যদিকে container **operating system** virtualize করে। এটা আসলে host-এর একটা সাধারণ Linux process (বা process-এর group)। Host kernel **namespaces** দিয়ে এটাকে isolate করে আর **cgroups** দিয়ে এর resource সীমিত করে:
+
+            - **Namespaces** ঠিক করে process কী **দেখতে** পাবে: নিজস্ব PID tree, network stack, mount point, hostname, IPC আর user।
+            - **cgroups** ঠিক করে process কতটা **ব্যবহার** করতে পারবে: CPU, memory, I/O, PID-এর সংখ্যা।
+
+            একটা host-এর সব container একই kernel share করে। তাই container কয়েক millisecond-এ start হয়, আর image সাধারণত GB-এর বদলে কয়েক দশ MB হয়। এর বিনিময়ে VM-এর তুলনায় isolation boundary দুর্বল। বাস্তবে দুটো একসাথেই চলে: cloud-এ আমার container সাধারণত VM-এর **ভেতরেই** চলে (যেমন EC2 instance)।
+        """,
+        ex_en=r"""
+            - **Filesystem:** each container gets the image's read-only layers plus a thin writable layer, assembled by a union/overlay filesystem (e.g. overlay2 or the containerd snapshotter).
+            - **Runtime stack:** the Docker CLI talks to `dockerd`, which uses containerd and an OCI runtime (`runc`) to create the namespaces and cgroups. "Docker" packages kernel features; it doesn't invent a new kind of isolation.
+            - **Shared-kernel consequences:** you can't run a Windows container on a Linux kernel. A kernel vulnerability can affect every container on the host. On macOS/Windows, Docker Desktop runs a lightweight Linux VM to provide the Linux kernel.
+            - **Resource limits** such as `--memory 256m` or `--cpus 0.5` are cgroup settings. A container that goes over its memory limit is OOM-killed.
+            - **Stronger isolation options:** full VMs, microVMs (Firecracker) or sandboxed runtimes (gVisor, Kata Containers) for multi-tenant or untrusted workloads.
+        """,
+        ex_bn=r"""
+            - **Filesystem:** প্রতিটা container image-এর read-only layer-গুলো পায়, আর তার উপর একটা পাতলা writable layer। এগুলো union/overlay filesystem (যেমন overlay2 বা containerd snapshotter) দিয়ে জোড়া লাগানো হয়।
+            - **Runtime stack:** Docker CLI কথা বলে `dockerd`-এর সাথে। `dockerd` containerd আর OCI runtime (`runc`) দিয়ে namespace ও cgroup তৈরি করে। মানে Docker kernel-এর feature-গুলোকে সহজে ব্যবহারযোগ্য করে, নতুন কোনো isolation বানায় না।
+            - **Kernel share করার ফল:** Linux kernel-এর উপর Windows container চালানো যায় না। Kernel-এ vulnerability থাকলে host-এর সব container ঝুঁকিতে পড়ে। macOS/Windows-এ Docker Desktop Linux kernel পাওয়ার জন্য একটা হালকা Linux VM চালায়।
+            - `--memory 256m` বা `--cpus 0.5`-এর মতো **resource limit** আসলে cgroup setting। Memory limit পার হলে container OOM-kill হয়।
+            - **আরও শক্ত isolation লাগলে:** পুরো VM, microVM (Firecracker) বা sandboxed runtime (gVisor, Kata Containers) ব্যবহার করা হয়। Multi-tenant বা untrusted workload-এর জন্য এগুলো দরকার হয়।
+        """,
+        tip_en=r"""Open with the one-liner "VMs virtualise hardware, containers virtualise the OS". Then explain namespaces (what a process sees) vs cgroups (what it uses), and finish with the trade-off: speed and density vs isolation strength.""",
+        tip_bn=r"""শুরু করো এক লাইনে: "VM hardware virtualize করে, container OS virtualize করে"। এরপর namespaces (process কী দেখে) আর cgroups (কতটা ব্যবহার করে)-এর পার্থক্য বোঝাও। শেষে trade-off বলো: speed ও density বনাম isolation-এর শক্তি।""",
+        mist_en=r"""Calling containers "lightweight VMs with their own kernel", claiming containers are automatically as secure as VMs, or thinking Docker Desktop runs Linux containers natively on macOS.""",
+        mist_bn=r"""Container-কে "নিজস্ব kernel-সহ lightweight VM" বলা, container মানেই VM-এর মতো secure ধরে নেওয়া, অথবা ভাবা যে Docker Desktop macOS-এ সরাসরি (VM ছাড়া) Linux container চালায়।""",
+        code=r"""
+            # A container is just a process on the host, limited by cgroups
+            docker run -d --name web --memory 256m --cpus 0.5 nginx:1.30-alpine
+
+            docker top web                              # nginx processes, as seen from the host
+            docker inspect -f '{{.State.Pid}}' web      # host PID of the container's PID 1
+
+            uname -r                                    # host kernel version
+            docker run --rm alpine uname -r             # same kernel version inside a container
+        """,
+        lang="bash",
+        follow=[
+            ("Which Linux namespaces does a container typically get?", "একটা container সাধারণত কোন কোন Linux namespace পায়?"),
+            ("Why does Docker Desktop need a VM on macOS and Windows?", "macOS আর Windows-এ Docker Desktop-এর VM কেন লাগে?"),
+            ("When would you choose a VM over a container?", "কোন পরিস্থিতিতে তুমি container-এর বদলে VM বেছে নেবে?"),
+        ],
+        refs=[D_CONTAINER, D_SECURITY],
+    ),
+    # ------------------------------------------------------------------ docker-002
+    Q(
+        id="docker-002", sub="Images and Containers", diff="easy", type="conceptual",
+        prio="high", market="both", mins=2,
+        tags=["image", "container", "layers", "digest", "copy-on-write"],
+        ver="Version-independent concept (Docker Engine 29)", vs=False, status="stable",
+        q_en=r"""What is the difference between a Docker image and a Docker container?""",
+        q_bn=r"""Docker image আর Docker container-এর মধ্যে পার্থক্য কী?""",
+        a_en=r"""
+            An **image** is a read-only, layered template. It holds the filesystem plus the metadata needed to run an app: the default command, environment variables, working directory and user. You build it from a Dockerfile, push it to a registry, and it's identified by a content **digest** (`sha256:…`). Tags like `node:24-alpine` are just movable labels that point to a digest.
+
+            A **container** is a running (or stopped) instance of an image. Docker adds a thin **writable layer** on top of the image layers, gives it its own process, network settings and config, and starts the command. You can start many containers from the same image. Anything written to the writable layer is lost when the container is removed, which is why persistent data goes into volumes.
+        """,
+        a_bn=r"""
+            **Image** হলো একটা read-only, layer-ভিত্তিক template। এতে app চালানোর জন্য দরকারি filesystem আর metadata থাকে: default command, environment variable, working directory, user। Dockerfile থেকে image build করে registry-তে push করা হয়, আর content **digest** (`sha256:…`) দিয়ে এটাকে চেনা যায়। `node:24-alpine`-এর মতো tag আসলে একটা movable label, যেটা কোনো একটা digest-কে point করে।
+
+            **Container** হলো image-এর একটা running (বা stopped) instance। Docker image layer-গুলোর উপর একটা পাতলা **writable layer** যোগ করে, নিজস্ব process, network setting আর config দেয়, তারপর command চালায়। একই image থেকে অনেকগুলো container চালানো যায়। Writable layer-এ যা লেখা হয়, container remove করলে সব হারিয়ে যায়। এজন্য persistent data volume-এ রাখতে হয়।
+        """,
+        ex_en=r"""
+            - **Copy-on-write:** when a container modifies a file from the image, the file is first copied up into the container's writable layer. The image itself never changes.
+            - **Layer sharing:** ten containers from the same image (and images sharing a base) reuse the same layers on disk, so startup is fast and storage is efficient.
+            - `docker run` = pull (if needed) + create + start. `docker images` lists templates; `docker ps -a` lists instances.
+            - **Tags are mutable, digests are not.** For reproducible deployments, reference `image@sha256:…`.
+            - **`docker commit` is an anti-pattern** for building images. Changes made by hand inside a container aren't reproducible, so put them in the Dockerfile instead.
+        """,
+        ex_bn=r"""
+            - **Copy-on-write:** container যখন image-এর কোনো file পরিবর্তন করে, তখন file-টা আগে container-এর writable layer-এ copy হয়। Image নিজে কখনো বদলায় না।
+            - **Layer sharing:** একই image থেকে দশটা container চালালে (বা একই base-এর ভিন্ন image হলেও) disk-এ একই layer reuse হয়। তাই startup দ্রুত হয়, storage-ও কম লাগে।
+            - `docker run` = pull (দরকার হলে) + create + start। `docker images` template-গুলো দেখায়, আর `docker ps -a` instance-গুলো দেখায়।
+            - **Tag বদলানো যায়, digest বদলায় না।** Reproducible deployment-এর জন্য `image@sha256:…` reference করো।
+            - Image বানাতে **`docker commit` ব্যবহার করা anti-pattern।** Container-এর ভেতরে হাতে করা পরিবর্তন reproduce করা যায় না, তাই সেগুলো Dockerfile-এ রাখো।
+        """,
+        tip_en=r"""The "class vs object" analogy works well. Back it up with the writable layer and copy-on-write, and mention that data in a container is lost on `docker rm` unless it lives in a volume.""",
+        tip_bn=r""""Class বনাম object" উপমাটা ভালো কাজ করে। সাথে writable layer আর copy-on-write-এর কথা বলো, আর উল্লেখ করো যে volume-এ না রাখলে `docker rm` করার সাথে সাথে container-এর data হারিয়ে যায়।""",
+        mist_en=r"""Saying a container "modifies the image", or assuming `docker stop` deletes data (stop keeps the writable layer; `docker rm` deletes it).""",
+        mist_bn=r"""Container "image পরিবর্তন করে" বলা, অথবা ধরে নেওয়া যে `docker stop` করলে data মুছে যায় (stop করলে writable layer থেকে যায়; `docker rm` করলে মুছে যায়)।""",
+        code=r"""
+            docker pull node:24-alpine
+            docker image ls node
+
+            # Two containers from the same image
+            docker run -d --name api1 -p 3001:3000 myorg/api:1.4.0
+            docker run -d --name api2 -p 3002:3000 myorg/api:1.4.0
+
+            docker diff api1      # files changed in api1's writable layer only
+            docker rm -f api1     # writable layer is gone; the image is untouched
+
+            # The immutable identity behind a tag
+            docker image inspect --format '{{index .RepoDigests 0}}' node:24-alpine
+        """,
+        lang="bash",
+        follow=[
+            ("What happens on disk when a container modifies a file that came from the image?", "Image থেকে আসা কোনো file container পরিবর্তন করলে disk-এ কী ঘটে?"),
+            ("Why should production deployments reference image digests instead of tags?", "Production deployment-এ tag-এর বদলে image digest কেন reference করা উচিত?"),
+        ],
+        related=["docker-001"],
+        refs=[D_IMAGE, D_LAYERS],
+    ),
+    # ------------------------------------------------------------------ docker-003
+    Q(
+        id="docker-003", sub="Dockerfiles", diff="easy", type="mcq",
+        prio="medium", market="bangladesh", mins=1,
+        tags=["dockerfile", "copy", "add"],
+        ver="Dockerfile syntax 1.x (BuildKit, Docker Engine 29)", vs=False, status="stable",
+        q_en=r"""Which statement about `COPY` and `ADD` in a Dockerfile is correct?""",
+        q_bn=r"""Dockerfile-এর `COPY` আর `ADD` সম্পর্কে কোন কথাটা সঠিক?""",
+        options=[
+            ("`ADD` can also fetch remote URLs/Git repositories and auto-extracts local tar archives, so `COPY` is preferred for plain local files",
+             "`ADD` remote URL/Git repository থেকেও আনতে পারে আর local tar archive নিজে থেকে extract করে; তাই সাধারণ local file-এর জন্য `COPY` ব্যবহার করাই ভালো"),
+            ("`COPY` can download files from a URL, while `ADD` only copies local files",
+             "`COPY` URL থেকে file download করতে পারে, আর `ADD` শুধু local file copy করে"),
+            ("They are identical aliases; Docker keeps both only for backward compatibility",
+             "দুটো হুবহু একই (alias); Docker শুধু backward compatibility-র জন্য দুটোই রেখেছে"),
+            ("`ADD` copies files without creating a new layer, so it produces smaller images",
+             "`ADD` নতুন layer না বানিয়ে file copy করে, তাই এতে image ছোট হয়"),
+        ],
+        correct=0,
+        a_en=r"""The correct statement is the one about `ADD`'s extra features. `COPY` just copies files from the build context (or from another stage with `--from`). `ADD` does extra things too: it fetches remote URLs and Git repositories and auto-extracts local tar archives. Because that "magic" can surprise you, `COPY` is the recommended default and `ADD` is used only when you actually want those features.""",
+        a_bn=r"""সঠিক কথাটা হলো `ADD`-এর বাড়তি feature-সংক্রান্ত option-টা। `COPY` শুধু build context থেকে (বা `--from` দিয়ে অন্য stage থেকে) file copy করে। `ADD` এর বাইরেও কিছু কাজ করে: remote URL ও Git repository থেকে file আনে আর local tar archive নিজে থেকে extract করে। এই বাড়তি "magic" মাঝে মাঝে অবাক করা ফল দিতে পারে। তাই default হিসেবে `COPY` ব্যবহার করার পরামর্শ দেওয়া হয়, আর `ADD` তখনই ব্যবহার করা হয় যখন সত্যিই ওই feature-গুলো দরকার।""",
+        ex_en=r"""
+            The tempting wrong answer is "identical aliases". They behave differently: `ADD app.tar.gz /opt/` unpacks the archive into `/opt/`, while `COPY app.tar.gz /opt/` copies the archive file as-is. Remote URLs are downloaded but, by default, not extracted. Both instructions create a layer, so the "no new layer, smaller image" option is wrong.
+
+            When you do need a remote file, `ADD --checksum=sha256:… https://…` verifies its integrity. Useful `COPY` flags include `--chown=node:node` (set ownership without an extra `RUN chown` layer), `--from=builder` (multi-stage) and `--link`.
+        """,
+        ex_bn=r"""
+            সবচেয়ে বিভ্রান্তিকর ভুল উত্তর হলো "দুটো একই alias"। আসলে এদের আচরণ আলাদা: `ADD app.tar.gz /opt/` archive-টা `/opt/`-এ unpack করে, কিন্তু `COPY app.tar.gz /opt/` archive file-টাই হুবহু copy করে। Remote URL থেকে file download হয়, কিন্তু default-এ extract হয় না। দুটো instruction-ই layer তৈরি করে, তাই "নতুন layer না বানিয়ে image ছোট করে" option-টা ভুল।
+
+            Remote file সত্যিই লাগলে `ADD --checksum=sha256:… https://…` দিয়ে integrity যাচাই করা যায়। `COPY`-এর কিছু কাজের flag: `--chown=node:node` (আলাদা `RUN chown` layer ছাড়াই ownership ঠিক করে), `--from=builder` (multi-stage), আর `--link`।
+        """,
+        tip_en=r"""Say "COPY by default, ADD only for its extra features". Then name one concrete ADD behaviour, like tar auto-extraction, to show you know why.""",
+        tip_bn=r"""বলো "default হিসেবে COPY, বাড়তি feature লাগলে তবেই ADD"। তারপর ADD-এর একটা নির্দিষ্ট আচরণের উদাহরণ দাও (যেমন tar auto-extract), যাতে বোঝা যায় কারণটা তুমি জানো।""",
+        refs=[D_DOCKERFILE, D_BEST],
+    ),
+    # ------------------------------------------------------------------ docker-004
+    Q(
+        id="docker-004", sub="Port Mapping", diff="easy", type="mcq",
+        prio="high", market="bangladesh", mins=1,
+        tags=["expose", "ports", "publish", "networking"],
+        ver="Version-independent concept (Docker Engine 29)", vs=False, status="stable",
+        q_en=r"""A Dockerfile contains `EXPOSE 3000`. You start it with `docker run -d myapp` (no `-p` flag). Which statement is true?""",
+        q_bn=r"""একটা Dockerfile-এ `EXPOSE 3000` লেখা আছে। তুমি container চালালে `docker run -d myapp` দিয়ে (কোনো `-p` flag নেই)। কোন কথাটা সত্য?""",
+        options=[
+            ("Port 3000 is published on the host, so `http://localhost:3000` works from the host",
+             "Host-এ port 3000 publish হয়ে যায়, তাই host থেকে `http://localhost:3000` কাজ করবে"),
+            ("The app inside the container can't listen on any port other than 3000",
+             "Container-এর ভেতরের app 3000 ছাড়া অন্য কোনো port-এ listen করতে পারবে না"),
+            ("`EXPOSE` is documentation/metadata only; nothing is published on the host unless you use `-p` (or `-P` to publish all exposed ports to random host ports)",
+             "`EXPOSE` শুধু documentation/metadata; `-p` (বা সব exposed port random host port-এ publish করতে `-P`) না দিলে host-এ কিছুই publish হয় না"),
+            ("Other containers on the same network can't reach port 3000 unless it is exposed",
+             "Port expose না করলে একই network-এর অন্য container-গুলো port 3000-এ পৌঁছাতে পারে না"),
+        ],
+        correct=2,
+        a_en=r"""The "documentation/metadata only" answer is correct. `EXPOSE` only records in the image metadata which port the app is expected to listen on. To reach the container from the host you must publish the port, for example `docker run -p 8080:3000 myapp` (host 8080 → container 3000), or use `-P` to map every exposed port to a random high host port.""",
+        a_bn=r""""শুধু documentation/metadata" উত্তরটাই সঠিক। `EXPOSE` শুধু image metadata-তে লিখে রাখে যে app কোন port-এ listen করবে বলে আশা করা হচ্ছে। Host থেকে container-এ পৌঁছাতে হলে port publish করতে হয়, যেমন `docker run -p 8080:3000 myapp` (host 8080 → container 3000)। অথবা `-P` দিলে সব exposed port random একটা high host port-এ map হয়।""",
+        ex_en=r"""
+            The most tempting wrong answer is the claim that other containers can't reach the port unless it's exposed. On a user-defined network, containers can reach **any** port another container listens on, whether or not it is exposed. `EXPOSE` doesn't open or block anything. It also doesn't restrict which port the app binds to, so the "can't listen on any other port" option is wrong too.
+
+            In Compose, `ports: ["127.0.0.1:8080:3000"]` publishes to the host (here bound to loopback only, which is nice when NGINX on the same host fronts the app). `expose:` is documentation, just like the Dockerfile instruction.
+        """,
+        ex_bn=r"""
+            সবচেয়ে বিভ্রান্তিকর ভুল উত্তর হলো এই দাবি যে expose না করলে অন্য container port-এ পৌঁছাতে পারে না। User-defined network-এ একটা container অন্য container-এর যেকোনো listen করা port-এ পৌঁছাতে পারে, সেটা expose করা থাকুক বা না থাকুক। `EXPOSE` কোনো কিছু খোলে না, বন্ধও করে না। App কোন port-এ bind করবে সেটাও এটা সীমিত করে না, তাই "অন্য port-এ listen করতে পারবে না" option-টাও ভুল।
+
+            Compose-এ `ports: ["127.0.0.1:8080:3000"]` দিলে port host-এ publish হয় (এখানে শুধু loopback-এ bind করা, যা একই host-এ NGINX সামনে থাকলে কাজের)। আর `expose:` হলো Dockerfile instruction-এর মতোই শুধু documentation।
+        """,
+        tip_en=r"""Mention the `host:container` order of `-p`, and that you can bind the host side to `127.0.0.1` so the port isn't public. That small detail sounds like production experience.""",
+        tip_bn=r"""`-p`-এর `host:container` order-টা বলো, আর উল্লেখ করো যে host side `127.0.0.1`-এ bind করলে port public হয় না। এই ছোট detail-টা production অভিজ্ঞতার পরিচয় দেয়।""",
+        refs=[D_DOCKERFILE, ("Docker Docs — Networking overview", "https://docs.docker.com/engine/network/")],
+    ),
+    # ------------------------------------------------------------------ docker-012
+    Q(
+        id="docker-012", sub="Layers and Caching", diff="medium", type="debugging",
+        prio="high", market="both", mins=5,
+        tags=["build-cache", "layers", "npm-ci", "dockerignore", "buildkit"],
+        ver="Docker Engine 29 / BuildKit (Dockerfile syntax 1.x), Node.js 24 LTS", vs=True, status="stable",
+        q_en=r"""
+            Every time a developer changes a single line in `src/`, CI rebuilds this image and spends about 3 minutes reinstalling every npm package. Find the problem(s) and fix the Dockerfile.
+        """,
+        q_bn=r"""
+            Developer-রা `src/`-এ মাত্র এক লাইন পরিবর্তন করলেও CI এই image আবার build করে, আর প্রতিবার প্রায় ৩ মিনিট ধরে সব npm package নতুন করে install করে। সমস্যা(গুলো) খুঁজে বের করো আর Dockerfile-টা ঠিক করো।
+        """,
+        code=r"""
+            FROM node:24-alpine
+            WORKDIR /app
+            COPY . .
+            RUN npm install
+            RUN npm run build
+            EXPOSE 3000
+            CMD ["node", "dist/server.js"]
+        """,
+        lang="dockerfile",
+        extra=[
+            dict(lang="dockerfile", label_en="Fixed Dockerfile", label_bn="সংশোধিত Dockerfile", src=r"""
+                # syntax=docker/dockerfile:1
+                FROM node:24-alpine
+                WORKDIR /app
+
+                # 1. Copy only the dependency manifests first
+                COPY package.json package-lock.json ./
+
+                # 2. This layer is reused until package*.json changes;
+                #    the cache mount keeps npm's download cache between builds
+                RUN --mount=type=cache,target=/root/.npm npm ci
+
+                # 3. Source code changes only invalidate the layers from here down
+                COPY . .
+                RUN npm run build
+
+                EXPOSE 3000
+                CMD ["node", "dist/server.js"]
+            """),
+            dict(lang="text", label_en=".dockerignore", label_bn=".dockerignore file", src=r"""
+                node_modules
+                dist
+                .git
+                .env*
+                npm-debug.log*
+                coverage
+                Dockerfile*
+                compose*.yaml
+            """),
+        ],
+        a_en=r"""
+            **Root cause:** the build cache works instruction by instruction, top to bottom. For `COPY`, the cache key includes checksums of the copied files. `COPY . .` copies the whole project, so changing any file invalidates that layer, and once a layer is invalidated **every layer after it is rebuilt too**, including `npm install`.
+
+            **Fix:**
+            1. Copy `package.json` and `package-lock.json` first, install dependencies, and only then `COPY . .`. Dependencies are reinstalled only when the manifests change.
+            2. Use `npm ci` instead of `npm install`. It installs exactly what the lockfile says and fails if the lockfile is out of sync.
+            3. Add a `.dockerignore`. Otherwise the host's `node_modules` (possibly built for macOS), `.git` and `.env` files are sent in the build context, bust the cache and may leak secrets.
+            4. Add a BuildKit cache mount (`--mount=type=cache,target=/root/.npm`). Even when the lockfile **does** change, npm reuses already-downloaded packages.
+        """,
+        a_bn=r"""
+            **মূল কারণ:** build cache উপর থেকে নিচে, প্রতিটা instruction ধরে ধরে কাজ করে। `COPY`-এর cache key-তে copy হওয়া file-গুলোর checksum থাকে। `COPY . .` পুরো project copy করে, তাই যেকোনো file বদলালেই ওই layer invalid হয়ে যায়। আর একটা layer invalid হলে **তার পরের সব layer আবার build হয়**, `npm install`-সহ।
+
+            **সমাধান:**
+            1. আগে শুধু `package.json` আর `package-lock.json` copy করো, dependency install করো, তারপর `COPY . .` করো। তাহলে শুধু manifest বদলালেই dependency আবার install হবে।
+            2. `npm install`-এর বদলে `npm ci` ব্যবহার করো। এটা lockfile-এ যা আছে হুবহু তাই install করে, আর lockfile mismatch হলে fail করে।
+            3. একটা `.dockerignore` যোগ করো। না হলে host-এর `node_modules` (হয়তো macOS-এর জন্য build করা), `.git` আর `.env` file build context-এ চলে যায়, cache নষ্ট করে, এমনকি secret-ও leak হতে পারে।
+            4. BuildKit cache mount (`--mount=type=cache,target=/root/.npm`) যোগ করো। এতে lockfile **বদলালেও** npm আগে download করা package-গুলো reuse করতে পারে।
+        """,
+        ex_en=r"""
+            - **Order from least to most frequently changing:** base image → system packages → dependency manifests → install → source → build.
+            - `RUN` instructions are cached by their command text, not by what they download. That's why a separate `RUN apt-get update` layer can go stale. Combine it with `apt-get install` in one `RUN`.
+            - **CI runners are often ephemeral**, so the local cache disappears between jobs. Export and import cache with `docker buildx build --cache-to/--cache-from` (registry or GitHub Actions cache backends).
+            - This image still ships devDependencies and the TypeScript sources. A multi-stage build (see docker-015) keeps only the compiled output and production dependencies.
+            - The `.dockerignore` above excludes `Dockerfile*`. That's safe because BuildKit reads the Dockerfile separately from the context.
+        """,
+        ex_bn=r"""
+            - **কম বদলায় এমন থেকে বেশি বদলায় এমন ক্রমে instruction সাজাও:** base image → system package → dependency manifest → install → source → build।
+            - `RUN` instruction-এর cache নির্ভর করে command-এর text-এর উপর, সেটা কী download করে তার উপর না। তাই আলাদা `RUN apt-get update` layer পুরনো (stale) হয়ে যেতে পারে। এটাকে `apt-get install`-এর সাথে একই `RUN`-এ রাখো।
+            - **CI runner অনেক সময় ephemeral হয়**, ফলে এক job থেকে আরেক job-এ local cache থাকে না। তখন `docker buildx build --cache-to/--cache-from` দিয়ে cache export/import করো (registry বা GitHub Actions cache backend)।
+            - এই image-এ এখনো devDependencies আর TypeScript source রয়ে গেছে। Multi-stage build (docker-015 দেখো) করলে শুধু compiled output আর production dependency থাকে।
+            - উপরের `.dockerignore` `Dockerfile*` বাদ দিয়েছে। এতে সমস্যা নেই, কারণ BuildKit Dockerfile-টা context থেকে আলাদাভাবে পড়ে।
+        """,
+        tip_en=r"""Say "once a layer's cache is invalidated, everything below it rebuilds" before you touch the code. Interviewers want to hear the rule, not just the reordered lines.""",
+        tip_bn=r"""Code ঠিক করার আগেই বলো: "একটা layer-এর cache invalid হলে তার নিচের সব layer আবার build হয়"। Interviewer শুধু লাইনগুলো সাজানো দেখতে চায় না, rule-টা তোমার মুখে শুনতে চায়।""",
+        mist_en=r"""Copying the host `node_modules` into the image, using `npm install` (which can change the lockfile) in CI, and putting rarely-changing steps after `COPY . .`.""",
+        mist_bn=r"""Host-এর `node_modules` image-এ copy করা, CI-তে `npm install` ব্যবহার করা (এটা lockfile বদলে দিতে পারে), আর কম বদলায় এমন step-গুলো `COPY . .`-এর পরে রাখা।""",
+        follow=[
+            ("How would you keep the build cache on ephemeral CI runners?", "Ephemeral CI runner-এ build cache কীভাবে ধরে রাখবে?"),
+            ("Why might `RUN apt-get update` on its own line cause stale packages?", "আলাদা লাইনে `RUN apt-get update` লিখলে package কেন পুরনো থেকে যেতে পারে?"),
+        ],
+        related=["docker-002"],
+        refs=[D_CACHE, D_CACHE_OPT, D_BEST],
+    ),
+    # ------------------------------------------------------------------ docker-013
+    Q(
+        id="docker-013", sub="Dockerfiles", diff="medium", type="mcq",
+        prio="high", market="both", mins=2,
+        tags=["entrypoint", "cmd", "exec-form", "dockerfile"],
+        ver="Version-independent (Dockerfile reference, Docker Engine 29)", vs=False, status="stable",
+        q_en=r"""Given this Dockerfile, which process does `docker run myapp worker.js` start?""",
+        q_bn=r"""এই Dockerfile দেখে বলো, `docker run myapp worker.js` চালালে কোন process start হবে?""",
+        code=r"""
+            FROM node:24-alpine
+            WORKDIR /app
+            COPY . .
+            ENTRYPOINT ["node"]
+            CMD ["server.js"]
+        """,
+        lang="dockerfile",
+        options=[
+            ("`node server.js worker.js`", "`node server.js worker.js`"),
+            ("`worker.js` — arguments after the image name replace the ENTRYPOINT",
+             "`worker.js` — image name-এর পরের argument ENTRYPOINT-কে replace করে"),
+            ("`node worker.js`", "`node worker.js`"),
+            ("`node server.js` — extra arguments are ignored when ENTRYPOINT is set",
+             "`node server.js` — ENTRYPOINT থাকলে বাড়তি argument ignore হয়"),
+        ],
+        correct=2,
+        a_en=r"""It runs `node worker.js`. With exec-form `ENTRYPOINT`, `CMD` only supplies the **default arguments** that are appended to the entrypoint. Arguments given after the image name in `docker run` **replace `CMD`**, not the entrypoint. To replace the entrypoint itself you need `docker run --entrypoint …`.""",
+        a_bn=r"""এটা `node worker.js` চালাবে। Exec-form `ENTRYPOINT` থাকলে `CMD` শুধু **default argument** দেয়, যেগুলো entrypoint-এর পরে যোগ হয়। `docker run`-এ image name-এর পরে যে argument দেওয়া হয়, সেটা **`CMD`-কে replace করে**, entrypoint-কে নয়। Entrypoint নিজেকেই বদলাতে চাইলে `docker run --entrypoint …` লাগবে।""",
+        ex_en=r"""
+            The tempting wrong answer is `node server.js worker.js`, which assumes run arguments are **appended** to `CMD`. They aren't: they override it completely.
+
+            Rules to remember:
+            - `ENTRYPOINT` = the fixed executable. `CMD` = default, overridable arguments (or the whole command when there's no entrypoint).
+            - Both should use **exec form** (JSON array). With shell-form `ENTRYPOINT node server.js`, the `CMD` and run arguments are ignored entirely, and `/bin/sh -c` becomes PID 1, which breaks signal handling (see docker-014).
+            - Official `node` images ship their own `ENTRYPOINT ["docker-entrypoint.sh"]`. That's why `docker run node:24-alpine -v` works. Setting your own `ENTRYPOINT`, as here, replaces it.
+        """,
+        ex_bn=r"""
+            বিভ্রান্তিকর ভুল উত্তর হলো `node server.js worker.js`। এখানে ধরে নেওয়া হচ্ছে যে run argument `CMD`-এর সাথে **যোগ** হয়। আসলে তা হয় না, এগুলো `CMD`-কে পুরোপুরি override করে।
+
+            মনে রাখার নিয়ম:
+            - `ENTRYPOINT` = নির্দিষ্ট executable। `CMD` = default argument, যেটা override করা যায় (entrypoint না থাকলে পুরো command)।
+            - দুটোই **exec form** (JSON array) দিয়ে লেখা উচিত। Shell-form `ENTRYPOINT node server.js` দিলে `CMD` আর run argument পুরোপুরি ignore হয়, আর `/bin/sh -c` PID 1 হয়ে যায়। এতে signal handling ভেঙে যায় (docker-014 দেখো)।
+            - Official `node` image-এ নিজস্ব `ENTRYPOINT ["docker-entrypoint.sh"]` থাকে। এজন্যই `docker run node:24-alpine -v` কাজ করে। এখানকার মতো নিজের `ENTRYPOINT` দিলে সেটা replace হয়ে যায়।
+        """,
+        tip_en=r"""Frame it as "ENTRYPOINT is the verb, CMD is the default object". It's short, memorable and correct.""",
+        tip_bn=r"""এভাবে বলো: "ENTRYPOINT হলো verb, CMD হলো default object"। ছোট, মনে রাখা সহজ, আর সঠিক।""",
+        related=["docker-012"],
+        refs=[D_DOCKERFILE, D_BEST],
+    ),
+    # ------------------------------------------------------------------ docker-023
+    Q(
+        id="docker-023", sub="Secrets", diff="hard", type="security-performance",
+        prio="high", market="both", mins=8,
+        tags=["secrets", "buildkit", "npm-token", "compose-secrets", "supply-chain"],
+        ver="Docker Engine 29 / BuildKit (Dockerfile syntax 1.x), Compose v5", vs=True, status="stable",
+        q_en=r"""Your Node.js API image needs a private npm token during `npm ci`, and at runtime the app needs a database password. How do you handle both secrets with Docker without leaking them into the image, build cache or logs?""",
+        q_bn=r"""তোমার Node.js API image-এ `npm ci` চালানোর সময় একটা private npm token লাগে, আর runtime-এ app-এর একটা database password লাগে। Image, build cache বা log-এ leak না করে Docker দিয়ে এই দুটো secret কীভাবে handle করবে?""",
+        a_en=r"""
+            I treat build-time and runtime secrets as two separate problems.
+
+            **Build time (npm token):**
+            - Never use `ENV` (it's stored in the image config) or `ARG` (values show up in `docker history` and build provenance).
+            - Never `COPY .npmrc` and then `RUN rm .npmrc`. Layers are additive, so the file still exists in the earlier layer.
+            - Use a **BuildKit secret mount**: `RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci`, built with `docker build --secret id=npmrc,src=$HOME/.npmrc`. The secret is mounted only while that one `RUN` executes, is never written to a layer and isn't part of the cache key.
+
+            **Runtime (DB password):**
+            - The image must contain **no credentials at all**. The same image moves from staging to production, and secrets are injected when the container starts.
+            - With Compose, use `secrets:`. They are mounted as files under `/run/secrets/<name>`, and the app reads a `*_FILE` path. In the cloud, use the platform's secret manager (AWS Secrets Manager/SSM Parameter Store, Vault, Kubernetes Secrets).
+            - For high-value secrets I prefer files over environment variables. Env vars are visible in `docker inspect`, inherited by child processes and often end up in crash dumps or debug logs.
+
+            Finally, add `.env*` and `.npmrc` to `.dockerignore` so `COPY . .` can't sneak them in, and run secret and CVE scanning (`docker scout`) in CI.
+        """,
+        a_bn=r"""
+            আমি build-time secret আর runtime secret-কে দুটো আলাদা সমস্যা হিসেবে দেখি।
+
+            **Build time (npm token):**
+            - কখনো `ENV` ব্যবহার করব না (এটা image config-এ থেকে যায়), `ARG`-ও না (value `docker history` আর build provenance-এ দেখা যায়)।
+            - `COPY .npmrc` করে পরে `RUN rm .npmrc` করাও চলবে না। Layer-গুলো additive, তাই আগের layer-এ file-টা থেকেই যায়।
+            - **BuildKit secret mount** ব্যবহার করো: `RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci`, আর build করো `docker build --secret id=npmrc,src=$HOME/.npmrc` দিয়ে। Secret-টা শুধু ওই একটা `RUN` চলার সময় mount থাকে। কোনো layer-এ লেখা হয় না, cache key-এরও অংশ হয় না।
+
+            **Runtime (DB password):**
+            - Image-এ **কোনো credential-ই থাকবে না**। একই image staging থেকে production-এ যায়, আর container start হওয়ার সময় secret inject হয়।
+            - Compose-এ `secrets:` ব্যবহার করো। এগুলো `/run/secrets/<name>`-এ file হিসেবে mount হয়, আর app একটা `*_FILE` path থেকে পড়ে। Cloud-এ platform-এর secret manager (AWS Secrets Manager/SSM Parameter Store, Vault, Kubernetes Secrets) ব্যবহার করো।
+            - গুরুত্বপূর্ণ secret-এর জন্য আমি environment variable-এর চেয়ে file পছন্দ করি। Env var `docker inspect`-এ দেখা যায়, child process-এ inherit হয়, আর প্রায়ই crash dump বা debug log-এ চলে যায়।
+
+            শেষে `.env*` আর `.npmrc` `.dockerignore`-এ যোগ করো, যাতে `COPY . .` এগুলো ভেতরে ঢোকাতে না পারে। আর CI-তে secret ও CVE scanning (`docker scout`) চালাও।
+        """,
+        ex_en=r"""
+            - **Why `ARG` is unsafe:** Docker's docs explicitly warn against build args for secrets, because they're visible in `docker history` and in max-mode provenance attestations.
+            - **Multi-stage alone is not a guarantee.** Even if the token only exists in a builder stage, that stage's layers live in your build cache, and with `--cache-to …,mode=max` they're exported to a registry.
+            - **Secret mounts don't affect caching.** Rotating the token doesn't rebuild the layer, which is usually what you want.
+            - **SSH mounts** (`RUN --mount=type=ssh`) are the equivalent for cloning private Git repositories.
+            - **Audit:** inspect layers with `docker history --no-trunc` or by exporting the image (`docker save`). If a secret ever landed in a pushed image, **rotate it**. Deleting the tag isn't enough.
+        """,
+        ex_bn=r"""
+            - **`ARG` কেন unsafe:** Docker-এর docs-এ স্পষ্টভাবে secret-এর জন্য build arg ব্যবহার করতে নিষেধ করা আছে, কারণ এগুলো `docker history` আর max-mode provenance attestation-এ দেখা যায়।
+            - **শুধু multi-stage দিয়ে নিশ্চয়তা পাওয়া যায় না।** Token শুধু builder stage-এ থাকলেও ওই stage-এর layer build cache-এ থেকে যায়, আর `--cache-to …,mode=max` দিলে registry-তে export হয়ে যায়।
+            - **Secret mount caching-এ প্রভাব ফেলে না।** Token rotate করলে layer আবার build হয় না, সাধারণত এটাই চাওয়া হয়।
+            - Private Git repository clone করার জন্য একই রকম ব্যবস্থা হলো **SSH mount** (`RUN --mount=type=ssh`)।
+            - **Audit:** `docker history --no-trunc` দিয়ে, অথবা image export করে (`docker save`) layer-গুলো পরীক্ষা করো। কোনো secret কখনো push করা image-এ ঢুকে গেলে সেটা **rotate করো**। শুধু tag delete করা যথেষ্ট না।
+        """,
+        tip_en=r"""Structure the answer as build-time vs runtime, and name the three anti-patterns (ENV, ARG, COPY-then-rm) before the fix. Ending with "if it leaked, rotate it" shows real security maturity.""",
+        tip_bn=r"""উত্তরটা build-time বনাম runtime ভাগ করে সাজাও। সমাধানের আগে তিনটা anti-pattern (ENV, ARG, COPY-করে-rm) উল্লেখ করো। শেষে "leak হলে rotate করো" বললে বোঝা যায় security নিয়ে তোমার বাস্তব পরিপক্বতা আছে।""",
+        mist_en=r"""Passing tokens with `--build-arg`, baking `.env` into the image with `COPY . .`, deleting a secret file in a later layer, or printing env vars in startup logs.""",
+        mist_bn=r"""`--build-arg` দিয়ে token পাঠানো, `COPY . .` দিয়ে `.env` image-এ ঢুকিয়ে ফেলা, পরের layer-এ secret file delete করা, অথবা startup log-এ env var print করা।""",
+        code=r"""
+            # syntax=docker/dockerfile:1
+            FROM node:24-slim AS deps
+            WORKDIR /app
+            COPY package.json package-lock.json ./
+            # The token file exists only while this RUN executes
+            RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
+                --mount=type=cache,target=/root/.npm \
+                npm ci --omit=dev
+
+            FROM node:24-slim
+            WORKDIR /app
+            ENV NODE_ENV=production
+            COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+            COPY --chown=node:node . .
+            USER node
+            CMD ["node", "src/server.js"]
+
+            # Build:
+            #   docker build --secret id=npmrc,src=$HOME/.npmrc -t api:1.0.0 .
+        """,
+        lang="dockerfile",
+        extra=[
+            dict(lang="yaml", label_en="Runtime secret with Compose (compose.yaml)", label_bn="Compose দিয়ে runtime secret (compose.yaml)", src=r"""
+                services:
+                  api:
+                    image: registry.example.com/api:1.0.0
+                    environment:
+                      DB_PASSWORD_FILE: /run/secrets/db_password   # app reads the file
+                    secrets:
+                      - db_password
+
+                secrets:
+                  db_password:
+                    file: ./secrets/db_password.txt   # git-ignored, never baked into the image
+            """),
+        ],
+        follow=[
+            ("How would you clone a private Git repository during a build without leaking an SSH key?", "Build-এর সময় SSH key leak না করে private Git repository কীভাবে clone করবে?"),
+            ("Why are environment variables considered weaker than mounted files for secrets?", "Secret রাখার জন্য environment variable-কে mount করা file-এর চেয়ে দুর্বল কেন ধরা হয়?"),
+            ("A token was pushed inside an image last month. What do you do?", "গত মাসে একটা token image-এর ভেতরে push হয়ে গেছে। এখন তুমি কী করবে?"),
+        ],
+        related=["docker-012"],
+        refs=[D_SECRETS, D_COMPOSE_SECRETS, D_DOCKERFILE],
+    ),
+    # ------------------------------------------------------------------ docker-030
+    Q(
+        id="docker-030", sub="Production Deployment", diff="extreme", type="architecture",
+        prio="medium", market="international", mins=20,
+        tags=["ci-cd", "supply-chain", "buildx", "sbom", "provenance", "digest"],
+        ver="Docker Engine 29, Buildx/BuildKit, Docker Scout", vs=True, status="stable",
+        q_en=r"""You're the platform lead for a product with a Next.js frontend and three Node.js services in a monorepo. Design the container build-and-release pipeline from a Git push to production. Cover build speed, reproducibility, supply-chain security and rollbacks.""",
+        q_bn=r"""তুমি একটা product-এর platform lead। Monorepo-তে একটা Next.js frontend আর তিনটা Node.js service আছে। Git push থেকে production পর্যন্ত container build-and-release pipeline design করো। Build speed, reproducibility, supply-chain security আর rollback কভার করবে।""",
+        a_en=r"""
+            **(Advanced, senior-level.)** My design rests on one principle: **build once, then promote the same immutable artifact, by digest, through every environment.**
+
+            1. **Build:** on every merge, CI builds only the services whose paths changed. It uses `docker buildx` with multi-stage Dockerfiles, npm cache mounts and a **remote layer cache** (`--cache-from/--cache-to type=registry,…,mode=max` or the GitHub Actions cache), because CI runners are ephemeral.
+            2. **Identify:** tag images with the Git SHA (plus semver on release) and record the **digest** the build outputs. Never deploy `latest`.
+            3. **Attest and sign:** generate SBOM and provenance attestations (`--sbom=true --provenance=mode=max`) and sign the image (e.g. cosign/Notation) so the deploy side can verify who built it and from what.
+            4. **Gate:** fail the pipeline on fixable critical/high CVEs (`docker scout cves`), leaked secrets and failing tests, with integration tests run **against the built image** via Compose.
+            5. **Base images:** pin `FROM node:24-slim@sha256:…`. A bot (Renovate/Dependabot) opens PRs when the digest changes, plus a scheduled weekly rebuild so OS patches land even without code changes.
+            6. **Promote:** staging and production reference the **digest**. Promotion is a metadata change (re-tag or a GitOps commit), never a rebuild. Config and secrets are injected at runtime, so one image fits all environments.
+            7. **Deploy and rollback:** health-gated rolling or blue/green rollout. Rollback means redeploying the previous digest: seconds, no rebuild. A retention policy keeps the last N releases.
+            8. **Multi-arch** only where needed (e.g. `linux/arm64` for Graviton nodes).
+
+            **Trade-offs:** `mode=max` cache exports cost registry storage and push time. Strict CVE gates can block urgent hotfixes, so allow time-boxed, documented exceptions (VEX statements). Provenance in max mode records build args, which is one more reason never to pass secrets that way.
+        """,
+        a_bn=r"""
+            **(Advanced, senior-level।)** আমার design-এর মূলনীতি একটাই: **একবার build করো, তারপর একই immutable artifact digest দিয়ে প্রতিটা environment-এ promote করো।**
+
+            1. **Build:** প্রতিটা merge-এ CI শুধু সেই service-গুলো build করে যাদের path বদলেছে। এতে `docker buildx`, multi-stage Dockerfile, npm cache mount আর **remote layer cache** (`--cache-from/--cache-to type=registry,…,mode=max` বা GitHub Actions cache) ব্যবহার হয়, কারণ CI runner ephemeral।
+            2. **Identify:** image-কে Git SHA দিয়ে tag করো (release-এ semver-ও), আর build যে **digest** দেয় সেটা record করো। কখনো `latest` deploy কোরো না।
+            3. **Attest ও sign:** SBOM আর provenance attestation তৈরি করো (`--sbom=true --provenance=mode=max`), আর image sign করো (যেমন cosign/Notation)। এতে deploy side যাচাই করতে পারে কে, কী থেকে image-টা build করেছে।
+            4. **Gate:** fix পাওয়া যায় এমন critical/high CVE (`docker scout cves`), leak হওয়া secret বা test fail করলে pipeline থামিয়ে দাও। Integration test Compose দিয়ে **build হওয়া image-এর উপরেই** চালাও।
+            5. **Base image:** `FROM node:24-slim@sha256:…` pin করো। Digest বদলালে একটা bot (Renovate/Dependabot) PR খুলবে। সাথে প্রতি সপ্তাহে scheduled rebuild চালাও, যাতে code না বদলালেও OS patch চলে আসে।
+            6. **Promote:** staging আর production **digest** reference করে। Promotion মানে শুধু metadata পরিবর্তন (re-tag বা GitOps commit), কখনো rebuild না। Config আর secret runtime-এ inject হয়, তাই একই image সব environment-এ চলে।
+            7. **Deploy ও rollback:** health-gated rolling বা blue/green rollout। Rollback মানে আগের digest আবার deploy করা: কয়েক সেকেন্ডের কাজ, rebuild লাগে না। Retention policy দিয়ে শেষ N-টা release রেখে দাও।
+            8. **Multi-arch** শুধু দরকার হলে (যেমন Graviton node-এর জন্য `linux/arm64`)।
+
+            **Trade-off:** `mode=max` cache export-এ registry storage আর push time বেশি লাগে। কড়া CVE gate জরুরি hotfix আটকে দিতে পারে, তাই সময়-সীমিত, documented exception (VEX statement) রাখো। Max mode-এর provenance build arg record করে, এটা আরেকটা কারণ যে এভাবে কখনো secret পাঠানো যাবে না।
+        """,
+        ex_en=r"""
+            **Why digests, not tags:** a tag like `api:1.8` can be re-pushed. A digest is a content hash, so "what's running in prod" is provable and rollbacks are exact.
+
+            **Failure scenarios to discuss:**
+            - Registry outage → deploys fail but running containers keep working. Mirror base images and keep a pull-through cache.
+            - A base image CVE drops on Friday → the scheduled rebuild plus a digest-bump PR gives a patched image without code changes, and scanning shows which services are affected.
+            - Bad release → health checks stop the rollout, and the previous digest is redeployed.
+
+            **Security layering:** least-privilege CI credentials (OIDC to the registry instead of long-lived passwords), signed images verified at deploy time, and no secrets in build args.
+
+            **Scale:** for dozens of services, add build matrices, path-based triggers and a shared base image that the platform team maintains and patches centrally.
+        """,
+        ex_bn=r"""
+            **Tag নয়, digest কেন:** `api:1.8`-এর মতো tag আবার push করা যায়। Digest হলো content hash, তাই "prod-এ কী চলছে" প্রমাণ করা যায়, আর rollback হয় হুবহু।
+
+            **যেসব failure scenario নিয়ে আলোচনা করা উচিত:**
+            - Registry outage → deploy fail করবে, কিন্তু চলমান container চলতে থাকবে। Base image mirror করো আর pull-through cache রাখো।
+            - শুক্রবারে base image-এ CVE ধরা পড়ল → scheduled rebuild আর digest-bump PR দিয়ে code না বদলেই patched image পাওয়া যায়। Scanning দেখিয়ে দেয় কোন service-গুলো প্রভাবিত।
+            - খারাপ release → health check rollout থামিয়ে দেয়, আর আগের digest আবার deploy হয়।
+
+            **Security-এর স্তর:** CI-এর credential-এ least privilege (দীর্ঘমেয়াদি password-এর বদলে registry-তে OIDC), deploy-এর সময় যাচাই করা signed image, আর build arg-এ কোনো secret নয়।
+
+            **Scale:** কয়েক ডজন service হলে build matrix, path-based trigger, আর platform team-এর maintain করা একটা shared base image যোগ করো, যেটা কেন্দ্রীয়ভাবে patch হয়।
+        """,
+        tip_en=r"""Lead with the "build once, promote by digest" principle, then walk through the pipeline stages in order. Close with failure scenarios and trade-offs. Senior interviewers care more about **why** each gate exists than about specific CI syntax.""",
+        tip_bn=r"""শুরু করো "একবার build, digest দিয়ে promote" নীতি দিয়ে। তারপর pipeline-এর stage-গুলো ক্রমানুসারে ব্যাখ্যা করো, শেষ করো failure scenario আর trade-off দিয়ে। Senior interviewer নির্দিষ্ট CI syntax-এর চেয়ে প্রতিটা gate **কেন** আছে সেটা বেশি গুরুত্ব দেয়।""",
+        mist_en=r"""Rebuilding the image separately for each environment, deploying mutable tags, baking environment config into images, and having no fast rollback path.""",
+        mist_bn=r"""প্রতিটা environment-এর জন্য আলাদা করে image rebuild করা, বদলানো যায় এমন tag deploy করা, environment config image-এর ভেতরে রেখে দেওয়া, আর দ্রুত rollback-এর কোনো পথ না রাখা।""",
+        code=r"""
+            # CI job (simplified) — runs on every merge to main
+            IMAGE=registry.example.com/shop/api
+            SHA=$(git rev-parse --short HEAD)
+
+            docker buildx build \
+              --platform linux/amd64 \
+              --cache-from type=registry,ref=$IMAGE:buildcache \
+              --cache-to   type=registry,ref=$IMAGE:buildcache,mode=max \
+              --sbom=true --provenance=mode=max \
+              --metadata-file build.json \
+              -t $IMAGE:$SHA --push .
+
+            DIGEST=$(jq -r '."containerimage.digest"' build.json)
+
+            # Gate: fail on fixable critical/high CVEs
+            docker scout cves --only-severity critical,high --only-fixed --exit-code "$IMAGE@$DIGEST"
+
+            # Promote the digest (e.g. GitOps commit), never a mutable tag
+            echo "image: $IMAGE@$DIGEST" > deploy/staging/api.image
+        """,
+        lang="bash",
+        follow=[
+            ("How do you get OS security patches into images when application code hasn't changed?", "Application code না বদলালেও OS-এর security patch image-এ কীভাবে আনবে?"),
+            ("How would you verify at deploy time that an image was built by your CI?", "Deploy-এর সময় কীভাবে যাচাই করবে যে image-টা তোমার CI-ই build করেছে?"),
+        ],
+        related=["docker-023", "docker-012"],
+        refs=[D_ATTEST, D_SCOUT, D_CACHE_OPT],
+    ),
+]
+
+if __name__ == "__main__":
+    save("docker", "b1", QUESTIONS)

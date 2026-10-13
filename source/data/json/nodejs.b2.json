@@ -1,0 +1,515 @@
+[
+ {
+  "id": "node-008",
+  "subtopic": "Modules (ESM & CommonJS)",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "esm",
+   "commonjs",
+   "require-esm",
+   "import-meta",
+   "modules"
+  ],
+  "technologyVersion": "Node.js 24 LTS / 26",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Compare CommonJS and ES modules in Node.js. How does Node decide which module system a file uses, and can the two be mixed?",
+   "bn": "Node.js-এ CommonJS আর ES module-এর তুলনা করো। একটি file কোন module system ব্যবহার করবে Node সেটা কীভাবে ঠিক করে, আর দুটো কি একসাথে ব্যবহার করা যায়?"
+  },
+  "answer": {
+   "en": "- **CommonJS (CJS):** `require()` / `module.exports`, loaded synchronously, `__dirname` and `__filename` available, `require` can be called anywhere at runtime.\n- **ES modules (ESM):** `import` / `export`, static structure that tools can analyse, top-level `await`, strict mode by default, relative imports need the file extension, and `import.meta.dirname` / `import.meta.filename` replace `__dirname` / `__filename`.\n\n**How Node decides:** `.mjs` is always ESM, `.cjs` is always CJS, and `.js` follows the nearest `package.json` `\"type\"` field (`\"module\"` → ESM, missing or `\"commonjs\"` → CJS). If there's no `\"type\"`, current Node also sniffs the syntax, but I always set `\"type\"` explicitly.\n\n**Mixing:** ESM can `import` a CJS module (its `module.exports` becomes the default export). Since Node 22.12 / 20.19, CJS can also `require()` an ES module, as long as that module graph has no top-level `await`; otherwise use `await import()`. For new projects I use ESM.",
+   "bn": "- **CommonJS (CJS):** `require()` / `module.exports`, synchronous ভাবে load হয়, `__dirname` ও `__filename` পাওয়া যায়, runtime-এ যেকোনো জায়গায় `require` call করা যায়।\n- **ES module (ESM):** `import` / `export`, static structure যা tool analyse করতে পারে, top-level `await`, default-ভাবে strict mode, relative import-এ file extension লাগে, আর `__dirname` / `__filename`-এর বদলে `import.meta.dirname` / `import.meta.filename`।\n\n**Node কীভাবে ঠিক করে:** `.mjs` সবসময় ESM, `.cjs` সবসময় CJS, আর `.js` file সবচেয়ে কাছের `package.json`-এর `\"type\"` field দেখে (`\"module\"` → ESM, না থাকলে বা `\"commonjs\"` হলে → CJS)। `\"type\"` না থাকলে current Node syntax দেখে আন্দাজও করে, কিন্তু আমি সবসময় `\"type\"` স্পষ্ট করে দিই।\n\n**একসাথে ব্যবহার:** ESM থেকে CJS module `import` করা যায় (তার `module.exports` default export হয়ে যায়)। Node 22.12 / 20.19 থেকে CJS-ও ES module `require()` করতে পারে, যদি সেই module graph-এ top-level `await` না থাকে; থাকলে `await import()` ব্যবহার করতে হয়। নতুন project-এ আমি ESM ব্যবহার করি।"
+  },
+  "explanation": {
+   "en": "- **`require(esm)` details:** it returns the module namespace object, so a default export is at `.default`. A module with top-level `await` (anywhere in its import graph) throws `ERR_REQUIRE_ASYNC_MODULE`. The feature was unflagged in v22.12 / v20.19 and marked stable in v25.4.\n- **Syntax detection** (treating an ambiguous `.js` file with `import`/`export` as ESM) is on by default since v22.7 / v20.19 but still \"release candidate\" — another reason to set `\"type\"` explicitly.\n- **`import.meta.dirname` / `filename`** are no longer experimental since v24.0 / v22.16.\n- **Named imports from CJS** work only when Node can detect the export names statically; `import pkg from 'cjs-lib'` (default import) always works.\n- **Dual packages** use the `\"exports\"` field with `\"import\"` and `\"require\"` conditions — watch out for the \"dual package hazard\" (two copies of module state).",
+   "bn": "- **`require(esm)`-এর খুঁটিনাটি:** এটা module namespace object return করে, তাই default export থাকে `.default`-এ। Import graph-এর কোথাও top-level `await` থাকলে `ERR_REQUIRE_ASYNC_MODULE` throw হয়। Feature-টি v22.12 / v20.19-এ flag ছাড়া চালু হয় এবং v25.4-এ stable ঘোষণা করা হয়।\n- **Syntax detection** (`import`/`export` থাকা ambiguous `.js` file-কে ESM ধরা) v22.7 / v20.19 থেকে default-ভাবে চালু, কিন্তু এখনও \"release candidate\" — `\"type\"` স্পষ্ট করে দেওয়ার আরেকটি কারণ।\n- **`import.meta.dirname` / `filename`** v24.0 / v22.16 থেকে আর experimental নয়।\n- **CJS থেকে named import** শুধু তখনই কাজ করে যখন Node static ভাবে export-এর নাম ধরতে পারে; `import pkg from 'cjs-lib'` (default import) সবসময় কাজ করে।\n- **Dual package** `\"exports\"` field-এ `\"import\"` ও `\"require\"` condition ব্যবহার করে — \"dual package hazard\" (module state-এর দুটি কপি) নিয়ে সতর্ক থাকো।"
+  },
+  "interviewTip": {
+   "en": "Give the decision rules in one breath (\".mjs, .cjs, then the type field\") and then mention `require(esm)` with its top-level-await limit. That one modern detail shows you're current.",
+   "bn": "Decision rule-গুলো এক নিঃশ্বাসে বলো (\".mjs, .cjs, তারপর type field\"), তারপর top-level-await-এর সীমাসহ `require(esm)`-এর কথা বলো। এই একটি আধুনিক detail দেখায় তুমি আপডেটেড।"
+  },
+  "references": [
+   {
+    "title": "Node.js API — ECMAScript modules",
+    "url": "https://nodejs.org/api/esm.html"
+   },
+   {
+    "title": "Node.js API — CommonJS modules (require(esm))",
+    "url": "https://nodejs.org/api/modules.html"
+   },
+   {
+    "title": "Node.js API — Packages (type field, detection)",
+    "url": "https://nodejs.org/api/packages.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the dual package hazard?",
+    "bn": "Dual package hazard কী?"
+   },
+   {
+    "en": "Why do relative ESM imports need the file extension?",
+    "bn": "Relative ESM import-এ file extension কেন লাগে?"
+   }
+  ],
+  "related": [
+   "node-024"
+  ],
+  "commonMistakes": {
+   "en": "Saying CommonJS can never load ES modules (outdated since v22.12), or using `__dirname` inside an ES module (it's not defined there).",
+   "bn": "CommonJS কখনোই ES module load করতে পারে না বলা (v22.12 থেকে এটা পুরনো তথ্য), অথবা ES module-এর ভেতরে `__dirname` ব্যবহার করা (সেখানে এটা defined নয়)।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// utils.mjs (ES module)\nexport const greet = (name) => `Hello, ${name}`;\nexport default function version() { return '1.0.0'; }\nconsole.log(import.meta.dirname); // ESM replacement for __dirname\n\n// legacy.cjs (CommonJS) — works by default on Node 22.12+ / 24 / 26\nconst utils = require('./utils.mjs');\nconsole.log(utils.greet('Rahim'));   // named export\nconsole.log(utils.default());        // default export lives on .default\n\n// If the ES module (or anything it imports) uses top-level await:\n// require() throws ERR_REQUIRE_ASYNC_MODULE -> use: const m = await import('./x.mjs');"
+  },
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-009",
+  "subtopic": "Package Management (npm)",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "npm",
+   "semver",
+   "caret",
+   "dependencies"
+  ],
+  "technologyVersion": "npm 11 (ships with Node.js 24+)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`package.json` contains `\"express\": \"^5.1.0\"` and there is no lockfile. Which version may `npm install` choose?",
+   "bn": "`package.json`-এ আছে `\"express\": \"^5.1.0\"` এবং কোনো lockfile নেই। `npm install` কোন version বেছে নিতে পারে?"
+  },
+  "answer": {
+   "en": "`5.3.0`. The caret range `^5.1.0` means `>=5.1.0 <6.0.0` — any newer minor or patch release of major version 5, but never a new major. npm picks the highest version that satisfies the range.",
+   "bn": "সঠিক উত্তর `5.3.0`। Caret range `^5.1.0` মানে `>=5.1.0 <6.0.0` — major version 5-এর যেকোনো নতুন minor বা patch release, কিন্তু কখনো নতুন major নয়। npm range-এর মধ্যে সবচেয়ে উঁচু version বেছে নেয়।"
+  },
+  "explanation": {
+   "en": "Semantic versioning is `MAJOR.MINOR.PATCH`: breaking changes bump MAJOR, new features MINOR, fixes PATCH.\n\n- `^5.1.0` → `>=5.1.0 <6.0.0` (minor + patch updates).\n- `~5.1.0` → `>=5.1.0 <5.2.0` (patch updates only).\n- `5.1.0` → exactly that version.\n- For `0.x` versions the caret is stricter: `^0.2.3` → `>=0.2.3 <0.3.0`, because in `0.x` a minor bump may break things.\n\n`6.0.0` is the tempting wrong answer — the caret never crosses a major version. `5.0.1` is below the lower bound. And \"only exactly 5.1.0\" is what a **lockfile** gives you, not the range itself — that's why you commit `package-lock.json`.",
+   "bn": "Semantic versioning হলো `MAJOR.MINOR.PATCH`: breaking change হলে MAJOR, নতুন feature হলে MINOR, bug fix হলে PATCH বাড়ে।\n\n- `^5.1.0` → `>=5.1.0 <6.0.0` (minor + patch update)।\n- `~5.1.0` → `>=5.1.0 <5.2.0` (শুধু patch update)।\n- `5.1.0` → ঠিক ওই version।\n- `0.x` version-এ caret আরও কড়া: `^0.2.3` → `>=0.2.3 <0.3.0`, কারণ `0.x`-এ minor bump-ও কিছু ভাঙতে পারে।\n\n`6.0.0` হলো প্রলোভনের ভুল উত্তর — caret কখনো major version পার হয় না। `5.0.1` lower bound-এর নিচে। আর \"শুধু ঠিক 5.1.0\" দেয় **lockfile**, range নিজে নয় — এজন্যই `package-lock.json` commit করা হয়।"
+  },
+  "interviewTip": {
+   "en": "Answer with the explicit range (`>=5.1.0 <6.0.0`) and then add the `0.x` caveat — few candidates know it.",
+   "bn": "উত্তরে স্পষ্ট range (`>=5.1.0 <6.0.0`) বলো, তারপর `0.x`-এর caveat যোগ করো — খুব কম candidate এটা জানে।"
+  },
+  "references": [
+   {
+    "title": "npm Docs — About semantic versioning",
+    "url": "https://docs.npmjs.com/about-semantic-versioning"
+   },
+   {
+    "title": "npm Docs — package-lock.json",
+    "url": "https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "`5.3.0`",
+    "bn": "`5.3.0`"
+   },
+   {
+    "en": "`6.0.0`",
+    "bn": "`6.0.0`"
+   },
+   {
+    "en": "`5.0.1`",
+    "bn": "`5.0.1`"
+   },
+   {
+    "en": "Only exactly `5.1.0`",
+    "bn": "শুধু ঠিক `5.1.0`"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-010",
+  "subtopic": "Package Management (npm)",
+  "difficulty": "easy",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "npm",
+   "lockfile",
+   "npm-ci",
+   "ci-cd",
+   "reproducible-builds"
+  ],
+  "technologyVersion": "npm 11 / Node.js 24 LTS",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Code works on a developer's laptop, but the CI build fails because a dependency resolved to a different version, and production sometimes behaves differently from staging. What is likely going on, and how would you make installs reproducible?",
+   "bn": "Code developer-এর laptop-এ ঠিকমতো চলে, কিন্তু CI build fail করছে কারণ একটি dependency অন্য version-এ resolve হয়েছে, আর production মাঝে মাঝে staging থেকে আলাদা আচরণ করে। সম্ভবত কী হচ্ছে, আর install-কে কীভাবে reproducible করবে?"
+  },
+  "answer": {
+   "en": "Most likely each environment is resolving version **ranges** at install time instead of installing the exact same dependency tree — for example `package-lock.json` isn't committed (or is in `.gitignore`), CI runs plain `npm install`, or people use different npm/Node versions.\n\nMy fix:\n\n1. **Commit `package-lock.json`** — it records the exact version and integrity hash of every package, including transitive dependencies.\n2. **Use `npm ci` in CI and Docker builds.** It installs exactly what the lockfile says, deletes `node_modules` first, and fails if `package.json` and the lockfile disagree instead of silently \"fixing\" it.\n3. **Pin the runtime:** `engines` in `package.json`, an `.nvmrc`, and a specific Node image tag (e.g. `node:24-…`) so everyone uses the same Node and npm.\n4. **Update deliberately:** use Dependabot/Renovate PRs that run tests, rather than drifting versions on random installs.",
+   "bn": "সম্ভবত প্রতিটি environment install-এর সময় হুবহু একই dependency tree install না করে version **range** resolve করছে — যেমন `package-lock.json` commit করা হয়নি (বা `.gitignore`-এ আছে), CI-তে সাধারণ `npm install` চলছে, অথবা সবাই আলাদা npm/Node version ব্যবহার করছে।\n\nআমার সমাধান:\n\n1. **`package-lock.json` commit করা** — এটা প্রতিটি package-এর (transitive dependency সহ) নির্দিষ্ট version আর integrity hash রেকর্ড করে।\n2. **CI ও Docker build-এ `npm ci` ব্যবহার করা।** এটা lockfile-এ যা আছে হুবহু তাই install করে, আগে `node_modules` মুছে দেয়, আর `package.json` ও lockfile না মিললে চুপচাপ \"ঠিক\" না করে fail করে।\n3. **Runtime pin করা:** `package.json`-এ `engines`, একটি `.nvmrc`, আর নির্দিষ্ট Node image tag (যেমন `node:24-…`), যাতে সবাই একই Node ও npm ব্যবহার করে।\n4. **পরিকল্পিতভাবে update করা:** random install-এ version বদলে যেতে না দিয়ে Dependabot/Renovate-এর PR ব্যবহার করা, যেগুলোতে test চলে।"
+  },
+  "explanation": {
+   "en": "- **`npm install` vs `npm ci`:** `npm install` may update the lockfile when `package.json` changed and is meant for development; `npm ci` never writes to `package.json` or the lockfile and can't add single packages.\n- **Production images:** `npm ci --omit=dev` keeps dev dependencies out of the runtime image.\n- **Integrity hashes** in the lockfile also protect against a tampered tarball being installed silently.\n- **One package manager per repo:** mixing `yarn.lock` and `package-lock.json` gives two sources of truth.\n- **Libraries vs apps:** a published library's lockfile is not used by its consumers, so libraries must still test against the ranges they declare.",
+   "bn": "- **`npm install` বনাম `npm ci`:** `package.json` বদলালে `npm install` lockfile update করতে পারে, এটা development-এর জন্য; `npm ci` কখনো `package.json` বা lockfile-এ লেখে না এবং একক package যোগ করতে পারে না।\n- **Production image:** `npm ci --omit=dev` দিলে dev dependency runtime image-এ ঢোকে না।\n- Lockfile-এর **integrity hash** কোনো tampered tarball চুপচাপ install হওয়া থেকেও রক্ষা করে।\n- **এক repo-তে একটাই package manager:** `yarn.lock` আর `package-lock.json` একসাথে রাখলে সত্যের উৎস দুটো হয়ে যায়।\n- **Library বনাম app:** publish করা library-র lockfile তার consumer-রা ব্যবহার করে না, তাই library-কে তার declare করা range-এর বিরুদ্ধেও test করতে হয়।"
+  },
+  "interviewTip": {
+   "en": "Name the root cause in one sentence (\"ranges resolved at different times\"), then give the three concrete fixes: commit the lockfile, `npm ci`, pin Node. Interviewers like answers that end in a checklist.",
+   "bn": "এক বাক্যে মূল কারণ বলো (\"ভিন্ন সময়ে range resolve হচ্ছে\"), তারপর তিনটি বাস্তব সমাধান দাও: lockfile commit, `npm ci`, Node pin করা। Checklist দিয়ে শেষ হওয়া উত্তর interviewer-রা পছন্দ করে।"
+  },
+  "references": [
+   {
+    "title": "npm Docs — npm ci",
+    "url": "https://docs.npmjs.com/cli/v11/commands/npm-ci"
+   },
+   {
+    "title": "npm Docs — package-lock.json",
+    "url": "https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does the `integrity` field in the lockfile protect against?",
+    "bn": "Lockfile-এর `integrity` field কীসের বিরুদ্ধে সুরক্ষা দেয়?"
+   },
+   {
+    "en": "How would you handle a critical security fix in a transitive dependency?",
+    "bn": "Transitive dependency-তে জরুরি security fix এলে কীভাবে handle করবে?"
+   }
+  ],
+  "related": [
+   "node-009",
+   "node-025"
+  ],
+  "commonMistakes": {
+   "en": "Deleting `package-lock.json` \"to fix conflicts\", or pinning every dependency to an exact version in `package.json` while still not committing the lockfile (transitive dependencies still float).",
+   "bn": "\"Conflict ঠিক করতে\" `package-lock.json` মুছে ফেলা, অথবা `package.json`-এ সব dependency exact version-এ pin করা কিন্তু lockfile commit না করা (transitive dependency তখনও বদলাতে থাকে)।"
+  },
+  "code": {
+   "language": "bash",
+   "source": "# CI / Dockerfile\nnpm ci                 # exact, clean install from package-lock.json\nnpm ci --omit=dev      # production image without devDependencies\n\n# Local development (adding/updating packages updates the lockfile)\nnpm install zod@4"
+  },
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-011",
+  "subtopic": "Streams",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "streams",
+   "pipeline",
+   "zlib",
+   "transform",
+   "abortsignal"
+  ],
+  "technologyVersion": "Node.js 24 LTS / 26",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write an async function `compressFile(src, dest, { signal })` that gzips a very large log file (several GB) without loading it into memory.\n\nRequirements:\n- Return the number of **uncompressed** bytes processed.\n- If anything fails (source missing, disk full, cancelled), reject with the error and delete any half-written output file.\n- Support cancellation through an optional `AbortSignal`.\n\nExample: `await compressFile('app.log', 'app.log.gz')` resolves to `6754388` for a 6.7 MB file.",
+   "bn": "একটি async function `compressFile(src, dest, { signal })` লেখো, যা অনেক বড় একটি log file (কয়েক GB) memory-তে load না করেই gzip করবে।\n\nশর্ত:\n- কত **uncompressed** byte process হয়েছে সেটা return করবে।\n- কিছু fail করলে (source নেই, disk full, cancel হয়েছে) error দিয়ে reject করবে এবং অর্ধেক লেখা output file মুছে ফেলবে।\n- Optional `AbortSignal` দিয়ে cancel করা যাবে।\n\nউদাহরণ: 6.7 MB-র একটি file-এর জন্য `await compressFile('app.log', 'app.log.gz')` resolve হবে `6754388`-এ।"
+  },
+  "answer": {
+   "en": "I'd build it as a stream chain with `pipeline()` from `node:stream/promises`: file read stream → a small `Transform` that counts bytes → `createGzip()` → file write stream. `pipeline` handles backpressure between every stage, rejects if any stage errors, destroys all streams so no file descriptors leak, and accepts an `AbortSignal` for cancellation. In the `catch` block I remove the partial `.gz` file and re-throw. Memory stays roughly constant (a few buffers of `highWaterMark` size) no matter how big the file is.",
+   "bn": "আমি `node:stream/promises`-এর `pipeline()` দিয়ে একটি stream chain বানাব: file read stream → byte গোনার জন্য ছোট একটি `Transform` → `createGzip()` → file write stream। `pipeline` প্রতিটি ধাপের মধ্যে backpressure handle করে, কোনো ধাপে error হলে reject করে, সব stream destroy করে যাতে file descriptor leak না হয়, আর cancel করার জন্য `AbortSignal` নেয়। `catch` block-এ অর্ধেক লেখা `.gz` file মুছে error আবার throw করি। File যত বড়ই হোক, memory প্রায় স্থির থাকে (`highWaterMark` সাইজের কয়েকটি buffer মাত্র)।"
+  },
+  "explanation": {
+   "en": "- **Why not `fs.readFile` + `zlib.gzipSync`:** that loads the whole file into memory (and blocks the event loop while compressing). For multi-GB files it simply crashes.\n- **Why not `.pipe()`:** if the write stream fails (disk full), `.pipe()` does not destroy the read stream or surface the error in one place; `pipeline` does.\n- **Counting bytes:** the `Transform` passes chunks through unchanged with `callback(null, chunk)`; counting before gzip gives uncompressed bytes.\n- **Cancellation:** when the signal aborts, `pipeline` rejects with an `AbortError` (`code: 'ABORT_ERR'`) and destroys the streams; our `catch` still deletes the partial file.\n- **Edge cases:** source missing → `ENOENT`; `dest` in a missing directory → `ENOENT` from the write stream; `src === dest` would corrupt data, so validate it in real code. `rm(dest, { force: true })` doesn't throw if the file was never created.",
+   "bn": "- **কেন `fs.readFile` + `zlib.gzipSync` নয়:** এতে পুরো file memory-তে আসে (আর compress করার সময় event loop block হয়)। Multi-GB file-এ সরাসরি crash করে।\n- **কেন `.pipe()` নয়:** write stream fail করলে (disk full) `.pipe()` read stream destroy করে না, error-ও এক জায়গায় পাওয়া যায় না; `pipeline` দুটোই করে।\n- **Byte গোনা:** `Transform` `callback(null, chunk)` দিয়ে chunk অপরিবর্তিত রেখে পাঠিয়ে দেয়; gzip-এর আগে গুনলে uncompressed byte পাওয়া যায়।\n- **Cancellation:** signal abort হলে `pipeline` একটি `AbortError` (`code: 'ABORT_ERR'`) দিয়ে reject করে এবং stream-গুলো destroy করে; আমাদের `catch` তখনও অর্ধেক file মুছে দেয়।\n- **Edge case:** source না থাকলে `ENOENT`; `dest`-এর directory না থাকলে write stream থেকে `ENOENT`; `src === dest` হলে data নষ্ট হবে, তাই আসল code-এ এটা validate করো। File তৈরি না হয়ে থাকলেও `rm(dest, { force: true })` throw করে না।"
+  },
+  "interviewTip": {
+   "en": "Say \"pipeline, not pipe\" early and explain why in one sentence (errors + cleanup). Then mention memory is O(1) regardless of file size — that's the point of the exercise.",
+   "bn": "শুরুতেই বলো \"pipe নয়, pipeline\" এবং এক বাক্যে কারণ বলো (error + cleanup)। তারপর উল্লেখ করো file-এর সাইজ যাই হোক memory O(1) — এই exercise-এর মূল কথাই এটা।"
+  },
+  "references": [
+   {
+    "title": "Node.js API — Stream (pipeline)",
+    "url": "https://nodejs.org/api/stream.html"
+   },
+   {
+    "title": "Node.js API — Zlib",
+    "url": "https://nodejs.org/api/zlib.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you compress many files concurrently without overwhelming the disk?",
+    "bn": "Disk-এর উপর চাপ না দিয়ে অনেকগুলো file একসাথে কীভাবে compress করবে?"
+   },
+   {
+    "en": "How would you stream the gzipped output directly as an HTTP response?",
+    "bn": "Gzip করা output সরাসরি HTTP response হিসেবে কীভাবে stream করবে?"
+   }
+  ],
+  "related": [
+   "node-005",
+   "node-032"
+  ],
+  "commonMistakes": {
+   "en": "Accumulating chunks in an array \"to count them\", forgetting to delete the partial output, or attaching separate `'error'` handlers to each stream and still missing one.",
+   "bn": "\"গোনার জন্য\" chunk-গুলো array-তে জমানো, অর্ধেক output file মুছতে ভুলে যাওয়া, অথবা প্রতিটি stream-এ আলাদা `'error'` handler লাগিয়েও কোনো একটা বাদ পড়ে যাওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import { createReadStream, createWriteStream } from 'node:fs';\nimport { rm } from 'node:fs/promises';\nimport { Transform } from 'node:stream';\nimport { pipeline } from 'node:stream/promises';\nimport { createGzip } from 'node:zlib';\n\nexport async function compressFile(src, dest, { signal } = {}) {\n  let bytes = 0;\n  const counter = new Transform({\n    transform(chunk, _encoding, callback) {\n      bytes += chunk.length;\n      callback(null, chunk); // pass through unchanged\n    },\n  });\n\n  try {\n    await pipeline(\n      createReadStream(src),\n      counter,\n      createGzip(),\n      createWriteStream(dest),\n      { signal },\n    );\n    return bytes;\n  } catch (err) {\n    await rm(dest, { force: true }); // don't leave a half-written .gz behind\n    throw err;\n  }\n}\n\n// Usage with a timeout-based cancellation\nconst bytes = await compressFile('app.log', 'app.log.gz', {\n  signal: AbortSignal.timeout(60_000),\n});\nconsole.log(`compressed ${bytes} bytes`);"
+  },
+  "complexity": {
+   "time": "O(n) in file size",
+   "space": "O(1) (bounded by stream buffers)"
+  },
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-012",
+  "subtopic": "Error Handling",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "unhandled-rejection",
+   "promises",
+   "error-handling",
+   "process"
+  ],
+  "technologyVersion": "Node.js 15+ (current: 24 LTS / 26)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What happens when this CommonJS script runs on Node.js 24 with default flags?",
+   "bn": "Default flag দিয়ে Node.js 24-এ এই CommonJS script চালালে কী হবে?"
+  },
+  "answer": {
+   "en": "The process crashes. Since Node.js 15 the default `--unhandled-rejections` mode is `throw`: an unhandled rejection is raised as an uncaught exception, the stack trace is printed and the process exits with code 1 before the timer fires.",
+   "bn": "Process crash করবে। Node.js 15 থেকে default `--unhandled-rejections` mode হলো `throw`: unhandled rejection-কে uncaught exception হিসেবে raise করা হয়, stack trace print হয় এবং timer fire হওয়ার আগেই process exit code 1 দিয়ে বন্ধ হয়ে যায়।"
+  },
+  "explanation": {
+   "en": "Option A was the behaviour in Node 14 and earlier (a warning plus a deprecation notice), which is why it's the most tempting wrong answer — many old blog posts still describe it.\n\nDetails worth knowing:\n- If a `process.on('unhandledRejection', ...)` listener exists, the event goes to that listener instead of crashing. Use it for **logging and a controlled shutdown**, not to keep running in an unknown state.\n- The real fix is in the code: `await loadConfig()` inside a `try/catch`, or `loadConfig().catch(handleError)`.\n- Fire-and-forget calls (`sendEmail()` without `await`) are the classic source of these crashes in Express handlers.\n- Modes can be changed with `--unhandled-rejections=strict|warn|none|...`, but changing the default in production usually hides bugs.",
+   "bn": "Option A ছিল Node 14 ও তার আগের আচরণ (একটি warning আর deprecation notice) — এজন্যই এটা সবচেয়ে প্রলোভনের ভুল উত্তর, অনেক পুরনো blog post এখনও এটাই বলে।\n\nযা জানা দরকার:\n- `process.on('unhandledRejection', ...)` listener থাকলে event crash না করে সেই listener-এ যায়। এটা **logging আর নিয়ন্ত্রিত shutdown**-এর জন্য ব্যবহার করো, অজানা অবস্থায় চালিয়ে যাওয়ার জন্য নয়।\n- আসল fix code-এ: `try/catch`-এর ভেতরে `await loadConfig()`, অথবা `loadConfig().catch(handleError)`।\n- Fire-and-forget call (`await` ছাড়া `sendEmail()`) Express handler-এ এই ধরনের crash-এর classic উৎস।\n- `--unhandled-rejections=strict|warn|none|...` দিয়ে mode বদলানো যায়, কিন্তু production-এ default বদলালে সাধারণত bug লুকিয়ে যায়।"
+  },
+  "interviewTip": {
+   "en": "Mention the version boundary (\"since Node 15, default mode is throw\") — it shows you know why older answers say \"just a warning\".",
+   "bn": "Version-এর সীমারেখা উল্লেখ করো (\"Node 15 থেকে default mode throw\") — এতে বোঝা যায় পুরনো উত্তরে কেন \"শুধু warning\" লেখা থাকে সেটা তুমি জানো।"
+  },
+  "references": [
+   {
+    "title": "Node.js API — process events",
+    "url": "https://nodejs.org/api/process.html"
+   },
+   {
+    "title": "Node.js API — Command-line options",
+    "url": "https://nodejs.org/api/cli.html"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "code": {
+   "language": "javascript",
+   "source": "async function loadConfig() {\n  throw new Error('config service down');\n}\n\nloadConfig(); // called without await or .catch()\n\nsetTimeout(() => console.log('still running'), 1000);"
+  },
+  "options": [
+   {
+    "en": "A warning is printed and the process keeps running, so `still running` is logged",
+    "bn": "একটি warning print হবে এবং process চলতে থাকবে, তাই `still running` log হবে"
+   },
+   {
+    "en": "The rejection is silently ignored and `still running` is logged",
+    "bn": "Rejection চুপচাপ ignore হবে এবং `still running` log হবে"
+   },
+   {
+    "en": "The process crashes with the error and exits with code 1; `still running` is never logged",
+    "bn": "Error সহ process crash করবে এবং exit code 1 দিয়ে বন্ধ হবে; `still running` কখনো log হবে না"
+   },
+   {
+    "en": "Node retries the rejected promise once, then logs `still running`",
+    "bn": "Node rejected promise-টি একবার retry করবে, তারপর `still running` log করবে"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-013",
+  "subtopic": "Event Loop",
+  "difficulty": "hard",
+  "type": "output",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 6,
+  "tags": [
+   "event-loop",
+   "microtasks",
+   "nexttick",
+   "setimmediate",
+   "output"
+  ],
+  "technologyVersion": "Node.js 11+ semantics (current: 24 LTS / 26)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Predict the exact output of this CommonJS script and explain each step.",
+   "bn": "এই CommonJS script-এর exact output কী হবে বলো এবং প্রতিটি ধাপ ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "Output: `sync`, `n1`, `p1`, `p2`, `n2`, `i1`, `n3`, `p3`, `i2`, `t1`.\n\nThree rules produce it: (1) after the main script — and after every individual callback — Node drains the whole nextTick queue, then the whole promise microtask queue, and repeats until both are empty; (2) since Node 11, that draining also happens between individual `setImmediate`/timer callbacks; (3) inside an I/O callback, the check phase (`setImmediate`) comes before the next timers phase.",
+   "bn": "Output: `sync`, `n1`, `p1`, `p2`, `n2`, `i1`, `n3`, `p3`, `i2`, `t1`।\n\nতিনটি নিয়মে এটা হয়: (1) main script-এর পরে — এবং প্রতিটি আলাদা callback-এর পরে — Node পুরো nextTick queue, তারপর পুরো promise microtask queue খালি করে, এবং দুটোই খালি না হওয়া পর্যন্ত এটা চলতে থাকে; (2) Node 11 থেকে এই draining আলাদা আলাদা `setImmediate`/timer callback-এর মাঝেও হয়; (3) I/O callback-এর ভেতর থেকে check phase (`setImmediate`) পরের timers phase-এর আগে আসে।"
+  },
+  "explanation": {
+   "en": "Step by step:\n\n1. Main script: queues microtask `p1`, nextTick `n1`, starts `readFile`, logs `sync`.\n2. Script ends → nextTick queue: `n1` runs and queues microtask `p2`.\n3. nextTick queue empty → microtasks: `p1` (queues nextTick `n2`), then `p2`.\n4. Microtasks empty → Node checks the nextTick queue again: `n2`.\n5. The read finishes; in the poll phase the `readFile` callback schedules timer `t1` and immediates `i1`, `i2`.\n6. Check phase: `i1` runs and queues `n3` and `p3`. Before `i2`, Node drains nextTick then microtasks: `n3`, `p3`. Then `i2`.\n7. Next loop iteration, timers phase: `t1`.\n\nBefore Node 11, all queued immediates ran back-to-back, so you would have seen `i1 i2 n3 p3`. Modern Node matches browser semantics.",
+   "bn": "ধাপে ধাপে:\n\n1. Main script: microtask `p1`, nextTick `n1` queue করে, `readFile` শুরু করে, `sync` log করে।\n2. Script শেষ → nextTick queue: `n1` চলে এবং microtask `p2` queue করে।\n3. nextTick queue খালি → microtask: `p1` (nextTick `n2` queue করে), তারপর `p2`।\n4. Microtask খালি → Node আবার nextTick queue দেখে: `n2`।\n5. Read শেষ হলে poll phase-এ `readFile` callback timer `t1` আর immediate `i1`, `i2` schedule করে।\n6. Check phase: `i1` চলে এবং `n3` ও `p3` queue করে। `i2`-এর আগে Node nextTick, তারপর microtask খালি করে: `n3`, `p3`। এরপর `i2`।\n7. পরের loop iteration-এ timers phase: `t1`।\n\nNode 11-এর আগে queue-তে থাকা সব immediate একটানা চলত, তখন দেখা যেত `i1 i2 n3 p3`। আধুনিক Node browser-এর semantics মেনে চলে।"
+  },
+  "interviewTip": {
+   "en": "Don't rush to the answer — narrate the queues as a small table (nextTick queue / microtasks / phase). Even if you slip on one line, a clear model earns most of the credit.",
+   "bn": "তাড়াহুড়ো করে উত্তর বলো না — queue-গুলোকে ছোট একটি table-এর মতো করে বর্ণনা করো (nextTick queue / microtask / phase)। একটা লাইনে ভুল হলেও পরিষ্কার model দেখালে বেশিরভাগ নম্বর পাবে।"
+  },
+  "references": [
+   {
+    "title": "Node.js Learn — The Node.js Event Loop",
+    "url": "https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick"
+   },
+   {
+    "title": "Node.js API — process events",
+    "url": "https://nodejs.org/api/process.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would the first lines change if this file were an ES module?",
+    "bn": "এই file যদি ES module হতো, তাহলে প্রথম দিকের লাইনগুলো কীভাবে বদলাত?"
+   },
+   {
+    "en": "Why is `process.nextTick` considered dangerous in recursive code?",
+    "bn": "Recursive code-এ `process.nextTick` কেন বিপজ্জনক ধরা হয়?"
+   }
+  ],
+  "related": [
+   "node-002",
+   "node-004"
+  ],
+  "commonMistakes": {
+   "en": "Assuming a nextTick scheduled from inside a promise callback runs before the remaining promise callbacks, or running both immediates before their microtasks (pre-Node 11 behaviour).",
+   "bn": "Promise callback-এর ভেতর থেকে schedule করা nextTick বাকি promise callback-গুলোর আগে চলবে ধরে নেওয়া, অথবা microtask-এর আগে দুটো immediate-ই চালিয়ে দেওয়া (Node 11-এর আগের আচরণ)।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const { readFile } = require('node:fs');\n\nPromise.resolve().then(() => {\n  console.log('p1');\n  process.nextTick(() => console.log('n2'));\n});\n\nprocess.nextTick(() => {\n  console.log('n1');\n  Promise.resolve().then(() => console.log('p2'));\n});\n\nreadFile(__filename, () => {\n  setTimeout(() => console.log('t1'), 0);\n  setImmediate(() => {\n    console.log('i1');\n    process.nextTick(() => console.log('n3'));\n    Promise.resolve().then(() => console.log('p3'));\n  });\n  setImmediate(() => console.log('i2'));\n});\n\nconsole.log('sync');",
+   "output": "sync\nn1\np1\np2\nn2\ni1\nn3\np3\ni2\nt1"
+  },
+  "technology": "nodejs"
+ },
+ {
+  "id": "node-014",
+  "subtopic": "Memory Management",
+  "difficulty": "hard",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "memory-leak",
+   "heap-snapshot",
+   "cache",
+   "gc",
+   "production-debugging"
+  ],
+  "technologyVersion": "Node.js 24 LTS / 26; Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "This Express service's memory grows steadily for days until the process crashes with \"JavaScript heap out of memory\", then it restarts and the cycle repeats. Latency also creeps up before each crash. Find the leak, explain how you would prove it with tools, and fix it.",
+   "bn": "এই Express service-এর memory কয়েকদিন ধরে ধীরে ধীরে বাড়তে থাকে, শেষে \"JavaScript heap out of memory\" দিয়ে process crash করে, তারপর restart হয়ে আবার একই চক্র চলে। প্রতিটি crash-এর আগে latency-ও বাড়তে থাকে। Leak-টা খুঁজে বের করো, tool দিয়ে কীভাবে প্রমাণ করবে ব্যাখ্যা করো, এবং ঠিক করো।"
+  },
+  "answer": {
+   "en": "The leak is the module-level `cache` Map. It is keyed by `req.originalUrl`, which includes the full query string, and entries are never evicted. Every unique URL — `?page=1…∞`, search terms, tracking parameters, bots adding random query strings — adds an entry that stays reachable forever, so the garbage collector can't free it. As the heap grows, GC runs longer and more often (latency creeps up) until V8 hits the heap limit.\n\nTo prove it: watch `heapUsed` over time, then take two or three **heap snapshots** a few minutes apart under traffic and open them in Chrome DevTools' Memory tab using the **Comparison** view. The growing objects (arrays of products) will show `cache` (a `Map`) in their retainer chain.\n\nFix: bound the cache — a max size with LRU eviction plus a TTL — and build the key from **whitelisted, normalised** parameters instead of the raw URL. For multiple instances, a shared Redis cache with TTLs is usually better anyway.",
+   "bn": "Leak হলো module-level `cache` Map। এর key হলো `req.originalUrl`, যাতে পুরো query string থাকে, আর কোনো entry কখনো evict হয় না। প্রতিটি নতুন URL — `?page=1…∞`, search term, tracking parameter, random query string যোগ করা bot — একটি entry যোগ করে যা চিরকাল reachable থাকে, তাই garbage collector সেটা free করতে পারে না। Heap বাড়ার সাথে GC আরও লম্বা ও ঘন ঘন চলে (latency বাড়ে), শেষে V8 heap limit-এ পৌঁছে যায়।\n\nপ্রমাণ করতে: সময়ের সাথে `heapUsed` দেখি, তারপর traffic চলাকালীন কয়েক মিনিট পরপর দুই-তিনটি **heap snapshot** নিই এবং Chrome DevTools-এর Memory tab-এ **Comparison** view-তে খুলি। বাড়তে থাকা object-গুলোর (product-এর array) retainer chain-এ `cache` (একটি `Map`) দেখা যাবে।\n\nFix: cache-কে সীমিত করা — LRU eviction সহ max size আর একটি TTL — এবং raw URL-এর বদলে **whitelist করা, normalise করা** parameter দিয়ে key বানানো। একাধিক instance থাকলে TTL সহ shared Redis cache সাধারণত এমনিতেই ভালো।"
+  },
+  "explanation": {
+   "en": "- **A leak in a GC language means \"unintentionally reachable\".** Common Node sources: unbounded caches/Maps, arrays used as in-memory logs or metrics, event listeners added per request and never removed, `setInterval`s that are never cleared, and closures that capture large objects.\n- **Getting snapshots in production:** `node --heapsnapshot-signal=SIGUSR2 server.js` then `kill -USR2 <pid>`; or `v8.writeHeapSnapshot()` from an admin-only endpoint; or `--heapsnapshot-near-heap-limit=2` to capture automatically just before an OOM. Snapshots pause the process and can be as large as the heap — take them on one instance, out of rotation if possible.\n- **`--max-old-space-size` is not a fix.** A bigger heap only delays the crash (and in containers, setting it above the memory limit gets the process OOM-killed by the kernel instead).\n- **`WeakMap`** helps when the key is an object whose lifetime you don't control; it doesn't help with string keys like URLs.\n- In production I'd use a maintained LRU library (e.g. `lru-cache`) instead of hand-rolling one; the fixed version shows the idea.",
+   "bn": "- **GC-ভিত্তিক language-এ leak মানে \"অনিচ্ছাকৃতভাবে reachable\"।** Node-এ সাধারণ উৎস: unbounded cache/Map, in-memory log বা metric হিসেবে ব্যবহার করা array, প্রতি request-এ যোগ করা কিন্তু কখনো remove না করা event listener, clear না করা `setInterval`, আর বড় object ধরে রাখা closure।\n- **Production-এ snapshot নেওয়া:** `node --heapsnapshot-signal=SIGUSR2 server.js` দিয়ে চালিয়ে `kill -USR2 <pid>`; অথবা admin-only endpoint থেকে `v8.writeHeapSnapshot()`; অথবা `--heapsnapshot-near-heap-limit=2` দিয়ে OOM-এর ঠিক আগে নিজে থেকেই snapshot নেওয়া। Snapshot নেওয়ার সময় process থেমে যায় এবং file heap-এর সমান বড় হতে পারে — একটি instance-এ নাও, সম্ভব হলে traffic rotation-এর বাইরে রেখে।\n- **`--max-old-space-size` কোনো fix নয়।** বড় heap শুধু crash পিছিয়ে দেয় (আর container-এ memory limit-এর চেয়ে বেশি দিলে kernel process-কে OOM-kill করে দেয়)।\n- **`WeakMap`** কাজে লাগে যখন key এমন object যার lifetime তুমি নিয়ন্ত্রণ করো না; URL-এর মতো string key-তে এটা কাজ করে না।\n- Production-এ আমি নিজে না লিখে maintained LRU library (যেমন `lru-cache`) ব্যবহার করব; fixed version-টা শুধু ধারণাটা দেখায়।"
+  },
+  "interviewTip": {
+   "en": "Use the words \"retainer chain\" and \"comparison view\" — it shows you've actually hunted a leak. Then explain why raising the heap limit is not a fix.",
+   "bn": "\"Retainer chain\" আর \"comparison view\" শব্দগুলো ব্যবহার করো — এতে বোঝা যায় তুমি সত্যিই leak খুঁজেছ। তারপর ব্যাখ্যা করো কেন heap limit বাড়ানো কোনো fix নয়।"
+  },
+  "references": [
+   {
+    "title": "Node.js Learn — Using Heap Snapshot",
+    "url": "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot"
+   },
+   {
+    "title": "Node.js API — v8 (writeHeapSnapshot)",
+    "url": "https://nodejs.org/api/v8.html"
+   },
+   {
+    "title": "Node.js API — Command-line options",
+    "url": "https://nodejs.org/api/cli.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What's the difference between `heapUsed`, `heapTotal` and `rss` in `process.memoryUsage()`?",
+    "bn": "`process.memoryUsage()`-এ `heapUsed`, `heapTotal` আর `rss`-এর পার্থক্য কী?"
+   },
+   {
+    "en": "How can Buffers make RSS grow while the JS heap looks stable?",
+    "bn": "JS heap স্থির দেখালেও Buffer কীভাবে RSS বাড়িয়ে দিতে পারে?"
+   }
+  ],
+  "related": [
+   "node-023",
+   "node-006"
+  ],
+  "commonMistakes": {
+   "en": "Calling `global.gc()` in a loop, restarting the process on a cron as the \"solution\", or assuming Node has no leaks because it has a garbage collector.",
+   "bn": "Loop-এ `global.gc()` call করা, cron দিয়ে process restart করাকেই \"সমাধান\" ধরা, অথবা garbage collector আছে বলে Node-এ leak হয় না ধরে নেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import express from 'express';\nimport { db } from './db.js';\n\nconst app = express();\nconst cache = new Map();\n\napp.get('/api/products', async (req, res) => {\n  const key = req.originalUrl;\n  if (cache.has(key)) return res.json(cache.get(key));\n\n  const products = await db.findProducts(req.query);\n  cache.set(key, products);\n  res.json(products);\n});\n\napp.listen(3000);"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "const MAX_ENTRIES = 500;\nconst TTL_MS = 60_000;\nconst cache = new Map(); // key -> { value, expires }; Map keeps insertion order\n\nfunction getCached(key) {\n  const hit = cache.get(key);\n  if (!hit) return undefined;\n  if (hit.expires < Date.now()) {\n    cache.delete(key);\n    return undefined;\n  }\n  cache.delete(key); // move to the \"most recently used\" end\n  cache.set(key, hit);\n  return hit.value;\n}\n\nfunction setCached(key, value) {\n  cache.set(key, { value, expires: Date.now() + TTL_MS });\n  if (cache.size > MAX_ENTRIES) {\n    cache.delete(cache.keys().next().value); // evict least recently used\n  }\n}\n\napp.get('/api/products', async (req, res) => {\n  // Whitelisted, normalised key -> bounded key space\n  const page = Math.max(1, Number.parseInt(req.query.page ?? '1', 10) || 1);\n  const category = typeof req.query.category === 'string' ? req.query.category : 'all';\n  const key = `products:${category}:${page}`;\n\n  const cached = getCached(key);\n  if (cached) return res.json(cached);\n\n  const products = await db.findProducts({ category, page });\n  setCached(key, products);\n  res.json(products);\n});",
+    "label": {
+     "en": "Fixed version (bounded LRU + TTL, normalised key)",
+     "bn": "সংশোধিত version (সীমিত LRU + TTL, normalise করা key)"
+    }
+   },
+   {
+    "language": "bash",
+    "source": "# Take heap snapshots on demand (writes Heap.*.heapsnapshot to the cwd)\nnode --heapsnapshot-signal=SIGUSR2 server.js\nkill -USR2 <pid>    # take one now, another after 10 minutes of traffic\n\n# Or capture automatically right before an out-of-memory crash\nnode --heapsnapshot-near-heap-limit=2 server.js",
+    "label": {
+     "en": "Capturing heap snapshots",
+     "bn": "Heap snapshot নেওয়া"
+    }
+   }
+  ],
+  "technology": "nodejs"
+ }
+]

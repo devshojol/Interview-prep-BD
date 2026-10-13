@@ -1,0 +1,572 @@
+[
+ {
+  "id": "sql-001",
+  "subtopic": "Logical Query Processing Order",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "select",
+   "where",
+   "group-by",
+   "having",
+   "order-by"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Which sequence shows the correct **logical** processing order of the clauses in a `SELECT` statement?",
+   "bn": "একটা `SELECT` statement-এর clause-গুলোর সঠিক **logical** processing order কোনটা?"
+  },
+  "answer": {
+   "en": "`FROM` (including joins) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` (then `LIMIT`/`FETCH`). We *write* `SELECT` first, but it's evaluated after the rows are filtered and grouped.",
+   "bn": "`FROM` (join-সহ) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` (তারপর `LIMIT`/`FETCH`)। আমরা `SELECT` আগে *লিখি*, কিন্তু row filter আর group হওয়ার পরে এটা evaluate হয়।"
+  },
+  "explanation": {
+   "en": "This order explains several everyday errors:\n- `SELECT salary * 12 AS annual FROM employees WHERE annual > 600000;` fails — the alias `annual` doesn't exist yet when `WHERE` runs. Repeat the expression or use a subquery/CTE.\n- An alias **can** be used in `ORDER BY`, because `ORDER BY` runs after `SELECT`.\n- Aggregates like `COUNT(*)` can't appear in `WHERE` (groups don't exist yet) — that's what `HAVING` is for.\n- Window functions are computed after `HAVING`, so you can't filter on them in `WHERE` either.\n\nIt's a *logical* order: the optimizer may physically execute things differently (e.g. push filters into joins) as long as the result is the same. The tempting wrong answer is the first option, because it matches the order in which we type the clauses.",
+   "bn": "এই ক্রম দিয়ে প্রতিদিনের কিছু error বোঝা যায়:\n- `SELECT salary * 12 AS annual FROM employees WHERE annual > 600000;` fail করে — `WHERE` চলার সময় `annual` alias-টা তখনো তৈরিই হয়নি। Expression-টা আবার লেখো, অথবা subquery/CTE ব্যবহার করো।\n- `ORDER BY`-তে alias **ব্যবহার করা যায়**, কারণ `ORDER BY` `SELECT`-এর পরে চলে।\n- `COUNT(*)`-এর মতো aggregate `WHERE`-এ দেওয়া যায় না (তখনো group তৈরিই হয়নি) — এর জন্যই `HAVING`।\n- Window function `HAVING`-এর পরে হিসাব হয়, তাই এগুলো দিয়েও `WHERE`-এ filter করা যায় না।\n\nএটা একটা *logical* ক্রম: ফলাফল একই থাকলে optimizer বাস্তবে অন্যভাবে execute করতে পারে (যেমন filter-কে join-এর ভেতরে ঠেলে দেওয়া)। লোভনীয় ভুল উত্তর প্রথম option-টা, কারণ আমরা clause-গুলো ঠিক ওই ক্রমেই লিখি।"
+  },
+  "interviewTip": {
+   "en": "After giving the order, immediately use it to explain the \"alias in WHERE\" error — applying the concept impresses more than reciting it.",
+   "bn": "ক্রমটা বলার পরপরই এটা দিয়ে \"WHERE-এ alias\" error ব্যাখ্যা করো — শুধু মুখস্থ বলার চেয়ে concept প্রয়োগ করে দেখালে বেশি ভালো লাগে।"
+  },
+  "references": [
+   {
+    "title": "Microsoft Learn — SELECT (logical processing order)",
+    "url": "https://learn.microsoft.com/en-us/sql/t-sql/queries/select-transact-sql"
+   },
+   {
+    "title": "PostgreSQL docs — SELECT",
+    "url": "https://www.postgresql.org/docs/current/sql-select.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "sql-004"
+  ],
+  "options": [
+   {
+    "en": "`SELECT` → `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `ORDER BY`",
+    "bn": "`SELECT` → `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `ORDER BY`"
+   },
+   {
+    "en": "`FROM` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`",
+    "bn": "`FROM` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`"
+   },
+   {
+    "en": "`FROM` → `SELECT` → `WHERE` → `GROUP BY` → `ORDER BY` → `HAVING`",
+    "bn": "`FROM` → `SELECT` → `WHERE` → `GROUP BY` → `ORDER BY` → `HAVING`"
+   },
+   {
+    "en": "`FROM` → `GROUP BY` → `WHERE` → `HAVING` → `SELECT` → `ORDER BY`",
+    "bn": "`FROM` → `GROUP BY` → `WHERE` → `HAVING` → `SELECT` → `ORDER BY`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "sql"
+ },
+ {
+  "id": "sql-002",
+  "subtopic": "JOIN Types",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "joins",
+   "inner-join",
+   "left-join",
+   "full-outer-join",
+   "cross-join"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Explain the different JOIN types in SQL: INNER, LEFT, RIGHT, FULL OUTER, CROSS, and SELF join. When would you use each?",
+   "bn": "SQL-এর বিভিন্ন JOIN type ব্যাখ্যা করো: INNER, LEFT, RIGHT, FULL OUTER, CROSS আর SELF join। কোনটা কখন ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "- **INNER JOIN:** only rows that match on both sides — e.g. orders with their customer.\n- **LEFT (OUTER) JOIN:** all rows from the left table, plus matches from the right; no match → NULLs. E.g. all customers, including those with no orders.\n- **RIGHT JOIN:** the mirror image; I usually rewrite it as a LEFT JOIN for readability.\n- **FULL OUTER JOIN:** all rows from both sides, matched where possible — useful for reconciling two data sources (e.g. bank statement vs internal ledger).\n- **CROSS JOIN:** every combination (Cartesian product) — e.g. every product × every size to generate a grid.\n- **SELF JOIN:** a table joined to itself with aliases — e.g. employees and their managers in the same table.",
+   "bn": "- **INNER JOIN:** শুধু দুই দিকেই match করা row — যেমন order আর তার customer।\n- **LEFT (OUTER) JOIN:** বাম table-এর সব row, সাথে ডান দিকের match; match না থাকলে NULL। যেমন সব customer, যাদের কোনো order নেই তারাও।\n- **RIGHT JOIN:** উল্টো রূপ; পড়ার সুবিধার জন্য আমি সাধারণত এটাকে LEFT JOIN হিসেবে আবার লিখি।\n- **FULL OUTER JOIN:** দুই দিকেরই সব row, যেখানে সম্ভব match করে — দুটো data source মেলাতে কাজে লাগে (যেমন bank statement বনাম internal ledger)।\n- **CROSS JOIN:** সব combination (Cartesian product) — যেমন একটা grid বানাতে প্রতিটা product × প্রতিটা size।\n- **SELF JOIN:** alias দিয়ে একটা table-কে নিজের সাথেই join করা — যেমন একই table-এ employee আর তার manager।"
+  },
+  "explanation": {
+   "en": "- **Row counts multiply:** a join returns one row per matching *pair*. A customer with 3 orders appears 3 times; with a LEFT JOIN, a customer with no orders still appears once (with NULLs). Aggregating after a join that fans out can double-count.\n- **Classic trap — `WHERE` on the right table after a LEFT JOIN:** `LEFT JOIN orders o ... WHERE o.status = 'paid'` removes the NULL rows and silently turns it into an inner join. Put that condition in the `ON` clause instead if you want to keep unmatched customers.\n- MySQL has no `FULL OUTER JOIN`; emulate it with a `LEFT JOIN ... UNION ... RIGHT JOIN`.\n- Avoid `NATURAL JOIN` / `USING` on wide schemas: adding a column with the same name can silently change the join.",
+   "bn": "- **Row সংখ্যা গুণ হয়:** join প্রতিটা matching *জোড়ার* জন্য একটা row দেয়। ৩টা order থাকা customer ৩ বার আসে; LEFT JOIN-এ order না থাকা customer-ও একবার আসে (NULL-সহ)। Fan out হওয়া join-এর পরে aggregate করলে double-count হতে পারে।\n- **Classic ফাঁদ — LEFT JOIN-এর পরে ডান table-এ `WHERE`:** `LEFT JOIN orders o ... WHERE o.status = 'paid'` NULL row-গুলো বাদ দিয়ে নীরবে এটাকে inner join বানিয়ে ফেলে। Unmatched customer রাখতে চাইলে condition-টা `ON` clause-এ দাও।\n- MySQL-এ `FULL OUTER JOIN` নেই; `LEFT JOIN ... UNION ... RIGHT JOIN` দিয়ে এর কাজ করানো হয়।\n- বড় schema-তে `NATURAL JOIN` / `USING` এড়িয়ে চলো: একই নামের নতুন column যোগ হলে join নীরবে বদলে যেতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Give a one-line business example for each type, then mention the `WHERE`-after-LEFT-JOIN trap — interviewers often follow up on exactly that.",
+   "bn": "প্রতিটা type-এর জন্য এক লাইনের business উদাহরণ দাও, তারপর LEFT JOIN-এর পরে `WHERE`-এর ফাঁদটা বলো — interviewer প্রায়ই ঠিক এটা নিয়েই পরের প্রশ্ন করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Joins Between Tables",
+    "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+   },
+   {
+    "title": "PostgreSQL docs — Table Expressions (JOIN, WHERE, GROUP BY, HAVING)",
+    "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What's the difference between putting a condition in `ON` vs `WHERE` for a LEFT JOIN?",
+    "bn": "LEFT JOIN-এ condition `ON`-এ দেওয়া আর `WHERE`-এ দেওয়ার মধ্যে পার্থক্য কী?"
+   },
+   {
+    "en": "How would you emulate FULL OUTER JOIN in MySQL?",
+    "bn": "MySQL-এ FULL OUTER JOIN-এর কাজ কীভাবে করাবে?"
+   }
+  ],
+  "related": [
+   "sql-019",
+   "sql-008"
+  ],
+  "commonMistakes": {
+   "en": "Expecting a LEFT JOIN to return exactly one row per left-table row (it returns one per match), or filtering the right table in `WHERE` and losing unmatched rows.",
+   "bn": "ধরে নেওয়া যে LEFT JOIN বাম table-এর প্রতিটা row-এর জন্য ঠিক একটা row দেয় (আসলে প্রতিটা match-এর জন্য একটা দেয়), অথবা `WHERE`-এ ডান table filter করে unmatched row হারিয়ে ফেলা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "-- all customers, with their PAID orders if any (filter in ON keeps unmatched customers)\nSELECT c.name, o.id AS order_id, o.amount\nFROM customers c\nLEFT JOIN orders o\n       ON o.customer_id = c.id\n      AND o.status = 'paid';\n\n-- every product in every size\nSELECT p.name, s.size\nFROM products p\nCROSS JOIN sizes s;\n\n-- self join: each employee with their manager's name\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON m.id = e.manager_id;"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-003",
+  "subtopic": "SELECT, JOIN, GROUP BY & ORDER BY",
+  "difficulty": "easy",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "select",
+   "join",
+   "group-by",
+   "order-by",
+   "aggregates"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL; output shown from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Using the `customers` and `orders` tables below, list each customer's number of **delivered** orders and the total delivered amount, highest spender first. Only customers with at least one delivered order should appear.",
+   "bn": "নিচের `customers` আর `orders` table ব্যবহার করে প্রতিটা customer-এর **delivered** order-এর সংখ্যা আর মোট delivered amount বের করো, সবচেয়ে বেশি খরচ করা customer আগে। শুধু যাদের অন্তত একটা delivered order আছে তারাই আসবে।"
+  },
+  "answer": {
+   "en": "- `JOIN` pairs every order with its customer (inner join: customers without orders disappear, which is what we want here).\n- `WHERE o.status = 'delivered'` removes cancelled and pending orders **before** grouping. So Sumi (only a pending order) and Tanvir (no orders) don't appear, and Rahim's cancelled 400 isn't counted.\n- `GROUP BY c.id, c.name` makes one group per customer; `COUNT(*)` and `SUM(o.amount)` are computed per group. Grouping by `id` too keeps two customers with the same name separate.\n- `ORDER BY total_spent DESC` can use the alias because `ORDER BY` runs after `SELECT`.",
+   "bn": "- `JOIN` প্রতিটা order-কে তার customer-এর সাথে জোড়া লাগায় (inner join: যাদের order নেই তারা বাদ পড়ে — এখানে আমরা সেটাই চাই)।\n- `WHERE o.status = 'delivered'` group করার **আগেই** cancelled আর pending order বাদ দেয়। তাই Sumi (শুধু pending order) আর Tanvir (কোনো order নেই) আসে না, আর Rahim-এর cancelled 400 গোনা হয় না।\n- `GROUP BY c.id, c.name` প্রতিটা customer-এর জন্য একটা group বানায়; `COUNT(*)` আর `SUM(o.amount)` প্রতিটা group-এর জন্য হিসাব হয়। `id` দিয়েও group করায় একই নামের দুজন customer আলাদা থাকে।\n- `ORDER BY total_spent DESC`-এ alias ব্যবহার করা যায়, কারণ `ORDER BY` `SELECT`-এর পরে চলে।"
+  },
+  "explanation": {
+   "en": "- Every non-aggregated column in `SELECT` must be in `GROUP BY` (or functionally dependent on it — PostgreSQL accepts `GROUP BY c.id` alone because `id` is the primary key). Older MySQL modes allowed ungrouped columns and returned arbitrary values — don't rely on that.\n- To include customers with zero delivered orders, switch to `LEFT JOIN` and move the status filter into the `ON` clause, then use `COUNT(o.id)` and `COALESCE(SUM(o.amount), 0)`.\n- If two customers tie on `total_spent`, the order between them is undefined — add a tie-breaker like `, c.name`.\n- The output formatting (e.g. `3000.00`) is PostgreSQL's; other databases may print `3000` or `3000.0`.",
+   "bn": "- `SELECT`-এর প্রতিটা non-aggregated column `GROUP BY`-তে থাকতে হবে (অথবা তার উপর functionally dependent হতে হবে — PostgreSQL শুধু `GROUP BY c.id` মেনে নেয়, কারণ `id` primary key)। পুরনো MySQL mode-এ group না করা column-ও চলত আর এলোমেলো value দিত — এর উপর ভরসা কোরো না।\n- শূন্য delivered order-ওয়ালা customer-দেরও আনতে চাইলে `LEFT JOIN`-এ যাও, status filter-টা `ON` clause-এ সরাও, তারপর `COUNT(o.id)` আর `COALESCE(SUM(o.amount), 0)` ব্যবহার করো।\n- দুজন customer-এর `total_spent` সমান হলে তাদের ক্রম নির্দিষ্ট থাকে না — `, c.name`-এর মতো একটা tie-breaker যোগ করো।\n- Output-এর format (যেমন `3000.00`) PostgreSQL-এর; অন্য database `3000` বা `3000.0` দেখাতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Narrate the query in execution order: join, filter, group, aggregate, sort. Pointing out why Sumi and Tanvir are missing shows you trace data, not just syntax.",
+   "bn": "Query-টা execution-এর ক্রমে বলে যাও: join, filter, group, aggregate, sort। Sumi আর Tanvir কেন নেই সেটা দেখালে বোঝা যায় তুমি শুধু syntax না, data-ও trace করো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Table Expressions (JOIN, WHERE, GROUP BY, HAVING)",
+    "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+   },
+   {
+    "title": "PostgreSQL docs — Aggregate Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you include customers with zero delivered orders?",
+    "bn": "শূন্য delivered order-ওয়ালা customer-দেরও কীভাবে দেখাবে?"
+   },
+   {
+    "en": "Show only customers whose delivered total is above 2,000.",
+    "bn": "শুধু তাদের দেখাও যাদের delivered total 2,000-এর বেশি।"
+   }
+  ],
+  "related": [
+   "sql-004",
+   "sql-002"
+  ],
+  "commonMistakes": {
+   "en": "Grouping only by `name` (merges different customers with the same name), or filtering status in `HAVING` instead of `WHERE`.",
+   "bn": "শুধু `name` দিয়ে group করা (একই নামের আলাদা customer মিশে যায়), অথবা status filter `WHERE`-এর বদলে `HAVING`-এ দেওয়া।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT c.name,\n       COUNT(*)      AS delivered_orders,\n       SUM(o.amount) AS total_spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.status = 'delivered'\nGROUP BY c.id, c.name\nORDER BY total_spent DESC;",
+   "output": " name  | delivered_orders | total_spent\n-------+------------------+-------------\n Karim |                2 |     3000.00\n Rahim |                2 |     2200.00\n Nadia |                1 |     1200.00"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE customers (\n  id   INT PRIMARY KEY,\n  name VARCHAR(50) NOT NULL,\n  city VARCHAR(50)\n);\n\nCREATE TABLE orders (\n  id          INT PRIMARY KEY,\n  customer_id INT NOT NULL REFERENCES customers(id),\n  amount      NUMERIC(10,2) NOT NULL,\n  status      VARCHAR(20) NOT NULL\n);\n\nINSERT INTO customers (id, name, city) VALUES\n  (1, 'Rahim',  'Dhaka'),\n  (2, 'Karim',  'Chattogram'),\n  (3, 'Nadia',  'Dhaka'),\n  (4, 'Sumi',   'Sylhet'),\n  (5, 'Tanvir', 'Khulna');\n\nINSERT INTO orders (id, customer_id, amount, status) VALUES\n  (1, 1, 1500.00, 'delivered'),\n  (2, 1,  700.00, 'delivered'),\n  (3, 2, 2200.00, 'delivered'),\n  (4, 3,  300.00, 'cancelled'),\n  (5, 3, 1200.00, 'delivered'),\n  (6, 2,  800.00, 'delivered'),\n  (7, 4,  950.00, 'pending'),\n  (8, 1,  400.00, 'cancelled');"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-004",
+  "subtopic": "WHERE vs HAVING",
+  "difficulty": "easy",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "where",
+   "having",
+   "group-by",
+   "aggregates"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL; output shown from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Find the departments that have **at least 2 employees earning more than 50,000**. For each such department, show how many such employees it has and their average salary.",
+   "bn": "যেসব department-এ **৫০,০০০-এর বেশি বেতন পাওয়া অন্তত ২ জন employee** আছে, সেগুলো বের করো। প্রতিটা department-এর জন্য এমন employee কতজন আর তাদের গড় বেতন দেখাও।"
+  },
+  "answer": {
+   "en": "- `WHERE salary > 50000` runs first and keeps only individual high earners: Ayesha, Bilal, Dipu, Gazi, Hasan.\n- `GROUP BY dept` then forms groups: Engineering (2), Sales (1: Dipu), HR (2).\n- `HAVING COUNT(*) >= 2` filters **groups** using an aggregate, dropping Sales.\n- The average is over the remaining rows only: Engineering (95000 + 72000) / 2 = 83500, HR (60000 + 52000) / 2 = 56000.\n\nRule of thumb: conditions on individual rows go in `WHERE`; conditions on aggregates (`COUNT`, `SUM`, `AVG`...) go in `HAVING`.",
+   "bn": "- `WHERE salary > 50000` আগে চলে আর শুধু আলাদা আলাদা বেশি বেতনের employee রাখে: Ayesha, Bilal, Dipu, Gazi, Hasan।\n- এরপর `GROUP BY dept` group বানায়: Engineering (২), Sales (১: Dipu), HR (২)।\n- `HAVING COUNT(*) >= 2` aggregate দিয়ে **group** filter করে, Sales বাদ পড়ে।\n- গড় হিসাব হয় শুধু বাকি row-গুলো দিয়ে: Engineering (95000 + 72000) / 2 = 83500, HR (60000 + 52000) / 2 = 56000।\n\nসহজ নিয়ম: আলাদা row-এর condition যায় `WHERE`-এ; aggregate-এর (`COUNT`, `SUM`, `AVG`...) condition যায় `HAVING`-এ।"
+  },
+  "explanation": {
+   "en": "- `WHERE COUNT(*) >= 2` is an error: aggregates don't exist yet when `WHERE` runs.\n- Putting `salary > 50000` in `HAVING` instead is also wrong here: `salary` isn't grouped, so most databases reject it, and even `HAVING MAX(salary) > 50000` would answer a different question.\n- Filtering early in `WHERE` is also faster: fewer rows reach the grouping step. Use `HAVING` only for conditions that truly need aggregates.\n- The engine may give `AVG` a different type or scale (PostgreSQL returns `numeric`, hence `ROUND(..., 2)` → `83500.00`).",
+   "bn": "- `WHERE COUNT(*) >= 2` error দেয়: `WHERE` চলার সময় aggregate-এর অস্তিত্বই থাকে না।\n- এখানে `salary > 50000` `HAVING`-এ দেওয়াও ভুল: `salary` group করা হয়নি, তাই বেশিরভাগ database এটা reject করে, আর `HAVING MAX(salary) > 50000` দিলেও সেটা অন্য প্রশ্নের উত্তর দেবে।\n- আগেভাগে `WHERE`-এ filter করা দ্রুতও: grouping step-এ কম row পৌঁছায়। শুধু যেসব condition-এ সত্যিই aggregate লাগে, সেগুলোর জন্য `HAVING` ব্যবহার করো।\n- Engine ভেদে `AVG`-এর type বা scale আলাদা হতে পারে (PostgreSQL `numeric` দেয়, তাই `ROUND(..., 2)` → `83500.00`)।"
+  },
+  "interviewTip": {
+   "en": "State the one-line rule (\"WHERE filters rows, HAVING filters groups\"), then walk through which rows survive each step with the sample data.",
+   "bn": "এক লাইনের নিয়মটা বলো (\"WHERE row filter করে, HAVING group filter করে\"), তারপর sample data দিয়ে দেখাও প্রতিটা ধাপে কোন row-গুলো টিকে থাকে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Table Expressions (JOIN, WHERE, GROUP BY, HAVING)",
+    "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+   },
+   {
+    "title": "PostgreSQL docs — Aggregate Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can a query have `HAVING` without `GROUP BY`? What does it do?",
+    "bn": "`GROUP BY` ছাড়া কি query-তে `HAVING` থাকতে পারে? তখন এটা কী করে?"
+   },
+   {
+    "en": "How would you also show departments with zero high earners?",
+    "bn": "শূন্য বেশি-বেতনের employee থাকা department-গুলোও কীভাবে দেখাবে?"
+   }
+  ],
+  "related": [
+   "sql-001",
+   "sql-003"
+  ],
+  "commonMistakes": {
+   "en": "Writing `HAVING salary > 50000` (wrong question / error), or using `WHERE COUNT(*) >= 2`.",
+   "bn": "`HAVING salary > 50000` লেখা (ভুল প্রশ্ন / error), অথবা `WHERE COUNT(*) >= 2` ব্যবহার করা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT dept,\n       COUNT(*)              AS high_earners,\n       ROUND(AVG(salary), 2) AS avg_high_salary\nFROM employees\nWHERE salary > 50000          -- filters ROWS, before grouping\nGROUP BY dept\nHAVING COUNT(*) >= 2          -- filters GROUPS, after aggregation\nORDER BY dept;",
+   "output": "    dept     | high_earners | avg_high_salary\n-------------+--------------+-----------------\n Engineering |            2 |        83500.00\n HR          |            2 |        56000.00"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE employees (\n  id     INT PRIMARY KEY,\n  name   VARCHAR(50) NOT NULL,\n  dept   VARCHAR(30) NOT NULL,\n  salary NUMERIC(10,2) NOT NULL\n);\n\nINSERT INTO employees (id, name, dept, salary) VALUES\n  (1, 'Ayesha',  'Engineering', 95000),\n  (2, 'Bilal',   'Engineering', 72000),\n  (3, 'Chandni', 'Engineering', 48000),\n  (4, 'Dipu',    'Sales',       55000),\n  (5, 'Esha',    'Sales',       45000),\n  (6, 'Farhan',  'Sales',       41000),\n  (7, 'Gazi',    'HR',          60000),\n  (8, 'Hasan',   'HR',          52000);"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-005",
+  "subtopic": "Aggregate Functions & NULL",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "count",
+   "avg",
+   "null",
+   "aggregates",
+   "output"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does this query return?",
+   "bn": "এই query কী return করবে?"
+  },
+  "answer": {
+   "en": "`5 | 3 | 2 | 433.33`. `COUNT(*)` counts rows (5); `COUNT(bonus)` skips NULLs (3); `COUNT(DISTINCT bonus)` counts distinct non-NULL values {500, 300} (2); `AVG` ignores NULLs, so it's 1300 / 3 = 433.33, not 1300 / 5.",
+   "bn": "`5 | 3 | 2 | 433.33`। `COUNT(*)` row গোনে (5); `COUNT(bonus)` NULL বাদ দেয় (3); `COUNT(DISTINCT bonus)` আলাদা non-NULL value গোনে {500, 300} (2); `AVG` NULL উপেক্ষা করে, তাই 1300 / 3 = 433.33, 1300 / 5 নয়।"
+  },
+  "explanation": {
+   "en": "All standard aggregates except `COUNT(*)` ignore NULLs. The tempting trap is `AVG = 260` (treating NULL as 0). If the business rule says \"no bonus means 0\", make it explicit: `AVG(COALESCE(bonus, 0))` → 260.00.\n\nAlso remember: `SUM` over zero rows (or only NULLs) returns NULL, not 0 — wrap it in `COALESCE(SUM(x), 0)` when you need a number.\n\nEngine detail: PostgreSQL, MySQL, and SQLite return a fractional average here (433.33 after rounding), but SQL Server's `AVG` over an `INT` column returns an integer (433) — use `AVG(CAST(bonus AS DECIMAL(10,2)))` there.",
+   "bn": "`COUNT(*)` ছাড়া সব standard aggregate NULL উপেক্ষা করে। লোভনীয় ফাঁদ হলো `AVG = 260` (NULL-কে 0 ধরা)। যদি business rule বলে \"bonus নেই মানে 0\", তাহলে সেটা স্পষ্ট করে লেখো: `AVG(COALESCE(bonus, 0))` → 260.00।\n\nআরও মনে রাখো: শূন্য row-এর (বা শুধু NULL-এর) উপর `SUM` 0 নয়, NULL দেয় — সংখ্যা দরকার হলে `COALESCE(SUM(x), 0)` দিয়ে মুড়ে দাও।\n\nEngine-এর খুঁটিনাটি: PostgreSQL, MySQL আর SQLite এখানে ভগ্নাংশসহ গড় দেয় (round করে 433.33), কিন্তু SQL Server-এ `INT` column-এর `AVG` integer দেয় (433) — সেখানে `AVG(CAST(bonus AS DECIMAL(10,2)))` ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Explain each column separately in one breath, then mention the `COALESCE` fix — it shows you think about business meaning, not just syntax.",
+   "bn": "প্রতিটা column আলাদা করে এক নিঃশ্বাসে ব্যাখ্যা করো, তারপর `COALESCE` দিয়ে সমাধানের কথা বলো — এতে বোঝা যায় তুমি শুধু syntax নয়, business-এর অর্থ নিয়েও ভাবো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Aggregate Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-aggregate.html"
+   },
+   {
+    "title": "PostgreSQL docs — Aggregate Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "sql-006"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE bonuses (emp_id INT PRIMARY KEY, bonus INT);\nINSERT INTO bonuses (emp_id, bonus) VALUES\n  (1, 500), (2, NULL), (3, 500), (4, NULL), (5, 300);\n\nSELECT COUNT(*)              AS all_rows,\n       COUNT(bonus)          AS with_bonus,\n       COUNT(DISTINCT bonus) AS distinct_bonus,\n       ROUND(AVG(bonus), 2)  AS avg_bonus\nFROM bonuses;",
+   "output": " all_rows | with_bonus | distinct_bonus | avg_bonus\n----------+------------+----------------+-----------\n        5 |          3 |              2 |    433.33"
+  },
+  "options": [
+   {
+    "en": "`5 | 5 | 3 | 260.00`",
+    "bn": "`5 | 5 | 3 | 260.00`"
+   },
+   {
+    "en": "`5 | 3 | 2 | 433.33`",
+    "bn": "`5 | 3 | 2 | 433.33`"
+   },
+   {
+    "en": "`3 | 3 | 2 | 433.33`",
+    "bn": "`3 | 3 | 2 | 433.33`"
+   },
+   {
+    "en": "`5 | 3 | 3 | 260.00`",
+    "bn": "`5 | 3 | 3 | 260.00`"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "sql"
+ },
+ {
+  "id": "sql-006",
+  "subtopic": "NULL & Three-Valued Logic",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "null",
+   "three-valued-logic",
+   "where",
+   "is-distinct-from"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How many rows does the final `SELECT` count?",
+   "bn": "শেষ `SELECT` কতগুলো row গুনবে?"
+  },
+  "answer": {
+   "en": "**1** — only Karim (Sylhet). For Nadia and Tanvir, `NULL <> 'Dhaka'` is **UNKNOWN**, not TRUE, and `WHERE` keeps only rows where the condition is TRUE.",
+   "bn": "**1** — শুধু Karim (Sylhet)। Nadia আর Tanvir-এর ক্ষেত্রে `NULL <> 'Dhaka'`-এর ফল **UNKNOWN**, TRUE নয়, আর `WHERE` শুধু সেসব row রাখে যেখানে condition TRUE।"
+  },
+  "explanation": {
+   "en": "SQL uses three-valued logic: TRUE, FALSE, UNKNOWN. Any comparison with NULL (`=`, `<>`, `<`, even `NULL = NULL`) is UNKNOWN. The tempting answer is 3 — \"NULL isn't Dhaka, so it should count\".\n\nTo include unknown cities:\n- `WHERE city IS NULL OR city <> 'Dhaka'` → 3\n- `WHERE city IS DISTINCT FROM 'Dhaka'` → 3 (standard SQL; supported by PostgreSQL, SQLite, SQL Server 2022+; MySQL uses `NOT (city <=> 'Dhaka')`)\n\nRelated traps: `NOT IN (subquery)` returns nothing if the subquery contains a NULL, and `CHECK` constraints *pass* on UNKNOWN.",
+   "bn": "SQL three-valued logic ব্যবহার করে: TRUE, FALSE, UNKNOWN। NULL-এর সাথে যেকোনো তুলনা (`=`, `<>`, `<`, এমনকি `NULL = NULL`) UNKNOWN। লোভনীয় উত্তর 3 — \"NULL তো Dhaka না, তাহলে গোনা উচিত\"।\n\nঅজানা city-গুলোও ধরতে চাইলে:\n- `WHERE city IS NULL OR city <> 'Dhaka'` → 3\n- `WHERE city IS DISTINCT FROM 'Dhaka'` → 3 (standard SQL; PostgreSQL, SQLite, SQL Server 2022+ support করে; MySQL-এ `NOT (city <=> 'Dhaka')`)\n\nসম্পর্কিত ফাঁদ: subquery-তে একটা NULL থাকলে `NOT IN (subquery)` কিছুই return করে না, আর UNKNOWN হলে `CHECK` constraint *pass* করে যায়।"
+  },
+  "interviewTip": {
+   "en": "Say \"three-valued logic\" by name and show the `IS DISTINCT FROM` fix. Linking it to the `NOT IN` + NULL trap is a strong follow-through.",
+   "bn": "\"Three-valued logic\" নাম ধরে বলো আর `IS DISTINCT FROM` দিয়ে সমাধান দেখাও। এটাকে `NOT IN` + NULL ফাঁদের সাথে যুক্ত করলে উত্তর আরও জোরালো হয়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Comparison Functions and Operators",
+    "url": "https://www.postgresql.org/docs/current/functions-comparison.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "sql-005",
+   "sql-016"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(50), city VARCHAR(50));\nINSERT INTO customers (id, name, city) VALUES\n  (1, 'Rahim',  'Dhaka'),\n  (2, 'Karim',  'Sylhet'),\n  (3, 'Nadia',  NULL),\n  (4, 'Sumi',   'Dhaka'),\n  (5, 'Tanvir', NULL);\n\nSELECT COUNT(*) AS cnt FROM customers WHERE city <> 'Dhaka';",
+   "output": " cnt\n-----\n   1"
+  },
+  "options": [
+   {
+    "en": "1",
+    "bn": "1"
+   },
+   {
+    "en": "3",
+    "bn": "3"
+   },
+   {
+    "en": "2",
+    "bn": "2"
+   },
+   {
+    "en": "0",
+    "bn": "0"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "sql"
+ },
+ {
+  "id": "sql-007",
+  "subtopic": "Constraints & Keys",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "primary-key",
+   "foreign-key",
+   "unique",
+   "check",
+   "candidate-key"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What are primary keys, foreign keys, and other constraints in SQL? Also explain candidate, composite, natural, and surrogate keys.",
+   "bn": "SQL-এ primary key, foreign key আর অন্যান্য constraint কী? সাথে candidate, composite, natural আর surrogate key ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "Constraints are rules the database enforces on every write:\n- **PRIMARY KEY:** uniquely identifies each row; unique + not null; one per table.\n- **FOREIGN KEY:** a column that must match a key in another table (referential integrity), with actions like `ON DELETE CASCADE / RESTRICT / SET NULL`.\n- **UNIQUE:** no duplicate values (e.g. email); usually allows NULLs.\n- **NOT NULL**, **CHECK** (e.g. `CHECK (price >= 0)`), and **DEFAULT**.\n\nKey vocabulary:\n- **Candidate key:** any minimal set of columns that could uniquely identify a row (e.g. `id`, `email`, `nid_number`). One is chosen as the primary key; the others are alternate keys (enforce them with `UNIQUE`).\n- **Composite key:** made of several columns, e.g. `(order_id, product_id)` in `order_items`.\n- **Natural key:** a real-world value (email, NID). **Surrogate key:** a meaningless generated id (identity/UUID). I usually use a surrogate primary key plus `UNIQUE` constraints on the natural keys.",
+   "bn": "Constraint হলো এমন নিয়ম যা database প্রতিটা write-এ enforce করে:\n- **PRIMARY KEY:** প্রতিটা row-কে আলাদাভাবে চেনায়; unique + not null; table-প্রতি একটা।\n- **FOREIGN KEY:** এমন column যার value অন্য table-এর key-এর সাথে মিলতেই হবে (referential integrity), সাথে `ON DELETE CASCADE / RESTRICT / SET NULL`-এর মতো action।\n- **UNIQUE:** কোনো duplicate value চলবে না (যেমন email); সাধারণত NULL রাখা যায়।\n- **NOT NULL**, **CHECK** (যেমন `CHECK (price >= 0)`) আর **DEFAULT**।\n\nKey-এর পরিভাষা:\n- **Candidate key:** column-এর এমন যেকোনো ন্যূনতম set যা একটা row-কে আলাদাভাবে চিনতে পারে (যেমন `id`, `email`, `nid_number`)। এর একটাকে primary key বানানো হয়; বাকিগুলো alternate key (`UNIQUE` দিয়ে enforce করো)।\n- **Composite key:** একাধিক column মিলে তৈরি, যেমন `order_items`-এ `(order_id, product_id)`।\n- **Natural key:** বাস্তব জগতের value (email, NID)। **Surrogate key:** অর্থহীন generated id (identity/UUID)। আমি সাধারণত surrogate primary key রাখি, আর natural key-গুলোতে `UNIQUE` constraint দিই।"
+  },
+  "explanation": {
+   "en": "- **Why enforce in the database, not only in code?** Multiple apps, scripts, admin fixes, and race conditions bypass application checks. A `UNIQUE` constraint is the only reliable way to prevent duplicate emails under concurrency.\n- Natural keys can change (people change emails/phones) — changing a primary key ripples through every foreign key. That's the main argument for surrogate keys.\n- A **super key** is any set of columns that uniquely identifies rows (a candidate key is a minimal super key) — a common viva definition.\n- Database differences: MySQL enforces `CHECK` only since 8.0.16 (older versions parsed and ignored it); SQL Server allows only one NULL in a `UNIQUE` column, while PostgreSQL allows many by default.",
+   "bn": "- **শুধু code-এ না রেখে database-এ কেন enforce করব?** একাধিক app, script, admin-এর হাতে করা fix আর race condition — সবাই application-এর check এড়িয়ে যেতে পারে। Concurrency-র মধ্যে duplicate email আটকানোর একমাত্র নির্ভরযোগ্য উপায় `UNIQUE` constraint।\n- Natural key বদলাতে পারে (মানুষ email/phone বদলায়) — primary key বদলালে সেটা প্রতিটা foreign key-তে ছড়িয়ে পড়ে। Surrogate key-এর পক্ষে এটাই প্রধান যুক্তি।\n- **Super key** হলো column-এর এমন যেকোনো set যা row-কে আলাদাভাবে চেনায় (candidate key হলো ন্যূনতম super key) — viva-তে প্রায়ই জিজ্ঞেস করা সংজ্ঞা।\n- Database-ভেদে পার্থক্য: MySQL `CHECK` enforce করে কেবল 8.0.16 থেকে (পুরনো version parse করে উপেক্ষা করত); SQL Server একটা `UNIQUE` column-এ মাত্র একটা NULL রাখতে দেয়, আর PostgreSQL default-ভাবে অনেকগুলো রাখতে দেয়।"
+  },
+  "interviewTip": {
+   "en": "Define each key with a concrete example from one schema (e.g. users/orders). Ending with \"surrogate PK + UNIQUE natural keys\" shows a practical design opinion.",
+   "bn": "একটা schema (যেমন users/orders) থেকে concrete উদাহরণ দিয়ে প্রতিটা key-এর সংজ্ঞা দাও। শেষে \"surrogate PK + UNIQUE natural key\" বললে একটা practical design মতামত দেখানো হয়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Constraints",
+    "url": "https://www.postgresql.org/docs/current/ddl-constraints.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What do `ON DELETE CASCADE`, `RESTRICT`, and `SET NULL` do?",
+    "bn": "`ON DELETE CASCADE`, `RESTRICT` আর `SET NULL` কী করে?"
+   },
+   {
+    "en": "Natural or surrogate primary key for a `users` table — which and why?",
+    "bn": "`users` table-এর জন্য natural নাকি surrogate primary key — কোনটা আর কেন?"
+   }
+  ],
+  "related": [
+   "sql-011",
+   "sql-032"
+  ],
+  "commonMistakes": {
+   "en": "Confusing a candidate key with a foreign key, or relying only on application validation for uniqueness.",
+   "bn": "Candidate key আর foreign key গুলিয়ে ফেলা, অথবা uniqueness-এর জন্য শুধু application validation-এর উপর ভরসা করা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE users (\n  id          INT PRIMARY KEY,                    -- surrogate primary key\n  email       VARCHAR(255) NOT NULL UNIQUE,       -- natural key, alternate key\n  nid_number  VARCHAR(17) UNIQUE,\n  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE order_items (\n  order_id    INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,\n  product_id  INT NOT NULL REFERENCES products(id),\n  quantity    INT NOT NULL CHECK (quantity > 0),\n  unit_price  NUMERIC(10,2) NOT NULL CHECK (unit_price >= 0),\n  PRIMARY KEY (order_id, product_id)              -- composite key\n);"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-008",
+  "subtopic": "Self Join",
+  "difficulty": "easy",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "self-join",
+   "employees",
+   "managers",
+   "aliases"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL; output shown from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "The `employees` table stores each employee's `manager_id` (which is another employee's `id`). Find every employee who earns **more than their direct manager**, showing both names and salaries.",
+   "bn": "`employees` table-এ প্রতিটা employee-এর `manager_id` রাখা আছে (যেটা আরেকজন employee-এর `id`)। যেসব employee তাদের **সরাসরি manager-এর চেয়ে বেশি** বেতন পায় তাদের বের করো — দুজনেরই নাম আর বেতন দেখাও।"
+  },
+  "answer": {
+   "en": "A **self join** treats the same table as two roles using aliases: `e` is the employee, `m` is the manager. The join condition `m.id = e.manager_id` attaches each employee to their manager's row, and then `WHERE e.salary > m.salary` compares the two salaries on the same result row.\n\nJoy (125,000) earns more than Mitu (120,000), and Omar (95,000) more than Rafi (90,000). Shafiq has no manager (`manager_id` is NULL), so the inner join drops him — which is correct here because he has no one to compare against.",
+   "bn": "**Self join** alias দিয়ে একই table-কে দুটো ভূমিকায় দেখে: `e` হলো employee, `m` হলো manager। Join condition `m.id = e.manager_id` প্রতিটা employee-কে তার manager-এর row-এর সাথে জুড়ে দেয়, তারপর `WHERE e.salary > m.salary` একই result row-এ দুটো বেতন তুলনা করে।\n\nJoy (১,২৫,০০০) Mitu-র (১,২০,০০০) চেয়ে বেশি পায়, আর Omar (৯৫,০০০) Rafi-র (৯০,০০০) চেয়ে বেশি। Shafiq-এর কোনো manager নেই (`manager_id` NULL), তাই inner join তাকে বাদ দেয় — এখানে সেটাই ঠিক, কারণ তুলনা করার কেউ নেই।"
+  },
+  "explanation": {
+   "en": "- Use `LEFT JOIN` instead when you want to list *all* employees with their manager's name (the CEO then shows a NULL manager).\n- Self joins only go one level. For \"everyone under Mitu at any depth\" you need a **recursive CTE**.\n- Aliases are mandatory here — without them the database can't tell which copy of `employees` a column refers to.\n- Index `manager_id` on large tables: it's used both by this join and by the foreign-key checks when a manager row is deleted.",
+   "bn": "- সব employee-কে তাদের manager-এর নামসহ দেখাতে চাইলে এর বদলে `LEFT JOIN` ব্যবহার করো (তখন CEO-র manager NULL দেখাবে)।\n- Self join শুধু এক ধাপ যায়। \"যেকোনো গভীরতায় Mitu-র অধীনে থাকা সবাই\" বের করতে **recursive CTE** লাগে।\n- এখানে alias বাধ্যতামূলক — না দিলে database বুঝতে পারে না column-টা `employees`-এর কোন copy থেকে আসছে।\n- বড় table-এ `manager_id`-তে index দাও: এই join আর কোনো manager-এর row delete করার সময় foreign-key check — দুটোতেই এটা কাজে লাগে।"
+  },
+  "interviewTip": {
+   "en": "Name the aliases by role (`e` employee, `m` manager) and say the join condition out loud — it shows you understand the direction of the relationship. Mention why the CEO disappears.",
+   "bn": "Alias-গুলোর নাম ভূমিকা অনুযায়ী দাও (`e` employee, `m` manager) আর join condition জোরে বলো — এতে বোঝা যায় তুমি সম্পর্কের দিকটা বুঝেছ। CEO কেন বাদ পড়ল সেটাও বলো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Joins Between Tables",
+    "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+   },
+   {
+    "title": "SQLite — SELECT",
+    "url": "https://www.sqlite.org/lang_select.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "List every employee with their manager's name, including the CEO.",
+    "bn": "CEO-সহ প্রত্যেক employee-কে তার manager-এর নামসহ দেখাও।"
+   },
+   {
+    "en": "How would you find all employees under Mitu at any level?",
+    "bn": "যেকোনো স্তরে Mitu-র অধীনে থাকা সব employee কীভাবে বের করবে?"
+   }
+  ],
+  "related": [
+   "sql-002",
+   "sql-023"
+  ],
+  "commonMistakes": {
+   "en": "Reversing the join condition (`e.id = m.manager_id`), which compares managers with their reports the wrong way around.",
+   "bn": "Join condition উল্টে দেওয়া (`e.id = m.manager_id`), যাতে manager আর তার অধীনস্থদের তুলনা উল্টো দিক থেকে হয়।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT e.name   AS employee,\n       e.salary AS salary,\n       m.name   AS manager,\n       m.salary AS manager_salary\nFROM employees e\nJOIN employees m ON m.id = e.manager_id\nWHERE e.salary > m.salary\nORDER BY e.name;",
+   "output": " employee | salary | manager | manager_salary\n----------+--------+---------+----------------\n Joy      | 125000 | Mitu    |         120000\n Omar     |  95000 | Rafi    |          90000"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE employees (\n  id         INT PRIMARY KEY,\n  name       VARCHAR(50) NOT NULL,\n  salary     INT NOT NULL,\n  manager_id INT REFERENCES employees(id)\n);\n\nINSERT INTO employees (id, name, salary, manager_id) VALUES\n  (1, 'Shafiq', 200000, NULL),\n  (2, 'Mitu',   120000, 1),\n  (3, 'Rafi',    90000, 1),\n  (4, 'Joy',    125000, 2),\n  (5, 'Lina',    85000, 2),\n  (6, 'Omar',    95000, 3),\n  (7, 'Puja',    70000, 3);"
+  },
+  "technology": "sql"
+ }
+]

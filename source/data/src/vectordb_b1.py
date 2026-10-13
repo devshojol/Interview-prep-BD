@@ -1,0 +1,537 @@
+# Vector Databases — batch 1 (vec-001..004, vec-012, vec-013, vec-023, vec-030)
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools"))
+from qb import Q, save  # noqa: E402
+
+PGV = ("pgvector — README (GitHub)", "https://github.com/pgvector/pgvector")
+HF_EMB = ("Hugging Face — Getting Started With Embeddings", "https://huggingface.co/blog/getting-started-with-embeddings")
+MTEB = ("Hugging Face — MTEB embedding leaderboard", "https://huggingface.co/spaces/mteb/leaderboard")
+E5 = ("Hugging Face — multilingual-e5-base model card", "https://huggingface.co/intfloat/multilingual-e5-base")
+SBERT = ("Reimers & Gurevych — Sentence-BERT (arXiv)", "https://arxiv.org/abs/1908.10084")
+WIKI_COS = ("Wikipedia — Cosine similarity", "https://en.wikipedia.org/wiki/Cosine_similarity")
+WIKI_NNS = ("Wikipedia — Nearest neighbor search", "https://en.wikipedia.org/wiki/Nearest_neighbor_search")
+RAG_PAPER = ("Lewis et al. — Retrieval-Augmented Generation (arXiv)", "https://arxiv.org/abs/2005.11401")
+OWASP_LLM08 = ("OWASP GenAI — LLM08:2025 Vector and Embedding Weaknesses", "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/")
+RERANK_PAPER = ("Nogueira & Cho — Passage Re-ranking with BERT (arXiv)", "https://arxiv.org/abs/1901.04085")
+PG_FTS = ("PostgreSQL docs — Full Text Search", "https://www.postgresql.org/docs/current/textsearch.html")
+
+QUESTIONS = [
+    # ------------------------------------------------------------------ vec-001
+    Q(
+        id="vec-001", sub="Embeddings", diff="easy", type="conceptual",
+        prio="high", market="both", mins=3,
+        tags=["embeddings", "vectors", "embedding-model", "semantic-search"],
+        ver="Version-independent concept", vs=False, status="stable",
+        q_en=r"""What is an embedding, and why is it useful for search?""",
+        q_bn=r"""Embedding কী, আর search-এর জন্য এটা কেন কাজের?""",
+        a_en=r"""
+            An embedding is a **list of numbers (a vector)** that an **embedding model** produces from a piece of content — a sentence, a product title, an image. The model is trained so that content with **similar meaning ends up with vectors that are close together**.
+
+            Every vector from a given model has the same length, its **dimension** — for example 384 for `all-MiniLM-L6-v2`, 768 for `multilingual-e5-base`, or 1536 for OpenAI's `text-embedding-3-small`.
+
+            That's useful for search because you can compare meanings instead of words: "cheap phone" and "budget smartphone" share no words, but their embeddings are close, so a vector search finds one from the other. The key rule: documents and queries must be embedded with the **same model**.
+        """,
+        a_bn=r"""
+            Embedding হলো **কিছু সংখ্যার একটা তালিকা (একটা vector)**, যেটা একটা **embedding model** কোনো content থেকে তৈরি করে — একটা বাক্য, product-এর title, একটা ছবি। Model-টা এমনভাবে train করা থাকে যাতে **কাছাকাছি অর্থের content-এর vector-ও কাছাকাছি থাকে**।
+
+            একটা নির্দিষ্ট model-এর প্রতিটা vector-এর দৈর্ঘ্য একই, এটাকে বলে **dimension** — যেমন `all-MiniLM-L6-v2`-এ 384, `multilingual-e5-base`-এ 768, বা OpenAI-এর `text-embedding-3-small`-এ 1536।
+
+            Search-এ এটা কাজের কারণ এতে শব্দ নয়, অর্থ তুলনা করা যায়: "cheap phone" আর "budget smartphone"-এ কোনো শব্দ মেলে না, কিন্তু তাদের embedding কাছাকাছি, তাই vector search একটা দিয়ে অন্যটা খুঁজে পায়। মূল নিয়ম: document আর query দুটোই **একই model** দিয়ে embed করতে হবে।
+        """,
+        ex_en=r"""
+            - **Numbers aren't human-readable:** dimension 17 doesn't mean "price" or "colour"; meaning is spread across all dimensions.
+            - **Language and domain matter:** an English-only model handles Bangla poorly. For Bangla + English content, pick a multilingual model and test it on your own queries; public benchmarks such as MTEB are a starting point, not the final word.
+            - **Input limits:** models have a maximum input length (e.g. 512 tokens for the e5 family); longer text is truncated, which is one reason we chunk documents.
+            - **Some models need prefixes:** the e5 models expect `query: ` and `passage: ` prefixes — skipping them silently lowers quality.
+            - **Cost/latency:** hosted embedding APIs are easy but send your text to a third party; self-hosted models keep data in-house but need compute.
+        """,
+        ex_bn=r"""
+            - **সংখ্যাগুলো মানুষের পড়ার মতো নয়:** dimension 17 মানে "দাম" বা "রং" নয়; অর্থ সব dimension জুড়ে ছড়িয়ে থাকে।
+            - **ভাষা আর domain গুরুত্বপূর্ণ:** শুধু-English model Bangla ভালোভাবে বোঝে না। Bangla + English content-এর জন্য multilingual model বেছে নিয়ে নিজের query দিয়ে test করো; MTEB-এর মতো public benchmark শুরুর জায়গা, শেষ কথা নয়।
+            - **Input-এর সীমা:** model-এর সর্বোচ্চ input length থাকে (যেমন e5 family-তে 512 token); লম্বা text কেটে ফেলা হয় — document chunk করার এটা একটা কারণ।
+            - **কিছু model-এ prefix লাগে:** e5 model `query: ` আর `passage: ` prefix আশা করে — বাদ দিলে চুপচাপ quality কমে যায়।
+            - **খরচ/latency:** hosted embedding API সহজ, কিন্তু তোমার text third party-র কাছে যায়; self-hosted model data নিজের কাছে রাখে, কিন্তু compute লাগে।
+        """,
+        tip_en=r"""Use the "cheap phone" vs "budget smartphone" style example — a concrete pair makes the idea click for any interviewer. Then mention dimension and "same model for queries and documents".""",
+        tip_bn=r""""cheap phone" বনাম "budget smartphone"-এর মতো উদাহরণ দাও — একটা concrete জোড়া যেকোনো interviewer-কে ধারণাটা সাথে সাথে বুঝিয়ে দেয়। তারপর dimension আর "query ও document-এ একই model" উল্লেখ করো।""",
+        mist_en=r"""Calling embeddings "encrypted" or "compressed text" (they aren't reversible encryption and can leak information), or mixing vectors from different models in one index.""",
+        mist_bn=r"""Embedding-কে "encrypted" বা "compressed text" বলা (এগুলো উল্টানো যায় এমন encryption নয়, আর তথ্য ফাঁস করতে পারে), অথবা আলাদা model-এর vector একই index-এ মেশানো।""",
+        code=r"""
+            # pip install sentence-transformers
+            from sentence_transformers import SentenceTransformer
+
+            model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+            vectors = model.encode(
+                ["cheap phone", "budget smartphone", "cotton saree"],
+                normalize_embeddings=True,
+            )
+            print(vectors.shape)  # one 384-dimensional vector per sentence
+        """,
+        lang="python", output=r"""(3, 384)""",
+        follow=[
+            ("Why must queries and documents use the same embedding model?", "Query আর document-এ কেন একই embedding model ব্যবহার করতে হয়?"),
+            ("How would you choose an embedding model for Bangla and English content?", "Bangla আর English content-এর জন্য embedding model কীভাবে বেছে নেবে?"),
+        ],
+        related=["vec-002", "vec-003", "vec-011"],
+        refs=[HF_EMB, MTEB, SBERT],
+    ),
+    # ------------------------------------------------------------------ vec-002
+    Q(
+        id="vec-002", sub="Vectors & Dimensions", diff="easy", type="mcq",
+        prio="high", market="both", mins=2,
+        tags=["dimensions", "pgvector", "embedding-model", "schema"],
+        ver="pgvector 0.8.7 (PostgreSQL 18)", vs=True, status="stable",
+        q_en=r"""Your table has a column `embedding vector(768)`, but the embedding model you just switched to returns 1536-dimensional vectors. What happens when you insert one?""",
+        q_bn=r"""তোমার table-এ `embedding vector(768)` column আছে, কিন্তু যে embedding model-এ সদ্য বদলেছ সেটা 1536-dimensional vector দেয়। একটা insert করলে কী হবে?""",
+        options=[
+            ("pgvector silently keeps the first 768 values", "pgvector চুপচাপ প্রথম 768টা value রেখে দেয়"),
+            ("The row is stored, but similarity queries return wrong results", "Row store হয়, কিন্তু similarity query ভুল result দেয়"),
+            ("The insert fails with an error like `expected 768 dimensions, not 1536`", "Insert fail করে, `expected 768 dimensions, not 1536`-এর মতো error দিয়ে"),
+            ("PostgreSQL automatically changes the column to `vector(1536)`", "PostgreSQL নিজে থেকেই column-টা `vector(1536)`-এ বদলে দেয়"),
+        ],
+        correct=2,
+        a_en=r"""The insert fails. A `vector(768)` column only accepts 768-dimensional vectors, so pgvector raises `expected 768 dimensions, not 1536`.""",
+        a_bn=r"""Insert fail করে। `vector(768)` column শুধু 768-dimensional vector নেয়, তাই pgvector `expected 768 dimensions, not 1536` error দেয়।""",
+        ex_en=r"""
+            Dimensions are part of the schema, and similarity only makes sense between vectors of the same length — pgvector even refuses to compare them (`different vector dimensions 768 and 1536`). Options A and B describe the scarier failure people imagine; in practice the database protects you, which is good.
+
+            The real lesson: **changing the embedding model is a migration**. Vectors from different models live in different "spaces" even if the dimension happens to match, so you add a new column (or table/index), re-embed all documents with the new model, switch queries over, then drop the old column. Truncating vectors yourself is only valid for models trained to support it (e.g. models with a `dimensions` option / Matryoshka-style training), and you must re-normalise afterwards.
+        """,
+        ex_bn=r"""
+            Dimension schema-রই অংশ, আর similarity শুধু একই দৈর্ঘ্যের vector-এর মধ্যেই অর্থবহ — pgvector এমনকি তুলনা করতেও রাজি হয় না (`different vector dimensions 768 and 1536`)। Option A আর B মানুষ যে ভয়ংকর failure কল্পনা করে সেটা বর্ণনা করে; বাস্তবে database তোমাকে রক্ষা করে, যেটা ভালো।
+
+            আসল শিক্ষা: **embedding model বদলানো মানে একটা migration**। আলাদা model-এর vector আলাদা "space"-এ থাকে, dimension কাকতালীয়ভাবে মিলে গেলেও। তাই নতুন column (বা table/index) যোগ করো, নতুন model দিয়ে সব document আবার embed করো, query নতুনটায় সরাও, তারপর পুরনো column drop করো। নিজে vector কেটে ছোট করা শুধু সেই model-এর জন্যই ঠিক যেগুলো এটা support করার জন্য train করা (যেমন `dimensions` option / Matryoshka-ধরনের training), আর তারপর আবার normalise করতে হবে।
+        """,
+        tip_en=r"""Turn the MCQ into a design point: "dimension mismatch is a symptom; the real issue is that a model change requires re-embedding." That's the insight interviewers want.""",
+        tip_bn=r"""MCQ-টাকে design-এর আলোচনায় নিয়ে যাও: "dimension mismatch একটা লক্ষণ; আসল কথা হলো model বদলালে আবার embed করতে হয়।" Interviewer এই insight-টাই চায়।""",
+        refs=[PGV],
+        related=["vec-011", "vec-024"],
+    ),
+    # ------------------------------------------------------------------ vec-003
+    Q(
+        id="vec-003", sub="Similarity Search", diff="easy", type="conceptual",
+        prio="high", market="both", mins=3,
+        tags=["similarity-search", "knn", "top-k", "pgvector"],
+        ver="Version-independent concept (example: pgvector 0.8.7)", vs=False, status="stable",
+        q_en=r"""Walk me through how a similarity search works end to end — from storing documents to answering a user's query.""",
+        q_bn=r"""Document store করা থেকে শুরু করে user-এর query-র উত্তর দেওয়া পর্যন্ত similarity search কীভাবে কাজ করে, ধাপে ধাপে বুঝিয়ে বলো।""",
+        a_en=r"""
+            **Offline (indexing):**
+            1. Take each item (a product, a chunk of a document) and embed its text with an embedding model.
+            2. Store the vector together with the item's id and metadata (category, language, price, tenant).
+            3. Build a vector index (e.g. HNSW) so nearest-neighbour lookups are fast.
+
+            **Online (query):**
+            1. Embed the user's query with the **same model**.
+            2. Ask the database for the **top-k nearest vectors** using a distance metric — usually cosine distance — optionally restricted by metadata filters.
+            3. Return the matching items with their scores; optionally drop results below a similarity threshold or rerank them.
+
+            Finding the k closest vectors is called **k-nearest-neighbour (k-NN)** search. Exact k-NN compares the query with every vector; at scale we use **approximate** nearest neighbour (ANN) indexes that are much faster with slightly lower recall.
+        """,
+        a_bn=r"""
+            **Offline (indexing):**
+            1. প্রতিটা item (একটা product, document-এর একটা chunk) নিয়ে তার text একটা embedding model দিয়ে embed করো।
+            2. Vector-টা item-এর id আর metadata (category, language, price, tenant) সহ store করো।
+            3. একটা vector index (যেমন HNSW) তৈরি করো, যাতে nearest-neighbour খোঁজা দ্রুত হয়।
+
+            **Online (query):**
+            1. User-এর query **একই model** দিয়ে embed করো।
+            2. Database-কে একটা distance metric — সাধারণত cosine distance — দিয়ে **top-k nearest vector** চাও, দরকার হলে metadata filter সহ।
+            3. Score সহ মিলে যাওয়া item return করো; চাইলে একটা similarity threshold-এর নিচের result বাদ দাও বা rerank করো।
+
+            সবচেয়ে কাছের k-টা vector খোঁজাকে বলে **k-nearest-neighbour (k-NN)** search। Exact k-NN query-কে প্রতিটা vector-এর সাথে তুলনা করে; বড় scale-এ আমরা **approximate** nearest neighbour (ANN) index ব্যবহার করি, যেটা অনেক দ্রুত কিন্তু recall সামান্য কম।
+        """,
+        ex_en=r"""
+            - **Similarity ≠ relevance:** the nearest vector isn't always a good answer — there's always *some* nearest neighbour, even for nonsense queries. Thresholds and reranking help.
+            - **Scores are model-specific:** a cosine similarity of 0.8 can be excellent for one model and mediocre for another; calibrate thresholds on your own data.
+            - **Metadata is part of the design:** without stored metadata you can't filter by category or tenant later without re-ingesting.
+            - **pgvector default:** with no index, pgvector does exact search (perfect recall); adding an HNSW or IVFFlat index switches to approximate search.
+        """,
+        ex_bn=r"""
+            - **Similarity মানেই relevance নয়:** সবচেয়ে কাছের vector সবসময় ভালো উত্তর নয় — অর্থহীন query-রও *কোনো না কোনো* nearest neighbour থাকেই। Threshold আর reranking এখানে সাহায্য করে।
+            - **Score model-নির্ভর:** একটা model-এ cosine similarity 0.8 দারুণ হতে পারে, অন্যটায় সাধারণ; নিজের data দিয়ে threshold calibrate করো।
+            - **Metadata design-এর অংশ:** metadata store না করলে পরে আবার ingest না করে category বা tenant দিয়ে filter করা যায় না।
+            - **pgvector-এর default:** index না থাকলে pgvector exact search করে (perfect recall); HNSW বা IVFFlat index যোগ করলে approximate search-এ চলে যায়।
+        """,
+        tip_en=r"""Split the answer into "offline" and "online" — it's a clean structure that also sets you up for follow-ups on indexing and filtering.""",
+        tip_bn=r"""উত্তরটা "offline" আর "online"-এ ভাগ করো — কাঠামোটা পরিষ্কার, আর indexing ও filtering নিয়ে follow-up প্রশ্নের জন্যও তোমাকে প্রস্তুত রাখে।""",
+        mist_en=r"""Forgetting to embed the query with the same model, or assuming the top result is always relevant.""",
+        mist_bn=r"""Query একই model দিয়ে embed করতে ভুলে যাওয়া, অথবা ধরে নেওয়া যে প্রথম result সবসময় relevant।""",
+        code=r"""
+            -- $1 = embedding of the user's query (same model as the stored vectors)
+            SELECT id, title, 1 - (embedding <=> $1) AS cosine_similarity
+            FROM products
+            WHERE category = 'saree'
+            ORDER BY embedding <=> $1
+            LIMIT 5;
+        """,
+        lang="sql",
+        follow=[
+            ("What is the difference between exact k-NN and approximate nearest neighbour search?", "Exact k-NN আর approximate nearest neighbour search-এর পার্থক্য কী?"),
+            ("How would you decide on a similarity threshold?", "Similarity threshold কীভাবে ঠিক করবে?"),
+        ],
+        related=["vec-001", "vec-006", "vec-013"],
+        refs=[WIKI_NNS, PGV],
+    ),
+    # ------------------------------------------------------------------ vec-004
+    Q(
+        id="vec-004", sub="Cosine Similarity", diff="easy", type="conceptual",
+        prio="high", market="both", mins=4,
+        tags=["cosine-similarity", "cosine-distance", "math-basics", "python"],
+        ver="Version-independent concept", vs=False, status="stable",
+        q_en=r"""What is cosine similarity? Explain it with a tiny example, and say how it relates to "cosine distance" in vector databases.""",
+        q_bn=r"""Cosine similarity কী? একটা ছোট উদাহরণ দিয়ে ব্যাখ্যা করো, আর vector database-এর "cosine distance"-এর সাথে এর সম্পর্ক কী বলো।""",
+        a_en=r"""
+            Cosine similarity measures the **angle** between two vectors, ignoring their length. It's the dot product divided by the product of their lengths:
+
+            `cos(a, b) = (a · b) / (|a| × |b|)`
+
+            The result ranges from **1** (same direction — very similar), through **0** (perpendicular — unrelated), to **−1** (opposite direction).
+
+            Tiny 2D example with `q = (1, 2)`:
+            - `(2, 4)` points the same way (just longer) → similarity **1.0**.
+            - `(2, −1)` is perpendicular: `1×2 + 2×(−1) = 0` → **0.0**.
+            - `(3, 1)`: dot = 5, lengths √5 and √10 → 5/√50 ≈ **0.707**.
+
+            Vector databases usually sort by **cosine distance = 1 − cosine similarity**, so smaller is closer. In pgvector, `<=>` returns cosine distance, and `1 - (a <=> b)` gives the similarity back.
+        """,
+        a_bn=r"""
+            Cosine similarity দুইটা vector-এর মধ্যকার **কোণ** মাপে, দৈর্ঘ্য উপেক্ষা করে। এটা হলো dot product-কে দুই vector-এর দৈর্ঘ্যের গুণফল দিয়ে ভাগ:
+
+            `cos(a, b) = (a · b) / (|a| × |b|)`
+
+            ফল থাকে **1** (একই দিক — খুব কাছাকাছি) থেকে **0** (লম্ব — সম্পর্কহীন) হয়ে **−1** (বিপরীত দিক) পর্যন্ত।
+
+            `q = (1, 2)` নিয়ে ছোট একটা 2D উদাহরণ:
+            - `(2, 4)` একই দিকে (শুধু লম্বা) → similarity **1.0**।
+            - `(2, −1)` লম্ব: `1×2 + 2×(−1) = 0` → **0.0**।
+            - `(3, 1)`: dot = 5, দৈর্ঘ্য √5 আর √10 → 5/√50 ≈ **0.707**।
+
+            Vector database সাধারণত **cosine distance = 1 − cosine similarity** দিয়ে sort করে, তাই যত ছোট তত কাছে। pgvector-এ `<=>` cosine distance দেয়, আর `1 - (a <=> b)` দিয়ে আবার similarity পাওয়া যায়।
+        """,
+        ex_en=r"""
+            - **Why ignore length?** For text embeddings, direction carries the meaning; length can vary with things like text length. Cosine compares meaning only.
+            - **Normalised vectors:** if every vector has length 1, cosine similarity equals the plain dot product — cheaper to compute. Many embedding models (or `normalize_embeddings=True`) give unit vectors.
+            - **Typical ranges:** real text embeddings rarely go negative; most pairs fall between about 0 and 1, and what counts as "similar" depends on the model.
+            - **Zero vector:** cosine is undefined for an all-zero vector (division by zero) — guard against empty or failed embeddings.
+        """,
+        ex_bn=r"""
+            - **দৈর্ঘ্য উপেক্ষা কেন?** Text embedding-এ অর্থ থাকে দিকের মধ্যে; দৈর্ঘ্য text-এর দৈর্ঘ্যের মতো বিষয়ের কারণে বদলাতে পারে। Cosine শুধু অর্থ তুলনা করে।
+            - **Normalised vector:** প্রতিটা vector-এর দৈর্ঘ্য 1 হলে cosine similarity সাধারণ dot product-এর সমান — হিসাব সস্তা। অনেক embedding model (বা `normalize_embeddings=True`) unit vector দেয়।
+            - **সাধারণ পরিসর:** বাস্তব text embedding খুব কমই negative হয়; বেশিরভাগ জোড়া মোটামুটি 0 থেকে 1-এর মধ্যে পড়ে, আর কতটা হলে "similar" ধরা হবে সেটা model-এর ওপর নির্ভর করে।
+            - **Zero vector:** সব-শূন্য vector-এর জন্য cosine অসংজ্ঞায়িত (শূন্য দিয়ে ভাগ) — খালি বা fail হওয়া embedding-এর বিরুদ্ধে সতর্ক থাকো।
+        """,
+        tip_en=r"""Draw two arrows on a whiteboard and say "angle, not length". Then compute one tiny example out loud — interviewers love seeing you do the arithmetic confidently.""",
+        tip_bn=r"""Whiteboard-এ দুইটা তীর এঁকে বলো "দৈর্ঘ্য নয়, কোণ"। তারপর জোরে জোরে একটা ছোট উদাহরণ হিসাব করো — আত্মবিশ্বাসের সাথে হিসাব করতে দেখলে interviewer খুশি হয়।""",
+        mist_en=r"""Confusing cosine *distance* with cosine *similarity* (sorting the wrong way), or thinking a similarity of 1.0 means the vectors are identical (they only point the same way).""",
+        mist_bn=r"""Cosine *distance* আর cosine *similarity* গুলিয়ে ফেলা (উল্টো দিকে sort করা), অথবা ভাবা যে similarity 1.0 মানে vector দুটো হুবহু এক (আসলে শুধু একই দিকে নির্দেশ করে)।""",
+        code=r"""
+            import math
+
+            def cosine(a, b):
+                dot = sum(x * y for x, y in zip(a, b))
+                norm_a = math.sqrt(sum(x * x for x in a))
+                norm_b = math.sqrt(sum(y * y for y in b))
+                return dot / (norm_a * norm_b)
+
+            q = [1, 2]
+            print(round(cosine(q, [2, 4]), 3))
+            print(round(cosine(q, [2, -1]), 3))
+            print(round(cosine(q, [3, 1]), 3))
+        """,
+        lang="python",
+        output=r"""
+            1.0
+            0.0
+            0.707
+        """,
+        follow=[
+            ("Why do normalised vectors make cosine similarity and dot product rank results the same way?", "Normalised vector-এ cosine similarity আর dot product কেন একই ভাবে result rank করে?"),
+            ("Which pgvector operator returns cosine distance, and how do you turn it into similarity?", "কোন pgvector operator cosine distance দেয়, আর সেটাকে similarity-তে কীভাবে বদলাবে?"),
+        ],
+        related=["vec-012", "vec-003"],
+        refs=[WIKI_COS, PGV],
+    ),
+    # ------------------------------------------------------------------ vec-012
+    Q(
+        id="vec-012", sub="Euclidean Distance & Dot Product", diff="medium", type="mcq",
+        prio="medium", market="both", mins=3,
+        tags=["euclidean", "l2", "dot-product", "cosine", "normalization"],
+        ver="Version-independent concept", vs=False, status="stable",
+        q_en=r"""Query vector `q = (1, 1)`. Document A = `(4, 4)`, document B = `(1, 0)`. Which statement is correct?""",
+        q_bn=r"""Query vector `q = (1, 1)`। Document A = `(4, 4)`, document B = `(1, 0)`। কোন বক্তব্যটি সঠিক?""",
+        options=[
+            ("Cosine similarity and Euclidean (L2) distance both rank A first", "Cosine similarity আর Euclidean (L2) distance দুটোই A-কে প্রথমে রাখে"),
+            ("L2 ranks A first because its coordinates are larger", "A-এর coordinate বড় বলে L2 A-কে প্রথমে রাখে"),
+            ("Dot product always gives the same ranking as L2 distance, even for unnormalised vectors", "Normalise না করা vector-এও dot product সবসময় L2 distance-এর মতো একই ranking দেয়"),
+            ("Cosine ranks A first, L2 ranks B first; if all vectors were normalised to length 1, cosine, dot product and L2 would give the same ranking", "Cosine A-কে প্রথমে রাখে, L2 B-কে; সব vector length 1-এ normalise করা থাকলে cosine, dot product আর L2 একই ranking দিত"),
+        ],
+        correct=3,
+        a_en=r"""Cosine ranks A first (same direction as q, similarity 1.0 vs 0.707 for B), but L2 ranks B first (distance 1.0 vs ≈4.24 for A). After normalising every vector to unit length, cosine, dot product and L2 all produce the same ranking.""",
+        a_bn=r"""Cosine A-কে প্রথমে রাখে (q-এর একই দিকে, similarity 1.0, যেখানে B-এর 0.707), কিন্তু L2 B-কে প্রথমে রাখে (distance 1.0, যেখানে A-এর ≈4.24)। প্রতিটা vector unit length-এ normalise করলে cosine, dot product আর L2 — তিনটাই একই ranking দেয়।""",
+        ex_en=r"""
+            - **Cosine:** `cos(q, A) = 8 / (√2 × √32) = 1.0`; `cos(q, B) = 1 / √2 ≈ 0.707` → A wins (direction only).
+            - **L2:** `|q − A| = √(9 + 9) ≈ 4.24`; `|q − B| = √(0 + 1) = 1` → B wins (A is far away because it's long).
+            - **Dot product:** `q·A = 8`, `q·B = 1` → A wins; dot product rewards both direction *and* length — so option C is false.
+
+            For unit vectors, `|a − b|² = 2 − 2·(a·b)`, so smaller L2 distance ⇔ larger dot product ⇔ larger cosine. Option B is the tempting trap: big coordinates make A *far* in L2, not close.
+
+            Practical rule: use the metric your embedding model was trained for (usually cosine, or dot product on normalised vectors), and create the index with the matching operator class — in pgvector `vector_cosine_ops` for `<=>`, `vector_l2_ops` for `<->`, `vector_ip_ops` for `<#>`.
+        """,
+        ex_bn=r"""
+            - **Cosine:** `cos(q, A) = 8 / (√2 × √32) = 1.0`; `cos(q, B) = 1 / √2 ≈ 0.707` → A জেতে (শুধু দিক দেখে)।
+            - **L2:** `|q − A| = √(9 + 9) ≈ 4.24`; `|q − B| = √(0 + 1) = 1` → B জেতে (A লম্বা বলে দূরে)।
+            - **Dot product:** `q·A = 8`, `q·B = 1` → A জেতে; dot product দিক *এবং* দৈর্ঘ্য দুটোকেই পুরস্কৃত করে — তাই option C ভুল।
+
+            Unit vector-এর ক্ষেত্রে `|a − b|² = 2 − 2·(a·b)`, তাই ছোট L2 distance ⇔ বড় dot product ⇔ বড় cosine। Option B হলো লোভনীয় ফাঁদ: বড় coordinate A-কে L2-তে *দূরে* নেয়, কাছে নয়।
+
+            বাস্তব নিয়ম: তোমার embedding model যে metric-এর জন্য train করা সেটাই ব্যবহার করো (সাধারণত cosine, বা normalised vector-এ dot product), আর মিলিয়ে operator class দিয়ে index বানাও — pgvector-এ `<=>`-এর জন্য `vector_cosine_ops`, `<->`-এর জন্য `vector_l2_ops`, `<#>`-এর জন্য `vector_ip_ops`।
+        """,
+        tip_en=r"""Compute the numbers quickly, then state the general rule (unit vectors ⇒ all three agree). The formula `|a − b|² = 2 − 2·a·b` is a great one-liner to show you understand why.""",
+        tip_bn=r"""দ্রুত সংখ্যাগুলো হিসাব করো, তারপর সাধারণ নিয়মটা বলো (unit vector ⇒ তিনটাই একমত)। কেন এমন হয় বোঝাতে `|a − b|² = 2 − 2·a·b` সূত্রটা দারুণ এক লাইনের উত্তর।""",
+        refs=[WIKI_COS, PGV],
+        related=["vec-004", "vec-018"],
+    ),
+    # ------------------------------------------------------------------ vec-013
+    Q(
+        id="vec-013", sub="Vector DBs vs Relational DBs (pgvector)", diff="medium", type="query",
+        prio="high", market="both", mins=6,
+        tags=["pgvector", "postgresql", "hnsw", "sql", "cosine-distance"],
+        ver="pgvector 0.8.7 (PostgreSQL 18)", vs=True, status="stable",
+        q_en=r"""Using pgvector, write a query that returns the **3 in-stock products most similar** to the query embedding `[1, 0, 0]` (a toy 3-dimensional embedding for "red saree"), using cosine similarity, and show the similarity rounded to 3 decimals. Make sure the query can use the HNSW index.""",
+        q_bn=r"""pgvector ব্যবহার করে এমন একটা query লেখো যেটা query embedding `[1, 0, 0]`-এর ("red saree"-এর একটা খেলনা 3-dimensional embedding) সাথে cosine similarity অনুযায়ী **সবচেয়ে মিল থাকা 3টা in-stock product** return করবে, আর similarity 3 দশমিক পর্যন্ত round করে দেখাবে। Query-টা যেন HNSW index ব্যবহার করতে পারে।""",
+        setup=r"""
+            CREATE EXTENSION IF NOT EXISTS vector;
+
+            CREATE TABLE products (
+              id        bigint PRIMARY KEY,
+              name      text    NOT NULL,
+              category  text    NOT NULL,
+              in_stock  boolean NOT NULL,
+              embedding vector(3) NOT NULL   -- real models use 384/768/1536 dimensions
+            );
+
+            INSERT INTO products (id, name, category, in_stock, embedding) VALUES
+              (1, 'Cotton saree (red)',  'saree',   true,  '[0.9, 0.1, 0.0]'),
+              (2, 'Silk saree (maroon)', 'saree',   true,  '[0.8, 0.2, 0.1]'),
+              (3, 'Jamdani saree',       'saree',   false, '[0.85, 0.15, 0.05]'),
+              (4, 'Men''s panjabi',      'panjabi', true,  '[0.2, 0.9, 0.1]'),
+              (5, 'Red kurti',           'kurti',   true,  '[0.6, 0.3, 0.4]');
+
+            CREATE INDEX ON products USING hnsw (embedding vector_cosine_ops);
+        """,
+        a_en=r"""
+            I filter on `in_stock`, order by the cosine **distance** operator `<=>` in ascending order with a `LIMIT`, and compute similarity separately as `1 - distance`.
+
+            Result: products 1, 2 and 5. Product 3 (Jamdani) would rank second by similarity (0.983) but is out of stock, and the panjabi points in a very different direction (0.216).
+
+            Two details matter for the index: the `ORDER BY` must use the same operator as the index's operator class (`<=>` ↔ `vector_cosine_ops`), and it must be ascending distance with a `LIMIT` — ordering by the similarity expression `DESC` would force a full scan and sort.
+        """,
+        a_bn=r"""
+            আমি `in_stock` দিয়ে filter করি, `LIMIT` সহ cosine **distance** operator `<=>` দিয়ে ascending order-এ sort করি, আর similarity আলাদা করে `1 - distance` হিসেবে হিসাব করি।
+
+            Result: product 1, 2 আর 5। Product 3 (Jamdani) similarity অনুযায়ী দ্বিতীয় হতো (0.983), কিন্তু stock-এ নেই, আর panjabi একেবারে আলাদা দিকে (0.216)।
+
+            Index-এর জন্য দুইটা বিষয় জরুরি: `ORDER BY`-এ index-এর operator class-এর সাথে মেলে এমন operator ব্যবহার করতে হবে (`<=>` ↔ `vector_cosine_ops`), আর সেটা `LIMIT` সহ ascending distance হতে হবে — similarity expression দিয়ে `DESC` sort করলে পুরো table scan করে sort করতে বাধ্য হবে।
+        """,
+        ex_en=r"""
+            - **Arithmetic:** with `q = [1, 0, 0]`, cosine similarity is just `x / |v|`. Product 1: 0.9/√0.82 ≈ 0.994; product 2: 0.8/√0.69 ≈ 0.963; product 5: 0.6/√0.61 ≈ 0.768.
+            - **`round()` needs numeric:** `<=>` returns `double precision`, and PostgreSQL's two-argument `round` works on `numeric`, hence the cast.
+            - **Filters + approximate index:** with an HNSW index, the `WHERE` filter is applied to the candidates the index returns (default `hnsw.ef_search = 40`). With a selective filter you can get fewer than 3 rows — pgvector 0.8+ iterative index scans (`SET hnsw.iterative_scan = relaxed_order`) fix that.
+            - **Tiny tables:** with 5 rows the planner will just do a sequential scan; that's fine and gives exact results. The index matters at thousands-plus rows.
+            - **Parameters in apps:** pass the query vector as a parameter (`$1`), never by string concatenation.
+        """,
+        ex_bn=r"""
+            - **হিসাব:** `q = [1, 0, 0]` হলে cosine similarity শুধু `x / |v|`। Product 1: 0.9/√0.82 ≈ 0.994; product 2: 0.8/√0.69 ≈ 0.963; product 5: 0.6/√0.61 ≈ 0.768।
+            - **`round()`-এর জন্য numeric লাগে:** `<=>` `double precision` return করে, আর PostgreSQL-এর দুই-argument `round` কাজ করে `numeric`-এ, তাই cast।
+            - **Filter + approximate index:** HNSW index থাকলে `WHERE` filter প্রয়োগ হয় index-এর ফেরত দেওয়া candidate-এর ওপর (default `hnsw.ef_search = 40`)। Filter খুব selective হলে 3টার কম row আসতে পারে — pgvector 0.8+-এর iterative index scan (`SET hnsw.iterative_scan = relaxed_order`) এটা ঠিক করে।
+            - **ছোট table:** 5টা row থাকলে planner সোজা sequential scan করবে; সেটা ঠিক আছে আর exact result দেয়। হাজার বা তার বেশি row-এ index গুরুত্বপূর্ণ হয়।
+            - **App-এ parameter:** query vector parameter (`$1`) হিসেবে পাঠাও, কখনো string জোড়া দিয়ে নয়।
+        """,
+        tip_en=r"""Say the two index rules out loud — matching operator class and ascending `ORDER BY distance LIMIT k`. Many candidates write a correct-looking query that silently can't use the index.""",
+        tip_bn=r"""Index-এর দুইটা নিয়ম জোরে বলো — মিলে যাওয়া operator class আর ascending `ORDER BY distance LIMIT k`। অনেক প্রার্থী ঠিকঠাক দেখতে এমন query লেখে যেটা চুপচাপ index ব্যবহার করতে পারে না।""",
+        mist_en=r"""Writing `ORDER BY similarity DESC`, using `<->` (L2) against a cosine index, or forgetting that `<=>` is a distance, not a similarity.""",
+        mist_bn=r"""`ORDER BY similarity DESC` লেখা, cosine index-এর বিপরীতে `<->` (L2) ব্যবহার করা, অথবা ভুলে যাওয়া যে `<=>` হলো distance, similarity নয়।""",
+        code=r"""
+            SELECT id,
+                   name,
+                   round((1 - (embedding <=> '[1, 0, 0]'))::numeric, 3) AS similarity
+            FROM products
+            WHERE in_stock
+            ORDER BY embedding <=> '[1, 0, 0]'
+            LIMIT 3;
+        """,
+        lang="sql",
+        output=r"""
+             id |        name         | similarity
+            ----+---------------------+------------
+              1 | Cotton saree (red)  |      0.994
+              2 | Silk saree (maroon) |      0.963
+              5 | Red kurti           |      0.768
+            (3 rows)
+        """,
+        follow=[
+            ("How would you add a category filter without losing results when using HNSW?", "HNSW ব্যবহার করার সময় result না হারিয়ে category filter কীভাবে যোগ করবে?"),
+            ("When would you use `vector_ip_ops` instead of `vector_cosine_ops`?", "কখন `vector_cosine_ops`-এর বদলে `vector_ip_ops` ব্যবহার করবে?"),
+        ],
+        related=["vec-018", "vec-025", "vec-009"],
+        refs=[PGV],
+    ),
+    # ------------------------------------------------------------------ vec-023
+    Q(
+        id="vec-023", sub="RAG Architecture", diff="hard", type="architecture",
+        prio="high", market="both", mins=15,
+        tags=["rag", "architecture", "ingestion", "reranking", "permissions", "citations"],
+        ver="Version-independent architecture (example store: pgvector 0.8.7)", vs=False, status="stable",
+        q_en=r"""Design a production RAG system that answers employee questions from about 50,000 internal documents — PDFs, wiki pages and HR policies in English and Bangla. Cover ingestion, retrieval, generation, permissions, freshness and evaluation.""",
+        q_bn=r"""প্রায় 50,000টা internal document — PDF, wiki page আর English ও Bangla-য় HR policy — থেকে employee-দের প্রশ্নের উত্তর দেবে এমন একটা production RAG system design করো। Ingestion, retrieval, generation, permission, freshness আর evaluation — সব দিক আলোচনা করো।""",
+        a_en=r"""
+            **Ingestion pipeline (async workers):**
+            - Connectors pull documents → extract text (OCR for scanned PDFs, keep tables and headings) → clean.
+            - **Chunk by structure** (sections/headings), roughly a few hundred tokens with some overlap.
+            - Attach metadata: `doc_id`, title, section path, language, `updated_at`, source URL, **ACL groups**, `embedding_model` version.
+            - Embed in batches with a multilingual model; **upsert by a deterministic chunk id** (doc id + position + content hash) so re-runs are idempotent; delete chunks of removed or changed documents.
+
+            **Storage:** pgvector if we're already on PostgreSQL (vectors, metadata and full-text in one transactional place); a dedicated vector DB if scale or features demand it.
+
+            **Retrieval:**
+            - Embed the query; run **hybrid search** (vector + keyword/BM25) and fuse with Reciprocal Rank Fusion.
+            - Apply the **permission filter inside the query** (user's groups), never after generation.
+            - Take ~50 candidates → **rerank** with a cross-encoder → keep the best 5–8 chunks, avoiding many near-duplicates from one document.
+
+            **Generation:** prompt the LLM to answer only from the provided context, **cite sources** (chunk → document link), and say "I don't know" when the context is insufficient. Treat retrieved text as data, not instructions (prompt-injection risk).
+
+            **Evaluation & operations:** a golden set of real questions (both languages) with expected sources; track recall@k/MRR for retrieval and faithfulness for answers; log query, retrieved ids, latency and cost; collect user feedback.
+        """,
+        a_bn=r"""
+            **Ingestion pipeline (async worker):**
+            - Connector document টেনে আনে → text বের করে (scan করা PDF-এ OCR, table আর heading রেখে) → পরিষ্কার করে।
+            - **কাঠামো অনুযায়ী chunk** (section/heading), মোটামুটি কয়েকশো token, কিছুটা overlap সহ।
+            - Metadata যোগ করো: `doc_id`, title, section path, language, `updated_at`, source URL, **ACL group**, `embedding_model` version।
+            - Multilingual model দিয়ে batch-এ embed করো; **নির্দিষ্ট chunk id** (doc id + অবস্থান + content hash) দিয়ে upsert করো যাতে আবার চালালেও idempotent থাকে; মুছে ফেলা বা বদলানো document-এর chunk delete করো।
+
+            **Storage:** আগে থেকেই PostgreSQL-এ থাকলে pgvector (vector, metadata আর full-text এক transactional জায়গায়); scale বা feature-এর দরকারে dedicated vector DB।
+
+            **Retrieval:**
+            - Query embed করো; **hybrid search** (vector + keyword/BM25) চালিয়ে Reciprocal Rank Fusion দিয়ে মেলাও।
+            - **Permission filter query-র ভেতরেই** প্রয়োগ করো (user-এর group), generation-এর পরে কখনো নয়।
+            - ~50টা candidate নাও → cross-encoder দিয়ে **rerank** করো → সেরা 5–8টা chunk রাখো, একই document থেকে প্রায়-একই অনেক chunk এড়িয়ে।
+
+            **Generation:** LLM-কে বলো শুধু দেওয়া context থেকে উত্তর দিতে, **source cite করতে** (chunk → document link), আর context যথেষ্ট না হলে "জানি না" বলতে। Retrieve করা text-কে instruction নয়, data হিসেবে দেখো (prompt-injection-এর ঝুঁকি)।
+
+            **Evaluation ও operations:** দুই ভাষাতেই আসল প্রশ্নের একটা golden set, প্রত্যাশিত source সহ; retrieval-এর জন্য recall@k/MRR আর answer-এর জন্য faithfulness track করো; query, retrieve হওয়া id, latency আর cost log করো; user feedback সংগ্রহ করো।
+        """,
+        ex_en=r"""
+            - **Failure scenarios:** stale answers (doc updated, chunks not re-synced) → event-driven re-ingest plus a nightly reconciliation; ACL changes → sync permissions frequently and store them on chunks; embedding API down → fall back to keyword-only search; LLM hallucination → require citations and test faithfulness.
+            - **Security:** filtering by permissions at retrieval time is the only reliable control — an LLM told "don't reveal HR docs" can be talked out of it. Log access for audits.
+            - **Model/version changes:** keep `embedding_model` on each row so re-embedding can run side by side and cut over atomically.
+            - **Cost & latency:** cache embeddings of frequent queries, batch embedding calls during ingestion, and keep the reranker on a small candidate set.
+            - **Scale check:** 50k documents might be ~1M chunks — comfortably within pgvector on a reasonably sized PostgreSQL instance.
+        """,
+        ex_bn=r"""
+            - **Failure scenario:** পুরনো উত্তর (doc update হয়েছে, chunk re-sync হয়নি) → event-driven re-ingest আর রাতে একবার reconciliation; ACL পরিবর্তন → ঘনঘন permission sync করে chunk-এ রাখো; embedding API down → শুধু keyword search-এ fallback; LLM hallucination → citation বাধ্যতামূলক করো আর faithfulness test করো।
+            - **Security:** retrieval-এর সময় permission দিয়ে filter করাই একমাত্র নির্ভরযোগ্য নিয়ন্ত্রণ — "HR doc প্রকাশ কোরো না" বলা LLM-কে কথার মারপ্যাঁচে রাজি করানো যায়। Audit-এর জন্য access log রাখো।
+            - **Model/version পরিবর্তন:** প্রতিটা row-এ `embedding_model` রাখো, যাতে re-embedding পাশাপাশি চালিয়ে atomically cut over করা যায়।
+            - **খরচ ও latency:** ঘনঘন আসা query-র embedding cache করো, ingestion-এ embedding call batch করো, আর reranker ছোট candidate set-এ রাখো।
+            - **Scale যাচাই:** 50k document মানে হয়তো ~1M chunk — মাঝারি আকারের PostgreSQL instance-এ pgvector দিয়ে স্বচ্ছন্দে চলে।
+        """,
+        tip_en=r"""Draw the two pipelines (ingestion and query) as boxes, then walk through one question end to end. Mention permissions and evaluation without being asked — they separate production thinking from demo thinking.""",
+        tip_bn=r"""দুইটা pipeline (ingestion আর query) box দিয়ে আঁকো, তারপর একটা প্রশ্ন শুরু থেকে শেষ পর্যন্ত চালিয়ে দেখাও। জিজ্ঞেস করার আগেই permission আর evaluation উল্লেখ করো — এগুলোই production-চিন্তাকে demo-চিন্তা থেকে আলাদা করে।""",
+        mist_en=r"""Putting access control only in the prompt, skipping evaluation ("it looked good in the demo"), or re-embedding everything on every sync instead of upserting changed chunks.""",
+        mist_bn=r"""Access control শুধু prompt-এ রাখা, evaluation বাদ দেওয়া ("demo-তে তো ভালোই দেখাচ্ছিল"), অথবা পরিবর্তিত chunk upsert না করে প্রতিবার sync-এ সবকিছু আবার embed করা।""",
+        code=r"""
+            -- Permission-aware vector candidates (fused later with full-text results via RRF)
+            SET hnsw.iterative_scan = relaxed_order;      -- keep enough rows when filters are selective
+
+            SELECT c.id, c.doc_id, c.section, c.content
+            FROM chunks c
+            WHERE c.acl_groups && $2::text[]              -- the user's groups
+              AND c.embedding_model = 'multilingual-e5-base@v1'
+            ORDER BY c.embedding <=> $1                   -- $1 = query embedding
+            LIMIT 50;
+        """,
+        lang="sql",
+        follow=[
+            ("How would you handle a document whose permissions change after it was indexed?", "Index হওয়ার পর কোনো document-এর permission বদলালে কীভাবে সামলাবে?"),
+            ("How do you stop retrieved documents from injecting instructions into the LLM?", "Retrieve হওয়া document যেন LLM-এ instruction ঢুকিয়ে দিতে না পারে, কীভাবে ঠেকাবে?"),
+            ("Where would you add caching in this design?", "এই design-এ কোথায় caching যোগ করবে?"),
+        ],
+        related=["vec-008", "vec-016", "vec-026", "vec-031"],
+        refs=[RAG_PAPER, PGV, OWASP_LLM08],
+    ),
+    # ------------------------------------------------------------------ vec-030
+    Q(
+        id="vec-030", sub="Production Use Cases", diff="extreme", type="system-design",
+        prio="medium", market="international", mins=25,
+        tags=["system-design", "e-commerce", "multilingual", "hybrid-search", "bangla", "scale"],
+        ver="Version-independent architecture (pgvector 0.8.7 figures for sizing)", vs=False, status="stable",
+        q_en=r"""Design product search for a large Bangladeshi marketplace: ~5 million products with titles in English, Bangla and Banglish (e.g. "lal saree"), ~2,000 searches per second at peak, p95 latency under 200 ms, and prices and stock that change constantly. How would you combine keyword and semantic search?""",
+        q_bn=r"""একটা বড় বাংলাদেশি marketplace-এর product search design করো: ~50 লাখ product, যার title English, Bangla আর Banglish-এ (যেমন "lal saree"), peak-এ প্রতি সেকেন্ডে ~2,000 search, p95 latency 200 ms-এর নিচে, আর দাম ও stock প্রতিনিয়ত বদলায়। Keyword আর semantic search কীভাবে মেলাবে?""",
+        a_en=r"""
+            *(Advanced system-design question.)*
+
+            **1. Query understanding:** normalise Unicode (Bangla NFC), lowercase, fix common misspellings, and pull structured intent out of the text — "under 2000 taka" → `price < 2000`, "saree" → category. Banglish needs special care: most embedding models handle romanised Bangla poorly, so add transliteration variants or rely more on the lexical side for it.
+
+            **2. Two retrievers in parallel:**
+            - **Lexical (BM25)** in a search engine or PostgreSQL full-text — essential for brand names, model numbers and SKUs ("Redmi Note 13") that embeddings blur.
+            - **Dense (vector)** with a multilingual model over title + key attributes, so "budget phone" finds "সস্তা মোবাইল".
+            - Fuse the two lists with **Reciprocal Rank Fusion**, then **rerank the top ~200** with a model that also uses business signals (popularity, stock, ratings, delivery area).
+
+            **3. Volatile data stays out of embeddings:** price and stock live in metadata, updated via change-data-capture or events; filters (`in_stock`, price range, category, seller) are applied inside the ANN search. Only re-embed a product when its text changes (content hash).
+
+            **4. Capacity:** 5M × 768-dim float32 vectors ≈ 15 GB raw (pgvector stores `4 × dims + 8` bytes each), more with the HNSW graph — so plan RAM, consider half-precision (≈7.7 GB) or quantisation, and add read replicas or shards for 2,000 QPS. Self-host the query-embedding model with batching and cache embeddings of popular queries in Redis.
+
+            **5. Latency budget (parallel where possible):** query embedding ~20–30 ms, ANN ~10–30 ms, BM25 ~20 ms, rerank ~50 ms — comfortably under 200 ms p95.
+
+            **6. Evaluation & safety nets:** offline NDCG@10 on labelled queries in all three scripts; online A/B tests on click-through, add-to-cart and zero-result rate. If the embedding service fails, fall back to lexical-only search; build new indexes blue/green.
+        """,
+        a_bn=r"""
+            *(Advanced system-design প্রশ্ন।)*
+
+            **1. Query বোঝা:** Unicode normalise করো (Bangla NFC), lowercase, সাধারণ বানান ভুল ঠিক করো, আর text থেকে structured intent বের করো — "under 2000 taka" → `price < 2000`, "saree" → category। Banglish-এ বিশেষ যত্ন লাগে: বেশিরভাগ embedding model romanised Bangla ভালো বোঝে না, তাই transliteration variant যোগ করো বা এর জন্য lexical অংশের ওপর বেশি ভরসা রাখো।
+
+            **2. পাশাপাশি দুইটা retriever:**
+            - **Lexical (BM25)** কোনো search engine বা PostgreSQL full-text-এ — brand name, model number আর SKU-এর ("Redmi Note 13") জন্য অপরিহার্য, যেগুলো embedding ঝাপসা করে ফেলে।
+            - **Dense (vector)** title + মূল attribute-এর ওপর multilingual model দিয়ে, যাতে "budget phone" দিয়ে "সস্তা মোবাইল" পাওয়া যায়।
+            - দুইটা list **Reciprocal Rank Fusion** দিয়ে মেলাও, তারপর **top ~200 rerank** করো এমন model দিয়ে যেটা business signal-ও (popularity, stock, rating, delivery area) ব্যবহার করে।
+
+            **3. পরিবর্তনশীল data embedding-এর বাইরে:** দাম আর stock থাকে metadata-তে, change-data-capture বা event দিয়ে update হয়; filter (`in_stock`, দামের পরিসর, category, seller) ANN search-এর ভেতরেই প্রয়োগ হয়। শুধু product-এর text বদলালেই আবার embed করো (content hash)।
+
+            **4. Capacity:** 50 লাখ × 768-dim float32 vector ≈ 15 GB raw (pgvector প্রতিটায় `4 × dims + 8` byte রাখে), HNSW graph সহ আরও বেশি — তাই RAM plan করো, half-precision (≈7.7 GB) বা quantisation বিবেচনা করো, আর 2,000 QPS-এর জন্য read replica বা shard যোগ করো। Query-embedding model batching সহ self-host করো আর জনপ্রিয় query-র embedding Redis-এ cache করো।
+
+            **5. Latency budget (যেখানে সম্ভব parallel):** query embedding ~20–30 ms, ANN ~10–30 ms, BM25 ~20 ms, rerank ~50 ms — স্বচ্ছন্দে p95 200 ms-এর নিচে।
+
+            **6. Evaluation ও safety net:** তিন ধরনের লেখাতেই labelled query দিয়ে offline NDCG@10; click-through, add-to-cart আর zero-result rate-এর ওপর online A/B test। Embedding service fail করলে শুধু lexical search-এ fallback; নতুন index blue/green পদ্ধতিতে তৈরি করো।
+        """,
+        ex_en=r"""
+            - **Why not vectors alone?** Pure semantic search returns "similar" phones when the user typed an exact model; it also struggles with numbers and rare brand names. Hybrid covers both.
+            - **Why rerank?** Retrieval optimises recall cheaply; the reranker optimises precision on a small set and is where business rules belong.
+            - **Filtered ANN pitfalls:** a selective filter (a small seller, one district) can starve an HNSW search; use iterative scans (pgvector 0.8+), filter-aware engines, or partitions by category.
+            - **Multilingual evaluation:** measure Bangla, English and Banglish queries separately — an average can hide that one script performs badly.
+            - **Product-neutral choice:** this works with OpenSearch/Elasticsearch + a vector DB (Qdrant, Weaviate, Milvus, Pinecone), or PostgreSQL full-text + pgvector at smaller scale. Choose by team skills, scale and operational cost.
+        """,
+        ex_bn=r"""
+            - **শুধু vector কেন নয়?** User নির্দিষ্ট model লিখলেও pure semantic search "কাছাকাছি" phone দেখায়; সংখ্যা আর বিরল brand name-এও সমস্যা হয়। Hybrid দুটো দিকই সামলায়।
+            - **Rerank কেন?** Retrieval কম খরচে recall বাড়ায়; reranker ছোট set-এ precision বাড়ায়, আর business rule বসানোর জায়গাও এটাই।
+            - **Filtered ANN-এর ফাঁদ:** selective filter (ছোট একজন seller, একটা জেলা) HNSW search-কে result-শূন্য করে দিতে পারে; iterative scan (pgvector 0.8+), filter-aware engine, বা category অনুযায়ী partition ব্যবহার করো।
+            - **Multilingual evaluation:** Bangla, English আর Banglish query আলাদা করে মাপো — গড় হিসাব লুকিয়ে ফেলতে পারে যে কোনো একটা লেখার ধরন খারাপ করছে।
+            - **Product-neutral পছন্দ:** OpenSearch/Elasticsearch + একটা vector DB (Qdrant, Weaviate, Milvus, Pinecone), অথবা ছোট scale-এ PostgreSQL full-text + pgvector — দুটোতেই চলে। Team-এর দক্ষতা, scale আর operational খরচ দেখে বেছে নাও।
+        """,
+        tip_en=r"""Start with clarifying questions (catalogue size, languages, latency, freshness), then draw query → two retrievers → fusion → rerank → results. Spend time on Banglish and volatile price/stock — those local details make the answer memorable.""",
+        tip_bn=r"""শুরু করো clarifying প্রশ্ন দিয়ে (catalogue-এর আকার, ভাষা, latency, freshness), তারপর আঁকো query → দুইটা retriever → fusion → rerank → result। Banglish আর পরিবর্তনশীল দাম/stock নিয়ে সময় দাও — এই local detail-গুলোই উত্তরকে মনে রাখার মতো করে।""",
+        mist_en=r"""Embedding price and stock into the product vector, relying on vectors alone for brand/model searches, or ignoring Banglish queries in evaluation.""",
+        mist_bn=r"""দাম আর stock product vector-এর ভেতরে embed করে ফেলা, brand/model search-এর জন্য শুধু vector-এর ওপর ভরসা করা, অথবা evaluation-এ Banglish query উপেক্ষা করা।""",
+        follow=[
+            ("How would you handle a product whose title changes but whose price changes every minute?", "যে product-এর title মাঝে মাঝে বদলায় কিন্তু দাম প্রতি মিনিটে বদলায়, সেটা কীভাবে সামলাবে?"),
+            ("How would you measure whether semantic search actually improved sales?", "Semantic search আসলেই বিক্রি বাড়িয়েছে কিনা কীভাবে মাপবে?"),
+            ("What changes if you add image search (\"find similar\")?", "Image search (\"এরকম আরও দেখাও\") যোগ করলে কী কী বদলাবে?"),
+        ],
+        related=["vec-016", "vec-019", "vec-027"],
+        refs=[PGV, E5, PG_FTS],
+    ),
+]
+
+if __name__ == "__main__":
+    save("vectordb", "b1", QUESTIONS)

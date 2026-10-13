@@ -1,0 +1,570 @@
+[
+ {
+  "id": "vec-005",
+  "subtopic": "Vector DBs vs Full-Text Search",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "semantic-search",
+   "full-text-search",
+   "bm25",
+   "keyword-search"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What's the difference between semantic (vector) search and keyword/full-text search like BM25? When does each one win?",
+   "bn": "Semantic (vector) search আর BM25-এর মতো keyword/full-text search-এর পার্থক্য কী? কখন কোনটা ভালো কাজ করে?"
+  },
+  "answer": {
+   "en": "**Keyword / full-text search (BM25):** builds an inverted index of words and scores documents by how often the query terms appear, how rare those terms are across the collection, and document length.\n- Wins at **exact matches**: product codes, model numbers, names, error messages (\"Redmi Note 13\", \"ERR_CONNECTION_RESET\").\n- Cheap, fast, explainable (\"matched these words\").\n- Misses synonyms and paraphrases: \"phone case\" won't match \"mobile cover\".\n\n**Semantic search:** compares embeddings, so it matches **meaning**.\n- Wins on synonyms, paraphrases, natural-language questions and even cross-language matches with a multilingual model (\"cheap phone\" ↔ \"সস্তা মোবাইল\").\n- Weaker on exact identifiers, numbers, rare jargon and negation, and its results are harder to explain.\n\nIn production I usually combine them — **hybrid search** — so exact matches and meaning both count.",
+   "bn": "**Keyword / full-text search (BM25):** শব্দের একটা inverted index তৈরি করে, আর document-কে score দেয় query-র শব্দ কতবার আছে, সেই শব্দ পুরো collection-এ কতটা বিরল, আর document-এর দৈর্ঘ্য দেখে।\n- **Exact match**-এ জেতে: product code, model number, নাম, error message (\"Redmi Note 13\", \"ERR_CONNECTION_RESET\")।\n- সস্তা, দ্রুত, ব্যাখ্যা করা যায় (\"এই শব্দগুলো মিলেছে\")।\n- Synonym আর ভিন্নভাবে বলা কথা ধরতে পারে না: \"phone case\" দিয়ে \"mobile cover\" পাওয়া যায় না।\n\n**Semantic search:** embedding তুলনা করে, তাই **অর্থ** মেলায়।\n- Synonym, ভিন্নভাবে বলা কথা, স্বাভাবিক ভাষার প্রশ্ন, এমনকি multilingual model দিয়ে ভাষা পেরিয়েও মেলাতে পারে (\"cheap phone\" ↔ \"সস্তা মোবাইল\")।\n- Exact identifier, সংখ্যা, বিরল jargon আর negation-এ দুর্বল, আর result ব্যাখ্যা করা কঠিন।\n\nProduction-এ আমি সাধারণত দুটো মেলাই — **hybrid search** — যাতে exact match আর অর্থ দুটোই গুরুত্ব পায়।"
+  },
+  "explanation": {
+   "en": "- **Negation example:** \"laptop without touchscreen\" embeds very close to \"touchscreen laptop\"; keyword search with a filter or query parsing handles it better.\n- **Language tooling:** full-text search depends on tokenisers and stemmers per language. Check whether your engine has a proper analyser for Bangla; if not, a simple (no-stemming) configuration or n-gram matching is the fallback, and a multilingual embedding model can cover the gap.\n- **Cost:** semantic search needs an embedding call per query and more memory for vectors; keyword search runs on modest hardware.\n- **In PostgreSQL** you can do both in one database: `tsvector`/`tsquery` full-text search plus pgvector.",
+   "bn": "- **Negation-এর উদাহরণ:** \"laptop without touchscreen\"-এর embedding \"touchscreen laptop\"-এর খুব কাছে পড়ে; filter বা query parsing সহ keyword search এটা ভালো সামলায়।\n- **ভাষার tooling:** full-text search প্রতিটা ভাষার tokeniser আর stemmer-এর ওপর নির্ভর করে। তোমার engine-এ Bangla-র জন্য ঠিকঠাক analyser আছে কিনা দেখো; না থাকলে simple (stemming ছাড়া) configuration বা n-gram matching হলো বিকল্প, আর multilingual embedding model সেই ঘাটতি পূরণ করতে পারে।\n- **খরচ:** semantic search-এ প্রতি query-তে একটা embedding call আর vector-এর জন্য বেশি memory লাগে; keyword search সাধারণ hardware-এই চলে।\n- **PostgreSQL-এ** এক database-এই দুটো করা যায়: `tsvector`/`tsquery` full-text search আর pgvector।"
+  },
+  "interviewTip": {
+   "en": "Give one query where keyword search wins (a model number) and one where semantic wins (a paraphrase), then conclude with hybrid. Concrete examples beat abstract definitions.",
+   "bn": "একটা query দাও যেখানে keyword search জেতে (একটা model number) আর একটা যেখানে semantic জেতে (ভিন্নভাবে বলা কথা), তারপর hybrid দিয়ে শেষ করো। বিমূর্ত definition-এর চেয়ে concrete উদাহরণ বেশি কাজ করে।"
+  },
+  "references": [
+   {
+    "title": "Wikipedia — Okapi BM25",
+    "url": "https://en.wikipedia.org/wiki/Okapi_BM25"
+   },
+   {
+    "title": "PostgreSQL docs — Full Text Search",
+    "url": "https://www.postgresql.org/docs/current/textsearch.html"
+   },
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you combine BM25 and vector scores that are on completely different scales?",
+    "bn": "সম্পূর্ণ আলাদা scale-এর BM25 আর vector score কীভাবে মেলাবে?"
+   },
+   {
+    "en": "Why is negation hard for embedding-based search?",
+    "bn": "Embedding-ভিত্তিক search-এর জন্য negation কেন কঠিন?"
+   }
+  ],
+  "related": [
+   "vec-016",
+   "vec-001"
+  ],
+  "commonMistakes": {
+   "en": "Claiming semantic search makes keyword search obsolete, or that BM25 \"understands\" synonyms.",
+   "bn": "দাবি করা যে semantic search keyword search-কে অপ্রয়োজনীয় করে দিয়েছে, অথবা BM25 synonym \"বোঝে\"।"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-006",
+  "subtopic": "Approximate Nearest Neighbour (ANN) Search",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "ann",
+   "knn",
+   "recall",
+   "performance"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Why do most vector databases use approximate nearest neighbour (ANN) indexes instead of exact k-NN search?",
+   "bn": "বেশিরভাগ vector database কেন exact k-NN search-এর বদলে approximate nearest neighbour (ANN) index ব্যবহার করে?"
+  },
+  "answer": {
+   "en": "Exact k-NN is a brute-force scan — cost grows linearly with the number of vectors and their dimension. ANN indexes such as HNSW or IVF only examine a small, promising part of the data, so queries stay fast at millions of vectors, at the price of occasionally missing a true neighbour.",
+   "bn": "Exact k-NN হলো brute-force scan — খরচ vector-এর সংখ্যা আর dimension-এর সাথে সরলরৈখিকভাবে বাড়ে। HNSW বা IVF-এর মতো ANN index data-র শুধু ছোট, সম্ভাবনাময় একটা অংশ দেখে, তাই লাখো vector-এও query দ্রুত থাকে — বিনিময়ে মাঝে মাঝে একটা আসল neighbour বাদ পড়তে পারে।"
+  },
+  "explanation": {
+   "en": "Exact search is *always* correct, so option B is wrong, and option C reverses the trade-off — ANN can only match exact search's accuracy, never beat it. Option D is false: pgvector, for example, does exact search with `ORDER BY embedding <=> $1 LIMIT k` when no index exists.\n\nThe quality of ANN is measured as **recall@k**: of the true top-k neighbours, how many did the index return? You tune it with parameters like `hnsw.ef_search` or `ivfflat.probes` — higher means better recall but slower queries. For small collections (tens of thousands of vectors), exact search is often fast enough and gives perfect recall, so an index isn't always needed.",
+   "bn": "Exact search *সবসময়* সঠিক, তাই option B ভুল; আর option C trade-off-টা উল্টে দেয় — ANN বড়জোর exact search-এর সমান accurate হতে পারে, বেশি কখনো নয়। Option D মিথ্যা: যেমন pgvector index না থাকলে `ORDER BY embedding <=> $1 LIMIT k` দিয়ে exact search করে।\n\nANN-এর মান মাপা হয় **recall@k** দিয়ে: আসল top-k neighbour-এর মধ্যে index কয়টা ফেরত দিল? এটা tune করা হয় `hnsw.ef_search` বা `ivfflat.probes`-এর মতো parameter দিয়ে — বেশি দিলে recall ভালো, কিন্তু query ধীর। ছোট collection-এ (কয়েক দশ হাজার vector পর্যন্ত) exact search প্রায়ই যথেষ্ট দ্রুত আর perfect recall দেয়, তাই সবসময় index লাগে না।"
+  },
+  "interviewTip": {
+   "en": "Use the phrase \"speed–recall trade-off\" and name the knob (`ef_search`, `probes`). It shows you know ANN is tunable, not magic.",
+   "bn": "\"Speed–recall trade-off\" কথাটা ব্যবহার করো আর knob-এর নাম বলো (`ef_search`, `probes`)। এতে বোঝা যায় তুমি জানো ANN tune করা যায়, এটা জাদু নয়।"
+  },
+  "references": [
+   {
+    "title": "Wikipedia — Nearest neighbor search",
+    "url": "https://en.wikipedia.org/wiki/Nearest_neighbor_search"
+   },
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "vec-003",
+   "vec-014"
+  ],
+  "options": [
+   {
+    "en": "Exact search compares the query with every vector, which is too slow at millions of vectors; ANN returns nearly the same top results far faster by trading a little recall",
+    "bn": "Exact search query-কে প্রতিটা vector-এর সাথে তুলনা করে, যেটা লাখো vector-এ খুব ধীর; ANN সামান্য recall ছেড়ে দিয়ে প্রায় একই top result অনেক দ্রুত দেয়"
+   },
+   {
+    "en": "Exact k-NN gives wrong answers for high-dimensional vectors",
+    "bn": "High-dimensional vector-এ exact k-NN ভুল উত্তর দেয়"
+   },
+   {
+    "en": "ANN is more accurate than exact search because it uses a graph",
+    "bn": "Graph ব্যবহার করে বলে ANN exact search-এর চেয়েও বেশি accurate"
+   },
+   {
+    "en": "ANN is required because SQL databases cannot sort by distance",
+    "bn": "SQL database distance দিয়ে sort করতে পারে না বলে ANN দরকার"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-007",
+  "subtopic": "Chunking",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "chunking",
+   "overlap",
+   "rag",
+   "embeddings"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Why do we split documents into chunks before embedding them, and how do you choose the chunk size and overlap?",
+   "bn": "Embed করার আগে document-কে chunk-এ ভাগ করি কেন, আর chunk size ও overlap কীভাবে ঠিক করো?"
+  },
+  "answer": {
+   "en": "We chunk for three reasons:\n- **Model limits:** embedding models accept a limited number of tokens; longer text gets truncated.\n- **Precise retrieval:** one vector for a 40-page PDF averages everything into a blurry meaning. Smaller chunks let a query match the exact section that answers it.\n- **LLM context budget:** in RAG we can only send a few passages to the LLM, so they should be focused.\n\n**Choosing size:** too large → diluted embeddings and wasted context; too small → chunks lose the context needed to make sense (\"it\", \"this policy\"). A common starting point is a few hundred tokens, then measure.\n\n**Overlap** (e.g. 10–20%) repeats a little text between neighbouring chunks so a sentence or idea split at a boundary still appears whole in at least one chunk.\n\nBetter than fixed sizes: **split by structure** — headings, paragraphs, list items — and prepend the document title and section heading to each chunk.",
+   "bn": "Chunk করার তিনটা কারণ:\n- **Model-এর সীমা:** embedding model সীমিত সংখ্যক token নেয়; লম্বা text কেটে ফেলা হয়।\n- **নিখুঁত retrieval:** 40 পাতার PDF-এর জন্য একটা vector সবকিছু গড় করে একটা ঝাপসা অর্থ তৈরি করে। ছোট chunk থাকলে query ঠিক সেই অংশের সাথে মেলে যেখানে উত্তর আছে।\n- **LLM context budget:** RAG-এ LLM-কে অল্প কয়েকটা passage-ই পাঠানো যায়, তাই সেগুলো focused হওয়া দরকার।\n\n**Size ঠিক করা:** খুব বড় → embedding ঝাপসা আর context-এর অপচয়; খুব ছোট → chunk অর্থ বোঝার মতো context হারায় (\"এটা\", \"এই policy\")। সাধারণ শুরু কয়েকশো token, তারপর মেপে দেখো।\n\n**Overlap** (যেমন 10–20%) পাশাপাশি chunk-এর মধ্যে সামান্য text পুনরাবৃত্তি করে, যাতে boundary-তে ভাগ হয়ে যাওয়া বাক্য বা ধারণা অন্তত একটা chunk-এ পুরোটা থাকে।\n\nFixed size-এর চেয়ে ভালো: **কাঠামো অনুযায়ী ভাগ করা** — heading, paragraph, list item — আর প্রতিটা chunk-এর শুরুতে document-এর title ও section heading জুড়ে দেওয়া।"
+  },
+  "explanation": {
+   "en": "- **Words aren't tokens:** models count tokens, and Bangla text often uses more tokens per word than English with many tokenisers — size chunks by the model's tokeniser, not by characters.\n- **Keep units intact:** don't cut tables, code blocks or numbered steps in half; convert tables to text rows that each make sense alone.\n- **Metadata travels with the chunk:** store doc id, title, section and position so you can cite sources and fetch neighbouring chunks.\n- **No universal best size:** the right size depends on your documents and questions — evaluate with a small golden set of real queries.",
+   "bn": "- **শব্দ মানে token নয়:** model token গোনে, আর অনেক tokeniser-এ Bangla text-এ প্রতি শব্দে English-এর চেয়ে বেশি token লাগে — character নয়, model-এর tokeniser দিয়ে chunk-এর আকার ঠিক করো।\n- **একক অংশ অক্ষত রাখো:** table, code block বা নম্বরযুক্ত ধাপ মাঝখান দিয়ে কেটো না; table-কে এমন text row-তে বদলাও যেগুলো আলাদাভাবেও অর্থবহ।\n- **Metadata chunk-এর সাথে যায়:** doc id, title, section আর অবস্থান store করো, যাতে source cite করা আর পাশের chunk আনা যায়।\n- **সবার জন্য একটা সেরা size নেই:** সঠিক size তোমার document আর প্রশ্নের ওপর নির্ভর করে — আসল query-র ছোট একটা golden set দিয়ে মূল্যায়ন করো।"
+  },
+  "interviewTip": {
+   "en": "Explain the trade-off (too big vs too small) with a concrete example, then say you'd validate the choice with retrieval metrics. \"It depends — and here's how I'd measure it\" is the strong answer.",
+   "bn": "একটা concrete উদাহরণ দিয়ে trade-off (খুব বড় বনাম খুব ছোট) ব্যাখ্যা করো, তারপর বলো retrieval metric দিয়ে সিদ্ধান্তটা যাচাই করবে। \"নির্ভর করে — আর এভাবে আমি মাপব\" — এটাই শক্তিশালী উত্তর।"
+  },
+  "references": [
+   {
+    "title": "Pinecone — Chunking strategies for LLM applications",
+    "url": "https://www.pinecone.io/learn/chunking-strategies/"
+   },
+   {
+    "title": "Hugging Face — multilingual-e5-base model card",
+    "url": "https://huggingface.co/intfloat/multilingual-e5-base"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you chunk a document that contains large tables?",
+    "bn": "বড় table থাকা document কীভাবে chunk করবে?"
+   },
+   {
+    "en": "What is 'parent-child' (small-to-big) retrieval?",
+    "bn": "'Parent-child' (small-to-big) retrieval কী?"
+   }
+  ],
+  "related": [
+   "vec-015",
+   "vec-008"
+  ],
+  "commonMistakes": {
+   "en": "Embedding whole documents as one vector, cutting chunks by raw character count through the middle of tables, or never revisiting chunk size after launch.",
+   "bn": "পুরো document একটা vector হিসেবে embed করা, raw character গুনে table-এর মাঝখান দিয়ে chunk কাটা, অথবা launch-এর পর আর কখনো chunk size নিয়ে ভাবা না।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Naive word-based chunker with overlap.\n// Real pipelines split on headings/paragraphs first and measure size in model tokens.\nfunction chunkText(text, { size = 300, overlap = 50 } = {}) {\n  if (overlap >= size) throw new Error('overlap must be smaller than size');\n  const words = text.split(/\\s+/).filter(Boolean);\n  const chunks = [];\n  for (let start = 0; start < words.length; start += size - overlap) {\n    chunks.push(words.slice(start, start + size).join(' '));\n    if (start + size >= words.length) break;\n  }\n  return chunks;\n}\n\n// 700 words -> chunks covering words 1-300, 251-550, 501-700\nconst longText = Array.from({ length: 700 }, (_, i) => `w${i + 1}`).join(' ');\nconsole.log(chunkText(longText, { size: 300, overlap: 50 }).length);",
+   "output": "3"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-014",
+  "subtopic": "Vector Indexing Fundamentals",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "hnsw",
+   "ivfflat",
+   "ann-index",
+   "pgvector",
+   "tuning"
+  ],
+  "technologyVersion": "pgvector 0.8.7 (PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Compare HNSW and IVFFlat indexes (as in pgvector) with a flat/brute-force search. How does each work at a high level, what are the tuning knobs, and when would you pick each?",
+   "bn": "HNSW আর IVFFlat index (pgvector-এ যেমন) flat/brute-force search-এর সাথে তুলনা করো। প্রতিটা মোটা দাগে কীভাবে কাজ করে, tuning-এর knob কী, আর কখন কোনটা বেছে নেবে?"
+  },
+  "answer": {
+   "en": "**Flat (no index):** compare the query with every vector. Perfect recall, simple, no build time — fine up to tens of thousands of vectors or when filters already shrink the set.\n\n**HNSW (Hierarchical Navigable Small World):** a multi-layer graph where each vector links to its near neighbours. A search starts at a sparse top layer, greedily hops towards the query, and refines in denser layers below — like taking a highway, then main roads, then side streets.\n- Knobs: `m` (links per node, pgvector default 16) and `ef_construction` (build-time candidate list, default 64) affect quality, memory and build time; `hnsw.ef_search` (default 40) trades query speed for recall.\n- Pros: excellent speed/recall, can be created on an empty table and handles inserts well. Cons: slower to build, more memory.\n\n**IVFFlat (inverted file):** k-means splits vectors into `lists` clusters; a query only scans the `probes` closest clusters.\n- Knobs: `lists` (pgvector suggests rows/1000 up to 1M rows, √rows above) and `ivfflat.probes` (default 1; start around √lists).\n- Pros: faster build, less memory. Cons: generally a worse speed/recall trade-off than HNSW, must be built **after** data is loaded, and recall drifts as new data changes the distribution — rebuild periodically.\n\nMy default is HNSW; IVFFlat when build time or memory is the constraint; flat for small or heavily filtered sets.",
+   "bn": "**Flat (index নেই):** query-কে প্রতিটা vector-এর সাথে তুলনা করো। Perfect recall, সহজ, build time নেই — কয়েক দশ হাজার vector পর্যন্ত বা filter আগেই set ছোট করে দিলে যথেষ্ট।\n\n**HNSW (Hierarchical Navigable Small World):** একটা multi-layer graph, যেখানে প্রতিটা vector তার কাছের neighbour-দের সাথে যুক্ত। Search শুরু হয় হালকা উপরের layer থেকে, লোভীভাবে query-র দিকে লাফিয়ে এগোয়, তারপর নিচের ঘন layer-এ সূক্ষ্মভাবে খোঁজে — অনেকটা আগে highway, তারপর বড় রাস্তা, শেষে গলিপথ ধরার মতো।\n- Knob: `m` (প্রতি node-এ link, pgvector default 16) আর `ef_construction` (build-এর সময় candidate list, default 64) quality, memory আর build time-এ প্রভাব ফেলে; `hnsw.ef_search` (default 40) query speed-এর বিনিময়ে recall বাড়ায়।\n- সুবিধা: চমৎকার speed/recall, খালি table-এও তৈরি করা যায় আর insert ভালো সামলায়। অসুবিধা: build ধীর, memory বেশি।\n\n**IVFFlat (inverted file):** k-means vector-গুলোকে `lists`-সংখ্যক cluster-এ ভাগ করে; query শুধু সবচেয়ে কাছের `probes`-সংখ্যক cluster scan করে।\n- Knob: `lists` (pgvector-এর পরামর্শ 1M row পর্যন্ত rows/1000, তার ওপরে √rows) আর `ivfflat.probes` (default 1; শুরু করো √lists-এর কাছাকাছি)।\n- সুবিধা: দ্রুত build, কম memory। অসুবিধা: সাধারণত HNSW-এর চেয়ে খারাপ speed/recall, data load করার **পরে** build করতে হয়, আর নতুন data distribution বদলালে recall কমে যায় — নিয়মিত rebuild করো।\n\nআমার default HNSW; build time বা memory সীমাবদ্ধতা হলে IVFFlat; ছোট বা অনেক বেশি filter করা set-এর জন্য flat।"
+  },
+  "explanation": {
+   "en": "- **Why IVFFlat needs data first:** its cluster centroids are learned from the rows present at build time; built on an empty or tiny table, the lists are poor and queries return fewer results.\n- **Memory matters:** HNSW performs best when the index fits in RAM (`shared_buffers` + OS cache). Index builds also benefit from a larger `maintenance_work_mem` — pgvector logs a notice when the graph no longer fits.\n- **Operator class must match the query:** an index built with `vector_cosine_ops` only serves `<=>` queries.\n- **Measure recall:** compare ANN results against an exact query (e.g. with the index disabled) on a sample of queries before choosing parameters.\n- **Other engines:** dedicated vector DBs offer the same ideas plus extras (product/binary quantisation, disk-based indexes, filter-aware graphs).",
+   "bn": "- **IVFFlat-এ আগে data কেন লাগে:** এর cluster centroid build-এর সময় থাকা row থেকে শেখা হয়; খালি বা খুব ছোট table-এ build করলে list খারাপ হয় আর query কম result দেয়।\n- **Memory গুরুত্বপূর্ণ:** index RAM-এ (`shared_buffers` + OS cache) আঁটলে HNSW সবচেয়ে ভালো চলে। বড় `maintenance_work_mem` index build-এও সাহায্য করে — graph আর না আঁটলে pgvector একটা notice log করে।\n- **Operator class query-র সাথে মিলতে হবে:** `vector_cosine_ops` দিয়ে তৈরি index শুধু `<=>` query serve করে।\n- **Recall মাপো:** parameter বেছে নেওয়ার আগে কিছু query-তে ANN result-কে exact query-র (যেমন index বন্ধ রেখে) সাথে তুলনা করো।\n- **অন্য engine:** dedicated vector DB একই ধারণার সাথে বাড়তি সুবিধা দেয় (product/binary quantisation, disk-based index, filter-aware graph)।"
+  },
+  "interviewTip": {
+   "en": "Give the intuition (graph of neighbours vs clusters) before the parameters. An analogy like \"highway → main road → side street\" for HNSW makes the answer memorable without heavy math.",
+   "bn": "Parameter-এর আগে intuition দাও (neighbour-এর graph বনাম cluster)। HNSW-এর জন্য \"highway → বড় রাস্তা → গলি\"-র মতো উপমা ভারী math ছাড়াই উত্তরটা মনে রাখার মতো করে।"
+  },
+  "references": [
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   },
+   {
+    "title": "Malkov & Yashunin — HNSW paper (arXiv)",
+    "url": "https://arxiv.org/abs/1603.09320"
+   },
+   {
+    "title": "Pinecone — What is a vector database?",
+    "url": "https://www.pinecone.io/learn/vector-database/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you measure the recall of your HNSW index in production?",
+    "bn": "Production-এ তোমার HNSW index-এর recall কীভাবে মাপবে?"
+   },
+   {
+    "en": "What happens to an HNSW index when you delete many rows?",
+    "bn": "অনেক row delete করলে HNSW index-এর কী হয়?"
+   }
+  ],
+  "related": [
+   "vec-006",
+   "vec-027",
+   "vec-025"
+  ],
+  "commonMistakes": {
+   "en": "Creating an IVFFlat index on an empty table, expecting `ef_search` changes to need a reindex (it's a query-time setting), or comparing indexes without measuring recall.",
+   "bn": "খালি table-এ IVFFlat index তৈরি করা, ভাবা যে `ef_search` বদলাতে reindex লাগে (এটা query-time setting), অথবা recall না মেপেই index তুলনা করা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "-- HNSW: good default; can be created before data arrives\nCREATE INDEX ON items USING hnsw (embedding vector_cosine_ops)\n  WITH (m = 16, ef_construction = 64);\nSET hnsw.ef_search = 100;            -- per session/transaction: higher = better recall, slower\n\n-- IVFFlat: build AFTER loading data\nCREATE INDEX ON items USING ivfflat (embedding vector_cosine_ops)\n  WITH (lists = 1000);               -- ~rows/1000 for up to 1M rows\nSET ivfflat.probes = 32;             -- start near sqrt(lists)"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-015",
+  "subtopic": "Chunking",
+  "difficulty": "medium",
+  "type": "scenario",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 8,
+  "tags": [
+   "chunking",
+   "rag",
+   "bangla",
+   "tables",
+   "evaluation"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Your RAG assistant answers questions from company HR policy PDFs written in Bangla and English. Users report that it misses details, and answers about leave rules quote half a table. The current pipeline splits text every 1,000 characters with no overlap. How do you fix the chunking?",
+   "bn": "তোমার RAG assistant Bangla আর English-এ লেখা company-র HR policy PDF থেকে প্রশ্নের উত্তর দেয়। User-রা বলছে এটা খুঁটিনাটি বাদ দেয়, আর ছুটির নিয়ম নিয়ে উত্তরে একটা table-এর অর্ধেক quote করে। বর্তমান pipeline প্রতি 1,000 character-এ text কাটে, কোনো overlap ছাড়া। Chunking কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**1. Diagnose first.** Collect 20–30 failing questions and look at what was retrieved. Is the right content split across chunks, missing (bad PDF extraction), or present but ranked low? That decides the fix.\n\n**2. Fix extraction.** Make sure tables come out as structured rows and scanned pages are OCR'd; garbage in, garbage out.\n\n**3. Chunk by structure, not by characters.**\n- Split on headings and sections (\"ছুটি নীতি / Leave Policy\"), then paragraphs; use the embedding model's token count for size (a few hundred tokens) with ~10–20% overlap.\n- Use a sentence splitter that understands Bangla — Bangla sentences end with \"।\" (dari), so a splitter that only looks for \".\" produces huge, broken chunks.\n- **Keep tables whole**, or turn each row into a self-contained sentence: \"Annual leave — permanent staff — 20 days per year\".\n\n**4. Add context to every chunk.** Prepend document title and section path (\"HR Policy 2026 › Leave › Annual leave\") before embedding, and store it as metadata for citations.\n\n**5. Consider small-to-big retrieval.** Retrieve small precise chunks, but send the LLM the parent section so it sees the whole table.\n\n**6. Re-evaluate** on the failing set plus a broader golden set; compare recall@k before and after.",
+   "bn": "**1. আগে diagnose করো।** 20–30টা fail হওয়া প্রশ্ন জোগাড় করে দেখো কী retrieve হয়েছে। সঠিক content কি কয়েকটা chunk-এ ভাগ হয়ে গেছে, একেবারে নেই (PDF extraction খারাপ), নাকি আছে কিন্তু নিচে rank হয়েছে? এটাই ঠিক করবে সমাধান কী।\n\n**2. Extraction ঠিক করো।** Table যেন structured row হিসেবে বের হয় আর scan করা পাতায় OCR হয়, নিশ্চিত করো; ভুল input মানেই ভুল output।\n\n**3. Character নয়, কাঠামো অনুযায়ী chunk করো।**\n- Heading আর section (\"ছুটি নীতি / Leave Policy\") ধরে ভাগ করো, তারপর paragraph; size ঠিক করো embedding model-এর token গুনে (কয়েকশো token), ~10–20% overlap সহ।\n- এমন sentence splitter ব্যবহার করো যেটা Bangla বোঝে — Bangla বাক্য শেষ হয় \"।\" (দাঁড়ি) দিয়ে, তাই শুধু \".\" খোঁজা splitter বিশাল, ভাঙা chunk তৈরি করে।\n- **Table অক্ষত রাখো**, অথবা প্রতিটা row-কে স্বয়ংসম্পূর্ণ বাক্যে বদলাও: \"Annual leave — permanent staff — বছরে 20 দিন\"।\n\n**4. প্রতিটা chunk-এ context যোগ করো।** Embed করার আগে document title আর section path (\"HR Policy 2026 › Leave › Annual leave\") জুড়ে দাও, আর citation-এর জন্য metadata হিসেবেও রাখো।\n\n**5. Small-to-big retrieval বিবেচনা করো।** ছোট নিখুঁত chunk দিয়ে retrieve করো, কিন্তু LLM-কে পাঠাও parent section, যাতে পুরো table দেখতে পায়।\n\n**6. আবার মূল্যায়ন করো** fail হওয়া set আর বড় একটা golden set দিয়ে; আগে-পরে recall@k তুলনা করো।"
+  },
+  "explanation": {
+   "en": "- **Why fixed 1,000-character splits hurt:** they cut mid-sentence and mid-table, and in Bangla a fixed character count means very different token counts than in English.\n- **Mixed-language documents:** detect language per chunk and store it as metadata; it helps filtering and evaluation, and confirms your embedding model handles both.\n- **Re-ingestion:** changing the chunker changes chunk ids — plan a full re-index and keep the old index until the new one is evaluated.\n- **Watch duplicates:** with overlap and near-identical policy versions, the top results can all be the same paragraph; de-duplicate or diversify results before sending them to the LLM.",
+   "bn": "- **নির্দিষ্ট 1,000-character ভাগ কেন ক্ষতিকর:** বাক্য আর table-এর মাঝখান দিয়ে কাটে, আর Bangla-য় নির্দিষ্ট character সংখ্যা মানে English-এর তুলনায় অনেক আলাদা token সংখ্যা।\n- **মিশ্র ভাষার document:** প্রতিটা chunk-এর ভাষা শনাক্ত করে metadata হিসেবে রাখো; filtering আর evaluation-এ কাজে লাগে, আর নিশ্চিত হওয়া যায় embedding model দুটো ভাষাই সামলাচ্ছে।\n- **আবার ingest:** chunker বদলালে chunk id বদলায় — পুরো re-index plan করো, আর নতুনটা মূল্যায়ন না হওয়া পর্যন্ত পুরনো index রেখে দাও।\n- **Duplicate খেয়াল রাখো:** overlap আর প্রায়-একই policy version থাকলে top result-গুলো সব একই paragraph হতে পারে; LLM-এ পাঠানোর আগে de-duplicate বা diversify করো।"
+  },
+  "interviewTip": {
+   "en": "Start with \"I'd look at the retrieved chunks for failing questions\" — diagnosis before solutions. Mentioning the Bangla \"।\" sentence boundary shows real local experience.",
+   "bn": "\"Fail হওয়া প্রশ্নের retrieve হওয়া chunk-গুলো আগে দেখব\" দিয়ে শুরু করো — সমাধানের আগে diagnosis। Bangla-র \"।\" দিয়ে বাক্য শেষ হওয়ার কথা বললে বাস্তব local অভিজ্ঞতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Pinecone — Chunking strategies for LLM applications",
+    "url": "https://www.pinecone.io/learn/chunking-strategies/"
+   },
+   {
+    "title": "Hugging Face — multilingual-e5-base model card",
+    "url": "https://huggingface.co/intfloat/multilingual-e5-base"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you measure whether the new chunking is actually better?",
+    "bn": "নতুন chunking আসলেই ভালো কিনা কীভাবে মাপবে?"
+   },
+   {
+    "en": "When does semantic chunking (splitting where the topic changes) help?",
+    "bn": "Semantic chunking (যেখানে topic বদলায় সেখানে ভাগ করা) কখন সাহায্য করে?"
+   }
+  ],
+  "related": [
+   "vec-007",
+   "vec-017",
+   "vec-032"
+  ],
+  "commonMistakes": {
+   "en": "Jumping straight to \"use a bigger LLM\" or \"increase top-k\" without checking whether the right text was ever in a single chunk.",
+   "bn": "সঠিক text কখনো একটা chunk-এ ছিল কিনা না দেখে সরাসরি \"বড় LLM ব্যবহার করো\" বা \"top-k বাড়াও\"-তে চলে যাওয়া।"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-016",
+  "subtopic": "Hybrid Search",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "hybrid-search",
+   "rrf",
+   "bm25",
+   "ranking",
+   "javascript"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Implement **Reciprocal Rank Fusion (RRF)** in JavaScript to merge the results of a keyword (BM25) search and a vector search into one ranking.\n\n- Input: an array of ranked lists of document ids (best first), plus `k` (default 60) and `limit`.\n- Each document's score is the sum over lists of `1 / (k + rank)`, with rank starting at 1.\n- Return the top `limit` documents as `{ id, score }`, highest score first.\n\nExample: keyword = `['p7', 'p2', 'p9']`, semantic = `['p2', 'p4', 'p7']`, `k = 60`, `limit = 3` → `p2`, `p7`, `p4`.",
+   "bn": "একটা keyword (BM25) search আর একটা vector search-এর result একটা ranking-এ মেলাতে JavaScript-এ **Reciprocal Rank Fusion (RRF)** implement করো।\n\n- Input: document id-এর ranked list-এর একটা array (সেরাটা আগে), সাথে `k` (default 60) আর `limit`।\n- প্রতিটা document-এর score হলো সব list মিলিয়ে `1 / (k + rank)`-এর যোগফল, rank শুরু 1 থেকে।\n- সবচেয়ে বেশি score আগে রেখে top `limit`টা document `{ id, score }` হিসেবে return করো।\n\nউদাহরণ: keyword = `['p7', 'p2', 'p9']`, semantic = `['p2', 'p4', 'p7']`, `k = 60`, `limit = 3` → `p2`, `p7`, `p4`।"
+  },
+  "answer": {
+   "en": "RRF ignores the raw scores and uses only **positions**, which is exactly why it's popular for hybrid search: BM25 scores and cosine similarities live on completely different scales, but ranks are comparable.\n\nFor each list I walk the ids with their 1-based rank and add `1 / (k + rank)` to a running total in a `Map`. A document ranked well in *both* lists accumulates two contributions and rises to the top; a document found by only one retriever still gets credit. Then I sort by score and take the top `limit`.\n\nIn the example, `p2` gets 1/62 + 1/61 ≈ 0.03252 and `p7` gets 1/61 + 1/63 ≈ 0.03227, so `p2` edges out `p7`; `p4` (only in the vector list, rank 2) beats `p9` (only in the keyword list, rank 3).",
+   "bn": "RRF raw score উপেক্ষা করে শুধু **অবস্থান** ব্যবহার করে — hybrid search-এ এটা জনপ্রিয় ঠিক এই কারণেই: BM25 score আর cosine similarity সম্পূর্ণ আলাদা scale-এ থাকে, কিন্তু rank তুলনা করা যায়।\n\nপ্রতিটা list-এর id-গুলো তাদের 1-based rank সহ ঘুরে দেখি আর একটা `Map`-এ চলমান যোগফলে `1 / (k + rank)` যোগ করি। *দুই* list-এই ভালো rank পাওয়া document দুইবার অবদান জমিয়ে উপরে ওঠে; শুধু একটা retriever-এ পাওয়া document-ও কিছু credit পায়। তারপর score অনুযায়ী sort করে top `limit`টা নিই।\n\nউদাহরণে `p2` পায় 1/62 + 1/61 ≈ 0.03252 আর `p7` পায় 1/61 + 1/63 ≈ 0.03227, তাই `p2` সামান্য ব্যবধানে `p7`-এর আগে; `p4` (শুধু vector list-এ, rank 2) `p9`-কে (শুধু keyword list-এ, rank 3) হারায়।"
+  },
+  "explanation": {
+   "en": "- **Why `k`?** It dampens the advantage of the very top ranks so one list can't dominate. 60 comes from the original RRF paper and is a common default; some engines use other defaults (Qdrant's documentation, for example, uses a smaller constant), so treat it as tunable.\n- **Edge cases:** duplicate ids inside one list (count only the first occurrence), empty lists, ties (break them deterministically, e.g. by id), and `limit` larger than the number of unique ids.\n- **Alternatives:** a weighted sum of *normalised* scores (convex combination) can beat RRF when tuned on labelled data, but it's sensitive to score distributions. RRF is a robust, tuning-free start.\n- **Pipeline:** retrieve ~50–100 from each retriever, fuse with RRF, then rerank the top few dozen with a cross-encoder if you need higher precision.",
+   "bn": "- **`k` কেন?** এটা একেবারে উপরের rank-গুলোর সুবিধা কিছুটা কমায়, যাতে একটা list একাই প্রাধান্য না পায়। 60 এসেছে মূল RRF paper থেকে আর এটা প্রচলিত default; কিছু engine অন্য default ব্যবহার করে (যেমন Qdrant-এর documentation ছোট একটা constant ব্যবহার করে), তাই এটাকে tune করার মতো ধরো।\n- **Edge case:** একই list-এ duplicate id (শুধু প্রথমটা গোনো), খালি list, tie (নির্দিষ্টভাবে ভাঙো, যেমন id দিয়ে), আর unique id-এর চেয়ে বড় `limit`।\n- **বিকল্প:** *normalised* score-এর weighted যোগফল (convex combination) labelled data-য় tune করলে RRF-কে ছাড়িয়ে যেতে পারে, কিন্তু score distribution-এর প্রতি সংবেদনশীল। RRF tuning ছাড়াই নির্ভরযোগ্য শুরু।\n- **Pipeline:** প্রতিটা retriever থেকে ~50–100টা আনো, RRF দিয়ে মেলাও, তারপর আরও precision লাগলে top কয়েক ডজন cross-encoder দিয়ে rerank করো।"
+  },
+  "interviewTip": {
+   "en": "Before coding, explain *why* ranks instead of scores (incomparable scales). Then walk through the example numbers — it proves your implementation is right.",
+   "bn": "Code লেখার আগে ব্যাখ্যা করো score-এর বদলে rank *কেন* (scale তুলনীয় নয়)। তারপর উদাহরণের সংখ্যাগুলো হিসাব করে দেখাও — এতেই প্রমাণ হয় তোমার implementation ঠিক।"
+  },
+  "references": [
+   {
+    "title": "Qdrant docs — Hybrid and multi-stage queries",
+    "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/"
+   },
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   },
+   {
+    "title": "Wikipedia — Okapi BM25",
+    "url": "https://en.wikipedia.org/wiki/Okapi_BM25"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you give the vector results more weight than the keyword results in RRF?",
+    "bn": "RRF-এ keyword result-এর চেয়ে vector result-কে বেশি গুরুত্ব কীভাবে দেবে?"
+   },
+   {
+    "en": "When might a weighted sum of normalised scores beat RRF?",
+    "bn": "কখন normalised score-এর weighted যোগফল RRF-কে ছাড়িয়ে যেতে পারে?"
+   }
+  ],
+  "related": [
+   "vec-005",
+   "vec-023",
+   "vec-030"
+  ],
+  "commonMistakes": {
+   "en": "Adding raw BM25 and cosine scores directly, using 0-based ranks (changes the scores), or counting a duplicate id twice within the same list.",
+   "bn": "Raw BM25 আর cosine score সরাসরি যোগ করা, 0-based rank ব্যবহার করা (score বদলে যায়), অথবা একই list-এ duplicate id দুইবার গোনা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function reciprocalRankFusion(rankedLists, { k = 60, limit = 10 } = {}) {\n  const scores = new Map();\n\n  for (const list of rankedLists) {\n    const seen = new Set();\n    list.forEach((id, index) => {\n      if (seen.has(id)) return;            // ignore duplicates inside one list\n      seen.add(id);\n      const rank = index + 1;              // ranks start at 1\n      scores.set(id, (scores.get(id) ?? 0) + 1 / (k + rank));\n    });\n  }\n\n  return [...scores.entries()]\n    .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))\n    .slice(0, limit)\n    .map(([id, score]) => ({ id, score: Number(score.toFixed(5)) }));\n}\n\nconst keyword  = ['p7', 'p2', 'p9'];   // full-text / BM25 order\nconst semantic = ['p2', 'p4', 'p7'];   // vector search order\nconsole.log(reciprocalRankFusion([keyword, semantic], { k: 60, limit: 3 }));",
+   "output": "[\n  { id: 'p2', score: 0.03252 },\n  { id: 'p7', score: 0.03227 },\n  { id: 'p4', score: 0.01613 }\n]"
+  },
+  "complexity": {
+   "time": "O(N log N) where N = total ids across lists",
+   "space": "O(U) for U unique ids"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-024",
+  "subtopic": "Embedding Model Changes",
+  "difficulty": "hard",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 12,
+  "tags": [
+   "re-embedding",
+   "migration",
+   "versioning",
+   "zero-downtime",
+   "pgvector"
+  ],
+  "technologyVersion": "pgvector 0.8.7 (PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "You have 5 million chunks embedded with model A (1536 dimensions) in pgvector. A new model B (1024 dimensions) scores better on your Bangla queries. How do you migrate to model B with zero downtime and a safe rollback?",
+   "bn": "pgvector-এ model A (1536 dimension) দিয়ে embed করা 50 লাখ chunk আছে। নতুন model B (1024 dimension) তোমার Bangla query-তে ভালো score করছে। Zero downtime আর নিরাপদ rollback সহ কীভাবে model B-তে migrate করবে?"
+  },
+  "answer": {
+   "en": "**Golden rule:** vectors from different models are not comparable — a model-B query must only ever be compared with model-B documents. So this is a parallel build and a cutover, not an in-place update.\n\n1. **Prove it first:** evaluate model B offline on a golden set (recall@k, MRR) per language, and estimate cost/time for 5M chunks (tokens × price or GPU throughput).\n2. **Add, don't replace:** a new column `embedding_v2 vector(1024)` (or a new table), plus an `embedding_model` version field.\n3. **Dual-write:** from now on, new and updated chunks are embedded with **both** models, so the backfill doesn't chase a moving target.\n4. **Backfill in batches:** an idempotent, resumable job (checkpoint by id), respecting API rate limits; log failures for retry.\n5. **Build the index after the backfill:** `CREATE INDEX CONCURRENTLY ... USING hnsw (embedding_v2 vector_cosine_ops)` with enough `maintenance_work_mem`, so writes aren't blocked.\n6. **Shadow and compare:** run both pipelines for a sample of real traffic, compare overlap and quality metrics; re-tune similarity thresholds, because score distributions change between models.\n7. **Cut over behind a feature flag** (by percentage or tenant) — query embedding and document column switch together.\n8. **Rollback window:** keep model A's column and index for a while; once stable, stop dual-writing and drop them.",
+   "bn": "**মূল নিয়ম:** আলাদা model-এর vector তুলনীয় নয় — model-B-এর query শুধু model-B-এর document-এর সাথেই তুলনা হবে। তাই এটা জায়গায় বসে update নয়, পাশাপাশি নতুন build আর তারপর cutover।\n\n1. **আগে প্রমাণ করো:** ভাষাভিত্তিক golden set-এ (recall@k, MRR) model B offline মূল্যায়ন করো, আর 50 লাখ chunk-এর খরচ/সময় হিসাব করো (token × দাম বা GPU throughput)।\n2. **Replace নয়, add করো:** নতুন column `embedding_v2 vector(1024)` (বা নতুন table), সাথে একটা `embedding_model` version field।\n3. **Dual-write:** এখন থেকে নতুন আর update হওয়া chunk **দুটো** model দিয়েই embed হবে, যাতে backfill একটা চলমান লক্ষ্যের পেছনে না ছোটে।\n4. **Batch-এ backfill:** idempotent, আবার শুরু করা যায় এমন job (id দিয়ে checkpoint), API rate limit মেনে; fail হওয়াগুলো retry-এর জন্য log করো।\n5. **Backfill-এর পরে index build:** যথেষ্ট `maintenance_work_mem` সহ `CREATE INDEX CONCURRENTLY ... USING hnsw (embedding_v2 vector_cosine_ops)`, যাতে write block না হয়।\n6. **Shadow চালিয়ে তুলনা:** আসল traffic-এর একটা sample-এ দুটো pipeline চালাও, overlap আর quality metric তুলনা করো; similarity threshold আবার tune করো, কারণ model বদলালে score distribution বদলায়।\n7. **Feature flag-এর পেছনে cutover** (percentage বা tenant অনুযায়ী) — query embedding আর document column একসাথে বদলাবে।\n8. **Rollback window:** model A-এর column আর index কিছুদিন রেখে দাও; স্থিতিশীল হলে dual-write বন্ধ করে সেগুলো drop করো।"
+  },
+  "explanation": {
+   "en": "- **Cache keys must include the model version** — a cached query embedding from model A must never be used against model B's column.\n- **Storage during migration roughly doubles** (two vectors per row plus two indexes) — check disk and RAM headroom first, or migrate per partition/tenant.\n- **Dimension limits:** pgvector indexes `vector` up to 2,000 dimensions and `halfvec` up to 4,000, so a 3,072-dimension model would need half-precision indexing.\n- **Shorter vectors:** some models can output fewer dimensions (Matryoshka-style training / a `dimensions` option) — a cheaper alternative to a full model switch, but still a re-embedding.\n- **Communicate:** search results *will* change; tell support and product teams before the cutover.",
+   "bn": "- **Cache key-এ model version থাকতে হবে** — model A থেকে cache করা query embedding কখনো model B-এর column-এর বিপরীতে ব্যবহার করা যাবে না।\n- **Migration চলাকালীন storage প্রায় দ্বিগুণ হয়** (প্রতি row-এ দুইটা vector আর দুইটা index) — আগে disk আর RAM-এর জায়গা দেখে নাও, অথবা partition/tenant ধরে ধরে migrate করো।\n- **Dimension-এর সীমা:** pgvector `vector` index করে 2,000 dimension পর্যন্ত আর `halfvec` 4,000 পর্যন্ত, তাই 3,072-dimension-এর model-এ half-precision indexing লাগবে।\n- **ছোট vector:** কিছু model কম dimension output দিতে পারে (Matryoshka-ধরনের training / `dimensions` option) — পুরো model বদলের চেয়ে সস্তা বিকল্প, তবুও আবার embed করতে হয়।\n- **জানিয়ে দাও:** search result *বদলাবেই*; cutover-এর আগে support আর product team-কে জানাও।"
+  },
+  "interviewTip": {
+   "en": "Lead with the invariant (\"never compare across models\"), then present the steps as a classic expand → migrate → contract plan. Interviewers recognise that pattern from database migrations.",
+   "bn": "শুরু করো অপরিবর্তনীয় নিয়মটা দিয়ে (\"model পেরিয়ে কখনো তুলনা নয়\"), তারপর ধাপগুলো classic expand → migrate → contract plan হিসেবে দেখাও। Database migration থেকে interviewer-রা এই pattern চেনে।"
+  },
+  "references": [
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   },
+   {
+    "title": "Kusupati et al. — Matryoshka Representation Learning (arXiv)",
+    "url": "https://arxiv.org/abs/2205.13147"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you estimate the cost and duration of re-embedding 5 million chunks?",
+    "bn": "50 লাখ chunk আবার embed করার খরচ আর সময় কীভাবে হিসাব করবে?"
+   },
+   {
+    "en": "What would you monitor during the gradual cutover?",
+    "bn": "ধীরে ধীরে cutover চলাকালীন কী কী monitor করবে?"
+   }
+  ],
+  "related": [
+   "vec-002",
+   "vec-011",
+   "vec-028"
+  ],
+  "commonMistakes": {
+   "en": "Re-embedding in place (mixing models in one column during the backfill), switching query embeddings before documents are done, or forgetting to re-tune thresholds.",
+   "bn": "জায়গায় বসে আবার embed করা (backfill-এর সময় এক column-এ model মিশিয়ে ফেলা), document শেষ হওয়ার আগেই query embedding বদলে ফেলা, অথবা threshold আবার tune করতে ভুলে যাওয়া।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "-- 1. Expand\nALTER TABLE chunks ADD COLUMN embedding_v2 vector(1024);\n\n-- 2. Backfill in batches from a worker (idempotent, resumable)\nUPDATE chunks SET embedding_v2 = $2 WHERE id = $1 AND embedding_v2 IS NULL;\n\n-- 3. Build the new index without blocking writes\nSET maintenance_work_mem = '8GB';\nCREATE INDEX CONCURRENTLY chunks_embedding_v2_idx\n  ON chunks USING hnsw (embedding_v2 vector_cosine_ops);\n\n-- 4. After cutover and a rollback window: contract\nDROP INDEX CONCURRENTLY chunks_embedding_idx;\nALTER TABLE chunks DROP COLUMN embedding;"
+  },
+  "technology": "vectordb"
+ },
+ {
+  "id": "vec-025",
+  "subtopic": "Metadata Filtering",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "metadata-filtering",
+   "pgvector",
+   "hnsw",
+   "iterative-scan",
+   "post-filtering"
+  ],
+  "technologyVersion": "pgvector 0.8.7 (iterative index scans since 0.8.0)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "version-specific",
+  "question": {
+   "en": "A table holds 20,000 documents with an HNSW index on `embedding`. Tenant 7 owns about 4% of them. This query should return 10 rows, but it returns only 5. What is the most likely cause and fix?",
+   "bn": "একটা table-এ 20,000 document, `embedding`-এ HNSW index আছে। Tenant 7-এর আছে প্রায় 4%। এই query-র 10টা row return করার কথা, কিন্তু দিচ্ছে মাত্র 5টা। সবচেয়ে সম্ভাব্য কারণ আর সমাধান কী?"
+  },
+  "answer": {
+   "en": "With approximate indexes, pgvector applies the `WHERE` filter **after** the index scan. HNSW hands back roughly `ef_search` nearest candidates, most belonging to other tenants, so only a handful survive the filter. Iterative index scans (pgvector 0.8+) keep scanning until enough rows pass the filter.",
+   "bn": "Approximate index-এ pgvector `WHERE` filter প্রয়োগ করে index scan-এর **পরে**। HNSW মোটামুটি `ef_search`-সংখ্যক কাছের candidate ফেরত দেয়, যার বেশিরভাগ অন্য tenant-এর, তাই filter পেরিয়ে টেকে মাত্র কয়েকটা। Iterative index scan (pgvector 0.8+) যথেষ্ট row filter পার না হওয়া পর্যন্ত scan চালিয়ে যায়।"
+  },
+  "explanation": {
+   "en": "This is the classic **post-filtering** pitfall of filtered ANN search. The pgvector docs give the same arithmetic: with the default `ef_search` of 40 and a filter matching 10% of rows, you get about 4 matches on average.\n\nFixes, from simplest:\n- `SET hnsw.iterative_scan = relaxed_order;` (or `strict_order`) — pgvector 0.8.0+ automatically scans more of the index, bounded by `hnsw.max_scan_tuples` (default 20,000). With `relaxed_order`, results can be slightly out of order; re-sort in an outer query if exact order matters.\n- Raise `hnsw.ef_search` — helps, but costs latency for every query.\n- **Partial indexes** per large tenant/category, or **partitioning** by tenant, so the filter is \"built in\".\n- For very selective filters, an exact scan over a B-tree-filtered subset may be faster and gives perfect recall.\n\nOption D is the tempting wrong answer: filtering in app code after `LIMIT` makes the problem worse, and can leak data if you forget it.",
+   "bn": "এটা filtered ANN search-এর classic **post-filtering** ফাঁদ। pgvector docs-এ একই হিসাব দেওয়া আছে: default `ef_search` 40 আর 10% row match করা filter থাকলে গড়ে প্রায় 4টা match পাওয়া যায়।\n\nসমাধান, সহজ থেকে শুরু:\n- `SET hnsw.iterative_scan = relaxed_order;` (বা `strict_order`) — pgvector 0.8.0+ নিজে থেকেই index-এর আরও বেশি অংশ scan করে, `hnsw.max_scan_tuples` (default 20,000) পর্যন্ত। `relaxed_order`-এ result-এর ক্রম সামান্য এলোমেলো হতে পারে; সঠিক ক্রম জরুরি হলে বাইরের query-তে আবার sort করো।\n- `hnsw.ef_search` বাড়াও — সাহায্য করে, কিন্তু প্রতিটা query-র latency বাড়ায়।\n- বড় tenant/category-র জন্য **partial index**, বা tenant অনুযায়ী **partitioning**, যাতে filter \"ভেতরেই\" থাকে।\n- খুব selective filter-এ B-tree দিয়ে filter করা subset-এ exact scan বেশি দ্রুত হতে পারে আর perfect recall দেয়।\n\nOption D হলো লোভনীয় ভুল উত্তর: `LIMIT`-এর পরে app code-এ filter করলে সমস্যা আরও বাড়ে, আর ভুলে গেলে data ফাঁসও হতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Name the concept — \"post-filtering in approximate search\" — before the fix. Then mention that other vector databases solve it with filter-aware indexes, which shows breadth beyond one tool.",
+   "bn": "সমাধানের আগে ধারণাটার নাম বলো — \"approximate search-এ post-filtering\"। তারপর উল্লেখ করো যে অন্য vector database filter-aware index দিয়ে এটা সমাধান করে — এতে এক tool-এর বাইরেও তোমার জ্ঞানের পরিধি দেখা যায়।"
+  },
+  "references": [
+   {
+    "title": "pgvector — README (GitHub)",
+    "url": "https://github.com/pgvector/pgvector"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "vec-013",
+   "vec-026",
+   "vec-010"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "SELECT id\nFROM docs\nWHERE tenant_id = 7\nORDER BY embedding <=> $1\nLIMIT 10;"
+  },
+  "options": [
+   {
+    "en": "The filter is applied after the index scan: HNSW returns about `hnsw.ef_search` (default 40) candidates and only a few belong to tenant 7. Enable iterative index scans (`SET hnsw.iterative_scan = relaxed_order`), raise `ef_search`, or use a partial index/partitioning per tenant",
+    "bn": "Filter প্রয়োগ হয় index scan-এর পরে: HNSW প্রায় `hnsw.ef_search` (default 40)-টা candidate দেয়, যার অল্প কয়েকটা tenant 7-এর। Iterative index scan চালু করো (`SET hnsw.iterative_scan = relaxed_order`), `ef_search` বাড়াও, অথবা tenant-ভিত্তিক partial index/partitioning ব্যবহার করো"
+   },
+   {
+    "en": "The HNSW index is corrupted; run `REINDEX`",
+    "bn": "HNSW index corrupt হয়ে গেছে; `REINDEX` চালাও"
+   },
+   {
+    "en": "`LIMIT` is ignored when an HNSW index is used; add `OFFSET 0`",
+    "bn": "HNSW index ব্যবহার হলে `LIMIT` উপেক্ষা করা হয়; `OFFSET 0` যোগ করো"
+   },
+   {
+    "en": "Cosine distance can't be combined with `WHERE`; filter in application code instead",
+    "bn": "Cosine distance `WHERE`-এর সাথে মেলানো যায় না; বদলে application code-এ filter করো"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "vectordb"
+ }
+]

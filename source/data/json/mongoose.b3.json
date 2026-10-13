@@ -1,0 +1,594 @@
+[
+ {
+  "id": "mongoose-008",
+  "subtopic": "Instance & Static Methods",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 3,
+  "tags": [
+   "methods",
+   "statics",
+   "query-helpers",
+   "schema"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What's the difference between instance methods, static methods and query helpers in Mongoose? When would you use each?",
+   "bn": "Mongoose-এ instance method, static method আর query helper-এর মধ্যে পার্থক্য কী? কোনটা কখন ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "- **Instance methods** (`schema.methods`) are available on **documents**; `this` is the document. Use them for behaviour of one record: `user.comparePassword(plain)`, `order.canBeCancelled()`.\n- **Static methods** (`schema.statics`) are available on the **model**; `this` is the model. Use them for reusable queries or domain operations that aren't about one loaded document: `User.findByEmail(email)`, `Order.markExpiredAsCancelled()`.\n- **Query helpers** (`schema.query`) are chainable methods on **queries**; `this` is the query. Use them for reusable filters: `Product.find().inStock().sort({ price: 1 })`.\n\nIn all three, use regular `function`s, not arrow functions, so `this` is bound correctly.",
+   "bn": "- **Instance method** (`schema.methods`) **document**-এ পাওয়া যায়; `this` হলো document। একটা record-এর আচরণের জন্য ব্যবহার করো: `user.comparePassword(plain)`, `order.canBeCancelled()`।\n- **Static method** (`schema.statics`) **model**-এ পাওয়া যায়; `this` হলো model। Reusable query বা এমন domain operation-এর জন্য, যেটা একটা load করা document নিয়ে না: `User.findByEmail(email)`, `Order.markExpiredAsCancelled()`।\n- **Query helper** (`schema.query`) হলো **query**-র ওপর chain করা যায় এমন method; `this` হলো query। Reusable filter-এর জন্য: `Product.find().inStock().sort({ price: 1 })`।\n\nতিনটাতেই arrow function না, সাধারণ `function` ব্যবহার করো, যাতে `this` ঠিকভাবে bind হয়।"
+  },
+  "explanation": {
+   "en": "- **Where logic belongs:** methods keep data rules close to the data (e.g. normalising an email in one place), but don't move everything into models — HTTP concerns, emails and payment calls belong in services.\n- **Alternative syntax:** you can pass `methods`, `statics` and `query` in the schema options object, or use `schema.loadClass(SomeClass)` with ES6 classes. The options style gives better TypeScript inference.\n- **Query helpers compose:** because they return the query, you can chain them with `.lean()`, `.select()` and pagination.\n- **Static vs plain function:** a static is just a function attached to the model; its value is discoverability (`User.` autocompletes it) and access to `this` (the model) for inheritance with discriminators.",
+   "bn": "- **Logic কোথায় থাকবে:** method data-র নিয়ম data-র কাছাকাছি রাখে (যেমন email normalise করা এক জায়গায়), কিন্তু সবকিছু model-এ ঢুকিয়ে দিও না — HTTP-সংক্রান্ত কাজ, email আর payment call service-এ থাকবে।\n- **বিকল্প syntax:** schema-র options object-এ `methods`, `statics` আর `query` দেওয়া যায়, অথবা ES6 class সহ `schema.loadClass(SomeClass)` ব্যবহার করা যায়। Options style-এ TypeScript inference ভালো হয়।\n- **Query helper মিলিয়ে ব্যবহার করা যায়:** এগুলো query return করে বলে `.lean()`, `.select()` আর pagination-এর সাথে chain করা যায়।\n- **Static বনাম সাধারণ function:** static হলো model-এর সাথে জুড়ে দেওয়া একটা function; এর সুবিধা হলো সহজে খুঁজে পাওয়া (`User.` লিখলে autocomplete হয়) আর `this` (model) access, যা discriminator-এর inheritance-এ কাজে লাগে।"
+  },
+  "interviewTip": {
+   "en": "Give one realistic example of each and say what `this` is in each case — that's the whole answer in a form interviewers can check quickly.",
+   "bn": "প্রতিটির একটা বাস্তব উদাহরণ দাও আর প্রতিটিতে `this` কী সেটা বলো — interviewer দ্রুত যাচাই করতে পারে এমনভাবে পুরো উত্তরটাই এতে চলে আসে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   },
+   {
+    "title": "Mongoose — Queries",
+    "url": "https://mongoosejs.com/docs/queries.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you type instance methods and statics in TypeScript?",
+    "bn": "TypeScript-এ instance method আর static-এর type কীভাবে দেবে?"
+   }
+  ],
+  "related": [
+   "mongoose-001"
+  ],
+  "commonMistakes": {
+   "en": "Using arrow functions (then `this` is undefined); putting a static on `schema.methods` and wondering why `User.findByEmail` is undefined.",
+   "bn": "Arrow function ব্যবহার করা (তখন `this` undefined); static-কে `schema.methods`-এ রেখে অবাক হওয়া যে `User.findByEmail` কেন undefined।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import bcrypt from \"bcrypt\";\n\n// Instance method: this = document\nuserSchema.methods.comparePassword = function (plain) {\n  return bcrypt.compare(plain, this.passwordHash);\n};\n\n// Static: this = model\nuserSchema.statics.findByEmail = function (email) {\n  return this.findOne({ email: email.trim().toLowerCase() });\n};\n\n// Query helper: this = query\nproductSchema.query.inStock = function () {\n  return this.where({ stock: { $gt: 0 } });\n};\n\nconst user = await User.findByEmail(\"Rafi@Example.com\").select(\"+passwordHash\");\nconst ok = user && (await user.comparePassword(\"secret123\"));\nconst items = await Product.find({ category: \"electronics\" }).inStock().lean();"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-009",
+  "subtopic": "Validation",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "validation",
+   "validators",
+   "custom-validator",
+   "async-validator"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How does validation work in Mongoose? Explain built-in validators, custom validators, and when validation runs.",
+   "bn": "Mongoose-এ validation কীভাবে কাজ করে? Built-in validator, custom validator, আর validation কখন চলে — ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "Validation rules live on the schema paths and run in the app before data is written.\n\n- **Built-in validators:** `required` for any type; `min`/`max` for numbers and dates; `enum`, `match`, `minLength`, `maxLength` for strings. Each accepts a custom message, e.g. `required: [true, \"Phone is required\"]`.\n- **Custom validators:** `validate: { validator: fn, message }`. The function returns `true`/`false`; an **async** validator returns a promise, and a rejection or `false` means invalid.\n- **When it runs:** automatically on `save()` and `create()` (validation is a pre-save step), or manually with `doc.validate()`. It does **not** run on `updateOne`/`findOneAndUpdate` unless you pass `runValidators: true`.\n\nOn failure Mongoose throws a `ValidationError` whose `errors` object has one entry per invalid path.",
+   "bn": "Validation-এর নিয়ম schema-র path-এ থাকে, আর data লেখার আগে app-এর ভেতরেই চলে।\n\n- **Built-in validator:** যেকোনো type-এ `required`; number আর date-এ `min`/`max`; string-এ `enum`, `match`, `minLength`, `maxLength`। প্রতিটিতে custom message দেওয়া যায়, যেমন `required: [true, \"Phone is required\"]`।\n- **Custom validator:** `validate: { validator: fn, message }`। Function `true`/`false` return করে; **async** validator একটা promise return করে, আর reject হলে বা `false` দিলে invalid ধরা হয়।\n- **কখন চলে:** `save()` আর `create()`-এ automatically (validation হলো একটা pre-save ধাপ), অথবা `doc.validate()` দিয়ে manually। `runValidators: true` না দিলে `updateOne`/`findOneAndUpdate`-এ **চলে না**।\n\nFail করলে Mongoose একটা `ValidationError` throw করে, যার `errors` object-এ প্রতিটি invalid path-এর জন্য একটা করে entry থাকে।"
+  },
+  "explanation": {
+   "en": "- **Casting comes first:** if a value can't be cast (e.g. `\"abc\"` for a Number), you get a `CastError` inside `err.errors` and the other validators for that path don't run.\n- **Not validators:** `unique` (an index) and setters like `trim`/`lowercase` (transformations).\n- **Async validators** (e.g. \"the referenced category exists\") add a database query per save — fine for admin forms, costly in bulk imports.\n- **Message templates:** `{VALUE}` and `{PATH}` in messages are replaced with the actual value and path name.\n- **API boundary:** many teams validate request bodies with zod at the edge *and* keep Mongoose validation as the last line of defence for data integrity.",
+   "bn": "- **আগে casting:** value cast করা না গেলে (যেমন Number-এ `\"abc\"`) `err.errors`-এর ভেতরে একটা `CastError` আসে, আর ওই path-এর অন্য validator চলে না।\n- **Validator না:** `unique` (একটা index) আর `trim`/`lowercase`-এর মতো setter (রূপান্তর)।\n- **Async validator** (যেমন \"referenced category আছে কি না\") প্রতিটি save-এ একটা database query যোগ করে — admin form-এ ঠিক আছে, bulk import-এ ব্যয়বহুল।\n- **Message template:** message-এ `{VALUE}` আর `{PATH}` আসল value আর path name দিয়ে replace হয়।\n- **API boundary:** অনেক team request body-কে edge-এ zod দিয়ে validate করে, *আর* data integrity-র শেষ প্রতিরক্ষা হিসেবে Mongoose validation-ও রাখে।"
+  },
+  "interviewTip": {
+   "en": "Mention the \"doesn't run on updates by default\" rule even though it wasn't asked — it's the most common real-world validation bug and shows experience.",
+   "bn": "জিজ্ঞেস না করলেও \"default-ভাবে update-এ চলে না\" নিয়মটা উল্লেখ করো — বাস্তবে validation-এর সবচেয়ে common bug এটাই, আর এতে অভিজ্ঞতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Validation",
+    "url": "https://mongoosejs.com/docs/validation.html"
+   },
+   {
+    "title": "Mongoose — SchemaTypes",
+    "url": "https://mongoosejs.com/docs/schematypes.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you validate that `endDate` is after `startDate`?",
+    "bn": "`endDate` যে `startDate`-এর পরে, সেটা কীভাবে validate করবে?"
+   },
+   {
+    "en": "Why might you validate with zod and also keep Mongoose validators?",
+    "bn": "zod দিয়ে validate করার পরেও কেন Mongoose validator রাখবে?"
+   }
+  ],
+  "related": [
+   "mongoose-003",
+   "mongoose-012"
+  ],
+  "commonMistakes": {
+   "en": "Assuming validation runs on every write; treating `unique` as a validator; writing validators as arrow functions that need `this`.",
+   "bn": "ধরে নেওয়া প্রতিটি write-এ validation চলে; `unique`-কে validator মনে করা; `this` লাগে এমন validator arrow function দিয়ে লেখা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const customerSchema = new Schema({\n  name: { type: String, required: [true, \"Name is required\"], minLength: 2, maxLength: 80 },\n  phone: {\n    type: String,\n    required: true,\n    validate: {\n      validator: (v) => /^(?:\\+?88)?01[3-9]\\d{8}$/.test(v),   // Bangladeshi mobile\n      message: \"{VALUE} is not a valid Bangladeshi mobile number\",\n    },\n  },\n  age: { type: Number, min: [18, \"Must be at least 18\"] },\n  category: {\n    type: Schema.Types.ObjectId,\n    ref: \"Category\",\n    validate: {\n      // async validator: resolve false (or reject) = invalid\n      validator: async (id) => !!(await Category.exists({ _id: id })),\n      message: \"Category does not exist\",\n    },\n  },\n});\n\ntry {\n  await Customer.create({ name: \"R\", phone: \"12345\", age: 16 });\n} catch (err) {\n  console.log(Object.keys(err.errors));   // [ 'name', 'phone', 'age' ]\n}"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-016",
+  "subtopic": "Lean Queries",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "lean",
+   "performance",
+   "hydration",
+   "pojo",
+   "nextjs"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `.lean()` do in Mongoose, why is it faster, and what do you lose by using it?",
+   "bn": "Mongoose-এ `.lean()` কী করে, এটা কেন দ্রুত, আর ব্যবহার করলে কী কী হারাও?"
+  },
+  "answer": {
+   "en": "Normally Mongoose **hydrates** every result: it wraps the raw object from the driver in a full Mongoose document with change tracking, getters/setters, virtuals and methods. `.lean()` skips that step and returns **plain JavaScript objects**.\n\nThat's faster and uses much less memory, which matters for list endpoints returning hundreds of rows.\n\nWhat you lose on lean results:\n- `save()`, change tracking and `isModified()`\n- instance methods\n- virtuals and getters (and schema `toJSON` transforms)\n- defaults for fields missing in the stored document\n\nI use `.lean()` for **read-only** paths — API lists, reports, server-side rendering — and keep normal documents when I'm going to modify and `save()`, or need virtuals/methods.",
+   "bn": "সাধারণভাবে Mongoose প্রতিটি result **hydrate** করে: driver থেকে আসা raw object-কে change tracking, getter/setter, virtual আর method সহ পূর্ণ Mongoose document-এ মুড়ে দেয়। `.lean()` এই ধাপটা বাদ দিয়ে **plain JavaScript object** return করে।\n\nএটা দ্রুত আর অনেক কম memory ব্যবহার করে — শত শত row return করা list endpoint-এ এটা গুরুত্বপূর্ণ।\n\nLean result-এ যা হারাও:\n- `save()`, change tracking আর `isModified()`\n- instance method\n- virtual আর getter (আর schema-র `toJSON` transform)\n- stored document-এ না থাকা field-এর default\n\nআমি **read-only** পথে `.lean()` ব্যবহার করি — API list, report, server-side rendering — আর modify করে `save()` করব বা virtual/method লাগবে এমন জায়গায় সাধারণ document রাখি।"
+  },
+  "explanation": {
+   "en": "- **What still works:** the query filter is still cast by the schema (lean only affects the *result*), and `populate()` still works.\n- **Types are BSON types:** `_id` is still an `ObjectId` instance and dates are `Date` objects. When passing lean results from a Next.js Server Component to a Client Component, convert `_id` to a string — class instances like `ObjectId` aren't allowed across that boundary.\n- **Virtuals on lean results:** compute them yourself or use a plugin (e.g. `mongoose-lean-virtuals`).\n- **Hidden fields still hidden:** `select: false` applies to lean queries too.\n- **Rule of thumb:** if the handler ends with `res.json(result)` and never calls `save()`, it's a good candidate for `.lean()`.",
+   "bn": "- **যা এখনো কাজ করে:** query filter তখনও schema অনুযায়ী cast হয় (lean শুধু *result*-কে প্রভাবিত করে), আর `populate()`-ও কাজ করে।\n- **Type-গুলো BSON type:** `_id` তখনও `ObjectId` instance, আর date হলো `Date` object। Next.js Server Component থেকে Client Component-এ lean result পাঠালে `_id`-কে string-এ রূপান্তর করো — `ObjectId`-এর মতো class instance ওই boundary পার হতে পারে না।\n- **Lean result-এ virtual:** নিজে হিসাব করো, অথবা plugin ব্যবহার করো (যেমন `mongoose-lean-virtuals`)।\n- **লুকানো field লুকানোই থাকে:** `select: false` lean query-তেও apply হয়।\n- **মূল নিয়ম:** handler যদি `res.json(result)` দিয়ে শেষ হয় আর কখনো `save()` call না করে, তাহলে সেটা `.lean()`-এর ভালো প্রার্থী।"
+  },
+  "interviewTip": {
+   "en": "Frame lean as \"skip hydration\" and list what hydration gives you — then the trade-off explains itself. Mentioning the Next.js serialisation gotcha shows real-world use.",
+   "bn": "Lean-কে \"hydration বাদ দেওয়া\" হিসেবে ব্যাখ্যা করো আর hydration কী কী দেয় তার তালিকা বলো — তাহলে trade-off নিজেই বোঝা যায়। Next.js-এর serialisation gotcha উল্লেখ করলে বাস্তব ব্যবহারের অভিজ্ঞতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Faster Mongoose Queries With Lean",
+    "url": "https://mongoosejs.com/docs/tutorials/lean.html"
+   },
+   {
+    "title": "Mongoose — Queries",
+    "url": "https://mongoosejs.com/docs/queries.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you safely pass lean documents to a Next.js Client Component?",
+    "bn": "Lean document নিরাপদে Next.js Client Component-এ কীভাবে পাঠাবে?"
+   },
+   {
+    "en": "Would you use `.lean()` in a query that is later passed to `save()`? Why not?",
+    "bn": "যে query-র result পরে `save()`-এ যাবে, সেখানে কি `.lean()` ব্যবহার করবে? কেন না?"
+   }
+  ],
+  "related": [
+   "mongoose-007",
+   "mongoose-024"
+  ],
+  "commonMistakes": {
+   "en": "Calling `.save()` on a lean result; expecting virtuals in lean output; assuming lean turns `ObjectId`s into strings.",
+   "bn": "Lean result-এ `.save()` call করা; lean output-এ virtual আশা করা; ধরে নেওয়া যে lean `ObjectId`-কে string বানিয়ে দেয়।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Hydrated documents: needed when you modify and save\nconst order = await Order.findById(id);\norder.status = \"shipped\";\nawait order.save();\n\n// Lean: read-only list for an API response\nconst recent = await Order.find({ customerId })\n  .select(\"status totals.grandTotal createdAt\")\n  .sort({ createdAt: -1 })\n  .limit(20)\n  .lean();\n\nrecent[0] instanceof mongoose.Document;   // false — plain object\ntypeof recent[0].save;                    // \"undefined\"\nrecent[0]._id instanceof mongoose.Types.ObjectId;   // true"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-017",
+  "subtopic": "Error Handling",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "error-handling",
+   "validationerror",
+   "casterror",
+   "e11000",
+   "express-5"
+  ],
+  "technologyVersion": "Mongoose 9.11, Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write Express 5 error-handling middleware that turns Mongoose/MongoDB errors into clean API responses:\n\n- `ValidationError` → 400 with a message per field\n- `CastError` (e.g. an invalid ObjectId) → 400\n- duplicate key (E11000) → 409 naming the field\n- `DocumentNotFoundError` (from `.orFail()`) → 404\n- anything else → 500 without leaking internals\n\nExample: creating a user with an existing email returns `409 { \"error\": \"email already exists\" }`.",
+   "bn": "এমন একটা Express 5 error-handling middleware লেখো, যেটা Mongoose/MongoDB error-কে পরিষ্কার API response-এ রূপান্তর করবে:\n\n- `ValidationError` → 400, প্রতিটি field-এর message সহ\n- `CastError` (যেমন invalid ObjectId) → 400\n- duplicate key (E11000) → 409, field-এর নাম সহ\n- `DocumentNotFoundError` (`.orFail()` থেকে) → 404\n- বাকি সব → 500, ভেতরের কোনো তথ্য ফাঁস না করে\n\nউদাহরণ: আগে থেকে থাকা email দিয়ে user তৈরি করলে `409 { \"error\": \"email already exists\" }` return হবে।"
+  },
+  "answer": {
+   "en": "The middleware checks error types from most to least specific:\n\n- `mongoose.Error.ValidationError`: `err.errors` maps each path to a `ValidatorError` (or a `CastError` if casting failed during validation), so I turn it into `{ field: message }`.\n- `mongoose.Error.CastError`: thrown when a **query** value can't be cast, e.g. `findById(\"abc\")`. I report the path but don't echo internal details.\n- `DocumentNotFoundError` → 404, so routes can use `.orFail()` instead of manual `null` checks.\n- **E11000** isn't a Mongoose error class — it's a `MongoServerError` from the driver with `code: 11000` and `keyValue` (e.g. `{ email: \"a@x.com\" }`), so I check `err.code`.\n- Everything else is logged server-side and returned as a generic 500.\n\nIt has four parameters, which is how Express recognises error middleware, and it's registered after the routes.",
+   "bn": "Middleware-টা error type-গুলো সবচেয়ে নির্দিষ্ট থেকে কম নির্দিষ্ট ক্রমে check করে:\n\n- `mongoose.Error.ValidationError`: `err.errors` প্রতিটি path-কে একটা `ValidatorError`-এর সাথে map করে (validation-এর সময় casting fail করলে `CastError`), তাই আমি এটাকে `{ field: message }`-এ রূপান্তর করি।\n- `mongoose.Error.CastError`: কোনো **query** value cast করা না গেলে throw হয়, যেমন `findById(\"abc\")`। আমি path জানাই, কিন্তু ভেতরের বিস্তারিত echo করি না।\n- `DocumentNotFoundError` → 404, যাতে route-গুলো হাতে `null` check না করে `.orFail()` ব্যবহার করতে পারে।\n- **E11000** কোনো Mongoose error class না — এটা driver-এর `MongoServerError`, যেখানে `code: 11000` আর `keyValue` (যেমন `{ email: \"a@x.com\" }`) থাকে, তাই আমি `err.code` check করি।\n- বাকি সব server-side-এ log হয় আর generic 500 হিসেবে return হয়।\n\nএতে চারটা parameter আছে — Express এভাবেই error middleware চিনতে পারে — আর এটা route-গুলোর পরে register করা হয়।"
+  },
+  "explanation": {
+   "en": "- **Edge cases:** an error after headers were sent (streaming) must be delegated with `next(err)`; bulk inserts with duplicates throw a `MongoBulkWriteError` with per-document `writeErrors`; a `ValidationError` can contain several fields at once — return them all so the form can show every problem.\n- **Don't leak:** echoing `err.message` for unknown errors can reveal collection names, query shapes or stack traces.\n- **Consistency:** use one error shape for the whole API (e.g. `{ error, fields? }`), and consider mapping zod errors in the same middleware.\n- **Duplicate key in practice:** keep values normalised (`lowercase`, `trim`) so \"Rafi@x.com\" and \"rafi@x.com\" are caught as duplicates.\n- **Express 4 (legacy):** async errors were not forwarded automatically, so routes needed `try/catch` + `next(err)` or a wrapper; Express 5 handles rejected promises for you.",
+   "bn": "- **Edge case:** header পাঠানোর পরে error হলে (streaming) `next(err)` দিয়ে পাঠিয়ে দিতে হয়; duplicate সহ bulk insert একটা `MongoBulkWriteError` throw করে, যেখানে প্রতিটি document-এর `writeErrors` থাকে; একটা `ValidationError`-এ একসাথে কয়েকটা field থাকতে পারে — সবগুলোই return করো, যাতে form প্রতিটি সমস্যা দেখাতে পারে।\n- **তথ্য ফাঁস কোরো না:** অজানা error-এর `err.message` echo করলে collection-এর নাম, query-র shape বা stack trace বেরিয়ে যেতে পারে।\n- **Consistency:** পুরো API-তে একটাই error shape রাখো (যেমন `{ error, fields? }`), আর একই middleware-এ zod error map করার কথা ভাবো।\n- **বাস্তবে duplicate key:** value normalise করে রাখো (`lowercase`, `trim`), যাতে \"Rafi@x.com\" আর \"rafi@x.com\" duplicate হিসেবে ধরা পড়ে।\n- **Express 4 (legacy):** async error automatically forward হতো না, তাই route-এ `try/catch` + `next(err)` বা wrapper লাগত; Express 5 rejected promise নিজেই সামলায়।"
+  },
+  "interviewTip": {
+   "en": "Point out that E11000 comes from the driver, not Mongoose — it's a detail that shows you've actually debugged these errors rather than guessed at them.",
+   "bn": "উল্লেখ করো যে E11000 আসে driver থেকে, Mongoose থেকে না — এই detail-টাই দেখায় যে তুমি আসলে এই error-গুলো debug করেছ, আন্দাজে বলছ না।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Validation",
+    "url": "https://mongoosejs.com/docs/validation.html"
+   },
+   {
+    "title": "Express — Error handling",
+    "url": "https://expressjs.com/en/guide/error-handling.html"
+   },
+   {
+    "title": "Mongoose API — Mongoose (set options)",
+    "url": "https://mongoosejs.com/docs/api/mongoose.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you return field-level errors for an `insertMany` import?",
+    "bn": "`insertMany` import-এর জন্য field-level error কীভাবে return করবে?"
+   },
+   {
+    "en": "Where would you log the request ID so errors can be traced across services?",
+    "bn": "Service জুড়ে error trace করতে request ID কোথায় log করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-003",
+   "mongoose-005",
+   "mongoose-012"
+  ],
+  "commonMistakes": {
+   "en": "Checking `err.name === \"MongoError\"` (old class name); returning `err.message` to clients; defining the handler with three parameters so Express treats it as normal middleware.",
+   "bn": "`err.name === \"MongoError\"` check করা (পুরনো class name); client-কে `err.message` return করা; তিনটা parameter দিয়ে handler define করা, ফলে Express এটাকে সাধারণ middleware মনে করে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose from \"mongoose\";\n\nexport function mongooseErrorHandler(err, req, res, next) {\n  if (res.headersSent) return next(err);\n\n  if (err instanceof mongoose.Error.ValidationError) {\n    const fields = Object.fromEntries(\n      Object.entries(err.errors).map(([path, e]) => [path, e.message])\n    );\n    return res.status(400).json({ error: \"Validation failed\", fields });\n  }\n\n  if (err instanceof mongoose.Error.CastError) {\n    return res.status(400).json({ error: `Invalid value for '${err.path}'` });\n  }\n\n  if (err instanceof mongoose.Error.DocumentNotFoundError) {\n    return res.status(404).json({ error: \"Not found\" });\n  }\n\n  // Duplicate key comes from the MongoDB driver (MongoServerError), not Mongoose\n  if (err?.code === 11000) {\n    const field = Object.keys(err.keyValue ?? err.keyPattern ?? {})[0] ?? \"value\";\n    return res.status(409).json({ error: `${field} already exists` });\n  }\n\n  console.error(err);          // use your logger (pino, winston) in real apps\n  return res.status(500).json({ error: \"Internal server error\" });\n}\n\n// Register after all routes. In Express 5, errors thrown in async handlers\n// are forwarded here automatically — no try/catch needed in routes.\napp.post(\"/users\", async (req, res) => {\n  const user = await User.create(pickSignupFields(req.body));\n  res.status(201).json(user);\n});\napp.use(mongooseErrorHandler);"
+  },
+  "complexity": {
+   "time": "O(k) where k = number of invalid fields",
+   "space": "O(k)"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-018",
+  "subtopic": "Common Pitfalls",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "strictquery",
+   "filters",
+   "typos",
+   "pitfalls"
+  ],
+  "technologyVersion": "Mongoose 9.11 (`strictQuery` default false since Mongoose 7)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "With Mongoose 9 default settings, a developer runs `await User.deleteMany({ emial: \"spam@example.com\" })` — note the typo: `emial` is not a path in the schema. What happens?",
+   "bn": "Mongoose 9-এর default setting-এ একজন developer চালাল `await User.deleteMany({ emial: \"spam@example.com\" })` — খেয়াল করো typo: `emial` schema-র কোনো path না। কী হবে?"
+  },
+  "answer": {
+   "en": "Since Mongoose 7, `strictQuery` defaults to `false`, so filter properties that aren't in the schema are **kept** and passed to MongoDB. `{ emial: \"spam@example.com\" }` matches no documents, so `deletedCount` is 0.",
+   "bn": "Mongoose 7 থেকে `strictQuery`-এর default `false`, তাই schema-তে না থাকা filter property **রেখে দেওয়া হয়** আর MongoDB-তে পাঠানো হয়। `{ emial: \"spam@example.com\" }` কোনো document match করে না, তাই `deletedCount` 0।"
+  },
+  "explanation": {
+   "en": "Option B is exactly what happens with `strictQuery: true` (the Mongoose 6 default): unknown paths are stripped, the filter becomes `{}`, and `deleteMany({})` wipes the collection. That danger is one reason the default changed. Option C happens if you set `strictQuery: \"throw\"` — a good choice in development and tests to catch typos early.\n\nThe flip side of `false`: filter keys coming from user input aren't restricted to schema paths, so always validate request data before using it in a filter. Don't count on TypeScript here: Mongoose 9's stricter `QueryFilter` type checks value types for known paths, but an unknown key like `emial` still compiles — `strictQuery: \"throw\"` in tests is the reliable safety net.",
+   "bn": "Option B ঠিক সেটাই, যা `strictQuery: true` (Mongoose 6-এর default) থাকলে হয়: অজানা path বাদ পড়ে, filter হয়ে যায় `{}`, আর `deleteMany({})` পুরো collection মুছে দেয়। এই বিপদই default বদলানোর একটা কারণ। `strictQuery: \"throw\"` set করলে option C হয় — development আর test-এ আগেভাগে typo ধরার জন্য এটা ভালো পছন্দ।\n\n`false`-এর উল্টো দিক: user input থেকে আসা filter key schema path-এ সীমাবদ্ধ থাকে না, তাই filter-এ ব্যবহারের আগে সবসময় request data validate করো। এখানে TypeScript-এর ওপর ভরসা কোরো না: Mongoose 9-এর আরও কঠোর `QueryFilter` type জানা path-এর value type check করে, কিন্তু `emial`-এর মতো অজানা key তবুও compile হয়ে যায় — test-এ `strictQuery: \"throw\"`-ই নির্ভরযোগ্য safety net।"
+  },
+  "interviewTip": {
+   "en": "Explain all three settings (`false`, `true`, `\"throw\"`) and which one you'd use where — knowing *why* the default changed is the impressive part.",
+   "bn": "তিনটা setting-ই (`false`, `true`, `\"throw\"`) ব্যাখ্যা করো আর কোনটা কোথায় ব্যবহার করবে বলো — default *কেন* বদলেছে সেটা জানাটাই impressive অংশ।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Migrating to 7 (strictQuery default)",
+    "url": "https://mongoosejs.com/docs/migrating_to_7.html"
+   },
+   {
+    "title": "Mongoose API — Mongoose (set options)",
+    "url": "https://mongoosejs.com/docs/api/mongoose.html"
+   },
+   {
+    "title": "Mongoose — Query Casting",
+    "url": "https://mongoosejs.com/docs/tutorials/query_casting.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is `strictQuery: \"throw\"` useful in tests but risky as a production default for some teams?",
+    "bn": "Test-এ `strictQuery: \"throw\"` কেন কাজের, কিন্তু কিছু team-এর জন্য production default হিসেবে কেন ঝুঁকিপূর্ণ?"
+   }
+  ],
+  "related": [
+   "mongoose-012"
+  ],
+  "options": [
+   {
+    "en": "Mongoose maps the typo to the closest schema path, `email`, and deletes that user",
+    "bn": "Mongoose typo-টাকে সবচেয়ে কাছের schema path `email`-এ map করে সেই user delete করে"
+   },
+   {
+    "en": "Every user is deleted, because Mongoose strips unknown filter fields and the filter becomes `{}`",
+    "bn": "সব user delete হয়ে যায়, কারণ Mongoose অজানা filter field বাদ দেয় আর filter হয়ে যায় `{}`"
+   },
+   {
+    "en": "Mongoose throws a `StrictModeError` because `emial` isn't in the schema",
+    "bn": "`emial` schema-তে না থাকায় Mongoose একটা `StrictModeError` throw করে"
+   },
+   {
+    "en": "Nothing is deleted: with the default `strictQuery: false` the unknown field is sent to MongoDB as-is, and no document has an `emial` field",
+    "bn": "কিছুই delete হয় না: default `strictQuery: false`-এ অজানা field যেমন আছে তেমনই MongoDB-তে যায়, আর কোনো document-এ `emial` field নেই"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-026",
+  "subtopic": "Security",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "security",
+   "nosql-injection",
+   "sanitizefilter",
+   "mass-assignment",
+   "redos",
+   "select-false"
+  ],
+  "technologyVersion": "Mongoose 9.11, Express 5, zod 4",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Review these four lines from an Express + Mongoose API for security problems:\n\n1. Login: `User.findOne({ email: req.body.email, password: req.body.password })`\n2. Signup: `User.create(req.body)`\n3. Search: `Product.find({ name: { $regex: req.query.q, $options: \"i\" } })`\n4. Profile: `res.json(await User.findById(req.userId))`\n\nHow would you fix each one, and which Mongoose features help?",
+   "bn": "একটা Express + Mongoose API-র এই চারটা line security-র দৃষ্টিতে review করো:\n\n1. Login: `User.findOne({ email: req.body.email, password: req.body.password })`\n2. Signup: `User.create(req.body)`\n3. Search: `Product.find({ name: { $regex: req.query.q, $options: \"i\" } })`\n4. Profile: `res.json(await User.findById(req.userId))`\n\nপ্রতিটি কীভাবে ঠিক করবে, আর কোন Mongoose feature সাহায্য করে?"
+  },
+  "answer": {
+   "en": "1. **Query selector injection + plain-text passwords.** Sending `{ \"email\": \"admin@shop.com\", \"password\": { \"$ne\": null } }` logs in as admin. Fix: validate that both values are strings (zod), query **only by email**, compare a bcrypt/argon2 hash in the app. Mongoose's **`sanitizeFilter`** option adds a second layer: it wraps nested objects that contain `$` keys in `$eq`, so `{ $ne: null }` becomes a literal value that matches nothing (use `mongoose.trusted()` for operators you add intentionally).\n2. **Mass assignment.** `User.create(req.body)` accepts any schema field, so a client can send `role: \"admin\"` or `isVerified: true`. `strict` mode only drops fields that aren't in the schema — `role` is. Fix: pick allowed fields explicitly; set privileged fields server-side.\n3. **Regex injection / ReDoS.** Raw user input becomes a regular expression: `.*` dumps everything, and patterns with catastrophic backtracking burn database CPU. A case-insensitive regex also can't use an index efficiently, even when anchored. Fix: validate type and length, escape special characters, limit results; for an index-backed prefix search, match a case-sensitive `^prefix` against a normalised lowercase field — or use a text index / Atlas Search.\n4. **Sensitive data exposure.** Returning the whole document leaks `passwordHash`, reset tokens and internal fields. Fix: `select: false` on sensitive paths plus a `toJSON` transform (or an explicit response DTO).",
+   "bn": "1. **Query selector injection + plain-text password।** `{ \"email\": \"admin@shop.com\", \"password\": { \"$ne\": null } }` পাঠালেই admin হিসেবে login হয়ে যায়। Fix: দুইটা value-ই string কি না validate করো (zod), **শুধু email দিয়ে** query করো, app-এ bcrypt/argon2 hash compare করো। Mongoose-এর **`sanitizeFilter`** option আরেকটা স্তর যোগ করে: `$` key থাকা nested object-কে `$eq`-এ মুড়ে দেয়, ফলে `{ $ne: null }` একটা literal value হয়ে যায় যা কিছুই match করে না (ইচ্ছাকৃতভাবে যোগ করা operator-এর জন্য `mongoose.trusted()` ব্যবহার করো)।\n2. **Mass assignment।** `User.create(req.body)` যেকোনো schema field নেয়, তাই client `role: \"admin\"` বা `isVerified: true` পাঠাতে পারে। `strict` mode শুধু schema-তে না থাকা field বাদ দেয় — `role` তো schema-তেই আছে। Fix: অনুমোদিত field explicitly বেছে নাও; privileged field server-side-এ set করো।\n3. **Regex injection / ReDoS।** Raw user input regular expression হয়ে যায়: `.*` দিলে সব বেরিয়ে আসে, আর catastrophic backtracking-ওয়ালা pattern database-এর CPU পুড়িয়ে দেয়। Case-insensitive regex anchor করা থাকলেও দক্ষভাবে index ব্যবহার করতে পারে না। Fix: type আর length validate করো, special character escape করো, result সীমিত করো; index-backed prefix search চাইলে একটা normalised lowercase field-এর ওপর case-sensitive `^prefix` match করো — অথবা text index / Atlas Search ব্যবহার করো।\n4. **Sensitive data ফাঁস।** পুরো document return করলে `passwordHash`, reset token আর internal field বেরিয়ে যায়। Fix: sensitive path-এ `select: false` আর একটা `toJSON` transform (অথবা explicit response DTO)।"
+  },
+  "explanation": {
+   "en": "- **`sanitizeFilter` is not a substitute for validation:** it protects filters, not updates, and it doesn't stop `$where`/`$function` code you build yourself. Validation at the edge remains the primary control.\n- **`strictQuery: false` (default since Mongoose 7)** means unknown filter keys pass through to MongoDB — another reason to validate the shape of any user-controlled filter (e.g. API \"filter\" query params).\n- **Express 5 helps a little:** its default `'simple'` query parser doesn't build nested objects from `?q[$ne]=x`, but JSON bodies can still contain objects.\n- **Performance angle:** bounded `limit`, `.lean()` and indexed, case-sensitive prefix queries also prevent a single request from exhausting database CPU — security and performance overlap here.\n- **Logging:** never log full request bodies on auth routes (passwords) and redact tokens.",
+   "bn": "- **`sanitizeFilter` validation-এর বিকল্প না:** এটা filter রক্ষা করে, update না, আর তুমি নিজে যে `$where`/`$function` code বানাও সেটাও আটকায় না। Edge-এ validation-ই মূল নিয়ন্ত্রণ।\n- **`strictQuery: false` (Mongoose 7 থেকে default)** মানে অজানা filter key MongoDB পর্যন্ত চলে যায় — user-controlled যেকোনো filter-এর (যেমন API-র \"filter\" query param) shape validate করার আরেকটা কারণ।\n- **Express 5 একটু সাহায্য করে:** এর default `'simple'` query parser `?q[$ne]=x` থেকে nested object বানায় না, কিন্তু JSON body-তে তবুও object থাকতে পারে।\n- **Performance-এর দিক:** সীমিত `limit`, `.lean()` আর indexed, case-sensitive prefix query একটা request-কে database-এর CPU শেষ করে ফেলা থেকেও আটকায় — এখানে security আর performance মিলে যায়।\n- **Logging:** auth route-এ কখনো পুরো request body log কোরো না (password থাকে), আর token redact করো।"
+  },
+  "interviewTip": {
+   "en": "For each snippet, state the attack first (payload or scenario), then the fix, then the Mongoose feature that adds depth. Concrete payloads make the answer far more convincing than \"sanitise inputs\".",
+   "bn": "প্রতিটি snippet-এর জন্য আগে attack-টা বলো (payload বা scenario), তারপর fix, তারপর যে Mongoose feature বাড়তি সুরক্ষা দেয়। \"Input sanitise করো\" বলার চেয়ে concrete payload উত্তরকে অনেক বেশি বিশ্বাসযোগ্য করে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose API — Mongoose (set options)",
+    "url": "https://mongoosejs.com/docs/api/mongoose.html"
+   },
+   {
+    "title": "Mongoose — Query Casting",
+    "url": "https://mongoosejs.com/docs/tutorials/query_casting.html"
+   },
+   {
+    "title": "OWASP — NoSQL Security Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/NoSQL_Security_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you let admins build flexible filters from the UI without opening an injection hole?",
+    "bn": "Injection-এর ফাঁক না রেখে admin-দের UI থেকে flexible filter বানাতে দেবে কীভাবে?"
+   },
+   {
+    "en": "Where do `select: false` fields still leak (e.g. aggregation)?",
+    "bn": "`select: false` field কোথায় এখনো ফাঁস হতে পারে (যেমন aggregation-এ)?"
+   }
+  ],
+  "related": [
+   "mongoose-018",
+   "mongoose-024"
+  ],
+  "commonMistakes": {
+   "en": "Believing Mongoose schemas make injection impossible; relying on `strict` mode to block privileged fields; escaping regex input but still allowing unlimited length and unbounded results.",
+   "bn": "Mongoose schema থাকলে injection অসম্ভব মনে করা; privileged field আটকাতে `strict` mode-এর ওপর ভরসা করা; regex input escape করলেও সীমাহীন length আর unbounded result রেখে দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// 1) Login\nconst user = await User.findOne({ email: req.body.email, password: req.body.password });\n\n// 2) Signup\nconst created = await User.create(req.body);\n\n// 3) Product search\nconst products = await Product.find({ name: { $regex: req.query.q, $options: \"i\" } });\n\n// 4) Profile\nres.json(await User.findById(req.userId));"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "mongoose.set(\"sanitizeFilter\", true);   // defence in depth against query selector injection\n\n// 1) Login: strings only, look up by email, compare the hash in the app\nconst { email, password } = LoginBody.parse(req.body);          // zod schema\nconst user = await User.findOne({ email }).select(\"+passwordHash\");\nconst ok = user && (await bcrypt.compare(password, user.passwordHash));\n\n// 2) Signup: whitelist fields; role/flags are never taken from the client\nconst { name, email: newEmail, password: pw } = SignupBody.parse(req.body);\nconst created = await User.create({ name, email: newEmail, passwordHash: await bcrypt.hash(pw, 12) });\n\n// 3) Search: validated, length-limited, escaped, bounded result; a case-sensitive\n//    prefix on a lowercase copy (nameLower) can use an index, unlike $options: \"i\"\nconst { q } = SearchQuery.parse(req.query);                      // z.string().min(1).max(50)\nconst safe = q.toLowerCase().replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\");\nconst products = await Product.find({ nameLower: { $regex: `^${safe}` } })\n  .limit(20).lean();\n\n// 4) Profile: sensitive fields hidden by the schema\nres.json(await User.findById(req.userId));",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   },
+   {
+    "language": "javascript",
+    "source": "const userSchema = new Schema({\n  name: { type: String, required: true, trim: true },\n  email: { type: String, required: true, unique: true, lowercase: true, trim: true },\n  passwordHash: { type: String, required: true, select: false },\n  role: { type: String, enum: [\"customer\", \"admin\"], default: \"customer\" },\n  resetToken: { type: String, select: false },\n}, {\n  toJSON: {\n    transform(doc, ret) {\n      delete ret.passwordHash;\n      delete ret.resetToken;\n      delete ret.__v;\n      return ret;\n    },\n  },\n});",
+    "label": {
+     "en": "Schema-level protections",
+     "bn": "Schema-level সুরক্ষা"
+    }
+   }
+  ],
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-027",
+  "subtopic": "Middleware & Hooks",
+  "difficulty": "hard",
+  "type": "scenario",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 10,
+  "tags": [
+   "soft-delete",
+   "query-middleware",
+   "plugins",
+   "ttl",
+   "partial-index",
+   "aggregate-middleware"
+  ],
+  "technologyVersion": "Mongoose 9.11 (sync/async hooks without next), MongoDB 9.0",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Product wants \"soft delete\" for users and posts: deleted items must disappear from every query in the app but stay in the database for 30 days for recovery and audits. How would you implement this with Mongoose, and what pitfalls would you watch for?",
+   "bn": "Product team user আর post-এর জন্য \"soft delete\" চায়: delete করা item app-এর সব query থেকে অদৃশ্য হবে, কিন্তু recovery আর audit-এর জন্য 30 দিন database-এ থাকবে। Mongoose দিয়ে এটা কীভাবে implement করবে, আর কোন কোন pitfall-এর দিকে নজর রাখবে?"
+  },
+  "answer": {
+   "en": "**Clarify:** should related data (a deleted user's posts) also hide? Can a deleted user's email be reused? Who can see or restore deleted items?\n\n**Implementation — a reusable plugin:**\n- Add `isDeleted: Boolean` (default `false`, backfilled on existing documents) and `deletedAt: Date`.\n- **Query middleware** on `/^find/` (covers `find`, `findOne`, `findById`, `findOneAndUpdate`…) plus `countDocuments`, `updateOne`, `updateMany`: if the filter doesn't already mention `isDeleted`, add `{ isDeleted: false }`. In query middleware `this` is the Query, so `this.getFilter()` / `this.where()` do the job.\n- **Aggregate middleware:** `pre(\"aggregate\")` prepends `{ $match: { isDeleted: false } }` — aggregations don't trigger find hooks.\n- A `softDelete()` method that sets both fields, used instead of `deleteOne()`.\n- **Purge:** a TTL index on `deletedAt` with `expireAfterSeconds` = 30 days. Documents with no `deletedAt` never expire.\n- **Uniqueness:** make `email` unique only among live users with a partial index (`partialFilterExpression: { isDeleted: false }`) so a deleted account doesn't block re-registration.\n\n**Pitfalls:** hooks don't cover `Model.collection.*`, the native driver, or `bulkWrite`; `$geoNear`/`$search` must be the first pipeline stage, so prepending `$match` breaks them; `populate()` runs find middleware on the referenced model, so deleted references become `null`; TTL deletion bypasses Mongoose entirely (no cascade, no hooks); every query now has an extra condition, so check that hot indexes still fit (add `isDeleted` to compound indexes where needed).",
+   "bn": "**আগে প্রশ্ন পরিষ্কার করো:** related data-ও (delete হওয়া user-এর post) কি লুকাবে? Delete হওয়া user-এর email কি আবার ব্যবহার করা যাবে? কে delete হওয়া item দেখতে বা restore করতে পারবে?\n\n**Implementation — একটা reusable plugin:**\n- `isDeleted: Boolean` (default `false`, আগের document-এ backfill করা) আর `deletedAt: Date` যোগ করো।\n- `/^find/`-এ **query middleware** (`find`, `findOne`, `findById`, `findOneAndUpdate`… cover করে), সাথে `countDocuments`, `updateOne`, `updateMany`: filter-এ আগে থেকে `isDeleted` না থাকলে `{ isDeleted: false }` যোগ করো। Query middleware-এ `this` হলো Query, তাই `this.getFilter()` / `this.where()` দিয়েই কাজ হয়।\n- **Aggregate middleware:** `pre(\"aggregate\")` শুরুতে `{ $match: { isDeleted: false } }` বসিয়ে দেয় — aggregation find hook চালায় না।\n- একটা `softDelete()` method, যেটা দুইটা field-ই set করে আর `deleteOne()`-এর বদলে ব্যবহার হয়।\n- **Purge:** `deletedAt`-এ 30 দিনের `expireAfterSeconds` সহ TTL index। যাদের `deletedAt` নেই, তারা কখনো expire হয় না।\n- **Uniqueness:** partial index দিয়ে (`partialFilterExpression: { isDeleted: false }`) `email` শুধু live user-দের মধ্যে unique রাখো, যাতে delete হওয়া account আবার registration আটকে না দেয়।\n\n**Pitfall:** hook `Model.collection.*`, native driver বা `bulkWrite` cover করে না; `$geoNear`/`$search` pipeline-এর প্রথম stage হতে হয়, তাই আগে `$match` বসালে এগুলো ভেঙে যায়; `populate()` referenced model-এ find middleware চালায়, তাই delete হওয়া reference `null` হয়ে যায়; TTL deletion পুরোপুরি Mongoose bypass করে (কোনো cascade বা hook নেই); প্রতিটি query-তে এখন একটা বাড়তি condition, তাই hot index এখনো মানানসই কি না দেখো (দরকার হলে compound index-এ `isDeleted` যোগ করো)।"
+  },
+  "explanation": {
+   "en": "- **Why a boolean plus a date?** Filtering on `isDeleted: false` is simple equality (index- and partial-index-friendly), while `deletedAt` drives the TTL purge. Backfill `isDeleted: false` before enabling the hook, or old documents (missing the field) vanish from queries.\n- **Escape hatch:** admins can query deleted items explicitly (`{ isDeleted: true }`) because the hook leaves filters that already mention `isDeleted` alone.\n- **Alternative design:** move deleted documents into an archive collection (`users_deleted`) inside a transaction. Live queries need no middleware at all; restoring is a move back. It's often simpler when deletes are rare.\n- **Compliance:** if a user requests permanent erasure, soft delete isn't enough — you need a real purge path, including backups policy.\n- **Testing:** write tests that assert deleted documents don't appear via `find`, `findById`, `countDocuments`, `aggregate` and `populate` — that's where regressions hide.",
+   "bn": "- **Boolean আর date দুটোই কেন?** `isDeleted: false` দিয়ে filter করা সহজ equality (index আর partial index-এর জন্য সুবিধাজনক), আর `deletedAt` TTL purge চালায়। Hook চালু করার আগে `isDeleted: false` backfill করো, নইলে পুরনো document (যেগুলোতে field নেই) query থেকে উধাও হয়ে যাবে।\n- **Escape hatch:** admin explicitly delete হওয়া item query করতে পারে (`{ isDeleted: true }`), কারণ filter-এ আগে থেকে `isDeleted` থাকলে hook সেটা ছুঁয়ে দেখে না।\n- **বিকল্প design:** delete হওয়া document একটা transaction-এর ভেতরে archive collection-এ (`users_deleted`) সরিয়ে নাও। তখন live query-তে কোনো middleware-ই লাগে না; restore মানে আবার ফিরিয়ে আনা। Delete কম হলে এটা প্রায়ই সহজ।\n- **Compliance:** কোনো user স্থায়ীভাবে মুছে ফেলার অনুরোধ করলে soft delete যথেষ্ট না — backup policy সহ একটা আসল purge পথ লাগবে।\n- **Testing:** এমন test লেখো যেগুলো নিশ্চিত করে delete হওয়া document `find`, `findById`, `countDocuments`, `aggregate` আর `populate`-এ আসে না — regression এখানেই লুকিয়ে থাকে।"
+  },
+  "interviewTip": {
+   "en": "Spend most of the answer on the pitfalls — anyone can write a `pre(/^find/)` hook; knowing where it silently doesn't apply (aggregate, populate, TTL, unique indexes) is what the interviewer is testing.",
+   "bn": "উত্তরের বেশিরভাগ সময় pitfall-এ দাও — `pre(/^find/)` hook যে কেউ লিখতে পারে; কোথায় এটা চুপচাপ apply হয় না (aggregate, populate, TTL, unique index) সেটা জানাই interviewer যাচাই করছে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Middleware",
+    "url": "https://mongoosejs.com/docs/middleware.html"
+   },
+   {
+    "title": "Mongoose — Plugins",
+    "url": "https://mongoosejs.com/docs/plugins.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you restore a soft-deleted user together with their posts?",
+    "bn": "একজন soft-deleted user-কে তার post সহ কীভাবে restore করবে?"
+   },
+   {
+    "en": "Would you choose the archive-collection approach instead? When?",
+    "bn": "এর বদলে কি archive-collection পদ্ধতি বেছে নেবে? কখন?"
+   }
+  ],
+  "related": [
+   "mongoose-014",
+   "mongoose-008"
+  ],
+  "commonMistakes": {
+   "en": "Adding only a `find` hook (missing `findOne`, counts and aggregations); forgetting to backfill the flag; keeping a plain unique index on email so deleted users block sign-ups.",
+   "bn": "শুধু `find` hook যোগ করা (`findOne`, count আর aggregation বাদ পড়ে); flag backfill করতে ভুলে যাওয়া; email-এ সাধারণ unique index রেখে দেওয়া, ফলে delete হওয়া user sign-up আটকে দেয়।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "export function softDeletePlugin(schema) {\n  schema.add({\n    isDeleted: { type: Boolean, default: false },\n    deletedAt: { type: Date },\n  });\n\n  // Purge 30 days after soft delete (TTL ignores documents without a Date)\n  schema.index({ deletedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });\n\n  function hideDeleted() {                     // Mongoose 9: no next()\n    if (!(\"isDeleted\" in this.getFilter())) this.where({ isDeleted: false });\n  }\n  schema.pre(/^find/, hideDeleted);\n  schema.pre([\"countDocuments\", \"updateOne\", \"updateMany\"], hideDeleted);\n\n  schema.pre(\"aggregate\", function () {\n    this.pipeline().unshift({ $match: { isDeleted: false } });\n  });\n\n  schema.methods.softDelete = function () {\n    this.isDeleted = true;\n    this.deletedAt = new Date();\n    return this.save();\n  };\n}\n\nuserSchema.plugin(softDeletePlugin);\nuserSchema.index(\n  { email: 1 },\n  { unique: true, partialFilterExpression: { isDeleted: false } }\n);"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-032",
+  "subtopic": "Indexes",
+  "difficulty": "extreme",
+  "type": "architecture",
+  "market": "international",
+  "priority": "high",
+  "estimatedMinutes": 18,
+  "tags": [
+   "indexes",
+   "autoindex",
+   "syncindexes",
+   "migrations",
+   "mongodb-9",
+   "production"
+  ],
+  "technologyVersion": "Mongoose 9.11 (syncIndexes fix for MongoDB 9.0 in 9.10.4 / 8.24.5), MongoDB 9.0",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Your Express + Mongoose API runs as 12 Kubernetes pods against a MongoDB 9.0 replica set (~200 GB). Indexes are declared in schemas, `autoIndex` is on, and the app calls `syncIndexes()` at startup. Last week a deploy added `unique: true` on `users.phone`: no error surfaced, yet duplicates keep appearing. Since the MongoDB 9.0 upgrade, every pod restart also seems to rebuild indexes and spike CPU/IO. Explain what's happening and design a production index-management strategy.",
+   "bn": "তোমার Express + Mongoose API 12টা Kubernetes pod হিসেবে একটা MongoDB 9.0 replica set-এর (~200 GB) বিরুদ্ধে চলে। Index schema-তে declare করা, `autoIndex` চালু, আর app startup-এ `syncIndexes()` call করে। গত সপ্তাহে একটা deploy-এ `users.phone`-এ `unique: true` যোগ হয়েছে: কোনো error দেখা যায়নি, তবুও duplicate আসতেই থাকছে। MongoDB 9.0 upgrade-এর পর থেকে প্রতিবার pod restart-এ index rebuild হচ্ছে বলে মনে হয়, CPU/IO বেড়ে যাচ্ছে। কী ঘটছে ব্যাখ্যা করো, আর production-এর জন্য একটা index-management strategy design করো।"
+  },
+  "answer": {
+   "en": "*(Advanced: production operations and data integrity.)*\n\n**What's happening:**\n- With `autoIndex`, each model calls `createIndexes()` when the app connects — 12 pods race to build the same indexes on every deploy. The new unique index **failed to build** because duplicate phones already existed; Mongoose reports that only as an `'index'` error event / log line, the app keeps running, and the uniqueness you think you have doesn't exist.\n- Known MongoDB 9.0 issue: at FCV 9.0, `listIndexes` reports `collation: { locale: \"simple\" }`, and Mongoose versions before **9.10.4 / 8.24.5** see that as a difference — so `syncIndexes()` **drops and rebuilds unchanged indexes at each startup**. That's the CPU/IO spike, and while a unique index is being rebuilt it isn't enforcing anything.\n\n**Strategy — treat indexes like schema migrations:**\n1. **Upgrade Mongoose** to ≥ 9.10.4 and **stop calling `syncIndexes()` at startup**.\n2. **`autoIndex: false` in production.** Schema index definitions stay the source of truth, but nothing builds or drops automatically.\n3. **A migration job, run once per deploy by the pipeline** (not per pod): review `Model.diffIndexes()`, create new indexes explicitly with `createIndexes()` (create-only), and drop only after review.\n4. **Before adding a unique index:** find and resolve duplicates with an aggregation, normalise the data (e.g. phone numbers to `+8801…` format), use a partial index if the field is optional, then build — and **verify the index exists** afterwards.\n5. **Large builds:** run off-peak and monitor progress (`$currentOp`). Index builds hold exclusive locks only briefly but consume CPU/IO and cache on every data-bearing member.\n6. **Safe drops:** **hide** the index first (`collMod` with `hidden: true`), watch latency for a few days, then drop. Unhiding is instant; rebuilding isn't.\n7. **Observability & CI:** alert on model `'index'` errors, compare `diffIndexes()` against staging in CI to detect drift, and review `$indexStats` for unused indexes.",
+   "bn": "*(Advanced: production operations আর data integrity।)*\n\n**কী ঘটছে:**\n- `autoIndex` চালু থাকলে app connect হওয়ার সময় প্রতিটি model `createIndexes()` call করে — প্রতিটি deploy-এ 12টা pod একই index বানানোর প্রতিযোগিতায় নামে। নতুন unique index **build হতে fail করেছে**, কারণ আগে থেকেই duplicate phone ছিল; Mongoose এটা শুধু একটা `'index'` error event / log line হিসেবে জানায়, app চলতেই থাকে, আর তুমি যে uniqueness আছে বলে ভাবছ সেটা আসলে নেই।\n- MongoDB 9.0-এর known issue: FCV 9.0-তে `listIndexes` `collation: { locale: \"simple\" }` report করে, আর **9.10.4 / 8.24.5**-এর আগের Mongoose version এটাকে পার্থক্য হিসেবে দেখে — তাই `syncIndexes()` **প্রতিটি startup-এ অপরিবর্তিত index drop করে আবার build করে**। এটাই CPU/IO spike, আর unique index rebuild হওয়ার সময় সেটা কিছুই enforce করে না।\n\n**Strategy — index-কে schema migration-এর মতো সামলাও:**\n1. Mongoose **9.10.4 বা তার ওপরে upgrade করো** আর **startup-এ `syncIndexes()` call করা বন্ধ করো**।\n2. **Production-এ `autoIndex: false`।** Schema-র index definition-ই source of truth থাকবে, কিন্তু automatically কিছু build বা drop হবে না।\n3. **একটা migration job, pipeline প্রতি deploy-এ একবার চালাবে** (প্রতি pod-এ না): `Model.diffIndexes()` review করো, নতুন index explicitly `createIndexes()` দিয়ে বানাও (শুধু create করে), আর review-এর পরেই কেবল drop করো।\n4. **Unique index যোগ করার আগে:** aggregation দিয়ে duplicate খুঁজে সমাধান করো, data normalise করো (যেমন phone number `+8801…` format-এ), field optional হলে partial index ব্যবহার করো, তারপর build করো — আর পরে **index আসলেই আছে কি না verify করো**।\n5. **বড় build:** কম traffic-এর সময় চালাও আর progress দেখো (`$currentOp`)। Index build অল্প সময়ের জন্য exclusive lock নেয়, কিন্তু প্রতিটি data-bearing member-এ CPU/IO আর cache খরচ করে।\n6. **নিরাপদ drop:** আগে index **hide** করো (`hidden: true` সহ `collMod`), কয়েক দিন latency দেখো, তারপর drop করো। Unhide সাথে সাথে হয়; rebuild হয় না।\n7. **Observability ও CI:** model-এর `'index'` error-এ alert দাও, drift ধরতে CI-তে staging-এর বিরুদ্ধে `diffIndexes()` compare করো, আর অব্যবহৃত index-এর জন্য `$indexStats` review করো।"
+  },
+  "explanation": {
+   "en": "- **`createIndexes()` vs `syncIndexes()`:** `createIndexes()` only builds what's missing; `syncIndexes()` also **drops** indexes that aren't in the schema — including ones a DBA added by hand for a hot query. Dropping should always be a reviewed, deliberate step.\n- **Why not per pod?** Index management is a cluster-level operation; doing it from every replica of the app multiplies load, creates races and hides failures in individual pod logs.\n- **Rolling index builds** (one member at a time) exist for the rare cases where a simultaneous replica-set build is too disruptive; they're operationally heavier.\n- **Atlas:** the same principles apply; Atlas also surfaces index suggestions (Performance Advisor) — treat them as input for a migration, not auto-apply.\n- **Version awareness:** this incident combines a MongoDB server change and an ODM bug fix; reading both release notes before upgrading is part of the job.",
+   "bn": "- **`createIndexes()` বনাম `syncIndexes()`:** `createIndexes()` শুধু যেটা নেই সেটা build করে; `syncIndexes()` schema-তে না থাকা index **drop-ও করে** — এমনকি কোনো DBA hot query-র জন্য হাতে বানানো index-ও। Drop করা সবসময় review করা, সচেতন একটা ধাপ হওয়া উচিত।\n- **প্রতি pod-এ কেন না?** Index management একটা cluster-level কাজ; app-এর প্রতিটি replica থেকে করলে load বহুগুণ বাড়ে, race তৈরি হয়, আর failure আলাদা আলাদা pod log-এ লুকিয়ে থাকে।\n- **Rolling index build** (একবারে একটা member) আছে সেই বিরল ক্ষেত্রের জন্য, যখন পুরো replica set-এ একসাথে build খুব বিঘ্ন ঘটায়; এটা operationally ভারী।\n- **Atlas:** একই নীতি খাটে; Atlas index-এর পরামর্শও দেখায় (Performance Advisor) — এগুলো auto-apply না করে migration-এর input হিসেবে নাও।\n- **Version সচেতনতা:** এই incident-এ একটা MongoDB server পরিবর্তন আর একটা ODM bug fix মিলে গেছে; upgrade-এর আগে দুটোর release note পড়াও কাজের অংশ।"
+  },
+  "interviewTip": {
+   "en": "Name the integrity risk first (\"we believe phone is unique, but it isn't\") — it's more serious than the CPU spike. Then present the migration-based workflow with hide-before-drop; that's what operators of large systems recognise as experience.",
+   "bn": "আগে integrity-র ঝুঁকিটা বলো (\"আমরা ভাবছি phone unique, কিন্তু আসলে না\") — এটা CPU spike-এর চেয়ে গুরুতর। তারপর hide-before-drop সহ migration-ভিত্তিক workflow দেখাও; বড় system চালানো লোকেরা এটাকেই অভিজ্ঞতা হিসেবে চেনে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose API — Model (createIndexes, diffIndexes, syncIndexes)",
+    "url": "https://mongoosejs.com/docs/api/model.html"
+   },
+   {
+    "title": "MongoDB 9.0 Release Notes (known issues)",
+    "url": "https://www.mongodb.com/docs/manual/release-notes/9.0/"
+   },
+   {
+    "title": "MongoDB Manual — Index Builds on Populated Collections",
+    "url": "https://www.mongodb.com/docs/manual/core/index-creation/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add a unique index on 50 million documents with minimal impact?",
+    "bn": "50 million document-এ সবচেয়ে কম প্রভাব ফেলে কীভাবে unique index যোগ করবে?"
+   },
+   {
+    "en": "A DBA added an index manually for a hot query. How do you keep it from being dropped by tooling?",
+    "bn": "একজন DBA একটা hot query-র জন্য হাতে একটা index বানিয়েছে। Tooling যেন সেটা drop না করে, কীভাবে নিশ্চিত করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-003",
+   "mongoose-030"
+  ],
+  "commonMistakes": {
+   "en": "Leaving `autoIndex` on in production \"because it's convenient\"; running `syncIndexes()` on every boot; assuming a unique index exists because it's in the schema; dropping an index without hiding it first.",
+   "bn": "\"সুবিধাজনক\" বলে production-এ `autoIndex` চালু রাখা; প্রতিটি boot-এ `syncIndexes()` চালানো; schema-তে আছে বলেই unique index আছে ধরে নেওয়া; আগে hide না করে index drop করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// App startup (production): never build or drop indexes here\nawait mongoose.connect(process.env.MONGODB_URI, { autoIndex: false });\n\n// migrations/2026-10-12-users-phone-unique.js — run once by the deploy pipeline\nconst dups = await User.aggregate([\n  { $match: { phone: { $type: \"string\" } } },\n  { $group: { _id: \"$phone\", ids: { $push: \"$_id\" }, n: { $sum: 1 } } },\n  { $match: { n: { $gt: 1 } } },\n]);\nif (dups.length) throw new Error(`Resolve ${dups.length} duplicate phone numbers first`);\n\nconsole.log(await User.diffIndexes());   // { toDrop: [...], toCreate: [...] } — review\nawait User.createIndexes();               // builds missing indexes only; never drops\n\n// Later, to retire an index safely: hide → observe → drop\nawait mongoose.connection.db.command({\n  collMod: \"users\",\n  index: { name: \"status_1_createdAt_-1\", hidden: true },\n});"
+  },
+  "technology": "mongoose"
+ }
+]

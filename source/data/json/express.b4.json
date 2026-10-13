@@ -1,0 +1,451 @@
+[
+ {
+  "id": "express-021",
+  "subtopic": "Security Headers (helmet)",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "helmet",
+   "security-headers",
+   "csp",
+   "hsts"
+  ],
+  "technologyVersion": "Express 5.x; helmet 8.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What does adding `app.use(helmet())` to an Express app actually do?",
+   "bn": "Express app-এ `app.use(helmet())` যোগ করলে আসলে কী হয়?"
+  },
+  "answer": {
+   "en": "It sets security-related HTTP **response headers**. Helmet 8's defaults include a baseline `Content-Security-Policy`, `Strict-Transport-Security` (one year, `includeSubDomains`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: no-referrer`, cross-origin isolation headers, `X-XSS-Protection: 0`, and it removes `X-Powered-By`.",
+   "bn": "এটা security-সংক্রান্ত HTTP **response header** set করে। Helmet 8-এর default-এ আছে একটি baseline `Content-Security-Policy`, `Strict-Transport-Security` (এক বছর, `includeSubDomains`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: no-referrer`, cross-origin isolation header, `X-XSS-Protection: 0`, আর এটা `X-Powered-By` সরিয়ে দেয়।"
+  },
+  "explanation": {
+   "en": "Option A is the common misconception: helmet does **nothing** to your input. You still need schema validation, parameterised queries and output encoding. It also doesn't rate-limit (that's `express-rate-limit`) or enable HTTPS (TLS is terminated by NGINX/the load balancer; HSTS only tells browsers to keep using HTTPS).\n\nPractical notes:\n- The default CSP matters most for HTML pages; if you serve an SPA that loads scripts from a CDN, you must customise `contentSecurityPolicy.directives`.\n- `X-XSS-Protection: 0` is intentional — the old browser XSS filter caused vulnerabilities, so helmet disables it.\n- Headers are defence in depth: they reduce the impact of bugs (clickjacking, MIME sniffing, some XSS), they don't fix them.\n- Verified with helmet 8.3 on Express 5.3: the response had all the headers above and no `X-Powered-By`.",
+   "bn": "Option A হলো প্রচলিত ভুল ধারণা: helmet তোমার input-এর জন্য **কিছুই** করে না। Schema validation, parameterised query আর output encoding তবুও লাগবে। এটা rate-limit-ও করে না (সেটা `express-rate-limit`-এর কাজ), HTTPS-ও চালু করে না (TLS terminate করে NGINX/load balancer; HSTS শুধু browser-কে HTTPS ব্যবহার চালিয়ে যেতে বলে)।\n\nবাস্তব নোট:\n- Default CSP সবচেয়ে বেশি গুরুত্বপূর্ণ HTML page-এর জন্য; CDN থেকে script load করা SPA serve করলে `contentSecurityPolicy.directives` customise করতে হবে।\n- `X-XSS-Protection: 0` ইচ্ছাকৃত — পুরনো browser XSS filter নিজেই vulnerability তৈরি করত, তাই helmet এটা বন্ধ করে।\n- Header হলো defence in depth: এগুলো bug-এর প্রভাব কমায় (clickjacking, MIME sniffing, কিছু XSS), bug ঠিক করে না।\n- Express 5.3-এ helmet 8.3 দিয়ে যাচাই করা: response-এ উপরের সব header ছিল এবং `X-Powered-By` ছিল না।"
+  },
+  "interviewTip": {
+   "en": "Name two or three concrete headers and what each prevents (CSP → XSS impact, HSTS → downgrade, nosniff → MIME sniffing). Then say clearly what helmet does *not* do.",
+   "bn": "দুই-তিনটি নির্দিষ্ট header-এর নাম বলো এবং প্রতিটি কী আটকায় (CSP → XSS-এর প্রভাব, HSTS → downgrade, nosniff → MIME sniffing)। তারপর স্পষ্ট বলো helmet কী *করে না*।"
+  },
+  "references": [
+   {
+    "title": "helmet (GitHub)",
+    "url": "https://github.com/helmetjs/helmet"
+   },
+   {
+    "title": "Express — Production best practices: security",
+    "url": "https://expressjs.com/en/advanced/best-practice-security.html"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "It validates and sanitises request bodies to prevent SQL injection and XSS",
+    "bn": "এটা request body validate ও sanitise করে SQL injection আর XSS আটকায়"
+   },
+   {
+    "en": "It sets a group of security-related response headers (e.g. `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`) and removes `X-Powered-By`",
+    "bn": "এটা কিছু security-সংক্রান্ত response header set করে (যেমন `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`) এবং `X-Powered-By` সরিয়ে দেয়"
+   },
+   {
+    "en": "It encrypts cookies and turns on HTTPS automatically",
+    "bn": "এটা cookie encrypt করে এবং স্বয়ংক্রিয়ভাবে HTTPS চালু করে"
+   },
+   {
+    "en": "It rate-limits requests per IP to block brute-force attacks",
+    "bn": "এটা IP প্রতি request rate-limit করে brute-force attack আটকায়"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "express"
+ },
+ {
+  "id": "express-022",
+  "subtopic": "Authorization",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "authentication",
+   "authorization",
+   "401-vs-403",
+   "idor",
+   "bola"
+  ],
+  "technologyVersion": "Version-independent; Express 5.x example",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between authentication and authorization in an Express API? Where does each happen, and which status codes do you return when they fail?",
+   "bn": "Express API-তে authentication আর authorization-এর পার্থক্য কী? প্রতিটি কোথায় ঘটে, আর fail করলে কোন status code return করো?"
+  },
+  "answer": {
+   "en": "- **Authentication — \"who are you?\"** Verify a credential (session cookie, JWT, API key) and attach the identity to `req.user`. It runs as middleware early in the chain for protected routes. Failure → **`401 Unauthorized`** (despite the name, it means \"not authenticated\"), usually with a `WWW-Authenticate` header for bearer tokens.\n- **Authorization — \"what are you allowed to do?\"** Check the identity against the action and the specific resource. Failure → **`403 Forbidden`** (or `404` when you don't want to reveal that the resource exists).\n\nAuthorization happens at two levels:\n- **Route level:** role or permission middleware, e.g. `requireRole('admin')` for admin endpoints.\n- **Object level:** in the handler or service — does *this* order belong to *this* user (and tenant)? Skipping this check is the classic IDOR / BOLA bug: a logged-in user changes `/orders/123` to `/orders/124` and sees someone else's data.",
+   "bn": "- **Authentication — \"তুমি কে?\"** একটি credential (session cookie, JWT, API key) যাচাই করে identity `req.user`-এ যুক্ত করা। Protected route-এর জন্য chain-এর শুরুর দিকে middleware হিসেবে চলে। Fail হলে → **`401 Unauthorized`** (নামের বিপরীতে, এর মানে \"authenticated নয়\"), bearer token-এর ক্ষেত্রে সাধারণত `WWW-Authenticate` header সহ।\n- **Authorization — \"তুমি কী করতে পারো?\"** Identity-কে action আর নির্দিষ্ট resource-এর সাথে মিলিয়ে দেখা। Fail হলে → **`403 Forbidden`** (অথবা resource-টি আছে কি না জানাতে না চাইলে `404`)।\n\nAuthorization দুই স্তরে হয়:\n- **Route level:** role বা permission middleware, যেমন admin endpoint-এর জন্য `requireRole('admin')`।\n- **Object level:** handler বা service-এ — *এই* order কি *এই* user-এর (আর tenant-এর)? এই check বাদ দেওয়াই classic IDOR / BOLA bug: একজন logged-in user `/orders/123` বদলে `/orders/124` করে অন্যের data দেখে ফেলে।"
+  },
+  "explanation": {
+   "en": "- **Why object-level checks are easy to miss:** role middleware passes (the user *is* a customer), the route works in testing with your own IDs, and nothing fails visibly. It's #1 in the OWASP API Security Top 10 for a reason.\n- **Best practice:** scope the query itself — `orders.findOne({ id, userId: req.user.id })` — so you can't forget a separate `if`.\n- **401 vs 403 in practice:** an expired token is `401` (the client should refresh or log in again); a valid token without permission is `403` (logging in again won't help).\n- **Centralise policies** (e.g. a `can(user, action, resource)` helper) instead of scattering `if (user.role === 'admin')` across handlers.\n- **Never trust identity fields from the body** (`userId` in JSON) — take them from `req.user`.",
+   "bn": "- **Object-level check কেন সহজে বাদ পড়ে:** role middleware pass করে (user সত্যিই customer), নিজের ID দিয়ে test করলে route ঠিকঠাক কাজ করে, আর চোখে পড়ার মতো কিছু fail করে না। এজন্যই এটা OWASP API Security Top 10-এর #1।\n- **Best practice:** query-টাকেই scope করো — `orders.findOne({ id, userId: req.user.id })` — যাতে আলাদা `if` লিখতে ভুলে যাওয়ার সুযোগ না থাকে।\n- **বাস্তবে 401 বনাম 403:** expired token হলে `401` (client-এর refresh বা আবার login করা উচিত); valid token কিন্তু অনুমতি নেই হলে `403` (আবার login করে লাভ নেই)।\n- **Policy কেন্দ্রীভূত করো** (যেমন একটি `can(user, action, resource)` helper), handler-জুড়ে `if (user.role === 'admin')` ছড়িয়ে না দিয়ে।\n- **Body থেকে আসা identity field কখনো বিশ্বাস কোরো না** (JSON-এর `userId`) — সেগুলো `req.user` থেকে নাও।"
+  },
+  "interviewTip": {
+   "en": "Give the one-line definitions, the status codes, and then immediately bring up object-level authorization (IDOR). That jump from textbook to real vulnerability is what makes the answer stand out.",
+   "bn": "এক লাইনের definition, status code, তারপর সাথে সাথে object-level authorization (IDOR)-এর প্রসঙ্গ তোলো। Textbook থেকে বাস্তব vulnerability-তে এই লাফটাই উত্তরকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "OWASP — Authorization Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+   },
+   {
+    "title": "MDN — 401 Unauthorized",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401"
+   },
+   {
+    "title": "MDN — 403 Forbidden",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you return 404 instead of 403 for an unauthorized resource?",
+    "bn": "অননুমোদিত resource-এর জন্য কখন 403-এর বদলে 404 return করবে?"
+   },
+   {
+    "en": "How would you test for IDOR vulnerabilities automatically?",
+    "bn": "IDOR vulnerability স্বয়ংক্রিয়ভাবে কীভাবে test করবে?"
+   }
+  ],
+  "related": [
+   "express-023",
+   "express-009"
+  ],
+  "commonMistakes": {
+   "en": "Returning `403` for a missing token (should be `401`), or thinking role checks alone are enough authorization.",
+   "bn": "Token না থাকলে `403` return করা (হওয়া উচিত `401`), অথবা শুধু role check-কেই যথেষ্ট authorization মনে করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Route-level authorization: role check\napp.delete('/admin/users/:id', authenticate, requireRole('admin'), deleteUser);\n\n// Object-level authorization: scope the query to the current user\napp.get('/orders/:id', authenticate, async (req, res) => {\n  const order = await orders.findOne({ id: req.params.id, userId: req.user.id });\n  if (!order) throw AppError.notFound('Order'); // 404: don't reveal other users' orders\n  res.json(order);\n});"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-023",
+  "subtopic": "Authentication",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "jwt",
+   "auth-middleware",
+   "rbac",
+   "jsonwebtoken",
+   "coding"
+  ],
+  "technologyVersion": "Express 5.x; jsonwebtoken 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write two Express 5 middlewares:\n\n- `authenticate` — reads a `Bearer` JWT from the `Authorization` header, verifies it (HS256, issuer `api.example.com`, audience `app.example.com`) and sets `req.user = { id, role }`. Respond `401` with a `WWW-Authenticate` header for missing, invalid or expired tokens (use error code `TOKEN_EXPIRED` for expired ones).\n- `requireRole(...roles)` — lets the request through only if `req.user.role` is one of `roles`, otherwise `403`.\n\nUsage: `app.delete('/admin/users/:id', authenticate, requireRole('admin'), handler)`.",
+   "bn": "দুটি Express 5 middleware লেখো:\n\n- `authenticate` — `Authorization` header থেকে `Bearer` JWT পড়বে, verify করবে (HS256, issuer `api.example.com`, audience `app.example.com`) এবং `req.user = { id, role }` set করবে। Token না থাকলে, invalid বা expired হলে `WWW-Authenticate` header সহ `401` দেবে (expired-এর জন্য error code `TOKEN_EXPIRED`)।\n- `requireRole(...roles)` — `req.user.role` যদি `roles`-এর একটি হয় তবেই request যেতে দেবে, নইলে `403`।\n\nব্যবহার: `app.delete('/admin/users/:id', authenticate, requireRole('admin'), handler)`।"
+  },
+  "answer": {
+   "en": "`authenticate` parses the header, rejects anything that isn't `Bearer <token>`, and calls `jwt.verify` with **pinned options**: `algorithms: ['HS256']`, `issuer` and `audience`. If verification throws, it maps `TokenExpiredError` to `TOKEN_EXPIRED` and everything else to `INVALID_TOKEN`, sets `WWW-Authenticate`, and returns `401`. On success it copies only the claims it needs to `req.user` and calls `next()` — **outside** the `try` block, so an error in a later middleware is never misreported as an invalid token.\n\n`requireRole` is a factory: it captures the allowed roles in a `Set` and returns middleware that answers `401` if `req.user` is missing (a misconfigured route), `403` if the role isn't allowed, and otherwise calls `next()`.",
+   "bn": "`authenticate` header parse করে, `Bearer <token>` ছাড়া অন্য কিছু হলে reject করে, এবং **pin করা option** দিয়ে `jwt.verify` call করে: `algorithms: ['HS256']`, `issuer` আর `audience`। Verification throw করলে `TokenExpiredError`-কে `TOKEN_EXPIRED` আর বাকি সবকিছুকে `INVALID_TOKEN`-এ map করে, `WWW-Authenticate` set করে এবং `401` return করে। সফল হলে শুধু দরকারি claim `req.user`-এ কপি করে `next()` call করে — `try` block-এর **বাইরে**, যাতে পরের কোনো middleware-এর error কখনো invalid token হিসেবে ভুলভাবে রিপোর্ট না হয়।\n\n`requireRole` একটি factory: এটা অনুমোদিত role-গুলো একটি `Set`-এ ধরে রাখে এবং এমন middleware return করে যা `req.user` না থাকলে (ভুলভাবে configure করা route) `401`, role অনুমোদিত না হলে `403`, আর অন্যথায় `next()` call করে।"
+  },
+  "explanation": {
+   "en": "- **Pin the algorithm:** without `algorithms`, a library could accept tokens signed with an unexpected algorithm (the historic `alg: none` and RS/HS confusion attacks). Verified: an `alg: none` token is rejected with `401`.\n- **Check `iss`/`aud`:** a token minted for another service with the same secret shouldn't work here (verified: wrong audience → `401`).\n- **Secrets:** a long random `JWT_SECRET` from the environment/secrets manager; consider asymmetric keys (RS256/EdDSA) when other services must verify but not issue tokens.\n- **Keep claims small and non-sensitive** — JWT payloads are only base64url-encoded, not encrypted.\n- **Roles in tokens go stale** until the token expires; that's another reason for short access-token lifetimes.\n- Verified with supertest on Express 5.3 + jsonwebtoken 9: no token → 401, garbage → 401 `INVALID_TOKEN`, expired → 401 `TOKEN_EXPIRED`, customer → 403, admin → 204.",
+   "bn": "- **Algorithm pin করো:** `algorithms` না দিলে library অপ্রত্যাশিত algorithm-এ signed token গ্রহণ করতে পারে (ঐতিহাসিক `alg: none` আর RS/HS confusion attack)। যাচাই করা: `alg: none` token `401` দিয়ে reject হয়।\n- **`iss`/`aud` check করো:** একই secret দিয়ে অন্য service-এর জন্য বানানো token এখানে কাজ করা উচিত নয় (যাচাই করা: ভুল audience → `401`)।\n- **Secret:** environment/secrets manager থেকে আসা লম্বা random `JWT_SECRET`; অন্য service-কে শুধু verify করতে দিতে হলে (issue নয়) asymmetric key (RS256/EdDSA) বিবেচনা করো।\n- **Claim ছোট ও অ-সংবেদনশীল রাখো** — JWT payload শুধু base64url-encoded, encrypted নয়।\n- **Token-এর role পুরনো হয়ে যায়** token expire না হওয়া পর্যন্ত; access token-এর আয়ু ছোট রাখার এটাও একটা কারণ।\n- Express 5.3 + jsonwebtoken 9-এ supertest দিয়ে যাচাই করা: token নেই → 401, আবর্জনা → 401 `INVALID_TOKEN`, expired → 401 `TOKEN_EXPIRED`, customer → 403, admin → 204।"
+  },
+  "interviewTip": {
+   "en": "While coding, say out loud *why* you pin `algorithms`, check `aud`, and call `next()` outside the `try`. Those three justifications are what turn a common exercise into a senior-sounding answer.",
+   "bn": "Code লেখার সময় মুখে বলো *কেন* `algorithms` pin করছ, `aud` check করছ, আর `try`-এর বাইরে `next()` call করছ। এই তিনটি যুক্তিই একটি সাধারণ exercise-কে senior-মানের উত্তরে পরিণত করে।"
+  },
+  "references": [
+   {
+    "title": "jsonwebtoken (GitHub)",
+    "url": "https://github.com/auth0/node-jsonwebtoken"
+   },
+   {
+    "title": "OWASP — JSON Web Token Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html"
+   },
+   {
+    "title": "RFC 6750 — OAuth 2.0 Bearer Token Usage",
+    "url": "https://www.rfc-editor.org/rfc/rfc6750"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you support permission-based checks (e.g. `orders:refund`) instead of roles?",
+    "bn": "Role-এর বদলে permission-ভিত্তিক check (যেমন `orders:refund`) কীভাবে support করবে?"
+   },
+   {
+    "en": "How would you verify tokens issued by an external identity provider (OIDC)?",
+    "bn": "External identity provider (OIDC)-এর issue করা token কীভাবে verify করবে?"
+   }
+  ],
+  "related": [
+   "express-022",
+   "express-019",
+   "express-024"
+  ],
+  "commonMistakes": {
+   "en": "Using `jwt.decode()` instead of `jwt.verify()` (no signature check), not pinning algorithms, or returning `403` for an expired token.",
+   "bn": "`jwt.verify()`-এর বদলে `jwt.decode()` ব্যবহার করা (signature check হয় না), algorithm pin না করা, অথবা expired token-এর জন্য `403` return করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import jwt from 'jsonwebtoken';\n\nconst JWT_OPTIONS = { algorithms: ['HS256'], issuer: 'api.example.com', audience: 'app.example.com' };\n\nexport function authenticate(req, res, next) {\n  const [scheme, token] = (req.get('authorization') ?? '').split(' ');\n  if (scheme !== 'Bearer' || !token) {\n    res.set('WWW-Authenticate', 'Bearer');\n    return res.status(401).json({ error: 'UNAUTHENTICATED' });\n  }\n\n  let payload;\n  try {\n    payload = jwt.verify(token, process.env.JWT_SECRET, JWT_OPTIONS); // pin the algorithm!\n  } catch (err) {\n    const code = err.name === 'TokenExpiredError' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';\n    res.set('WWW-Authenticate', 'Bearer error=\"invalid_token\"');\n    return res.status(401).json({ error: code });\n  }\n\n  req.user = { id: payload.sub, role: payload.role };\n  next(); // outside the try: later errors aren't misreported as \"invalid token\"\n}\n\nexport function requireRole(...roles) {\n  const allowed = new Set(roles);\n  return (req, res, next) => {\n    if (!req.user) return res.status(401).json({ error: 'UNAUTHENTICATED' }); // authenticate missing\n    if (!allowed.has(req.user.role)) return res.status(403).json({ error: 'FORBIDDEN' });\n    next();\n  };\n}\n\n// app.delete('/admin/users/:id', authenticate, requireRole('admin'), deleteUser);"
+  },
+  "complexity": {
+   "time": "O(1) per request (plus signature verification)",
+   "space": "O(1)"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-024",
+  "subtopic": "Cookies & Sessions",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "sessions",
+   "jwt",
+   "express-session",
+   "redis",
+   "authentication"
+  ],
+  "technologyVersion": "Express 5.x; express-session 1.x; connect-redis (example)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Compare server-side sessions (cookie + session store) with stateless JWTs for authenticating users of an Express web app. Which would you choose for a typical web app, and when would you pick the other?",
+   "bn": "Express web app-এর user authenticate করার জন্য server-side session (cookie + session store) আর stateless JWT-এর তুলনা করো। সাধারণ একটি web app-এর জন্য কোনটা বেছে নেবে, আর কখন অন্যটা?"
+  },
+  "answer": {
+   "en": "**Server-side sessions:** the browser holds an opaque, random session ID in an `httpOnly` cookie; the server looks the session up in a store (Redis) on each request.\n- Pros: instant revocation (delete the session), small cookie, no sensitive data on the client, roles/permissions always fresh.\n- Cons: a lookup per request and a shared store for multiple instances; cookies are sent automatically, so you need CSRF protection (SameSite + token).\n\n**Stateless JWTs:** a signed token carries the claims; any service with the key verifies it without a lookup.\n- Pros: no shared session store, works well across many services, mobile clients and third-party APIs; easy to verify at a gateway.\n- Cons: hard to revoke before expiry (you add short lifetimes + refresh tokens or a deny-list — reintroducing state), claims go stale, bigger tokens, key management, and a storage dilemma in browsers (memory/`localStorage` vs cookies).\n\n**My default for a first-party web app with one backend: sessions** in Redis with secure cookies — simpler and safer. I choose JWTs when several services or native mobile apps must verify identity independently, or when tokens come from an identity provider (OAuth 2.0 / OpenID Connect).",
+   "bn": "**Server-side session:** browser একটি `httpOnly` cookie-তে opaque, random session ID রাখে; server প্রতিটি request-এ store (Redis) থেকে session খোঁজে।\n- সুবিধা: তাৎক্ষণিক revocation (session মুছে দাও), ছোট cookie, client-এ কোনো sensitive data নেই, role/permission সবসময় হালনাগাদ।\n- অসুবিধা: প্রতি request-এ একটি lookup আর একাধিক instance-এর জন্য shared store; cookie স্বয়ংক্রিয়ভাবে যায়, তাই CSRF সুরক্ষা লাগে (SameSite + token)।\n\n**Stateless JWT:** একটি signed token claim বহন করে; key থাকা যেকোনো service lookup ছাড়াই verify করতে পারে।\n- সুবিধা: shared session store লাগে না, অনেক service, mobile client আর third-party API-জুড়ে ভালো কাজ করে; gateway-তে সহজে verify করা যায়।\n- অসুবিধা: expiry-র আগে revoke করা কঠিন (ছোট আয়ু + refresh token বা deny-list যোগ করতে হয় — যা আবার state ফিরিয়ে আনে), claim পুরনো হয়ে যায়, token বড়, key management, আর browser-এ রাখার দ্বিধা (memory/`localStorage` বনাম cookie)।\n\n**একটি backend-ওয়ালা first-party web app-এর জন্য আমার default: session**, Redis-এ, secure cookie সহ — সহজ ও নিরাপদ। JWT বেছে নিই যখন একাধিক service বা native mobile app-কে নিজে নিজে identity verify করতে হয়, অথবা token আসে কোনো identity provider (OAuth 2.0 / OpenID Connect) থেকে।"
+  },
+  "explanation": {
+   "en": "- **\"Stateless\" is rarely fully stateless:** as soon as you need logout-everywhere, bans or refresh-token rotation, you store state again. Be honest about that trade-off in interviews.\n- **Performance:** a Redis session lookup is typically sub-millisecond; it's rarely the bottleneck people fear.\n- **Scaling sessions:** use a shared store (`connect-redis`) — the default `MemoryStore` leaks memory and isn't shared between instances, and the express-session docs say it's not meant for production.\n- **Behind a proxy:** with `cookie.secure: true`, set `app.set('trust proxy', 1)`, or express-session won't send the cookie over what it thinks is plain HTTP.\n- **Hybrid is common:** sessions for the browser app, JWT/OAuth access tokens for mobile apps and service-to-service calls.",
+   "bn": "- **\"Stateless\" খুব কমই পুরোপুরি stateless:** সব জায়গা থেকে logout, ban বা refresh-token rotation লাগলেই আবার state রাখতে হয়। Interview-তে এই trade-off নিয়ে সৎ থাকো।\n- **Performance:** Redis-এ session lookup সাধারণত এক millisecond-এর কম; মানুষ যতটা ভয় পায় ততটা bottleneck এটা খুব কমই হয়।\n- **Session scale করা:** shared store (`connect-redis`) ব্যবহার করো — default `MemoryStore` memory leak করে, instance-এর মধ্যে share হয় না, আর express-session-এর docs বলে এটা production-এর জন্য নয়।\n- **Proxy-র পেছনে:** `cookie.secure: true` দিলে `app.set('trust proxy', 1)` দাও, নইলে express-session যেটাকে সাধারণ HTTP মনে করে সেখানে cookie পাঠায় না।\n- **Hybrid প্রচলিত:** browser app-এর জন্য session, mobile app আর service-to-service call-এর জন্য JWT/OAuth access token।"
+  },
+  "interviewTip": {
+   "en": "Don't present JWT as \"modern\" and sessions as \"old\". Compare them on revocation, state, CSRF/XSS exposure and multi-service needs, then make a clear recommendation with conditions — that's what interviewers want.",
+   "bn": "JWT-কে \"আধুনিক\" আর session-কে \"পুরনো\" হিসেবে উপস্থাপন কোরো না। Revocation, state, CSRF/XSS ঝুঁকি আর multi-service প্রয়োজনের ভিত্তিতে তুলনা করো, তারপর শর্তসহ স্পষ্ট সুপারিশ দাও — interviewer এটাই চায়।"
+  },
+  "references": [
+   {
+    "title": "Express — express-session middleware",
+    "url": "https://expressjs.com/en/resources/middleware/session.html"
+   },
+   {
+    "title": "OWASP — Session Management Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
+   },
+   {
+    "title": "OWASP — JSON Web Token Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you implement 'log out from all devices' with each approach?",
+    "bn": "প্রতিটি পদ্ধতিতে 'সব device থেকে logout' কীভাবে implement করবে?"
+   },
+   {
+    "en": "How does CSRF risk differ between cookie sessions and bearer tokens?",
+    "bn": "Cookie session আর bearer token-এর মধ্যে CSRF ঝুঁকি কীভাবে আলাদা?"
+   }
+  ],
+  "related": [
+   "express-016",
+   "express-019",
+   "express-023"
+  ],
+  "commonMistakes": {
+   "en": "Claiming JWTs are \"more secure\", storing JWTs in `localStorage` by default, or using express-session's `MemoryStore` in production.",
+   "bn": "JWT-কে \"বেশি নিরাপদ\" দাবি করা, default-ভাবে `localStorage`-এ JWT রাখা, অথবা production-এ express-session-এর `MemoryStore` ব্যবহার করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import session from 'express-session';\nimport { RedisStore } from 'connect-redis';\nimport { createClient } from 'redis';\n\nconst redis = await createClient({ url: process.env.REDIS_URL }).connect();\n\napp.set('trust proxy', 1); // behind NGINX/ALB: needed for secure cookies\napp.use(session({\n  store: new RedisStore({ client: redis, prefix: 'sess:' }),\n  secret: process.env.SESSION_SECRET,\n  name: 'sid',\n  resave: false,\n  saveUninitialized: false,\n  cookie: { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 8 * 60 * 60 * 1000 },\n}));\n\napp.post('/auth/login', async (req, res, next) => {\n  const user = await verifyCredentials(req.body.email, req.body.password);\n  req.session.regenerate((err) => {          // prevent session fixation\n    if (err) return next(err);\n    req.session.userId = user.id;\n    res.sendStatus(204);\n  });\n});"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-025",
+  "subtopic": "Production Debugging",
+  "difficulty": "hard",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 12,
+  "tags": [
+   "production-debugging",
+   "504",
+   "connection-pool",
+   "timeouts",
+   "observability"
+  ],
+  "technologyVersion": "Express 5.x; node-postgres (pg) 8.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "After a release, a growing share of requests to your Express API hang until NGINX returns `504 Gateway Timeout` after 60 seconds. Restarting the instances fixes it for a few hours. CPU and memory look normal, and there are no error logs for the hanging requests. How do you find and fix the cause?",
+   "bn": "একটি release-এর পর তোমার Express API-র ক্রমবর্ধমান অংশের request ৬০ সেকেন্ড ঝুলে থাকে, তারপর NGINX `504 Gateway Timeout` দেয়। Instance restart করলে কয়েক ঘণ্টার জন্য ঠিক হয়ে যায়। CPU আর memory স্বাভাবিক, আর ঝুলে থাকা request-গুলোর কোনো error log নেই। কারণ কীভাবে খুঁজবে আর ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**Reading the symptoms:** normal CPU rules out event-loop blocking; \"gets worse over time, restart fixes it\" points to a **leaked, finite resource**; hanging without errors means requests are *waiting* for something. The prime suspect is the **database connection pool**.\n\nMy approach:\n1. **Scope it:** which routes and instances? Compare NGINX access logs (`$upstream_response_time`, status 504) with app logs using the request ID that NGINX forwards. Requests that log \"started\" but never \"completed\" show where they're stuck.\n2. **Check pool metrics:** node-postgres exposes `pool.totalCount`, `idleCount` and `waitingCount`. If `idleCount` is 0 and `waitingCount` keeps growing, connections are being checked out and never returned. In PostgreSQL, `pg_stat_activity` showing sessions `idle in transaction` confirms it.\n3. **Diff the release:** look for code that calls `pool.connect()` and releases the client only on the happy path — any thrown error skips `client.release()` and leaks a connection. After `max` (10 by default) failures, every request waits forever, because `connectionTimeoutMillis` defaults to 0 (no timeout).\n4. **Fix:** release in `finally` (with `ROLLBACK` in `catch`), or use a transaction helper / `pool.query()` for single queries.\n5. **Make it fail fast next time:** `connectionTimeoutMillis`, `statement_timeout` and `idle_in_transaction_session_timeout`; `AbortSignal.timeout()` on outbound HTTP calls; alerts on pool `waitingCount` and on the share of slow requests.",
+   "bn": "**Symptom পড়া:** CPU স্বাভাবিক মানে event loop block নয়; \"সময়ের সাথে খারাপ হয়, restart করলে ঠিক\" মানে কোনো **leak হওয়া সীমিত resource**; error ছাড়াই ঝুলে থাকা মানে request কোনো কিছুর জন্য *অপেক্ষা* করছে। প্রধান সন্দেহভাজন **database connection pool**।\n\nআমার approach:\n1. **পরিধি ঠিক করা:** কোন route আর কোন instance? NGINX-এর forward করা request ID দিয়ে NGINX access log (`$upstream_response_time`, status 504) আর app log মেলাই। যে request \"started\" log করেছে কিন্তু কখনো \"completed\" নয়, সেগুলো দেখায় কোথায় আটকে আছে।\n2. **Pool metric দেখা:** node-postgres `pool.totalCount`, `idleCount` আর `waitingCount` দেয়। `idleCount` 0 আর `waitingCount` বাড়তেই থাকলে connection checkout হচ্ছে কিন্তু ফেরত আসছে না। PostgreSQL-এ `pg_stat_activity`-তে `idle in transaction` session দেখা গেলে নিশ্চিত।\n3. **Release-এর diff দেখা:** এমন code খুঁজি যা `pool.connect()` call করে কিন্তু শুধু সফল পথে `client.release()` করে — কোনো error throw হলেই release বাদ পড়ে এবং একটি connection leak হয়। `max` (default 10)টি failure-এর পর প্রতিটি request চিরকাল অপেক্ষা করে, কারণ `connectionTimeoutMillis`-এর default 0 (কোনো timeout নেই)।\n4. **Fix:** `finally`-তে release (`catch`-এ `ROLLBACK` সহ), অথবা transaction helper / একক query-র জন্য `pool.query()` ব্যবহার।\n5. **পরেরবার যেন দ্রুত fail করে:** `connectionTimeoutMillis`, `statement_timeout` আর `idle_in_transaction_session_timeout`; outbound HTTP call-এ `AbortSignal.timeout()`; pool `waitingCount` আর ধীর request-এর অনুপাতের উপর alert।"
+  },
+  "explanation": {
+   "en": "**Other causes with the same \"hang, no errors\" signature:**\n- a middleware branch that neither responds nor calls `next()`;\n- outbound HTTP calls to a slow dependency without a timeout;\n- a promise that never settles (a callback API wrapped incorrectly);\n- database row locks held by a long transaction, so other queries wait.\n\n**Why there are no error logs:** nothing has failed yet — requests are queued. That's why logging both *start* and *finish* (e.g. pino-http with request IDs, plus a log or metric for requests aborted by the client) and alerting on latency, not just errors, matters.\n\n**Why 504 and not 500:** NGINX gave up after `proxy_read_timeout` (60 s by default). Setting app-side timeouts *below* the proxy's lets the app return a clear `503` and log it, instead of the proxy cutting the connection.\n\n**Verification:** reproduce in staging by forcing the failing path ~10 times, watch `waitingCount` climb, deploy the fix, and confirm it stays flat under the same test.",
+   "bn": "**একই \"ঝুলে থাকে, error নেই\" লক্ষণের অন্যান্য কারণ:**\n- এমন middleware branch যা response-ও দেয় না, `next()`-ও call করে না;\n- timeout ছাড়া ধীর কোনো dependency-তে outbound HTTP call;\n- এমন promise যা কখনো settle হয় না (ভুলভাবে wrap করা callback API);\n- লম্বা transaction-এর ধরে রাখা database row lock, ফলে অন্য query অপেক্ষা করে।\n\n**কেন কোনো error log নেই:** এখনো কিছুই fail করেনি — request-গুলো queue-তে আছে। এজন্যই *শুরু* আর *শেষ* দুটোই log করা (যেমন request ID সহ pino-http, সাথে client-এর abort করা request-এর log বা metric) এবং শুধু error নয়, latency-র উপরও alert রাখা জরুরি।\n\n**500 না হয়ে 504 কেন:** NGINX `proxy_read_timeout`-এর (default 60 s) পর হাল ছেড়ে দিয়েছে। App-এর timeout proxy-র চেয়ে *কম* রাখলে proxy connection কেটে দেওয়ার আগেই app একটি স্পষ্ট `503` দিয়ে log করতে পারে।\n\n**যাচাই:** staging-এ ব্যর্থ path প্রায় ১০ বার চালিয়ে reproduce করো, `waitingCount` বাড়তে দেখো, fix deploy করো, আর একই test-এ এটা স্থির থাকছে কি না নিশ্চিত করো।"
+  },
+  "interviewTip": {
+   "en": "Reason from the symptoms out loud (\"normal CPU → not blocking; restart fixes → leak; no errors → waiting\"). Interviewers care more about this diagnostic reasoning than about guessing the exact bug.",
+   "bn": "Symptom থেকে মুখে মুখে যুক্তি দাও (\"CPU স্বাভাবিক → blocking নয়; restart করলে ঠিক → leak; error নেই → অপেক্ষা\")। Interviewer সঠিক bug আন্দাজ করার চেয়ে এই diagnostic যুক্তিকে বেশি গুরুত্ব দেয়।"
+  },
+  "references": [
+   {
+    "title": "node-postgres (GitHub)",
+    "url": "https://github.com/brianc/node-postgres"
+   },
+   {
+    "title": "pino-http (GitHub)",
+    "url": "https://github.com/pinojs/pino-http"
+   },
+   {
+    "title": "Express — Production best practices: performance and reliability",
+    "url": "https://expressjs.com/en/advanced/best-practice-performance.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you set app, proxy and database timeouts relative to each other?",
+    "bn": "App, proxy আর database-এর timeout পরস্পরের তুলনায় কীভাবে ঠিক করবে?"
+   },
+   {
+    "en": "What metrics would have caught this before users noticed?",
+    "bn": "কোন metric থাকলে user টের পাওয়ার আগেই এটা ধরা পড়ত?"
+   }
+  ],
+  "related": [
+   "express-011",
+   "express-010",
+   "express-007"
+  ],
+  "commonMistakes": {
+   "en": "Increasing NGINX's timeout or the pool size (the leak just takes longer), or scheduling automatic restarts as the \"fix\".",
+   "bn": "NGINX-এর timeout বা pool size বাড়ানো (leak শুধু একটু দেরিতে ধরা দেয়), অথবা স্বয়ংক্রিয় restart-কেই \"fix\" হিসেবে চালু করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Code added in the latest release\napp.post('/orders', async (req, res) => {\n  const client = await pool.connect();\n  await client.query('BEGIN');\n  const order = await createOrder(client, req.body);\n  await client.query('COMMIT');\n  client.release();\n  res.status(201).json(order);\n});"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "import pg from 'pg';\n\nexport const pool = new pg.Pool({\n  max: 10,\n  connectionTimeoutMillis: 5_000,             // don't wait forever for a free connection\n  statement_timeout: 10_000,                  // server-side limit per statement\n  idle_in_transaction_session_timeout: 15_000,\n});\n\napp.post('/orders', async (req, res) => {\n  const client = await pool.connect();\n  try {\n    await client.query('BEGIN');\n    const order = await createOrder(client, req.body);\n    await client.query('COMMIT');\n    res.status(201).json(order);\n  } catch (err) {\n    await client.query('ROLLBACK');\n    throw err; // Express 5 -> error middleware\n  } finally {\n    client.release(); // always return the connection\n  }\n});\n\n// Expose pool health for dashboards/alerts\nsetInterval(() => {\n  logger.info({ total: pool.totalCount, idle: pool.idleCount, waiting: pool.waitingCount }, 'pg pool');\n}, 30_000).unref();",
+    "label": {
+     "en": "Fixed version (release in finally + fail-fast timeouts)",
+     "bn": "সংশোধিত version (finally-তে release + দ্রুত fail করার timeout)"
+    }
+   }
+  ],
+  "technology": "express"
+ },
+ {
+  "id": "express-026",
+  "subtopic": "Testing",
+  "difficulty": "hard",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "testing",
+   "supertest",
+   "node-test",
+   "dependency-injection",
+   "integration-tests"
+  ],
+  "technologyVersion": "Express 5.x; Node.js 24 LTS / 26 (node:test); supertest 7.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write integration tests for `POST /api/orders` using `node:test` and supertest that check:\n\n1. `401` without a token;\n2. `400` for invalid input (e.g. `quantity: 0`), with nothing saved;\n3. `201` and the created order for a valid request;\n4. the order is saved with the **authenticated** user's ID, even if the body contains a different `userId`.\n\nThe tests must not open a real port or touch the real database. Show how you'd structure the app to make that possible.",
+   "bn": "`node:test` আর supertest দিয়ে `POST /api/orders`-এর integration test লেখো, যা check করবে:\n\n1. token ছাড়া `401`;\n2. invalid input-এ (যেমন `quantity: 0`) `400`, আর কিছুই save হবে না;\n3. valid request-এ `201` আর তৈরি হওয়া order;\n4. body-তে অন্য `userId` থাকলেও order **authenticated** user-এর ID দিয়ে save হবে।\n\nTest যেন আসল port না খোলে বা আসল database না ছোঁয়। এটা সম্ভব করতে app-এর structure কেমন হবে দেখাও।"
+  },
+  "answer": {
+   "en": "The key is an **app factory**: `createApp({ ordersRepo, verifyToken })` builds and returns the Express app *without* calling `listen()`, and receives its dependencies as parameters. Production code passes the real PostgreSQL repository and JWT verifier; tests pass in-memory fakes.\n\nsupertest's `request(app)` accepts the app directly and binds it to an ephemeral port internally, so no fixed port is opened and tests can run in parallel. With `node:test` I use `describe`/`it`, build a fresh app in `beforeEach` (so tests don't share state), and assert with `node:assert/strict`: status codes, response body, and — importantly — the side effects recorded by the fake repository (nothing saved on 401/400; `userId` taken from the token).",
+   "bn": "মূল চাবিকাঠি একটি **app factory**: `createApp({ ordersRepo, verifyToken })` `listen()` call *না করেই* Express app বানিয়ে return করে, আর dependency-গুলো parameter হিসেবে নেয়। Production code আসল PostgreSQL repository আর JWT verifier পাঠায়; test পাঠায় in-memory fake।\n\nsupertest-এর `request(app)` সরাসরি app নেয় এবং ভেতরে ভেতরে একটি ephemeral port-এ bind করে, ফলে কোনো নির্দিষ্ট port খোলে না এবং test parallel-এ চলতে পারে। `node:test`-এ আমি `describe`/`it` ব্যবহার করি, `beforeEach`-এ প্রতিবার নতুন app বানাই (যাতে test-গুলো state share না করে), আর `node:assert/strict` দিয়ে assert করি: status code, response body, আর — গুরুত্বপূর্ণভাবে — fake repository-তে রেকর্ড হওয়া side effect (401/400-এ কিছু save হয়নি; `userId` token থেকে নেওয়া)।"
+  },
+  "explanation": {
+   "en": "- **Test behaviour, not implementation:** assert on HTTP status, body and observable side effects, not on which internal function was called.\n- **Security-relevant tests matter most:** \"nothing is saved on 400\" and \"userId comes from the token, not the body\" catch real vulnerabilities (mass assignment, IDOR) that happy-path tests miss.\n- **Layers of tests:** these fast HTTP-level tests with fakes cover routing, middleware order, validation and auth; separate repository tests against a real PostgreSQL (e.g. in a container) cover SQL. Don't mock what you're trying to test.\n- **Run:** `node --test` discovers `*.test.js` files; `node --test --watch` reruns on change. Jest or Vitest work the same way with supertest.\n- **Error paths:** add tests for the error middleware (e.g. repository throws → 500 problem JSON without leaking the message).\n- Verified: the suite passes (4 tests) on Node 22 with Express 5.3 and supertest 7.",
+   "bn": "- **Implementation নয়, behaviour test করো:** HTTP status, body আর দৃশ্যমান side effect-এর উপর assert করো, কোন internal function call হলো তার উপর নয়।\n- **Security-সংক্রান্ত test সবচেয়ে জরুরি:** \"400-এ কিছু save হয় না\" আর \"userId body থেকে নয়, token থেকে আসে\" — এগুলো এমন আসল vulnerability (mass assignment, IDOR) ধরে যা happy-path test মিস করে।\n- **Test-এর স্তর:** fake দিয়ে এই দ্রুত HTTP-level test routing, middleware order, validation আর auth ঢাকে; আসল PostgreSQL-এর বিরুদ্ধে (যেমন container-এ) আলাদা repository test SQL ঢাকে। যা test করতে চাও সেটাকেই mock কোরো না।\n- **চালানো:** `node --test` `*.test.js` file খুঁজে নেয়; `node --test --watch` পরিবর্তনে আবার চালায়। Jest বা Vitest-ও supertest-এর সাথে একইভাবে কাজ করে।\n- **Error path:** error middleware-এর জন্যও test যোগ করো (যেমন repository throw করলে message ফাঁস না করে 500 problem JSON)।\n- যাচাই করা: Express 5.3 আর supertest 7 দিয়ে Node 22-এ suite pass করে (4টি test)।"
+  },
+  "interviewTip": {
+   "en": "Start by explaining the app-factory/dependency-injection structure — that's the real answer to \"how do you make Express testable\". Then write two or three focused tests, including one that checks a side effect.",
+   "bn": "শুরুতে app-factory/dependency-injection structure ব্যাখ্যা করো — \"Express-কে কীভাবে testable বানাও\" প্রশ্নের আসল উত্তর এটাই। তারপর দুই-তিনটি নির্দিষ্ট test লেখো, যার একটি side effect check করে।"
+  },
+  "references": [
+   {
+    "title": "Node.js API — Test runner",
+    "url": "https://nodejs.org/api/test.html"
+   },
+   {
+    "title": "supertest (GitHub)",
+    "url": "https://github.com/forwardemail/supertest"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you test the real SQL in the repository layer?",
+    "bn": "Repository layer-এর আসল SQL কীভাবে test করবে?"
+   },
+   {
+    "en": "How do you test rate limiting or time-based behaviour without waiting?",
+    "bn": "অপেক্ষা না করে rate limiting বা সময়-নির্ভর আচরণ কীভাবে test করবে?"
+   }
+  ],
+  "related": [
+   "express-023",
+   "express-012"
+  ],
+  "commonMistakes": {
+   "en": "Calling `app.listen()` inside the module under test (port conflicts, open handles), sharing one app/fake across tests, or asserting only status codes.",
+   "bn": "Test করা module-এর ভেতরেই `app.listen()` call করা (port conflict, খোলা handle), সব test-এ একটাই app/fake share করা, অথবা শুধু status code assert করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// app.js — factory: no listen(), dependencies injected\nimport express from 'express';\n\nexport function createApp({ ordersRepo, verifyToken }) {\n  const app = express();\n  app.use(express.json());\n\n  const authenticate = async (req, res, next) => {\n    const token = req.get('authorization')?.replace(/^Bearer /, '');\n    const user = token ? await verifyToken(token) : null;\n    if (!user) return res.status(401).json({ error: 'UNAUTHENTICATED' });\n    req.user = user;\n    next();\n  };\n\n  app.post('/api/orders', authenticate, async (req, res) => {\n    const { productId, quantity } = req.body ?? {};\n    if (typeof productId !== 'string' || !Number.isInteger(quantity) || quantity < 1) {\n      return res.status(400).json({ error: 'VALIDATION_FAILED' });\n    }\n    const order = await ordersRepo.create({ userId: req.user.id, productId, quantity });\n    res.status(201).json(order);\n  });\n\n  return app;\n}\n\n// orders.test.js — run with: node --test\nimport { describe, it, beforeEach } from 'node:test';\nimport assert from 'node:assert/strict';\nimport request from 'supertest';\nimport { createApp } from './app.js';\n\ndescribe('POST /api/orders', () => {\n  let app;\n  let saved;\n\n  beforeEach(() => {\n    saved = [];\n    const ordersRepo = {\n      async create(data) {\n        const order = { id: 'ord_1', ...data };\n        saved.push(order);\n        return order;\n      },\n    };\n    const verifyToken = async (token) =>\n      token === 'valid-token' ? { id: 'user_42', role: 'customer' } : null;\n    app = createApp({ ordersRepo, verifyToken }); // no listen(), no real DB\n  });\n\n  it('returns 401 without a token', async () => {\n    const res = await request(app).post('/api/orders').send({ productId: 'p1', quantity: 1 });\n    assert.equal(res.status, 401);\n    assert.equal(saved.length, 0);\n  });\n\n  it('returns 400 for invalid input and saves nothing', async () => {\n    const res = await request(app)\n      .post('/api/orders')\n      .set('Authorization', 'Bearer valid-token')\n      .send({ productId: 'p1', quantity: 0 });\n    assert.equal(res.status, 400);\n    assert.equal(saved.length, 0);\n  });\n\n  it('creates the order for the authenticated user', async () => {\n    const res = await request(app)\n      .post('/api/orders')\n      .set('Authorization', 'Bearer valid-token')\n      .send({ productId: 'p1', quantity: 2 });\n    assert.equal(res.status, 201);\n    assert.deepEqual(res.body, { id: 'ord_1', userId: 'user_42', productId: 'p1', quantity: 2 });\n  });\n\n  it('ignores a userId sent in the body', async () => {\n    await request(app)\n      .post('/api/orders')\n      .set('Authorization', 'Bearer valid-token')\n      .send({ productId: 'p1', quantity: 1, userId: 'someone_else' });\n    assert.equal(saved[0].userId, 'user_42');\n  });\n});"
+  },
+  "complexity": {
+   "time": "O(1) per test",
+   "space": "O(1)"
+  },
+  "technology": "express"
+ }
+]

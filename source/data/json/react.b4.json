@@ -1,0 +1,593 @@
+[
+ {
+  "id": "react-011",
+  "subtopic": "Accessibility",
+  "difficulty": "easy",
+  "type": "debugging",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 4,
+  "tags": [
+   "accessibility",
+   "a11y",
+   "forms",
+   "semantic-html"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A screen-reader user and a keyboard-only user both say they can't use this login form. Find the accessibility problems and fix them.",
+   "bn": "একজন screen-reader user আর একজন শুধু keyboard ব্যবহারকারী — দুজনই বলছেন তারা এই login form ব্যবহার করতে পারছেন না। Accessibility সমস্যাগুলো খুঁজে বের করো আর ঠিক করো।"
+  },
+  "answer": {
+   "en": "There are four problems:\n1. **The \"button\" is a `<div>`** — it isn't focusable, doesn't respond to Enter/Space and isn't announced as a button. Use a real `<button type=\"submit\">`.\n2. **Inputs have no labels.** A placeholder disappears when you type and isn't a reliable accessible name. Add `<label htmlFor>` (note `htmlFor`, not `for`, in JSX).\n3. **The image has no `alt`.** Screen readers may read the file name. Give meaningful `alt`, or `alt=\"\"` if it's decorative.\n4. **No `<form>` element**, so pressing Enter doesn't submit and assistive tech doesn't see a form. Wrap the fields in `<form>`.\n\nI'd also add `autoComplete` hints and announce errors with `role=\"alert\"`.",
+   "bn": "চারটা সমস্যা আছে:\n1. **\"Button\"-টা আসলে একটা `<div>`** — এটা focus করা যায় না, Enter/Space-এ সাড়া দেয় না, আর button হিসেবে announce-ও হয় না। আসল `<button type=\"submit\">` ব্যবহার করো।\n2. **Input-এর কোনো label নেই।** টাইপ শুরু করলে placeholder চলে যায়, আর এটা নির্ভরযোগ্য accessible name না। `<label htmlFor>` যোগ করো (JSX-এ `for` না, `htmlFor`)।\n3. **Image-এ `alt` নেই।** Screen reader হয়তো file-এর নাম পড়ে শোনাবে। অর্থপূর্ণ `alt` দাও, আর শুধু সাজসজ্জার হলে `alt=\"\"`।\n4. **কোনো `<form>` element নেই**, তাই Enter চাপলে submit হয় না, আর assistive tech এটাকে form হিসেবে চেনে না। Field-গুলো `<form>`-এ wrap করো।\n\nসাথে `autoComplete` hint যোগ করব আর error `role=\"alert\"` দিয়ে announce করব।"
+  },
+  "explanation": {
+   "en": "**Rule of thumb:** use the native HTML element first. A `<button>` gives you focus, keyboard activation, the `button` role and form submission for free; recreating that on a `<div>` needs `role`, `tabIndex`, key handlers and still misses details.\n\n**React specifics:** JSX uses `htmlFor` and `className`, while `aria-*` and `data-*` attributes keep their hyphenated names. In reusable components generate ids with `useId` so two forms on one page don't share the same `id`.\n\n**How to catch these early:** `eslint-plugin-jsx-a11y`, automated axe checks in tests/CI, React Testing Library queries like `getByRole('button', { name: /log in/i })` (they fail when roles/labels are missing), and a quick manual test with only the keyboard and a screen reader.",
+   "bn": "**মূল নিয়ম:** আগে native HTML element ব্যবহার করো। `<button>` বিনা খরচে focus, keyboard দিয়ে চালানো, `button` role আর form submission দেয়; `<div>`-এ এগুলো নতুন করে বানাতে `role`, `tabIndex`, key handler লাগে, তারপরও কিছু খুঁটিনাটি বাদ পড়ে।\n\n**React-এর বিশেষ দিক:** JSX-এ `htmlFor` আর `className` ব্যবহার হয়, কিন্তু `aria-*` আর `data-*` attribute hyphen-সহ নামেই থাকে। Reusable component-এ `useId` দিয়ে id তৈরি করো, যাতে একই page-এ দুটো form একই `id` share না করে।\n\n**আগেভাগে কীভাবে ধরবে:** `eslint-plugin-jsx-a11y`, test/CI-তে automated axe check, React Testing Library-র `getByRole('button', { name: /log in/i })`-এর মতো query (role/label না থাকলে fail করে), আর শুধু keyboard ও screen reader দিয়ে একটা দ্রুত manual test।"
+  },
+  "interviewTip": {
+   "en": "List the issues from most to least severe and give the fix for each. Saying \"native elements first, ARIA second\" is the principle interviewers want to hear.",
+   "bn": "সমস্যাগুলো সবচেয়ে গুরুতর থেকে কম গুরুতর ক্রমে বলো আর প্রতিটার সমাধান দাও। \"আগে native element, তারপর ARIA\" — interviewer ঠিক এই নীতিটাই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Common components (e.g. <div>)",
+    "url": "https://react.dev/reference/react-dom/components/common"
+   },
+   {
+    "title": "MDN — <button>: The Button element",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button"
+   },
+   {
+    "title": "MDN — Accessibility",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/Accessibility"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When is `alt=\"\"` the correct choice for an image?",
+    "bn": "কোনো image-এর জন্য কখন `alt=\"\"` সঠিক?"
+   },
+   {
+    "en": "How would you move focus to an error summary after a failed submit?",
+    "bn": "Submit fail করার পর focus কীভাবে error summary-তে নিয়ে যাবে?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Adding `role=\"button\"` to the `<div>` and stopping there (still not focusable or keyboard-operable), or treating placeholders as labels.",
+   "bn": "`<div>`-এ শুধু `role=\"button\"` যোগ করে থেমে যাওয়া (তবুও focus বা keyboard দিয়ে চালানো যায় না), অথবা placeholder-কে label মনে করা।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "export default function LoginForm({ onLogin }) {\n  return (\n    <div>\n      <img src=\"/logo.svg\" />\n      <input type=\"email\" placeholder=\"Email\" />\n      <input type=\"password\" placeholder=\"Password\" />\n      <div className=\"btn\" onClick={onLogin}>Log in</div>\n    </div>\n  );\n}"
+  },
+  "extraCode": [
+   {
+    "language": "jsx",
+    "source": "import { useId } from 'react';\n\nexport default function LoginForm({ loginAction, error }) {\n  const id = useId();\n  return (\n    <form action={loginAction}>\n      <img src=\"/logo.svg\" alt=\"Acme Shop\" />\n\n      <label htmlFor={`${id}-email`}>Email</label>\n      <input id={`${id}-email`} name=\"email\" type=\"email\" autoComplete=\"email\" required />\n\n      <label htmlFor={`${id}-password`}>Password</label>\n      <input\n        id={`${id}-password`}\n        name=\"password\"\n        type=\"password\"\n        autoComplete=\"current-password\"\n        required\n      />\n\n      {error && <p role=\"alert\">{error}</p>}\n      <button type=\"submit\">Log in</button>\n    </form>\n  );\n}",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "react"
+ },
+ {
+  "id": "react-020",
+  "subtopic": "Testing with React Testing Library",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "testing",
+   "react-testing-library",
+   "user-event",
+   "queries"
+  ],
+  "technologyVersion": "React 19.3 with React Testing Library + user-event",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How do you test React components with React Testing Library? Explain the query priority, `user-event`, and how you test asynchronous UI.",
+   "bn": "React Testing Library দিয়ে React component কীভাবে test করো? Query priority, `user-event` আর asynchronous UI কীভাবে test করো তা ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "RTL's idea is to **test behaviour the way a user experiences it**, not implementation details. I render the component, find elements the way a user or screen reader would, interact, and assert on what's on screen — never on internal state or hook calls.\n\n**Query priority:** `getByRole` (with `{ name }`) first, then `getByLabelText`, `getByPlaceholderText`, `getByText`, `getByDisplayValue`, `getByAltText`, `getByTitle`, and `getByTestId` only as a last resort. Role-based queries also double as an accessibility check.\n\n**Query variants:** `getBy…` throws if the element isn't there (use for things that must exist now), `queryBy…` returns `null` (use to assert something is *absent*), and `findBy…` returns a promise that waits — that's how I test async UI.\n\n**Interactions:** `@testing-library/user-event` (`const user = userEvent.setup(); await user.click(...)`) simulates real typing and clicking, including focus and keyboard events, which is more realistic than `fireEvent`. For network calls I mock at the HTTP level (e.g. MSW) rather than mocking my own modules.",
+   "bn": "RTL-এর মূল ধারণা হলো **user যেভাবে অনুভব করে সেভাবে behaviour test করা**, implementation-এর খুঁটিনাটি না। আমি component render করি, user বা screen reader যেভাবে খোঁজে সেভাবে element খুঁজি, interact করি, আর স্ক্রিনে কী আছে তার উপর assert করি — কখনো internal state বা hook call-এর উপর না।\n\n**Query priority:** প্রথমে `getByRole` (`{ name }`-সহ), তারপর `getByLabelText`, `getByPlaceholderText`, `getByText`, `getByDisplayValue`, `getByAltText`, `getByTitle`, আর একদম শেষ উপায় হিসেবে `getByTestId`। Role-ভিত্তিক query একসাথে accessibility check-এর কাজও করে।\n\n**Query-র ধরন:** element না থাকলে `getBy…` throw করে (যা এখনই থাকা উচিত তার জন্য), `queryBy…` `null` return করে (কিছু *নেই* সেটা assert করতে), আর `findBy…` একটা promise return করে যেটা অপেক্ষা করে — async UI এভাবেই test করি।\n\n**Interaction:** `@testing-library/user-event` (`const user = userEvent.setup(); await user.click(...)`) focus আর keyboard event-সহ আসল টাইপ ও click simulate করে, যেটা `fireEvent`-এর চেয়ে বাস্তবসম্মত। Network call-এর জন্য নিজের module mock না করে HTTP level-এ mock করি (যেমন MSW)।"
+  },
+  "explanation": {
+   "en": "- **Avoid `act` warnings properly:** awaiting `user-event` calls and `findBy…` queries keeps updates inside `act` automatically. If you see an `act` warning, something updated after the test stopped waiting — usually a missing `await`.\n- **`waitFor`** is for assertions that become true later; don't put side effects (clicks) inside it.\n- **Matchers** like `toBeInTheDocument` and `toHaveTextContent` come from `@testing-library/jest-dom` (with Vitest, import `@testing-library/jest-dom/vitest` in the setup file).\n- **What not to test:** internal state values, the number of renders, or that a specific hook was called. Those tests break on refactors without catching real bugs.\n- **Layering:** unit/component tests with RTL + Vitest/Jest, a few end-to-end tests (Playwright) for critical flows like checkout and login.",
+   "bn": "- **`act` warning ঠিকভাবে এড়াও:** `user-event` call আর `findBy…` query await করলে update নিজে থেকেই `act`-এর ভেতরে থাকে। `act` warning দেখলে বুঝবে test অপেক্ষা থামানোর পর কিছু update হয়েছে — সাধারণত কোথাও `await` বাদ পড়েছে।\n- **`waitFor`** এমন assertion-এর জন্য, যেটা পরে সত্য হবে; এর ভেতরে side effect (click) রাখবে না।\n- **Matcher** যেমন `toBeInTheDocument` আর `toHaveTextContent` আসে `@testing-library/jest-dom` থেকে (Vitest-এ setup file-এ `@testing-library/jest-dom/vitest` import করো)।\n- **কী test করবে না:** internal state-এর value, কতবার render হলো, বা নির্দিষ্ট hook call হয়েছে কি না। এমন test refactor করলেই ভাঙে, অথচ আসল bug ধরে না।\n- **স্তর ভাগ:** RTL + Vitest/Jest দিয়ে unit/component test, আর login ও checkout-এর মতো গুরুত্বপূর্ণ flow-এর জন্য কয়েকটা end-to-end test (Playwright)।"
+  },
+  "interviewTip": {
+   "en": "Lead with the philosophy (\"test what the user sees\"), then show you know the practical tools: query priority, get/query/find, `user-event` with `await`. A short example test makes the answer concrete.",
+   "bn": "দর্শন দিয়ে শুরু করো (\"user যা দেখে সেটা test করো\"), তারপর দেখাও তুমি ব্যবহারিক tool-গুলো জানো: query priority, get/query/find, `await`-সহ `user-event`। ছোট একটা উদাহরণ test দিলে উত্তরটা বাস্তব হয়।"
+  },
+  "references": [
+   {
+    "title": "React Testing Library (GitHub)",
+    "url": "https://github.com/testing-library/react-testing-library"
+   },
+   {
+    "title": "user-event (GitHub)",
+    "url": "https://github.com/testing-library/user-event"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you test a component that uses a Context provider or a Redux store?",
+    "bn": "Context provider বা Redux store ব্যবহার করে এমন component কীভাবে test করবে?"
+   },
+   {
+    "en": "When would you write an end-to-end test instead of a component test?",
+    "bn": "কখন component test-এর বদলে end-to-end test লিখবে?"
+   }
+  ],
+  "related": [
+   "react-011"
+  ],
+  "commonMistakes": {
+   "en": "Using `getByTestId` everywhere, asserting on component state, forgetting to `await` user-event calls, or using `getBy…` to check that something is *not* rendered (it throws).",
+   "bn": "সব জায়গায় `getByTestId` ব্যবহার করা, component state-এর উপর assert করা, user-event call `await` করতে ভুলে যাওয়া, অথবা কিছু render *হয়নি* তা যাচাই করতে `getBy…` ব্যবহার করা (এটা throw করে)।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { expect, test } from 'vitest';\nimport LoginPage from './LoginPage';\n\ntest('shows an error when the password is wrong', async () => {\n  const user = userEvent.setup();\n  render(<LoginPage />); // the API is mocked with MSW to return 401\n\n  await user.type(screen.getByLabelText(/email/i), 'rahim@example.com');\n  await user.type(screen.getByLabelText(/password/i), 'wrong-pass');\n  await user.click(screen.getByRole('button', { name: /log in/i }));\n\n  // findBy waits for the async error to appear\n  expect(await screen.findByRole('alert')).toHaveTextContent(/invalid email or password/i);\n  // queryBy returns null instead of throwing\n  expect(screen.queryByText(/welcome back/i)).not.toBeInTheDocument();\n});"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-021",
+  "subtopic": "Keys and List Rendering",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "keys",
+   "index-as-key",
+   "lists",
+   "state-bug"
+  ],
+  "technologyVersion": "Version-independent concept (React 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "QA reports: \"I typed `urgent` in the note field of **Buy milk**, then deleted **Buy milk**. Now **Call Karim** shows the note `urgent`.\" Explain why this happens and fix it.",
+   "bn": "QA জানাল: \"**Buy milk**-এর note field-এ `urgent` লিখলাম, তারপর **Buy milk** delete করলাম। এখন **Call Karim**-এর পাশে note দেখাচ্ছে `urgent`।\" কেন এমন হচ্ছে ব্যাখ্যা করো আর ঠিক করো।"
+  },
+  "answer": {
+   "en": "The list uses the **array index as the key**. Keys tell React which element is which between renders.\n\nBefore deleting: key `0` = Buy milk, `1` = Call Karim, `2` = Pay bills. After deleting the first item the array is shorter, so now key `0` = Call Karim and key `1` = Pay bills. React compares by key: it sees that `0` and `1` still exist and only key `2` disappeared. So it **keeps the first `<li>` and its DOM input (with \"urgent\")**, just updating the text to \"Call Karim\", and removes the *last* row.\n\nFix: use a stable id from the data as the key (`key={todo.id}`) and delete by id, not by index. Then React removes exactly the `<li>` for Buy milk, together with its input.",
+   "bn": "List-এ **array index-কে key** হিসেবে ব্যবহার করা হয়েছে। Render-এর মধ্যে কোন element কোনটা, সেটা React key দিয়ে বোঝে।\n\nDelete-এর আগে: key `0` = Buy milk, `1` = Call Karim, `2` = Pay bills। প্রথম item delete করার পর array ছোট হয়ে যায়, ফলে এখন key `0` = Call Karim আর key `1` = Pay bills। React key দিয়ে তুলনা করে: দেখে `0` আর `1` এখনো আছে, শুধু key `2` নেই। তাই সে **প্রথম `<li>` আর তার DOM input (\"urgent\"-সহ) রেখে দেয়**, শুধু লেখাটা \"Call Karim\"-এ update করে, আর *শেষের* row সরিয়ে দেয়।\n\nসমাধান: data থেকে আসা স্থায়ী id-কে key হিসেবে ব্যবহার করো (`key={todo.id}`) আর index না, id দিয়ে delete করো। তখন React ঠিক Buy milk-এর `<li>`-টাই তার input-সহ সরিয়ে দেয়।"
+  },
+  "explanation": {
+   "en": "The note lives in **uncontrolled DOM state** (and the same happens with component state inside each row). React attaches that state to the key, not to the data, so when keys shift, state \"moves\" to another item.\n\nIndex keys are only safe when the list is static: never reordered, filtered, or has items inserted/removed in the middle. Also avoid generating keys during render (`Math.random()`, `crypto.randomUUID()` in `map`), which remounts every row each time. If items come without ids, assign one when they're created.\n\nThis bug is easy to miss in demos because adding to the *end* of the list works fine — it only shows up on deletion, insertion at the top, sorting or filtering.",
+   "bn": "Note-টা থাকে **uncontrolled DOM state**-এ (প্রতিটা row-এর ভেতরের component state-এর ক্ষেত্রেও একই ঘটনা ঘটে)। React এই state data-র সাথে না, key-র সাথে যুক্ত রাখে, তাই key সরে গেলে state অন্য item-এ \"চলে যায়\"।\n\nIndex key শুধু তখনই নিরাপদ, যখন list static: কখনো reorder, filter হয় না, বা মাঝখানে item যোগ/মুছে ফেলা হয় না। Render-এর সময় key তৈরি করাও (`map`-এর ভেতরে `Math.random()`, `crypto.randomUUID()`) এড়িয়ে চলো — এতে প্রতিবার প্রতিটা row remount হয়। Item-এর id না থাকলে তৈরি করার সময়ই একটা id দাও।\n\nDemo-তে এই bug সহজে চোখে পড়ে না, কারণ list-এর *শেষে* যোগ করলে সব ঠিক থাকে — delete, উপরে insert, sort বা filter করলেই কেবল দেখা দেয়।"
+  },
+  "interviewTip": {
+   "en": "Walk through the keys before and after the deletion — interviewers love seeing you \"be the reconciler\". Then state when index keys are acceptable.",
+   "bn": "Delete-এর আগে আর পরে key-গুলো ধাপে ধাপে দেখাও — interviewer তোমাকে \"reconciler-এর মতো চিন্তা করতে\" দেখতে পছন্দ করে। তারপর বলো কখন index key চলে।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Rendering Lists",
+    "url": "https://react.dev/learn/rendering-lists"
+   },
+   {
+    "title": "react.dev — Preserving and Resetting State",
+    "url": "https://react.dev/learn/preserving-and-resetting-state"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When is using the index as a key acceptable?",
+    "bn": "কখন index-কে key হিসেবে ব্যবহার করা গ্রহণযোগ্য?"
+   },
+   {
+    "en": "How can you intentionally reset a component's state using `key`?",
+    "bn": "`key` দিয়ে ইচ্ছাকৃতভাবে কোনো component-এর state কীভাবে reset করবে?"
+   }
+  ],
+  "related": [
+   "react-004",
+   "react-023"
+  ],
+  "commonMistakes": {
+   "en": "Thinking the bug is in the `filter` logic, or \"fixing\" it by making the input controlled while still using index keys (row components with their own state would still mix up).",
+   "bn": "ভাবা যে bug-টা `filter` logic-এ, অথবা index key রেখেই input controlled করে \"ঠিক\" করা (নিজস্ব state-ওয়ালা row component তখনো এলোমেলো হবে)।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { useState } from 'react';\n\nexport default function TodoList() {\n  const [todos, setTodos] = useState([\n    { id: 'a1', title: 'Buy milk' },\n    { id: 'b2', title: 'Call Karim' },\n    { id: 'c3', title: 'Pay bills' },\n  ]);\n\n  function remove(index) {\n    setTodos(todos.filter((_, i) => i !== index));\n  }\n\n  return (\n    <ul>\n      {todos.map((todo, index) => (\n        <li key={index}>\n          {todo.title}\n          <input placeholder=\"Add a note\" />\n          <button onClick={() => remove(index)}>Delete</button>\n        </li>\n      ))}\n    </ul>\n  );\n}"
+  },
+  "extraCode": [
+   {
+    "language": "jsx",
+    "source": "import { useState } from 'react';\n\nexport default function TodoList() {\n  const [todos, setTodos] = useState([\n    { id: 'a1', title: 'Buy milk' },\n    { id: 'b2', title: 'Call Karim' },\n    { id: 'c3', title: 'Pay bills' },\n  ]);\n\n  function remove(id) {\n    setTodos((prev) => prev.filter((t) => t.id !== id));\n  }\n\n  return (\n    <ul>\n      {todos.map((todo) => (\n        <li key={todo.id}>\n          {todo.title}\n          <input placeholder=\"Add a note\" aria-label={`Note for ${todo.title}`} />\n          <button onClick={() => remove(todo.id)}>Delete</button>\n        </li>\n      ))}\n    </ul>\n  );\n}",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "react"
+ },
+ {
+  "id": "react-022",
+  "subtopic": "Server and Client Components",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "server-components",
+   "use-client",
+   "serialization",
+   "rsc"
+  ],
+  "technologyVersion": "React 19.3 (Server Components via a framework, e.g. Next.js 16.4)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "A Server Component renders a Client Component (a module marked with `'use client'`). Which prop can **not** be passed from the Server Component to the Client Component?",
+   "bn": "একটা Server Component একটা Client Component (`'use client'` দেওয়া module) render করছে। Server Component থেকে Client Component-এ নিচের কোন prop পাঠানো **যাবে না**?"
+  },
+  "answer": {
+   "en": "A regular function can't cross the server→client boundary, because props are **serialised** and sent over the network. The only functions allowed are Server Functions (marked `'use server'`), which are sent as references the client can call.",
+   "bn": "সাধারণ function server→client boundary পার হতে পারে না, কারণ props **serialise** করে network দিয়ে পাঠানো হয়। শুধু Server Function (`'use server'` দেওয়া) পাঠানো যায়, যেগুলো এমন reference হিসেবে যায় যেটা client call করতে পারে।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is the **Promise**. React can serialise promises: the server starts the fetch, passes the promise, and the Client Component reads it with `use()` inside a `<Suspense>` boundary — a useful streaming pattern. Plain objects, arrays, `Date`, `Map`, `Set`, typed arrays and JSX (including Server Component output as `children`) are all supported.\n\nNot supported: ordinary functions, class instances, and symbols that aren't registered globally. Fixes for the handler: define it **inside** the Client Component, or pass a Server Function if the work must happen on the server.\n\nRelated rules: `'use client'` marks a module boundary — that module and everything it imports become client code. Keep the directive on interactive leaves so most of the tree stays on the server, and import the `server-only` package in modules that must never reach the client bundle (database code, secrets).",
+   "bn": "লোভনীয় ভুল উত্তর হলো **Promise**। React promise serialise করতে পারে: server fetch শুরু করে, promise-টা পাঠায়, আর Client Component একটা `<Suspense>` boundary-র ভেতরে `use()` দিয়ে সেটা পড়ে — এটা streaming-এর একটা কাজের pattern। Plain object, array, `Date`, `Map`, `Set`, typed array আর JSX (`children` হিসেবে Server Component-এর output-সহ) — সবই support করে।\n\nSupport করে না: সাধারণ function, class instance, আর globally register না করা symbol। Handler-এর সমাধান: এটাকে Client Component-এর **ভেতরে** define করো, অথবা কাজটা server-এ করতে হলে একটা Server Function পাঠাও।\n\nসংশ্লিষ্ট নিয়ম: `'use client'` একটা module boundary চিহ্নিত করে — ওই module আর সে যা import করে সব client code হয়ে যায়। Directive-টা interactive leaf-এ রাখো, যাতে tree-র বেশিরভাগ অংশ server-এ থাকে, আর যেসব module কখনো client bundle-এ যাওয়া উচিত না (database code, secret), সেখানে `server-only` package import করো।"
+  },
+  "interviewTip": {
+   "en": "Say the key word \"serialisable\" and list what *is* allowed (including promises and JSX) — knowing the surprising \"yes\" cases impresses more than only knowing functions are forbidden.",
+   "bn": "মূল শব্দ \"serialisable\" বলো, আর কী কী *পাঠানো যায়* তার তালিকা দাও (promise আর JSX-সহ) — শুধু function নিষেধ জানার চেয়ে অপ্রত্যাশিত \"হ্যাঁ\" case-গুলো জানা বেশি প্রভাব ফেলে।"
+  },
+  "references": [
+   {
+    "title": "react.dev — 'use client'",
+    "url": "https://react.dev/reference/rsc/use-client"
+   },
+   {
+    "title": "react.dev — Server Components",
+    "url": "https://react.dev/reference/rsc/server-components"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "A plain object like `{ id: 1, name: 'Rahim', joinedAt: new Date() }`",
+    "bn": "একটা plain object, যেমন `{ id: 1, name: 'Rahim', joinedAt: new Date() }`"
+   },
+   {
+    "en": "A `Promise` that the Client Component unwraps with `use()`",
+    "bn": "একটা `Promise`, যেটা Client Component `use()` দিয়ে unwrap করে"
+   },
+   {
+    "en": "An inline handler such as `onSelect={(id) => console.log(id)}`",
+    "bn": "Inline handler, যেমন `onSelect={(id) => console.log(id)}`"
+   },
+   {
+    "en": "Server-rendered JSX passed as `children`",
+    "bn": "Server-এ render হওয়া JSX, `children` হিসেবে পাঠানো"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "react"
+ },
+ {
+  "id": "react-027",
+  "subtopic": "Activity and useEffectEvent",
+  "difficulty": "hard",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 8,
+  "tags": [
+   "activity",
+   "useeffectevent",
+   "react-19-2",
+   "effects"
+  ],
+  "technologyVersion": "React 19.3 (both APIs stable since 19.2)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "React 19.2 introduced `<Activity>` and `useEffectEvent`. What problem does each solve, and what are the gotchas?",
+   "bn": "React 19.2-এ `<Activity>` আর `useEffectEvent` এসেছে। প্রতিটা কোন সমস্যার সমাধান করে, আর এদের gotcha কী কী?"
+  },
+  "answer": {
+   "en": "**`<Activity mode=\"visible\" | \"hidden\">`** hides part of the UI **without unmounting it**. Before, you had two bad options: conditional rendering (`{show && <Tab />}`) loses state and DOM, while CSS hiding keeps everything running at full priority. When an Activity is hidden, React hides its DOM (`display: none`), **cleans up its effects**, and defers its updates until there's nothing more urgent — but keeps its state. When it becomes visible again, effects re-run and the user finds their draft, scroll position or form input intact. It's also useful to pre-render a likely next screen in the background.\n\n**`useEffectEvent(fn)`** separates *non-reactive* logic from an effect. The returned function always sees the latest props and state, but it's not a dependency, so changing those values doesn't re-run the effect. Classic case: a chat effect should reconnect when `roomId` changes, but not when `theme` changes, even though the \"connected\" notification uses the theme.\n\nGotchas: Effect Events must only be called from inside effects (not during render, not passed to children), and must not be listed in dependencies — the updated `eslint-plugin-react-hooks` knows this. For Activity, effects need proper cleanup, because hiding runs it — e.g. a video must pause in its effect cleanup, or it keeps playing while hidden.",
+   "bn": "**`<Activity mode=\"visible\" | \"hidden\">`** UI-র কোনো অংশ **unmount না করেই** লুকিয়ে রাখে। আগে দুটো খারাপ উপায় ছিল: conditional rendering (`{show && <Tab />}`) state আর DOM হারায়, আর CSS দিয়ে লুকালে সবকিছু পূর্ণ priority-তে চলতে থাকে। Activity hidden হলে React তার DOM লুকিয়ে রাখে (`display: none`), **তার effect cleanup করে**, আর আরও জরুরি কিছু না থাকা পর্যন্ত update পিছিয়ে দেয় — কিন্তু state রেখে দেয়। আবার visible হলে effect নতুন করে চলে, আর user তার draft, scroll position বা form input অক্ষত পায়। সম্ভাব্য পরের screen background-এ pre-render করতেও এটা কাজে লাগে।\n\n**`useEffectEvent(fn)`** effect থেকে *non-reactive* logic আলাদা করে। Return হওয়া function সবসময় সর্বশেষ props আর state দেখে, কিন্তু এটা dependency না, তাই ওই value বদলালে effect আবার চলে না। Classic উদাহরণ: chat effect `roomId` বদলালে reconnect করবে, কিন্তু `theme` বদলালে না — যদিও \"connected\" notification theme ব্যবহার করে।\n\nGotcha: Effect Event শুধু effect-এর ভেতর থেকে call করতে হবে (render-এর সময় না, child-এ পাঠিয়ে না), আর dependency-তে রাখা যাবে না — আপডেট হওয়া `eslint-plugin-react-hooks` এটা জানে। Activity-র ক্ষেত্রে effect-এর সঠিক cleanup থাকতে হবে, কারণ hide করলে cleanup চলে — যেমন video-কে effect cleanup-এ pause করতে হবে, নইলে লুকানো অবস্থাতেও চলতে থাকবে।"
+  },
+  "explanation": {
+   "en": "**Why Activity cleans up effects:** hidden UI shouldn't keep subscriptions, timers or network polling alive. Treating hide/show like unmount/remount for effects (but not for state) is exactly what StrictMode's double-effect check prepares you for — symmetrical effects \"just work\".\n\n**Rendering while hidden:** a hidden subtree can still re-render at low priority when its props change, so it's ready when shown. Don't put dozens of heavy screens in hidden Activities — they still consume memory.\n\n**Don't misuse `useEffectEvent`:** it's for logic that truly shouldn't trigger re-synchronisation (logging, notifications, reading the latest settings). Using it to hide a real dependency recreates the stale-data bugs the dependency array protects you from.",
+   "bn": "**Activity কেন effect cleanup করে:** লুকানো UI-এর subscription, timer বা network polling চালু রাখা উচিত না। Effect-এর জন্য hide/show-কে unmount/remount-এর মতো ধরা (কিন্তু state-এর জন্য না) — ঠিক এটার জন্যই StrictMode-এর double-effect check তোমাকে প্রস্তুত করে; symmetrical effect থাকলে সব নিজে থেকেই ঠিকঠাক চলে।\n\n**Hidden অবস্থায় rendering:** props বদলালে hidden subtree কম priority-তে re-render হতে পারে, যাতে দেখানোর সময় প্রস্তুত থাকে। ডজনখানেক ভারী screen hidden Activity-তে রেখো না — এরা তবুও memory খরচ করে।\n\n**`useEffectEvent`-এর অপব্যবহার করো না:** এটা এমন logic-এর জন্য, যেটা আসলেই re-synchronisation trigger করা উচিত না (logging, notification, সর্বশেষ setting পড়া)। আসল dependency লুকাতে এটা ব্যবহার করলে dependency array যে stale-data bug থেকে রক্ষা করে, সেগুলোই আবার ফিরে আসে।"
+  },
+  "interviewTip": {
+   "en": "For each API, state \"before / after\": what people did before and why it was painful. Then give one concrete use case and one gotcha each — that structure makes a new-feature answer sound experienced rather than memorised from a blog post.",
+   "bn": "প্রতিটা API-র জন্য \"আগে / পরে\" বলো: আগে মানুষ কী করত আর সেটা কেন কষ্টকর ছিল। তারপর প্রতিটার একটা বাস্তব use case আর একটা gotcha দাও — এই কাঠামোয় নতুন feature-এর উত্তর blog থেকে মুখস্থ না, অভিজ্ঞ মানুষের মতো শোনায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — <Activity>",
+    "url": "https://react.dev/reference/react/Activity"
+   },
+   {
+    "title": "react.dev — useEffectEvent",
+    "url": "https://react.dev/reference/react/useEffectEvent"
+   },
+   {
+    "title": "react.dev — React 19.2",
+    "url": "https://react.dev/blog/2025/10/01/react-19-2"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is `<Activity mode=\"hidden\">` different from rendering with `display: none` yourself?",
+    "bn": "নিজে `display: none` দিয়ে render করা আর `<Activity mode=\"hidden\">`-এর মধ্যে পার্থক্য কী?"
+   },
+   {
+    "en": "How did people solve the `theme`-in-effect problem before `useEffectEvent`?",
+    "bn": "`useEffectEvent`-এর আগে মানুষ effect-এর ভেতরে `theme`-এর সমস্যা কীভাবে সমাধান করত?"
+   }
+  ],
+  "related": [
+   "react-012",
+   "react-013"
+  ],
+  "commonMistakes": {
+   "en": "Thinking effects keep running inside a hidden Activity, or calling an Effect Event from an event handler or during render.",
+   "bn": "ভাবা যে hidden Activity-র ভেতরে effect চলতেই থাকে, অথবা event handler থেকে বা render-এর সময় Effect Event call করা।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { Activity, useEffect, useEffectEvent, useState } from 'react';\n\n// 1) Activity: keep the draft when switching tabs\nexport function Mailbox() {\n  const [tab, setTab] = useState('inbox');\n  return (\n    <>\n      <TabBar current={tab} onSelect={setTab} />\n      <Activity mode={tab === 'inbox' ? 'visible' : 'hidden'}>\n        <Inbox />\n      </Activity>\n      <Activity mode={tab === 'compose' ? 'visible' : 'hidden'}>\n        <ComposeEmail /> {/* draft state survives tab switches */}\n      </Activity>\n    </>\n  );\n}\n\n// 2) useEffectEvent: reconnect on roomId, not on theme\nexport function ChatRoom({ roomId, theme }) {\n  const onConnected = useEffectEvent(() => {\n    showNotification('Connected!', theme); // always the latest theme\n  });\n\n  useEffect(() => {\n    const connection = createConnection(roomId);\n    connection.on('connected', () => onConnected());\n    connection.connect();\n    return () => connection.disconnect();\n  }, [roomId]); // theme is intentionally not a dependency\n\n  return <Messages roomId={roomId} />;\n}"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-028",
+  "subtopic": "React 19.3 Features",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "international",
+  "priority": "low",
+  "estimatedMinutes": 4,
+  "tags": [
+   "viewtransition",
+   "react-19-3",
+   "transitions",
+   "animation"
+  ],
+  "technologyVersion": "React 19.3 (<ViewTransition> stable since 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "In React 19.3 you wrap the gallery image in `<ViewTransition>`. Clicking **Next** switches the photo instantly, with no animation. What is the reason?",
+   "bn": "React 19.3-এ তুমি gallery-র image-টা `<ViewTransition>`-এ wrap করেছ। **Next**-এ click করলে photo সাথে সাথে বদলে যায়, কোনো animation হয় না। কারণ কী?"
+  },
+  "answer": {
+   "en": "`<ViewTransition>` (stable in React 19.3) is activated only by **non-urgent** updates: `startTransition`, `useDeferredValue` or a Suspense boundary revealing content. Urgent updates apply immediately. Fix: `onClick={() => startTransition(() => setIndex(...))}`.",
+   "bn": "`<ViewTransition>` (React 19.3-এ stable) শুধু **non-urgent** update-এ চালু হয়: `startTransition`, `useDeferredValue` বা কোনো Suspense boundary content দেখানো। Urgent update সাথে সাথে apply হয়। সমাধান: `onClick={() => startTransition(() => setIndex(...))}`।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is the `key`: changing the key is actually what makes this work — the old `<ViewTransition>` \"exits\" and the new one \"enters\" in the same Transition, and React runs a cross-fade by default using the browser's View Transition API. You can then customise it with View Transition classes in CSS, and with `addTransitionType('next')` inside `startTransition` you can animate \"next\" and \"previous\" differently (e.g. `enter={{ next: 'from-right', previous: 'from-left' }}`). Respect `prefers-reduced-motion`.\n\nOther React 19.3 additions worth knowing:\n- **Fragment refs (stable):** `<Fragment ref={ref}>` gives a `FragmentInstance` with methods like `addEventListener`, `focus`, `focusLast`, `observeUsing` (Intersection/ResizeObserver) and `getClientRects` that act on the Fragment's first-level DOM children — no wrapper `<div>` needed.\n- **`browser()` from `react-dom`:** `use(browser())` suspends during server rendering, so the nearest `<Suspense>` fallback goes into the HTML and the component renders only in the browser after hydration — replacing the old \"`mounted` state set in an effect\" trick.",
+   "bn": "লোভনীয় ভুল উত্তর হলো `key`: আসলে key বদলানোর কারণেই এটা কাজ করে — একই Transition-এ পুরনো `<ViewTransition>` \"exit\" করে আর নতুনটা \"enter\" করে, আর React default-ভাবে browser-এর View Transition API দিয়ে একটা cross-fade চালায়। এরপর CSS-এ View Transition class দিয়ে এটা customise করা যায়, আর `startTransition`-এর ভেতরে `addTransitionType('next')` দিয়ে \"next\" আর \"previous\" আলাদাভাবে animate করা যায় (যেমন `enter={{ next: 'from-right', previous: 'from-left' }}`)। `prefers-reduced-motion` মেনে চলো।\n\nReact 19.3-এর আরও কিছু জানার মতো সংযোজন:\n- **Fragment ref (stable):** `<Fragment ref={ref}>` একটা `FragmentInstance` দেয়, যার `addEventListener`, `focus`, `focusLast`, `observeUsing` (Intersection/ResizeObserver) আর `getClientRects`-এর মতো method Fragment-এর প্রথম স্তরের DOM children-এর উপর কাজ করে — বাড়তি wrapper `<div>` লাগে না।\n- **`react-dom` থেকে `browser()`:** server rendering-এর সময় `use(browser())` suspend করে, ফলে সবচেয়ে কাছের `<Suspense>` fallback HTML-এ যায় আর component শুধু hydration-এর পর browser-এ render হয় — পুরনো \"effect-এ `mounted` state set করা\" কৌশলের বদলে।"
+  },
+  "interviewTip": {
+   "en": "Connect the new API to concepts you already know: \"ViewTransition is driven by transitions — the same urgent vs non-urgent split as `useTransition`.\" Linking features to fundamentals shows understanding, not just release-note memory.",
+   "bn": "নতুন API-কে পরিচিত ধারণার সাথে যুক্ত করো: \"ViewTransition চলে transition দিয়ে — `useTransition`-এর মতোই urgent বনাম non-urgent ভাগ।\" Feature-কে মূল ধারণার সাথে যুক্ত করলে বোঝা যায় তুমি বোঝো, শুধু release note মুখস্থ করোনি।"
+  },
+  "references": [
+   {
+    "title": "react.dev — <ViewTransition>",
+    "url": "https://react.dev/reference/react/ViewTransition"
+   },
+   {
+    "title": "react.dev — React 19.3",
+    "url": "https://react.dev/blog/2026/09/09/react-19-3"
+   },
+   {
+    "title": "react.dev — <Fragment>",
+    "url": "https://react.dev/reference/react/Fragment"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "react-024",
+   "react-027"
+  ],
+  "code": {
+   "language": "jsx",
+   "source": "import { useState, ViewTransition } from 'react';\n\nexport default function Gallery({ photos }) {\n  const [index, setIndex] = useState(0);\n  const photo = photos[index];\n\n  return (\n    <>\n      <ViewTransition key={photo.id}>\n        <img src={photo.url} alt={photo.alt} />\n      </ViewTransition>\n      <button onClick={() => setIndex((i) => (i + 1) % photos.length)}>\n        Next\n      </button>\n    </>\n  );\n}"
+  },
+  "options": [
+   {
+    "en": "`<ViewTransition>` only animates updates that come from a Transition (e.g. `startTransition`), a `useDeferredValue` update or a Suspense reveal — a plain urgent `setState` doesn't activate it",
+    "bn": "`<ViewTransition>` শুধু Transition (যেমন `startTransition`), `useDeferredValue` update বা Suspense reveal থেকে আসা update animate করে — সাধারণ urgent `setState` এটাকে চালু করে না"
+   },
+   {
+    "en": "Changing the `key` remounts `<ViewTransition>`, and remounting cancels any running animation",
+    "bn": "`key` বদলালে `<ViewTransition>` remount হয়, আর remount চলমান যেকোনো animation বাতিল করে দেয়"
+   },
+   {
+    "en": "`<ViewTransition>` is still canary-only in React 19.3",
+    "bn": "React 19.3-এ `<ViewTransition>` এখনো শুধু canary-তে আছে"
+   },
+   {
+    "en": "The image must be wrapped in a `<Fragment ref>` so React can measure its DOM nodes",
+    "bn": "Image-কে `<Fragment ref>`-এ wrap করতে হবে, যাতে React তার DOM node মাপতে পারে"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "react"
+ },
+ {
+  "id": "react-029",
+  "subtopic": "Rendering Large Lists",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "virtualization",
+   "large-lists",
+   "performance",
+   "windowing"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "An orders table must show 10,000 rows with sorting and a search box. The first render takes about 3 seconds and scrolling is janky. How do you make it fast?",
+   "bn": "একটা orders table-এ sorting আর search box-সহ ১০,০০০ row দেখাতে হবে। প্রথম render-এ প্রায় ৩ সেকেন্ড লাগে আর scroll করলে আটকে আটকে যায়। এটা কীভাবে দ্রুত করবে?"
+  },
+  "answer": {
+   "en": "The real bottleneck is the **DOM size**: 10,000 rows × 8 cells is 80,000+ elements that React must create and the browser must lay out and paint. Memoization alone can't fix that.\n\n1. **Virtualise (windowing).** Render only the rows in the viewport plus a small overscan (so only ~30–50 rows are mounted) inside a tall spacer, using a library like TanStack Virtual or react-window. The DOM size stays constant no matter how many rows exist.\n2. **Make each row cheap.** Stable keys (`order.id`), a memoized row component (or React Compiler), no inline objects created per row, and sorting/filtering done once per change (`useMemo`), not inside rows.\n3. **Keep interactions responsive.** Keep the search input urgent and render results from `useDeferredValue(query)`; trigger sorting inside `startTransition`.\n4. **Move work off the client if possible.** For very large or growing datasets, sort/filter/paginate on the server (cursor-based pagination or infinite loading); for heavy client computation, use a Web Worker.\n5. **Measure** before and after with the React Profiler and the Performance panel.",
+   "bn": "আসল bottleneck হলো **DOM-এর আকার**: ১০,০০০ row × ৮টা cell মানে ৮০,০০০+ element, যেগুলো React-কে তৈরি করতে হয় আর browser-কে layout ও paint করতে হয়। শুধু memoization দিয়ে এটা ঠিক হবে না।\n\n1. **Virtualise (windowing) করো।** শুধু viewport-এ থাকা row আর সামান্য overscan একটা লম্বা spacer-এর ভেতরে render করো (ফলে একসাথে মাত্র ~৩০–৫০টা row mount থাকে) — TanStack Virtual বা react-window-এর মতো library দিয়ে। Row যত বেশিই হোক, DOM-এর আকার স্থির থাকে।\n2. **প্রতিটা row সস্তা করো।** Stable key (`order.id`), memoized row component (বা React Compiler), প্রতি row-এ নতুন inline object না, আর sorting/filtering প্রতিটা পরিবর্তনে একবার (`useMemo`), row-এর ভেতরে না।\n3. **Interaction responsive রাখো।** Search input urgent রাখো আর result render করো `useDeferredValue(query)` থেকে; sorting চালাও `startTransition`-এর ভেতরে।\n4. **সম্ভব হলে কাজ client থেকে সরাও।** খুব বড় বা বাড়তে থাকা dataset-এর জন্য server-এ sort/filter/paginate করো (cursor-based pagination বা infinite loading); client-এ ভারী হিসাবের জন্য Web Worker।\n5. **আগে-পরে মাপো** React Profiler আর Performance panel দিয়ে।"
+  },
+  "explanation": {
+   "en": "**Trade-offs of virtualisation**\n- Browser find (Ctrl+F) and screen readers only \"see\" mounted rows. Mitigate with your own search, `aria-rowcount` on the table plus `aria-rowindex` on each row, and keyboard navigation that scrolls the virtualizer.\n- Variable row heights need measuring (`measureElement` in TanStack Virtual), which costs layout work.\n- Printing or \"select all\" needs special handling.\n\n**Simpler alternatives:** pagination is often the best UX for business tables. For long *documents* (not interactive tables), CSS `content-visibility: auto` lets the browser skip rendering off-screen sections while keeping them in the DOM — easy, but the React render cost remains.\n\n**Security/perf angle:** never ship 10,000 rows of data the user isn't allowed to see \"because the UI filters it\" — filter on the server.",
+   "bn": "**Virtualisation-এর trade-off**\n- Browser find (Ctrl+F) আর screen reader শুধু mount হওয়া row-ই \"দেখে\"। নিজস্ব search, table-এ `aria-rowcount` আর প্রতিটা row-এ `aria-rowindex`, আর virtualizer scroll করে এমন keyboard navigation দিয়ে এটা সামলাও।\n- Row-এর উচ্চতা আলাদা আলাদা হলে মাপতে হয় (TanStack Virtual-এ `measureElement`), যাতে layout-এর খরচ লাগে।\n- Print বা \"select all\"-এর জন্য বিশেষ ব্যবস্থা লাগে।\n\n**সহজ বিকল্প:** business table-এর জন্য প্রায়ই pagination-ই সবচেয়ে ভালো UX। লম্বা *document*-এর জন্য (interactive table না), CSS `content-visibility: auto` browser-কে screen-এর বাইরের অংশ render না করে DOM-এ রেখে দিতে দেয় — সহজ, কিন্তু React-এর render খরচ থেকেই যায়।\n\n**Security/perf দিক:** \"UI তো filter করে দেয়\" ভেবে user-এর দেখার অনুমতি নেই এমন ১০,০০০ row-এর data কখনো পাঠাবে না — server-এ filter করো।"
+  },
+  "interviewTip": {
+   "en": "Name the root cause first (DOM size), then layer the fixes from biggest impact (virtualisation, server pagination) to smaller ones (memo, deferred values). Mentioning the accessibility trade-off of virtualisation is a senior-level touch.",
+   "bn": "আগে root cause-এর নাম বলো (DOM-এর আকার), তারপর সবচেয়ে বড় প্রভাব (virtualisation, server pagination) থেকে ছোট প্রভাবের (memo, deferred value) ক্রমে সমাধান সাজাও। Virtualisation-এর accessibility trade-off উল্লেখ করা senior-level ছোঁয়া।"
+  },
+  "references": [
+   {
+    "title": "TanStack Virtual (GitHub)",
+    "url": "https://github.com/TanStack/virtual"
+   },
+   {
+    "title": "web.dev — content-visibility",
+    "url": "https://web.dev/articles/content-visibility"
+   },
+   {
+    "title": "react.dev — useDeferredValue",
+    "url": "https://react.dev/reference/react/useDeferredValue"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you keep keyboard navigation and screen-reader support in a virtualised table?",
+    "bn": "Virtualised table-এ keyboard navigation আর screen-reader support কীভাবে রাখবে?"
+   },
+   {
+    "en": "When would you choose server-side pagination over client-side virtualisation?",
+    "bn": "কখন client-side virtualisation-এর বদলে server-side pagination বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "react-024",
+   "react-026"
+  ],
+  "commonMistakes": {
+   "en": "Answering only \"use `React.memo`/`useMemo`\", which doesn't reduce the number of DOM nodes, or virtualising without stable keys.",
+   "bn": "শুধু \"`React.memo`/`useMemo` ব্যবহার করো\" বলা, যেটা DOM node-এর সংখ্যা কমায় না, অথবা stable key ছাড়া virtualise করা।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { useRef } from 'react';\nimport { useVirtualizer } from '@tanstack/react-virtual';\n\nexport function OrdersTable({ rows }) {\n  const scrollRef = useRef(null);\n  const virtualizer = useVirtualizer({\n    count: rows.length,\n    getScrollElement: () => scrollRef.current,\n    estimateSize: () => 40, // px per row\n    overscan: 10,\n  });\n\n  return (\n    <div ref={scrollRef} style={{ height: 600, overflow: 'auto' }}>\n      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>\n        {virtualizer.getVirtualItems().map((item) => {\n          const order = rows[item.index];\n          return (\n            <div\n              key={order.id}\n              style={{\n                position: 'absolute',\n                top: 0,\n                left: 0,\n                width: '100%',\n                height: item.size,\n                transform: `translateY(${item.start}px)`,\n              }}\n            >\n              <OrderRow order={order} />\n            </div>\n          );\n        })}\n      </div>\n    </div>\n  );\n}"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-032",
+  "subtopic": "Real-time UI Architecture",
+  "difficulty": "extreme",
+  "type": "system-design",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "websocket",
+   "usesyncexternalstore",
+   "real-time",
+   "batching",
+   "memory-leaks"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A logistics dashboard receives about 50 WebSocket messages per second (position/status updates for 2,000 vehicles) and shows a live table, charts and alerts. The first version stores every message in React state; after a few minutes the tab freezes and memory keeps growing. Design a client architecture that stays responsive for hours.",
+   "bn": "একটা logistics dashboard প্রতি সেকেন্ডে প্রায় ৫০টা WebSocket message পায় (২,০০০ গাড়ির position/status update), আর live table, chart ও alert দেখায়। প্রথম version প্রতিটা message React state-এ রাখে; কয়েক মিনিট পর tab আটকে যায় আর memory বাড়তেই থাকে। এমন একটা client architecture design করো, যেটা ঘণ্টার পর ঘণ্টা responsive থাকে।"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level design question.)* Goals: sub-second freshness, interactions under ~200 ms (INP), flat memory over hours, and no out-of-order data.\n\n**1. Connection layer outside React.** A single WebSocket manager module handles connect, heartbeat, reconnect with exponential backoff + jitter, and resubscription. Messages carry a sequence number or timestamp so stale/out-of-order updates are dropped. Heavy parsing can move to a Web Worker.\n\n**2. An external store, not React state per message.** Keep a normalised `Map` by vehicle id outside React. Buffer incoming messages and **coalesce** them (only the latest per id), then flush at most once per animation frame (or every 100–250 ms). One flush = one notification, instead of 50 `setState` calls per second.\n\n**3. Selective subscriptions.** Components read the store through `useSyncExternalStore` with a per-item selector, so when vehicle 42 changes only the row showing vehicle 42 re-renders. The table is virtualised, so only ~50 rows subscribe at a time.\n\n**4. Charts and alerts at their own pace.** Update charts imperatively through the chart library's API at a capped rate (2–4 fps) and keep history in bounded ring buffers. Alerts are derived from the store and de-duplicated.\n\n**5. Memory hygiene.** Every subscription, listener and interval has a cleanup; no unbounded arrays in state; verify with heap snapshots over a long session.\n\n**6. Server cooperation.** Send deltas, aggregate on the server, and let the client subscribe only to what's visible (viewport-based subscriptions) to cut traffic.\n\nTrade-off: coalescing trades a little freshness for a lot of CPU; immutable per-item objects make change detection cheap but allocate more.",
+   "bn": "*(Advanced, senior-level design প্রশ্ন।)* লক্ষ্য: এক সেকেন্ডের কম সময়ে fresh data, ~২০০ ms-এর কম interaction (INP), ঘণ্টার পর ঘণ্টা স্থির memory, আর ক্রমের বাইরে আসা data না দেখানো।\n\n**১. React-এর বাইরে connection layer।** একটাই WebSocket manager module connect, heartbeat, exponential backoff + jitter-সহ reconnect আর resubscription সামলায়। প্রতিটা message-এ sequence number বা timestamp থাকে, যাতে পুরনো/ক্রমের বাইরের update বাদ দেওয়া যায়। ভারী parsing Web Worker-এ সরানো যায়।\n\n**২. প্রতি message-এ React state না, একটা external store।** React-এর বাইরে vehicle id অনুযায়ী একটা normalised `Map` রাখো। আসা message buffer করো আর **coalesce** করো (প্রতি id-র শুধু সর্বশেষটা), তারপর প্রতি animation frame-এ (বা প্রতি ১০০–২৫০ ms-এ) সর্বোচ্চ একবার flush করো। এক flush = এক notification, প্রতি সেকেন্ডে ৫০টা `setState`-এর বদলে।\n\n**৩. বেছে বেছে subscription।** Component-গুলো প্রতি item-এর selector-সহ `useSyncExternalStore` দিয়ে store পড়ে, তাই vehicle 42 বদলালে শুধু vehicle 42 দেখানো row-টাই re-render হয়। Table virtualised, তাই একসাথে মাত্র ~৫০টা row subscribe করে।\n\n**৪. Chart আর alert নিজের গতিতে।** Chart library-র API দিয়ে imperatively, সীমিত হারে (২–৪ fps) chart update করো, আর history রাখো সীমিত ring buffer-এ। Alert store থেকে derive হয় আর duplicate বাদ দেওয়া হয়।\n\n**৫. Memory-র পরিচ্ছন্নতা।** প্রতিটা subscription, listener আর interval-এর cleanup আছে; state-এ সীমাহীন array নেই; লম্বা session ধরে heap snapshot দিয়ে যাচাই।\n\n**৬. Server-এর সহযোগিতা।** Delta পাঠানো, server-এ aggregate করা, আর client যেন শুধু দৃশ্যমান জিনিসে subscribe করে (viewport-ভিত্তিক subscription) — এতে traffic কমে।\n\nTrade-off: coalescing সামান্য freshness ছেড়ে অনেক CPU বাঁচায়; প্রতি item-এ immutable object change detection সস্তা করে, কিন্তু বেশি allocate করে।"
+  },
+  "explanation": {
+   "en": "**Why the first version froze:** 50 `setState` calls per second, each copying a growing array, re-rendering a 2,000-row table and every chart. Garbage collection pauses plus long render tasks → frozen tab; the unbounded message array → memory growth.\n\n**Failure scenarios to design for**\n- **Background tabs:** browsers throttle timers and pause `requestAnimationFrame`. Because pending updates are coalesced per id, the buffer is bounded (≤ 2,000 entries) and one flush catches up when the tab returns (listen to `visibilitychange`).\n- **Reconnect storms** after a server restart → jittered backoff; request a fresh snapshot after reconnecting, then apply deltas newer than its sequence number.\n- **Slow devices:** adapt flush frequency, or show \"live updates paused\" while the user interacts with heavy views; user-triggered re-sorts go into `startTransition`.\n\n**Observability:** track long tasks, INP and JS heap size in RUM; use React Performance Tracks in a profiling build to confirm only changed rows render.",
+   "bn": "**প্রথম version কেন আটকে যেত:** প্রতি সেকেন্ডে ৫০টা `setState`, প্রতিবার একটা বাড়তে থাকা array copy করা, ২,০০০ row-এর table আর প্রতিটা chart re-render করা। Garbage collection-এর বিরতি আর লম্বা render task মিলে tab আটকে যায়; আর সীমাহীন message array-র কারণে memory বাড়ে।\n\n**যেসব failure scenario মাথায় রেখে design করতে হবে**\n- **Background tab:** browser timer ধীর করে দেয় আর `requestAnimationFrame` থামিয়ে রাখে। Pending update id অনুযায়ী coalesce হয় বলে buffer সীমিত থাকে (≤ ২,০০০ entry), আর tab ফিরে এলে এক flush-এই সব ধরে ফেলে (`visibilitychange` শোনো)।\n- Server restart-এর পর **reconnect-এর ঝড়** → jitter-সহ backoff; reconnect করার পর একটা নতুন snapshot নাও, তারপর তার sequence number-এর চেয়ে নতুন delta apply করো।\n- **ধীর device:** flush-এর হার মানিয়ে নাও, অথবা user ভারী view-তে কাজ করার সময় \"live update থামানো আছে\" দেখাও; user-এর চালানো re-sort `startTransition`-এ যায়।\n\n**Observability:** RUM-এ long task, INP আর JS heap size track করো; profiling build-এ React Performance Tracks দিয়ে নিশ্চিত হও যে শুধু বদলানো row-ই render হচ্ছে।"
+  },
+  "interviewTip": {
+   "en": "Start by explaining *why* the naive version fails (render storm + unbounded memory), then present layers: connection → store → subscriptions → rendering → server. Ending with failure scenarios (background tabs, reconnects) is what distinguishes a senior answer.",
+   "bn": "আগে ব্যাখ্যা করো সাধারণ version *কেন* ব্যর্থ হয় (render-এর ঝড় + সীমাহীন memory), তারপর স্তরগুলো দেখাও: connection → store → subscription → rendering → server। শেষে failure scenario (background tab, reconnect) বললে উত্তরটা senior-level হয়ে ওঠে।"
+  },
+  "references": [
+   {
+    "title": "react.dev — useSyncExternalStore",
+    "url": "https://react.dev/reference/react/useSyncExternalStore"
+   },
+   {
+    "title": "MDN — WebSocket",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/WebSocket"
+   },
+   {
+    "title": "react.dev — useDeferredValue",
+    "url": "https://react.dev/reference/react/useDeferredValue"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you guarantee the client doesn't miss updates during a reconnect?",
+    "bn": "Reconnect-এর সময় client যাতে কোনো update মিস না করে, সেটা কীভাবে নিশ্চিত করবে?"
+   },
+   {
+    "en": "How would you detect and debug a memory leak that only appears after hours?",
+    "bn": "যে memory leak কয়েক ঘণ্টা পর দেখা দেয়, সেটা কীভাবে ধরবে আর debug করবে?"
+   },
+   {
+    "en": "Would Server-Sent Events be a better fit than WebSockets here?",
+    "bn": "এখানে কি WebSocket-এর চেয়ে Server-Sent Events বেশি উপযুক্ত হতো?"
+   }
+  ],
+  "related": [
+   "react-029",
+   "react-026",
+   "react-025"
+  ],
+  "commonMistakes": {
+   "en": "Putting the socket inside a component effect without cleanup (duplicate connections), storing every message in a Context (whole app re-renders 50 times a second), or throttling with `setTimeout` per message instead of coalescing.",
+   "bn": "Cleanup ছাড়া component-এর effect-এর ভেতরে socket রাখা (duplicate connection), প্রতিটা message Context-এ রাখা (পুরো app প্রতি সেকেন্ডে ৫০ বার re-render), অথবা coalesce না করে প্রতি message-এ `setTimeout` দিয়ে throttle করা।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "// vehicleStore.js — lives outside React\nconst vehicles = new Map();   // id -> { lat, lng, status, seq }\nconst listeners = new Set();\nlet pending = new Map();\nlet scheduled = false;\n\nexport function receive(msg) {             // called by the WebSocket manager\n  const known = pending.get(msg.id) ?? vehicles.get(msg.id);\n  if (known && known.seq >= msg.seq) return; // drop stale / out-of-order\n  pending.set(msg.id, msg);                  // coalesce: latest per id only\n  if (!scheduled) {\n    scheduled = true;\n    requestAnimationFrame(flush);            // at most one flush per frame\n  }\n}\n\nfunction flush() {\n  scheduled = false;\n  for (const [id, msg] of pending) {\n    vehicles.set(id, { lat: msg.lat, lng: msg.lng, status: msg.status, seq: msg.seq });\n  }\n  pending = new Map();\n  listeners.forEach((notify) => notify());\n}\n\nexport function subscribe(listener) {\n  listeners.add(listener);\n  return () => listeners.delete(listener);\n}\n\nexport const getVehicle = (id) => vehicles.get(id);\n\n// useVehicle.js\nimport { memo, useSyncExternalStore } from 'react';\nimport { getVehicle, subscribe } from './vehicleStore';\n\nexport function useVehicle(id) {\n  // re-renders only when this vehicle's object changes\n  return useSyncExternalStore(subscribe, () => getVehicle(id));\n}\n\nexport const VehicleRow = memo(function VehicleRow({ id }) {\n  const v = useVehicle(id);\n  if (!v) return null;\n  return (\n    <tr>\n      <td>{id}</td>\n      <td>{v.status}</td>\n      <td>{v.lat.toFixed(4)}, {v.lng.toFixed(4)}</td>\n    </tr>\n  );\n});"
+  },
+  "technology": "react"
+ }
+]

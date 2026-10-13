@@ -1,0 +1,571 @@
+[
+ {
+  "id": "react-001",
+  "subtopic": "Components and JSX",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "jsx",
+   "components",
+   "react-element",
+   "jsx-runtime"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is JSX, and what does it compile to?",
+   "bn": "JSX কী, আর এটা compile হয়ে কী-তে পরিণত হয়?"
+  },
+  "answer": {
+   "en": "JSX is a syntax extension that lets you write HTML-like markup inside JavaScript. Browsers can't run it directly, so a compiler (Babel, SWC, esbuild or TypeScript) turns every tag into a function call. With the modern **automatic JSX runtime**, `<h1 className=\"title\">Hi</h1>` becomes roughly `jsx(\"h1\", { className: \"title\", children: \"Hi\" })`, imported automatically from `react/jsx-runtime`.\n\nThat call returns a **React element** — a plain, lightweight object that *describes* the UI. It is not a DOM node. React later compares these descriptions and updates the real DOM.\n\nA component is just a function that returns JSX. Lowercase tags (`div`) are DOM elements; capitalised names (`UserCard`) are components.",
+   "bn": "JSX হলো একটা syntax extension, যেটা দিয়ে JavaScript-এর ভেতরেই HTML-এর মতো markup লেখা যায়। Browser সরাসরি JSX চালাতে পারে না, তাই একটা compiler (Babel, SWC, esbuild বা TypeScript) প্রতিটা tag-কে function call-এ রূপান্তর করে। আধুনিক **automatic JSX runtime**-এ `<h1 className=\"title\">Hi</h1>` মোটামুটি `jsx(\"h1\", { className: \"title\", children: \"Hi\" })` হয়ে যায়, আর `react/jsx-runtime` থেকে এটা নিজে থেকেই import হয়।\n\nএই call একটা **React element** return করে — একটা সাধারণ, হালকা object যেটা UI দেখতে কেমন হবে তার *বর্ণনা* দেয়। এটা DOM node নয়। পরে React এই বর্ণনাগুলো তুলনা করে আসল DOM update করে।\n\nComponent হলো এমন একটা function যেটা JSX return করে। ছোট হাতের tag (`div`) মানে DOM element, আর বড় হাতের নাম (`UserCard`) মানে component।"
+  },
+  "explanation": {
+   "en": "- **Why no `import React`?** Since the automatic runtime (React 17+), the compiler injects the `react/jsx-runtime` import, so you don't need `React` in scope just for JSX.\n- **Rules:** return a single root (use a Fragment `<>...</>` if needed), close every tag (`<img />`), use camelCase attributes (`className`, `htmlFor`, `onClick`, `tabIndex`).\n- **Curly braces take expressions, not statements:** use a ternary, `&&` or `.map()` instead of `if`/`for` inside JSX.\n- **Escaping:** strings in `{}` are escaped automatically, which protects against XSS. Only `dangerouslySetInnerHTML` bypasses this.\n- **Gotcha:** `{items.length && <List />}` renders `0` when the list is empty, because `0` is a valid React child. Use `items.length > 0 && ...`.",
+   "bn": "- **কেন `import React` লাগে না?** Automatic runtime (React 17+) থেকে compiler নিজেই `react/jsx-runtime` import যোগ করে দেয়, তাই শুধু JSX-এর জন্য scope-এ `React` রাখার দরকার নেই।\n- **নিয়ম:** একটাই root element return করতে হয় (দরকার হলে Fragment `<>...</>`), প্রতিটা tag বন্ধ করতে হয় (`<img />`), আর attribute camelCase-এ লিখতে হয় (`className`, `htmlFor`, `onClick`, `tabIndex`)।\n- **Curly brace-এ expression চলে, statement না:** JSX-এর ভেতরে `if`/`for`-এর বদলে ternary, `&&` বা `.map()` ব্যবহার করো।\n- **Escaping:** `{}`-এর ভেতরের string নিজে থেকেই escape হয়, ফলে XSS থেকে সুরক্ষা পাওয়া যায়। শুধু `dangerouslySetInnerHTML` এই সুরক্ষা bypass করে।\n- **Gotcha:** list খালি হলে `{items.length && <List />}` স্ক্রিনে `0` দেখায়, কারণ `0` একটা valid React child। এর বদলে `items.length > 0 && ...` লেখো।"
+  },
+  "interviewTip": {
+   "en": "Say \"JSX compiles to function calls that return plain objects (React elements)\". Then mention the automatic runtime and one gotcha like the `0 &&` bug — it shows hands-on experience.",
+   "bn": "বলো \"JSX compile হয়ে function call হয়, যেটা সাধারণ object (React element) return করে\"। এরপর automatic runtime আর `0 &&` bug-এর মতো একটা gotcha উল্লেখ করো — এতে বোঝা যায় তোমার হাতে-কলমে অভিজ্ঞতা আছে।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Writing Markup with JSX",
+    "url": "https://react.dev/learn/writing-markup-with-jsx"
+   },
+   {
+    "title": "react.dev — JavaScript in JSX with Curly Braces",
+    "url": "https://react.dev/learn/javascript-in-jsx-with-curly-braces"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why must component names start with a capital letter?",
+    "bn": "Component-এর নাম কেন বড় হাতের অক্ষর দিয়ে শুরু করতে হয়?"
+   },
+   {
+    "en": "How does JSX help prevent XSS, and when does that protection not apply?",
+    "bn": "JSX কীভাবে XSS ঠেকাতে সাহায্য করে, আর কখন এই সুরক্ষা কাজ করে না?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Saying JSX is \"HTML inside JavaScript\" or that it creates DOM nodes directly. JSX creates element objects; React DOM creates and updates the real nodes.",
+   "bn": "JSX-কে \"JavaScript-এর ভেতরে HTML\" বলা, বা বলা যে এটা সরাসরি DOM node তৈরি করে। আসলে JSX element object তৈরি করে; আসল node তৈরি ও update করে React DOM।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "// What you write\nfunction Greeting({ name }) {\n  return <h1 className=\"title\">Hello, {name}</h1>;\n}\n\n// Roughly what the compiler emits (automatic runtime)\n// (jsxs = the variant used for several static children)\nimport { jsxs as _jsxs } from 'react/jsx-runtime';\n\nfunction Greeting({ name }) {\n  return _jsxs('h1', { className: 'title', children: ['Hello, ', name] });\n}"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-002",
+  "subtopic": "Props and State",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "props",
+   "state",
+   "data-flow",
+   "lifting-state"
+  ],
+  "technologyVersion": "Version-independent concept (React 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between props and state in React?",
+   "bn": "React-এ props আর state-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "**Props** are inputs a parent passes to a child, like function arguments. The child must treat them as read-only. **State** is data a component owns and changes over time with its setter (`setCount`); updating state schedules a re-render of that component and its children.\n\nData flows one way: down through props. If a child needs to change parent data, the parent passes a callback prop (`onChange`) and keeps the state itself — this is called **lifting state up**.\n\nMy rule: if a value can be calculated from props or other state, it shouldn't be state at all — I compute it during render.",
+   "bn": "**Props** হলো parent থেকে child-এ পাঠানো input, অনেকটা function argument-এর মতো। Child-কে এগুলো read-only হিসেবে ব্যবহার করতে হয়। **State** হলো component-এর নিজের data, যেটা সময়ের সাথে setter (`setCount`) দিয়ে বদলায়; state update করলে ওই component আর তার children-এর re-render schedule হয়।\n\nData একদিকে প্রবাহিত হয়: props দিয়ে নিচের দিকে। Child যদি parent-এর data বদলাতে চায়, parent একটা callback prop (`onChange`) পাঠায় আর state নিজের কাছেই রাখে — একে বলে **lifting state up**।\n\nআমার নিয়ম: কোনো value যদি props বা অন্য state থেকে হিসাব করে বের করা যায়, তাহলে সেটা state-এ রাখাই উচিত না — আমি render-এর সময়ই সেটা compute করি।"
+  },
+  "explanation": {
+   "en": "- **Owner:** props are owned by the parent; state is owned by the component that declares it.\n- **Mutability:** never mutate props (`props.user.name = 'x'` is a bug). State changes only through the setter with a new value.\n- **Re-render trigger:** a state change re-renders the owner; new props arrive because the parent re-rendered.\n- **Copying props into state** (`useState(props.color)`) only uses the *initial* value — later prop changes are ignored. If that's intended, name it `initialColor`; if not, read the prop directly. To reset a child's state when an id changes, give it a `key`.",
+   "bn": "- **মালিক কে:** props-এর মালিক parent; state-এর মালিক যে component সেটা declare করে।\n- **পরিবর্তন:** props কখনো mutate করবে না (`props.user.name = 'x'` একটা bug)। State শুধু setter দিয়ে নতুন value দিয়ে বদলায়।\n- **Re-render কখন হয়:** state বদলালে owner component re-render হয়; parent re-render হলে child নতুন props পায়।\n- **Props-কে state-এ copy করা** (`useState(props.color)`) শুধু *প্রথম* value নেয় — পরে prop বদলালেও state বদলায় না। এটা ইচ্ছাকৃত হলে নাম দাও `initialColor`; না হলে সরাসরি prop পড়ো। কোনো id বদলালে child-এর state reset করতে চাইলে তাকে একটা `key` দাও।"
+  },
+  "interviewTip": {
+   "en": "Structure it as a quick comparison (owner, mutability, what triggers re-render), then add \"lifting state up\" and \"derived values shouldn't be state\" — those two points separate juniors from strong candidates.",
+   "bn": "ছোট একটা তুলনা দিয়ে শুরু করো (মালিক, mutability, কী কারণে re-render হয়), তারপর \"lifting state up\" আর \"derived value state-এ রাখা উচিত না\" — এই দুইটা পয়েন্ট বললে তুমি সাধারণ junior-দের থেকে আলাদা হয়ে যাবে।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Passing Props to a Component",
+    "url": "https://react.dev/learn/passing-props-to-a-component"
+   },
+   {
+    "title": "react.dev — State: A Component's Memory",
+    "url": "https://react.dev/learn/state-a-components-memory"
+   },
+   {
+    "title": "react.dev — Sharing State Between Components",
+    "url": "https://react.dev/learn/sharing-state-between-components"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you lift state up versus use Context?",
+    "bn": "কখন lifting state up করবে আর কখন Context ব্যবহার করবে?"
+   },
+   {
+    "en": "Why is `useState(props.value)` often a bug?",
+    "bn": "`useState(props.value)` প্রায়ই কেন bug তৈরি করে?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Storing derived data (e.g. `fullName`, filtered lists) in state and syncing it with effects, which causes extra renders and out-of-sync bugs.",
+   "bn": "Derived data (যেমন `fullName` বা filter করা list) state-এ রেখে effect দিয়ে sync করা — এতে বাড়তি render হয় আর data মিলিয়ে না যাওয়ার bug তৈরি হয়।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { useState } from 'react';\n\nfunction Stepper({ value, onIncrement }) {\n  // value and onIncrement are props: read-only here\n  return <button onClick={onIncrement}>Count: {value}</button>;\n}\n\nexport default function App() {\n  const [count, setCount] = useState(0); // state lives in the parent\n  const isEven = count % 2 === 0;         // derived, not state\n\n  return (\n    <>\n      <Stepper value={count} onIncrement={() => setCount((c) => c + 1)} />\n      <p>{isEven ? 'Even' : 'Odd'}</p>\n    </>\n  );\n}"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-003",
+  "subtopic": "useState",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "usestate",
+   "batching",
+   "updater-function",
+   "snapshot"
+  ],
+  "technologyVersion": "React 19.3 (automatic batching since React 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "The component below renders once and then the button is clicked **once**. Assume a production build without StrictMode. What is logged to the console, and what number does the button show after the click?",
+   "bn": "নিচের component একবার render হলো, তারপর button-এ **একবার** click করা হলো। ধরে নাও এটা production build, StrictMode নেই। Console-এ কী log হবে, আর click-এর পর button-এ কোন সংখ্যা দেখাবে?"
+  },
+  "answer": {
+   "en": "The console shows `render: 0`, then `clicked: 0`, then `render: 2`. The button shows **2**.\n\n`count` is a snapshot: during this render it is `0`, so both `setCount(count + 1)` calls queue \"replace with 1\". The updater `setCount(c => c + 1)` receives the queued value `1` and returns `2`. The `console.log` inside the handler still sees the old snapshot `0`, because state only changes in the *next* render. React batches all three updates into a single re-render, so `render` is logged only once more.",
+   "bn": "Console-এ প্রথমে `render: 0`, তারপর `clicked: 0`, তারপর `render: 2` আসবে। Button-এ দেখাবে **2**।\n\n`count` হলো একটা snapshot: এই render-এ এর মান `0`, তাই দুটো `setCount(count + 1)` call-ই \"1 দিয়ে replace করো\" queue করে। Updater `setCount(c => c + 1)` queue-তে থাকা `1` পায় আর `2` return করে। Handler-এর ভেতরের `console.log` তখনো পুরনো snapshot `0` দেখে, কারণ state বদলায় শুধু *পরের* render-এ। React তিনটা update batch করে একটাই re-render করে, তাই `render` আর মাত্র একবার log হয়।"
+  },
+  "explanation": {
+   "en": "Step by step:\n\n1. Initial render logs `render: 0`.\n2. Click → `setCount(0 + 1)` queues *replace with 1*.\n3. `setCount(0 + 1)` again queues *replace with 1* (still 1).\n4. `setCount(c => c + 1)` queues an updater: 1 → 2.\n5. `console.log('clicked:', count)` prints the snapshot `0`.\n6. The event handler finishes, React processes the queue once (automatic batching) and re-renders with `count = 2` → `render: 2`.\n\nIf all three calls used the updater form, the result would be 3. Use the updater whenever the new state depends on the previous state, especially for multiple updates in one event or in async callbacks.",
+   "bn": "ধাপে ধাপে:\n\n1. প্রথম render-এ `render: 0` log হয়।\n2. Click → `setCount(0 + 1)` queue করে *1 দিয়ে replace*।\n3. আবার `setCount(0 + 1)` → আবারও *1 দিয়ে replace* (এখনো 1)।\n4. `setCount(c => c + 1)` একটা updater queue করে: 1 → 2।\n5. `console.log('clicked:', count)` snapshot `0` print করে।\n6. Event handler শেষ হলে React একবারেই পুরো queue process করে (automatic batching) আর `count = 2` দিয়ে re-render করে → `render: 2`।\n\nতিনটা call-ই যদি updater form-এ হতো, ফল হতো 3। নতুন state আগের state-এর উপর নির্ভর করলে updater ব্যবহার করো, বিশেষ করে একই event-এ একাধিক update বা async callback-এর ভেতরে।"
+  },
+  "interviewTip": {
+   "en": "Walk through the queue line by line out loud. Use the words \"snapshot\", \"queue\" and \"batching\" — interviewers listen for exactly those concepts.",
+   "bn": "Queue-টা লাইন ধরে ধরে মুখে ব্যাখ্যা করো। \"snapshot\", \"queue\" আর \"batching\" শব্দগুলো ব্যবহার করো — interviewer ঠিক এই ধারণাগুলোই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Queueing a Series of State Updates",
+    "url": "https://react.dev/learn/queueing-a-series-of-state-updates"
+   },
+   {
+    "title": "react.dev — useState",
+    "url": "https://react.dev/reference/react/useState"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What would change if all three calls used the updater form?",
+    "bn": "তিনটা call-ই updater form-এ হলে কী বদলাত?"
+   },
+   {
+    "en": "Are updates inside `setTimeout` or a resolved promise also batched in React 18+?",
+    "bn": "React 18+-এ `setTimeout` বা resolved promise-এর ভেতরের update-ও কি batch হয়?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Answering 3 (assuming each call sees the updated value), or expecting `clicked:` to print the new value immediately after calling the setter.",
+   "bn": "উত্তর 3 বলা (ভাবা যে প্রতিটা call update হওয়া value দেখে), অথবা setter call করার সাথে সাথে `clicked:` নতুন value print করবে বলে আশা করা।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { useState } from 'react';\n\nexport default function Counter() {\n  const [count, setCount] = useState(0);\n\n  function handleClick() {\n    setCount(count + 1);\n    setCount(count + 1);\n    setCount((c) => c + 1);\n    console.log('clicked:', count);\n  }\n\n  console.log('render:', count);\n  return <button onClick={handleClick}>{count}</button>;\n}",
+   "output": "render: 0\nclicked: 0\nrender: 2\n(button shows 2)"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-004",
+  "subtopic": "Keys",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "keys",
+   "lists",
+   "reconciliation"
+  ],
+  "technologyVersion": "Version-independent concept (React 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You render a todo list where users can add, delete and reorder items. Which `key` should each `<TodoItem>` get?",
+   "bn": "তুমি একটা todo list render করছ, যেখানে user item যোগ, মুছে ফেলা আর reorder করতে পারে। প্রতিটা `<TodoItem>`-কে কোন `key` দেওয়া উচিত?"
+  },
+  "answer": {
+   "en": "Use a stable, unique id from the data, such as `todo.id`. Keys tell React which item is which between renders, so state, focus and DOM nodes stay attached to the right item when the list changes.",
+   "bn": "Data থেকে পাওয়া স্থায়ী, unique id ব্যবহার করো, যেমন `todo.id`। Key দিয়ে React বুঝতে পারে কোন item কোনটা, ফলে list বদলালেও state, focus আর DOM node সঠিক item-এর সাথেই থাকে।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is the **index**: it removes the warning and works for static lists, but when you insert, delete or reorder, the indexes shift. React then reuses the wrong component instance, so an input's text or a checkbox's checked state \"jumps\" to a different row.\n\n`Math.random()` is worse: every render produces new keys, so React unmounts and remounts every item — you lose state and focus, and performance drops. Omitting the key makes React fall back to the index and log a warning. Keys only need to be unique among siblings, and they are not passed to the component as a prop. If the data has no id, generate one when the item is *created* (e.g. `crypto.randomUUID()`), not during render.",
+   "bn": "সবচেয়ে লোভনীয় ভুল উত্তর হলো **index**: এতে warning চলে যায় আর static list-এ ঠিকঠাক চলে, কিন্তু item যোগ, মুছে ফেলা বা reorder করলে index সরে যায়। তখন React ভুল component instance আবার ব্যবহার করে, ফলে কোনো input-এর লেখা বা checkbox-এর checked অবস্থা অন্য row-তে \"লাফিয়ে\" চলে যায়।\n\n`Math.random()` আরও খারাপ: প্রতিটা render-এ নতুন key তৈরি হয়, ফলে React প্রতিটা item unmount করে আবার mount করে — state আর focus হারায়, performance-ও কমে। Key না দিলে React index ব্যবহার করে আর warning দেয়। Key শুধু sibling-দের মধ্যে unique হলেই চলে, আর এটা component-এ prop হিসেবে যায় না। Data-তে id না থাকলে item *তৈরির সময়* একটা id বানাও (যেমন `crypto.randomUUID()`), render-এর সময় না।"
+  },
+  "interviewTip": {
+   "en": "Explain *what keys are for* (identity across renders), then give the concrete index-key bug with input fields. That example is what interviewers want to hear.",
+   "bn": "আগে বলো key *কী কাজে লাগে* (render-এর মধ্যে identity ধরে রাখা), তারপর input field-সহ index-key bug-এর বাস্তব উদাহরণ দাও। Interviewer ঠিক এই উদাহরণটাই শুনতে চায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Rendering Lists",
+    "url": "https://react.dev/learn/rendering-lists"
+   },
+   {
+    "title": "react.dev — Preserving and Resetting State",
+    "url": "https://react.dev/learn/preserving-and-resetting-state"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "The array index: `key={index}`",
+    "bn": "Array-এর index: `key={index}`"
+   },
+   {
+    "en": "A stable unique id from the data: `key={todo.id}`",
+    "bn": "Data থেকে পাওয়া স্থায়ী unique id: `key={todo.id}`"
+   },
+   {
+    "en": "A random value: `key={Math.random()}`",
+    "bn": "একটা random value: `key={Math.random()}`"
+   },
+   {
+    "en": "No key — React generates keys automatically for lists",
+    "bn": "কোনো key না — list-এর জন্য React নিজেই key তৈরি করে নেয়"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "react"
+ },
+ {
+  "id": "react-012",
+  "subtopic": "Stale Closures",
+  "difficulty": "medium",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "stale-closure",
+   "setinterval",
+   "useeffect",
+   "useeffectevent"
+  ],
+  "technologyVersion": "React 19.3 (useEffectEvent stable since 19.2)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "The `Timer` component mounts and stays on screen for about **3.5 seconds**. What is logged, what number is on the screen, and why? How would you fix it?",
+   "bn": "`Timer` component mount হয়ে প্রায় **3.5 সেকেন্ড** স্ক্রিনে থাকল। কী log হবে, স্ক্রিনে কোন সংখ্যা দেখাবে, আর কেন? তুমি এটা কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "It logs `tick 0` three times and the screen shows **1** forever.\n\nThe effect runs once (empty dependency array), so the interval callback is a **closure over the first render**, where `count` is `0`. Every tick calls `setCount(0 + 1)`, which sets `1` again and again — after the first tick React sees the same value and nothing changes.\n\nFixes:\n- Use the updater form `setCount(c => c + 1)`, which doesn't need the closed-over value.\n- To *read* the latest value inside the interval (e.g. for logging), wrap that logic in `useEffectEvent` (stable since React 19.2) or keep it in a ref.\n- Adding `count` to the dependency array also works, but it clears and recreates the interval on every tick.",
+   "bn": "তিনবার `tick 0` log হবে, আর স্ক্রিনে সবসময় **1** দেখাবে।\n\nEffect-টা একবারই চলে (dependency array খালি), তাই interval callback হলো **প্রথম render-এর closure**, যেখানে `count`-এর মান `0`। প্রতিটা tick-এ `setCount(0 + 1)` call হয়, অর্থাৎ বারবার `1` set হয় — প্রথম tick-এর পর React একই value দেখে, কিছুই বদলায় না।\n\nসমাধান:\n- Updater form `setCount(c => c + 1)` ব্যবহার করো, এতে closure-এর পুরনো value লাগে না।\n- Interval-এর ভেতরে সর্বশেষ value *পড়তে* চাইলে (যেমন log করার জন্য) সেই logic `useEffectEvent`-এ রাখো (React 19.2 থেকে stable) অথবা ref-এ রাখো।\n- Dependency array-তে `count` দিলেও কাজ হয়, কিন্তু তখন প্রতিটা tick-এ interval clear হয়ে নতুন করে তৈরি হয়।"
+  },
+  "explanation": {
+   "en": "Each render has its own props, state and functions. A function created in render 1 \"remembers\" render 1's values forever — that's a normal JavaScript closure, not a React bug. The problem appears when a long-lived callback (interval, subscription, WebSocket handler) is created once and never refreshed.\n\nTimeline: mount → effect creates the interval with `count = 0`. At 1s it logs `tick 0` and sets 1 → re-render shows 1. At 2s and 3s the same old closure logs `tick 0` and sets 1 again, so React bails out.\n\nIn development with StrictMode, the effect runs setup → cleanup → setup, but the cleanup clears the first interval, so the visible behaviour is the same. The fixed version uses the updater for state and `useEffectEvent` for the \"non-reactive\" logging logic, so the effect still subscribes only once.",
+   "bn": "প্রতিটা render-এর নিজস্ব props, state আর function থাকে। Render 1-এ তৈরি হওয়া function চিরকাল render 1-এর value \"মনে রাখে\" — এটা সাধারণ JavaScript closure, React-এর bug না। সমস্যা হয় যখন দীর্ঘস্থায়ী callback (interval, subscription, WebSocket handler) একবার তৈরি হয় আর কখনো refresh হয় না।\n\nTimeline: mount → effect `count = 0` দিয়ে interval তৈরি করে। 1s-এ `tick 0` log হয় আর 1 set হয় → re-render-এ 1 দেখায়। 2s আর 3s-এ সেই পুরনো closure আবার `tick 0` log করে আর আবার 1 set করে, তাই React কিছু বদলায় না।\n\nDevelopment-এ StrictMode থাকলে effect setup → cleanup → setup হয়, কিন্তু cleanup প্রথম interval clear করে দেয়, তাই দৃশ্যমান আচরণ একই থাকে। সংশোধিত version-এ state-এর জন্য updater আর \"non-reactive\" logging logic-এর জন্য `useEffectEvent` ব্যবহার করা হয়েছে, ফলে effect এখনো মাত্র একবার subscribe করে।"
+  },
+  "interviewTip": {
+   "en": "Say the word \"closure\" early and explain *which render* the callback belongs to. Offering two fixes with their trade-offs (updater vs dependency array vs `useEffectEvent`) shows senior-level thinking.",
+   "bn": "শুরুতেই \"closure\" শব্দটা বলো, আর ব্যাখ্যা করো callback-টা *কোন render*-এর। Trade-off-সহ একাধিক সমাধান দিলে (updater বনাম dependency array বনাম `useEffectEvent`) senior-level চিন্তা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — useEffectEvent",
+    "url": "https://react.dev/reference/react/useEffectEvent"
+   },
+   {
+    "title": "react.dev — Queueing a Series of State Updates",
+    "url": "https://react.dev/learn/queueing-a-series-of-state-updates"
+   },
+   {
+    "title": "react.dev — Synchronizing with Effects",
+    "url": "https://react.dev/learn/synchronizing-with-effects"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why must a `useEffectEvent` function not be added to the dependency array or passed to children?",
+    "bn": "`useEffectEvent` function কেন dependency array-তে দেওয়া বা child-এ পাঠানো যাবে না?"
+   },
+   {
+    "en": "How would you solve the same problem with `useRef` in older React versions?",
+    "bn": "পুরনো React version-এ একই সমস্যা `useRef` দিয়ে কীভাবে সমাধান করবে?"
+   }
+  ],
+  "related": [
+   "react-003"
+  ],
+  "commonMistakes": {
+   "en": "Silencing the exhaustive-deps lint rule instead of fixing the closure, or thinking the screen keeps counting up because the interval keeps firing.",
+   "bn": "Closure ঠিক না করে exhaustive-deps lint rule বন্ধ করে দেওয়া, অথবা ভাবা যে interval চলছে বলে স্ক্রিনের সংখ্যা বাড়তেই থাকবে।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { useEffect, useState } from 'react';\n\nexport default function Timer() {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    const id = setInterval(() => {\n      console.log('tick', count);\n      setCount(count + 1);\n    }, 1000);\n    return () => clearInterval(id);\n  }, []);\n\n  return <p>{count}</p>;\n}",
+   "output": "tick 0\ntick 0\ntick 0\n(screen shows: 1)"
+  },
+  "extraCode": [
+   {
+    "language": "jsx",
+    "source": "import { useEffect, useEffectEvent, useState } from 'react';\n\nexport default function Timer() {\n  const [count, setCount] = useState(0);\n\n  // Always sees the latest committed `count`, but is not a dependency\n  const onTick = useEffectEvent(() => {\n    console.log('tick', count);\n  });\n\n  useEffect(() => {\n    const id = setInterval(() => {\n      onTick();\n      setCount((c) => c + 1); // updater: no stale value needed\n    }, 1000);\n    return () => clearInterval(id);\n  }, []);\n\n  return <p>{count}</p>;\n}",
+    "label": {
+     "en": "Fixed version (React 19.2+)",
+     "bn": "সংশোধিত version (React 19.2+)"
+    }
+   }
+  ],
+  "technology": "react"
+ },
+ {
+  "id": "react-013",
+  "subtopic": "Effects and Cleanup",
+  "difficulty": "medium",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "strictmode",
+   "useeffect",
+   "cleanup",
+   "render-order"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What does the console show on the **first mount in development**? What is different in a **production** build, and why does React behave this way?",
+   "bn": "**Development-এ প্রথম mount**-এর সময় console-এ কী দেখাবে? **Production** build-এ কী আলাদা হবে, আর React কেন এমন আচরণ করে?"
+  },
+  "answer": {
+   "en": "In development with `<StrictMode>` the log is: `render Rahim`, `render Rahim`, `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`. In production it is just `render Rahim` and `effect: subscribe`.\n\nStrictMode does two extra checks in development only:\n- It calls the component function **twice** to catch impure rendering (side effects in render).\n- After mounting, it runs every effect's **cleanup and setup one extra time**, simulating unmount + remount, to catch effects that are missing a cleanup.\n\nIf your app breaks under this (double subscriptions, two API calls with conflicting results), the bug is real — it would also show up when the user navigates away and back, or with features like `<Activity>`.",
+   "bn": "Development-এ `<StrictMode>` থাকলে log হবে: `render Rahim`, `render Rahim`, `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`। Production-এ শুধু `render Rahim` আর `effect: subscribe`।\n\nStrictMode শুধু development-এ দুটো বাড়তি check করে:\n- Impure rendering (render-এর ভেতরে side effect) ধরার জন্য component function **দুইবার** call করে।\n- Mount হওয়ার পর প্রতিটা effect-এর **cleanup আর setup একবার বাড়তি** চালায় — unmount + remount simulate করে, যাতে cleanup ছাড়া effect ধরা পড়ে।\n\nএতে যদি তোমার app ভেঙে যায় (double subscription, দুটো API call-এর conflicting result), তাহলে bug-টা আসল — user অন্য page-এ গিয়ে ফিরে এলে বা `<Activity>`-এর মতো feature-এও এটা দেখা দিত।"
+  },
+  "explanation": {
+   "en": "Order of events on mount: React renders (twice in StrictMode — both renders happen before anything is committed), commits the DOM, then runs effects. StrictMode then calls the cleanup and the setup again. Your effect should be **symmetrical**: whatever setup does (subscribe, connect, add listener), cleanup undoes.\n\nNotes:\n- React DevTools can show the second render's `console.log` dimmed; without DevTools you see both lines.\n- Don't \"fix\" the double effect with a `useRef` flag to run only once. Fix the cleanup instead, or move one-off app initialisation outside components.\n- For data fetching, the dev-only double request is harmless if you ignore/abort the stale response in cleanup — or use a framework or a data library that caches requests.",
+   "bn": "Mount-এর সময় ঘটনার ক্রম: React render করে (StrictMode-এ দুইবার — দুটো render-ই commit-এর আগে হয়), DOM commit করে, তারপর effect চালায়। এরপর StrictMode আবার cleanup আর setup call করে। তোমার effect হওয়া উচিত **symmetrical**: setup যা করে (subscribe, connect, listener যোগ), cleanup ঠিক সেটাই undo করে।\n\nকিছু নোট:\n- React DevTools দ্বিতীয় render-এর `console.log` হালকা রঙে (dimmed) দেখাতে পারে; DevTools ছাড়া দুটো লাইনই দেখবে।\n- শুধু একবার চালানোর জন্য `useRef` flag দিয়ে double effect \"ঠিক\" করো না। বরং cleanup ঠিক করো, অথবা এককালীন app initialization component-এর বাইরে নিয়ে যাও।\n- Data fetching-এর ক্ষেত্রে cleanup-এ পুরনো response ignore/abort করলে dev-only double request ক্ষতিকর না — অথবা এমন framework বা data library ব্যবহার করো যেটা request cache করে।"
+  },
+  "interviewTip": {
+   "en": "Give the exact sequence first, then explain *why* StrictMode does it (\"it's a dev-only stress test for missing cleanups\"). Mentioning that production runs once avoids the common panic about duplicate API calls.",
+   "bn": "প্রথমে সঠিক ক্রমটা বলো, তারপর ব্যাখ্যা করো StrictMode *কেন* এটা করে (\"এটা missing cleanup ধরার জন্য dev-only stress test\")। Production-এ একবারই চলে — এটা বললে duplicate API call নিয়ে সাধারণ দুশ্চিন্তাটা দূর হয়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — StrictMode",
+    "url": "https://react.dev/reference/react/StrictMode"
+   },
+   {
+    "title": "react.dev — useEffect",
+    "url": "https://react.dev/reference/react/useEffect"
+   },
+   {
+    "title": "react.dev — Synchronizing with Effects",
+    "url": "https://react.dev/learn/synchronizing-with-effects"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you prevent a fetch effect from setting state with a stale response?",
+    "bn": "Fetch effect যাতে পুরনো response দিয়ে state set না করে, সেটা কীভাবে ঠেকাবে?"
+   },
+   {
+    "en": "Which other things does StrictMode double-invoke in development?",
+    "bn": "StrictMode development-এ আর কী কী দুইবার invoke করে?"
+   }
+  ],
+  "related": [
+   "react-012"
+  ],
+  "commonMistakes": {
+   "en": "Removing StrictMode to \"fix\" double effects, or believing the effect runs twice in production too.",
+   "bn": "Double effect \"ঠিক\" করতে StrictMode সরিয়ে দেওয়া, অথবা ভাবা যে production-এও effect দুইবার চলে।"
+  },
+  "code": {
+   "language": "jsx",
+   "source": "import { StrictMode, useEffect, useState } from 'react';\nimport { createRoot } from 'react-dom/client';\n\nfunction Profile() {\n  const [name] = useState('Rahim');\n  console.log('render', name);\n\n  useEffect(() => {\n    console.log('effect: subscribe');\n    return () => console.log('cleanup: unsubscribe');\n  }, []);\n\n  return <h1>{name}</h1>;\n}\n\ncreateRoot(document.getElementById('root')).render(\n  <StrictMode>\n    <Profile />\n  </StrictMode>\n);",
+   "output": "Development (StrictMode):\nrender Rahim\nrender Rahim\neffect: subscribe\ncleanup: unsubscribe\neffect: subscribe\n\nProduction:\nrender Rahim\neffect: subscribe"
+  },
+  "technology": "react"
+ },
+ {
+  "id": "react-023",
+  "subtopic": "Rendering and Reconciliation",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "reconciliation",
+   "state-preservation",
+   "keys",
+   "fiber"
+  ],
+  "technologyVersion": "Version-independent concept (React 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "The user clicks the counter three times (it shows `Guest: 3`) and then ticks the **Admin mode** checkbox. What does the button show now?",
+   "bn": "User counter-এ তিনবার click করল (এখন দেখাচ্ছে `Guest: 3`), তারপর **Admin mode** checkbox tick করল। এখন button-এ কী দেখাবে?"
+  },
+  "answer": {
+   "en": "It shows `Admin: 3`. React decides whether to keep state by looking at the **element type and its position in the tree**, not at which line of JSX produced it. Both branches render a `<Counter>` as the first child of the same `<div>`, so React treats it as the same component and preserves its state.",
+   "bn": "দেখাবে `Admin: 3`। State রাখবে কি না, React সেটা ঠিক করে **element type আর tree-তে তার position** দেখে — JSX-এর কোন লাইন থেকে element এসেছে সেটা দেখে না। দুই branch-ই একই `<div>`-এর প্রথম child হিসেবে `<Counter>` render করে, তাই React এটাকে একই component ধরে state রেখে দেয়।"
+  },
+  "explanation": {
+   "en": "The tempting answer is `Admin: 0`, because the code *looks* like two different counters. But reconciliation only sees \"position 0 of this div: was `Counter`, is still `Counter`\" → same fiber, update props, keep state.\n\nHow to get a fresh counter when the mode changes:\n- Give different keys: `<Counter key={isAdmin ? 'admin' : 'guest'} ... />` — a different key means a different identity.\n- Or render them at different positions: `{isAdmin && <Counter label=\"Admin\" />}{!isAdmin && <Counter label=\"Guest\" />}`.\n\nThe opposite trap: if the *type* changes at a position (e.g. `<div><Counter /></div>` → `<section><Counter /></section>`), React destroys the whole subtree and its state. That's also why you must never declare a component inside another component's body — it becomes a new type on every render, so its state resets each time. No key warning appears here because keys are only required for arrays of children.",
+   "bn": "লোভনীয় উত্তর হলো `Admin: 0`, কারণ code দেখে মনে হয় দুটো আলাদা counter। কিন্তু reconciliation শুধু দেখে \"এই div-এর position 0: আগে ছিল `Counter`, এখনো `Counter`\" → একই fiber, props update করো, state রেখে দাও।\n\nMode বদলালে নতুন counter পেতে চাইলে:\n- আলাদা key দাও: `<Counter key={isAdmin ? 'admin' : 'guest'} ... />` — আলাদা key মানে আলাদা identity।\n- অথবা আলাদা position-এ render করো: `{isAdmin && <Counter label=\"Admin\" />}{!isAdmin && <Counter label=\"Guest\" />}`।\n\nউল্টো ফাঁদ: কোনো position-এ যদি *type* বদলায় (যেমন `<div><Counter /></div>` → `<section><Counter /></section>`), React পুরো subtree আর তার state ধ্বংস করে দেয়। এজন্যই কখনো একটা component-এর body-র ভেতরে আরেকটা component declare করা যাবে না — প্রতিটা render-এ এটা নতুন type হয়ে যায়, ফলে প্রতিবার state reset হয়। এখানে key warning আসে না, কারণ key শুধু children-এর array-র জন্য দরকার।"
+  },
+  "interviewTip": {
+   "en": "State the rule in one sentence: \"React preserves state while the same type renders at the same position.\" Then show both ways to reset (key, different position). That's a strong signal you understand reconciliation, not just keys in lists.",
+   "bn": "নিয়মটা এক বাক্যে বলো: \"একই position-এ একই type render হলে React state রেখে দেয়।\" তারপর reset করার দুটো উপায় দেখাও (key, আলাদা position)। এতে বোঝা যায় তুমি শুধু list-এর key না, পুরো reconciliation বোঝো।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Preserving and Resetting State",
+    "url": "https://react.dev/learn/preserving-and-resetting-state"
+   },
+   {
+    "title": "react.dev — Render and Commit",
+    "url": "https://react.dev/learn/render-and-commit"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "react-004"
+  ],
+  "code": {
+   "language": "jsx",
+   "source": "import { useState } from 'react';\n\nfunction Counter({ label }) {\n  const [count, setCount] = useState(0);\n  return (\n    <button onClick={() => setCount(count + 1)}>\n      {label}: {count}\n    </button>\n  );\n}\n\nexport default function App() {\n  const [isAdmin, setIsAdmin] = useState(false);\n  return (\n    <div>\n      {isAdmin ? <Counter label=\"Admin\" /> : <Counter label=\"Guest\" />}\n      <label>\n        <input\n          type=\"checkbox\"\n          checked={isAdmin}\n          onChange={(e) => setIsAdmin(e.target.checked)}\n        />\n        Admin mode\n      </label>\n    </div>\n  );\n}"
+  },
+  "options": [
+   {
+    "en": "`Admin: 0` — the other branch of the ternary creates a new component instance",
+    "bn": "`Admin: 0` — ternary-এর অন্য branch একটা নতুন component instance তৈরি করে"
+   },
+   {
+    "en": "`Admin: 3` — same component type at the same position, so React keeps the state and only updates the `label` prop",
+    "bn": "`Admin: 3` — একই position-এ একই component type, তাই React state রেখে দেয় আর শুধু `label` prop update করে"
+   },
+   {
+    "en": "`Guest: 3` — the new `label` prop is not read until the next click",
+    "bn": "`Guest: 3` — নতুন `label` prop পরের click-এর আগে পড়া হয় না"
+   },
+   {
+    "en": "React logs a missing-`key` warning and remounts the counter",
+    "bn": "React missing-`key` warning দেয় আর counter remount করে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "react"
+ },
+ {
+  "id": "react-030",
+  "subtopic": "Component API Design",
+  "difficulty": "extreme",
+  "type": "architecture",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "design-system",
+   "compound-components",
+   "accessibility",
+   "api-design",
+   "server-components"
+  ],
+  "technologyVersion": "React 19.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "You lead a design-system team. Twenty product teams will use your React component library (Button, Dialog, Tabs, Combobox…) in both Next.js App Router apps and Vite SPAs. How do you design the component APIs and the library architecture?",
+   "bn": "তুমি একটা design-system team-এর lead। বিশটা product team তোমার React component library (Button, Dialog, Tabs, Combobox…) Next.js App Router app আর Vite SPA — দুই জায়গাতেই ব্যবহার করবে। Component API আর library architecture কীভাবে design করবে?"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level question.)* I'd start from requirements: accessible by default, themeable, composable, type-safe, small bundles, works in Server Component apps, and a stable API that 20 teams can upgrade safely.\n\n**API patterns**\n- **Compound components** for complex widgets: `<Tabs> <TabList> <TabTrigger value=\"a\"/> </TabList> <TabPanel value=\"a\"/> </Tabs>`. Shared state goes through Context, so consumers control layout without prop explosions.\n- **Controlled and uncontrolled** support everywhere: `value` / `defaultValue` / `onValueChange`, implemented once in a `useControllableState` hook.\n- **Behave like the DOM element**: spread remaining props onto the root, accept `ref` as a normal prop (React 19 — no `forwardRef`), compose event handlers instead of overriding them.\n- **Variants, not style props**: `variant=\"danger\" size=\"sm\"` mapped to classes; an `asChild`/slot pattern for \"render as a link\".\n- **Accessibility built in**: follow WAI-ARIA patterns (roles, keyboard navigation, focus trapping in Dialog), `useId` for ARIA relationships, respect `prefers-reduced-motion`.\n\n**Architecture**\n- Interactive components ship with `'use client'` at their own entry files; purely presentational ones (Badge, Card) stay server-compatible.\n- Styling with CSS variables (design tokens) and `@layer` so apps can override without specificity wars; avoid runtime CSS-in-JS that breaks with Server Components.\n- ESM output, per-component `exports`, `\"sideEffects\"` declared → good tree-shaking.\n- Quality gates: RTL + axe tests, visual regression, Storybook docs, React Compiler-friendly pure components.\n- Releases: semver, changesets, deprecation warnings one major ahead, codemods for breaking changes.\n\nTrade-off: building on a headless library (React Aria, Radix) saves months of accessibility work but adds a dependency you don't control.",
+   "bn": "*(Advanced, senior-level প্রশ্ন।)* আমি requirement দিয়ে শুরু করব: default-ভাবে accessible, themeable, composable, type-safe, ছোট bundle, Server Component app-এ চলে, আর এমন stable API যেটা বিশটা team নিরাপদে upgrade করতে পারে।\n\n**API pattern**\n- জটিল widget-এর জন্য **compound component**: `<Tabs> <TabList> <TabTrigger value=\"a\"/> </TabList> <TabPanel value=\"a\"/> </Tabs>`। Shared state Context দিয়ে যায়, ফলে consumer layout নিয়ন্ত্রণ করতে পারে, prop-এর বিস্ফোরণ হয় না।\n- সব জায়গায় **controlled আর uncontrolled** দুটোই: `value` / `defaultValue` / `onValueChange` — একবার `useControllableState` hook-এ implement করা।\n- **DOM element-এর মতো আচরণ**: বাকি props root-এ spread করা, `ref` সাধারণ prop হিসেবে নেওয়া (React 19 — `forwardRef` লাগে না), event handler override না করে compose করা।\n- **Style prop না, variant**: `variant=\"danger\" size=\"sm\"` class-এ map হয়; \"link হিসেবে render\" করার জন্য `asChild`/slot pattern।\n- **Accessibility ভেতরেই**: WAI-ARIA pattern মানা (role, keyboard navigation, Dialog-এ focus trap), ARIA সম্পর্কের জন্য `useId`, `prefers-reduced-motion` মানা।\n\n**Architecture**\n- Interactive component-গুলোর নিজস্ব entry file-এ `'use client'` থাকবে; শুধু presentational component (Badge, Card) server-compatible থাকবে।\n- CSS variable (design token) আর `@layer` দিয়ে styling, যাতে app specificity-যুদ্ধ ছাড়াই override করতে পারে; Server Component-এ ভেঙে যায় এমন runtime CSS-in-JS এড়ানো।\n- ESM output, প্রতিটা component-এর জন্য `exports`, `\"sideEffects\"` declare করা → ভালো tree-shaking।\n- Quality gate: RTL + axe test, visual regression, Storybook docs, React Compiler-friendly pure component।\n- Release: semver, changesets, এক major আগে থেকে deprecation warning, breaking change-এর জন্য codemod।\n\nTrade-off: headless library-র (React Aria, Radix) উপর তৈরি করলে accessibility-র কয়েক মাসের কাজ বাঁচে, কিন্তু এমন একটা dependency যোগ হয় যেটা তোমার নিয়ন্ত্রণে নেই।"
+  },
+  "explanation": {
+   "en": "**Why these choices**\n- Compound components + Context keep each piece small and let teams insert their own markup between parts. The cost: misuse outside the parent must be caught with a clear runtime error (see `useTabs` in the code).\n- Controlled/uncontrolled hybrids prevent the classic bug where a component silently switches modes. Warn in dev if `value` changes from `undefined` to defined.\n- With React 19, `ref` is a regular prop for function components, so spreading props passes it through; legacy `forwardRef` is only needed if you still support React 18 consumers.\n- The context value object is recreated each render; with React Compiler it's memoized automatically, otherwise wrap it in `useMemo` so every consumer doesn't re-render on unrelated parent renders.\n\n**Failure scenarios to plan for:** a team pins an old major for a year (support window policy), a CSS reset in an app overrides your styles (layers), a Server Component imports an interactive component without the directive (lint rule + entry-point design), and accessibility regressions (automated axe checks in CI plus manual screen-reader testing for complex widgets).",
+   "bn": "**কেন এই সিদ্ধান্তগুলো**\n- Compound component + Context প্রতিটা অংশ ছোট রাখে, আর team-গুলো অংশগুলোর মাঝে নিজের markup বসাতে পারে। খরচ: parent-এর বাইরে ভুল ব্যবহার হলে স্পষ্ট runtime error দিয়ে ধরতে হয় (code-এ `useTabs` দেখো)।\n- Controlled/uncontrolled hybrid সেই classic bug ঠেকায়, যেখানে component চুপচাপ mode বদলে ফেলে। `value` যদি `undefined` থেকে defined হয়, dev-এ warning দাও।\n- React 19-এ function component-এর জন্য `ref` একটা সাধারণ prop, তাই props spread করলে এটাও চলে যায়; React 18 consumer support করলে তবেই legacy `forwardRef` দরকার।\n- Context value object প্রতিটা render-এ নতুন তৈরি হয়; React Compiler থাকলে এটা নিজে থেকেই memoize হয়, না থাকলে `useMemo` দিয়ে wrap করো, যাতে parent-এর অপ্রাসঙ্গিক render-এ সব consumer re-render না হয়।\n\n**যেসব failure scenario আগে থেকে ভাবতে হবে:** কোনো team এক বছর পুরনো major-এ আটকে থাকে (support window policy), কোনো app-এর CSS reset তোমার style override করে (layers), কোনো Server Component directive ছাড়া interactive component import করে (lint rule + entry-point design), আর accessibility regression (CI-তে automated axe check, আর জটিল widget-এর জন্য manual screen-reader testing)।"
+  },
+  "interviewTip": {
+   "en": "Open with requirements and consumers before naming patterns. Then cover API (compound, controlled/uncontrolled, ref, a11y), architecture (RSC boundaries, styling, bundling) and process (versioning, codemods). Ending with a build-vs-buy trade-off sounds like a real tech lead.",
+   "bn": "Pattern-এর নাম বলার আগে requirement আর consumer কারা সেটা দিয়ে শুরু করো। তারপর API (compound, controlled/uncontrolled, ref, a11y), architecture (RSC boundary, styling, bundling) আর process (versioning, codemod) কভার করো। শেষে build-vs-buy trade-off বললে একজন আসল tech lead-এর মতো শোনায়।"
+  },
+  "references": [
+   {
+    "title": "react.dev — createContext",
+    "url": "https://react.dev/reference/react/createContext"
+   },
+   {
+    "title": "react.dev — useId",
+    "url": "https://react.dev/reference/react/useId"
+   },
+   {
+    "title": "react.dev — React Compiler v1.0",
+    "url": "https://react.dev/blog/2025/10/07/react-compiler-1"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add arrow-key navigation between tabs without breaking composition?",
+    "bn": "Composition না ভেঙে tab-গুলোর মধ্যে arrow-key navigation কীভাবে যোগ করবে?"
+   },
+   {
+    "en": "How do you ship a breaking API change to 20 teams with minimal pain?",
+    "bn": "কম কষ্টে বিশটা team-এর কাছে একটা breaking API change কীভাবে পৌঁছে দেবে?"
+   },
+   {
+    "en": "When would you choose a headless library instead of building widgets yourself?",
+    "bn": "নিজে widget বানানোর বদলে কখন headless library বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "react-002"
+  ],
+  "commonMistakes": {
+   "en": "Designing a single mega-component with 40 boolean props, forgetting keyboard and screen-reader support, or marking the whole library entry `'use client'` so nothing can render on the server.",
+   "bn": "৪০টা boolean prop-সহ একটা বিশাল component বানানো, keyboard আর screen-reader support ভুলে যাওয়া, অথবা পুরো library-র entry-তে `'use client'` দিয়ে দেওয়া, ফলে কিছুই server-এ render হতে পারে না।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "'use client';\nimport { createContext, use, useId, useState, type ComponentProps } from 'react';\n\ntype TabsCtx = { value: string; select: (v: string) => void; baseId: string };\nconst TabsContext = createContext<TabsCtx | null>(null);\n\nfunction useTabs() {\n  const ctx = use(TabsContext);\n  if (!ctx) throw new Error('<TabTrigger> and <TabPanel> must be inside <Tabs>');\n  return ctx;\n}\n\ntype TabsProps = {\n  value?: string;                      // controlled\n  defaultValue?: string;               // uncontrolled\n  onValueChange?: (value: string) => void;\n} & ComponentProps<'div'>;\n\nexport function Tabs({ value, defaultValue = '', onValueChange, ...rest }: TabsProps) {\n  const [inner, setInner] = useState(defaultValue);\n  const isControlled = value !== undefined;\n  const current = isControlled ? value : inner;\n  const baseId = useId();\n\n  const select = (next: string) => {\n    if (!isControlled) setInner(next);\n    onValueChange?.(next);\n  };\n\n  return (\n    <TabsContext value={{ value: current, select, baseId }}>\n      <div {...rest} />\n    </TabsContext>\n  );\n}\n\nexport function TabTrigger({ value, onClick, ...rest }: { value: string } & ComponentProps<'button'>) {\n  const { value: current, select, baseId } = useTabs();\n  const selected = current === value;\n  return (\n    <button\n      {...rest} // includes `ref` in React 19\n      type=\"button\"\n      role=\"tab\"\n      id={`${baseId}-tab-${value}`}\n      aria-selected={selected}\n      aria-controls={`${baseId}-panel-${value}`}\n      tabIndex={selected ? 0 : -1}\n      onClick={(e) => {\n        onClick?.(e);                      // compose, don't override\n        if (!e.defaultPrevented) select(value);\n      }}\n    />\n  );\n}\n\nexport function TabPanel({ value, ...rest }: { value: string } & ComponentProps<'div'>) {\n  const { value: current, baseId } = useTabs();\n  if (current !== value) return null;\n  return (\n    <div\n      {...rest}\n      role=\"tabpanel\"\n      id={`${baseId}-panel-${value}`}\n      aria-labelledby={`${baseId}-tab-${value}`}\n    />\n  );\n}"
+  },
+  "technology": "react"
+ }
+]

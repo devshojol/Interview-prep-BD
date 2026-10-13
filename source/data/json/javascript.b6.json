@@ -1,0 +1,468 @@
+[
+ {
+  "id": "js-035",
+  "subtopic": "Modern JavaScript (ES2025/ES2026)",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 4,
+  "tags": [
+   "es2026",
+   "map-upsert",
+   "getorinsert",
+   "modern-javascript",
+   "baseline"
+  ],
+  "technologyVersion": "ECMAScript 2026 (Map upsert: Baseline newly available since 2026-02; Node.js 26, not Node.js 24)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "This snippet uses the ES2026 `Map` \"upsert\" methods. What does it log?",
+   "bn": "এই snippet ES2026-এর `Map` \"upsert\" method ব্যবহার করছে। এটা কী log করবে?"
+  },
+  "answer": {
+   "en": "`3 2 2`.\n\n- `getOrInsert(key, defaultValue)` returns the **existing** value if the key is present; otherwise it inserts `defaultValue` and returns it. So the counter works like `(map.get(k) ?? 0) + 1`, and `'home'` reaches `3`.\n- `getOrInsertComputed(key, callback)` is the **lazy** version: the callback runs only when the key is missing, receives the key, and its result is inserted. Keys `'r'` and `'s'` are new → 2 factory calls; `'rafi'` reuses the existing `'r'` array → it holds `['rina', 'rafi']`.",
+   "bn": "`3 2 2`।\n\n- `getOrInsert(key, defaultValue)` key থাকলে **আগের** value return করে; না থাকলে `defaultValue` insert করে সেটা return করে। তাই counter-টা `(map.get(k) ?? 0) + 1`-এর মতো কাজ করে, আর `'home'` পৌঁছায় `3`-এ।\n- `getOrInsertComputed(key, callback)` হলো **lazy** version: key না থাকলেই কেবল callback চলে, key-টা argument হিসেবে পায়, আর তার result insert হয়। `'r'` আর `'s'` নতুন key → ২ বার factory call; `'rafi'` আগের `'r'` array-টাই ব্যবহার করে → তাতে থাকে `['rina', 'rafi']`।"
+  },
+  "explanation": {
+   "en": "- **Option B** assumes `getOrInsert` always returns the default (so `home` stays at 1) and that the factory runs every time.\n- **Option C** treats `getOrInsertComputed` like `getOrInsert(key, factory())`, where the argument is evaluated eagerly on every call. Avoiding that wasted work is exactly why the computed variant exists.\n- **Option D** assumes the existing array is replaced.\n\nSupport: Map/WeakMap upsert is ES2026 and Baseline newly available since February 2026 (Chrome 145, Firefox 144, Safari 26.2). It's in Node.js 26 but **not** Node.js 24 LTS — polyfill (core-js) or fall back to `has`/`get`/`set` there.\n\nOther ES2026 additions worth knowing, with status:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (exact sum, rounded once), while `0.1 + 0.2 + 0.3` → `0.6000000000000001`. Baseline since April 2026; not yet in Node.js 26.\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — Baseline since September 2025, Node.js 26.\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access.\n- `Error.isError()` — standard, but **not Baseline** (Safari's implementation is still partial).\n- Still **not** Baseline: Temporal and `using` declarations — label them experimental if you mention them.",
+   "bn": "- **Option B** ধরে নেয় `getOrInsert` সবসময় default return করে (ফলে `home` 1-এই থাকে) আর factory প্রতিবার চলে।\n- **Option C** `getOrInsertComputed`-কে `getOrInsert(key, factory())`-এর মতো ভাবে, যেখানে argument প্রতিটি call-এ আগেভাগে evaluate হয়। এই অপচয় এড়ানোর জন্যই computed version-টা আছে।\n- **Option D** ধরে নেয় আগের array replace হয়ে যায়।\n\nSupport: Map/WeakMap upsert ES2026-এর অংশ এবং February 2026 থেকে Baseline newly available (Chrome 145, Firefox 144, Safari 26.2)। Node.js 26-এ আছে, কিন্তু Node.js 24 LTS-এ **নেই** — সেখানে polyfill (core-js) বা `has`/`get`/`set` fallback ব্যবহার করো।\n\nES2026-এর আরও কিছু সংযোজন, অবস্থা সহ:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (নিখুঁত যোগফল, একবারই round হয়), যেখানে `0.1 + 0.2 + 0.3` → `0.6000000000000001`। April 2026 থেকে Baseline; Node.js 26-এ এখনো নেই।\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — September 2025 থেকে Baseline, Node.js 26-এ আছে।\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access।\n- `Error.isError()` — standard, কিন্তু **Baseline নয়** (Safari-র implementation এখনো আংশিক)।\n- এখনো Baseline **নয়**: Temporal আর `using` declaration — উল্লেখ করলে experimental হিসেবে চিহ্নিত করো।"
+  },
+  "interviewTip": {
+   "en": "Explain the eager-vs-lazy difference between the two methods, then immediately give the support status (Baseline 2026, Node 26 yes, Node 24 no). Knowing *where* a new feature runs is what makes the answer production-grade.",
+   "bn": "দুটো method-এর eager বনাম lazy পার্থক্য ব্যাখ্যা করো, তারপর সাথে সাথে support status বলো (Baseline 2026, Node 26-এ আছে, Node 24-এ নেই)। নতুন feature *কোথায়* চলে সেটা জানাই উত্তরকে production-grade বানায়।"
+  },
+  "references": [
+   {
+    "title": "MDN — Map.prototype.getOrInsert()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/getOrInsert"
+   },
+   {
+    "title": "MDN — Map.prototype.getOrInsertComputed()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/getOrInsertComputed"
+   },
+   {
+    "title": "MDN — Math.sumPrecise()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sumPrecise"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you write the same grouping code for Node.js 24?",
+    "bn": "Node.js 24-এর জন্য একই grouping code কীভাবে লিখবে?"
+   }
+  ],
+  "related": [
+   "js-027",
+   "js-022",
+   "js-012"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const visits = new Map();\nfor (const page of ['home', 'cart', 'home', 'home']) {\n  visits.set(page, visits.getOrInsert(page, 0) + 1);\n}\n\nlet factoryCalls = 0;\nconst byInitial = new Map();\nfor (const name of ['rina', 'sakib', 'rafi']) {\n  byInitial\n    .getOrInsertComputed(name[0], () => {\n      factoryCalls++;\n      return [];\n    })\n    .push(name);\n}\n\nconsole.log(visits.get('home'), factoryCalls, byInitial.get('r').length);",
+   "output": "3 2 2"
+  },
+  "options": [
+   {
+    "en": "`3 2 2`",
+    "bn": "`3 2 2`"
+   },
+   {
+    "en": "`1 3 2`",
+    "bn": "`1 3 2`"
+   },
+   {
+    "en": "`3 3 2`",
+    "bn": "`3 3 2`"
+   },
+   {
+    "en": "`3 2 1`",
+    "bn": "`3 2 1`"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "javascript"
+ },
+ {
+  "id": "js-036",
+  "subtopic": "Shallow vs Deep Copy",
+  "difficulty": "hard",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 12,
+  "tags": [
+   "deep-clone",
+   "structuredclone",
+   "circular-references",
+   "weakmap",
+   "recursion"
+  ],
+  "technologyVersion": "Manual version: ES2015+; `structuredClone` Baseline widely available (Node.js 17+)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Implement `deepClone(value)` that copies nested objects and arrays and also handles:\n\n- `Date`, `RegExp`, `Map` and `Set`;\n- symbol-keyed properties;\n- class instances (keep their prototype);\n- **circular references** (`obj.self = obj` must not overflow the stack).\n\nThen explain when you would simply use `structuredClone` or `JSON.parse(JSON.stringify(x))` instead, and what each approach loses.",
+   "bn": "`deepClone(value)` implement করো, যেটা nested object আর array copy করবে এবং এগুলোও handle করবে:\n\n- `Date`, `RegExp`, `Map` আর `Set`;\n- symbol-key-ওয়ালা property;\n- class instance (তাদের prototype ঠিক রেখে);\n- **circular reference** (`obj.self = obj` হলে stack overflow হওয়া চলবে না)।\n\nএরপর ব্যাখ্যা করো কখন সরাসরি `structuredClone` বা `JSON.parse(JSON.stringify(x))` ব্যবহার করবে, আর প্রতিটি পদ্ধতিতে কী হারায়।"
+  },
+  "answer": {
+   "en": "I recurse with a `WeakMap` called `seen` that maps each original object to its copy:\n\n1. Primitives (and functions) are returned as-is.\n2. If the object was already cloned, return the existing copy — this handles cycles **and** keeps shared references shared.\n3. Special-case `Date`, `RegExp`, `Map` and `Set`. For `Map`/`Set`, register the empty copy in `seen` **before** filling it, so entries pointing back to the container resolve correctly.\n4. For arrays and plain/class objects, create the shell (`new Array(length)` or `Object.create(Object.getPrototypeOf(value))`), register it, then copy every own enumerable key from `Reflect.ownKeys` (strings and symbols). I use `Object.defineProperty` so a key named `\"__proto__\"` becomes a normal own property instead of triggering the prototype setter.\n\nIt's O(n) time and space in the number of reachable values.\n\nIn practice, I reach for **`structuredClone`** first: it's built in (Baseline widely available, Node 17+), handles cycles, `Date`, `RegExp`, `Map`, `Set`, typed arrays and more. I write a custom clone only when I need things it doesn't do: keeping class prototypes, symbol keys, or sharing functions.",
+   "bn": "আমি `seen` নামের একটা `WeakMap` নিয়ে recursion করি, যেটা প্রতিটি original object-কে তার copy-র সাথে map করে:\n\n1. Primitive (আর function) যেমন আছে তেমনই return করি।\n2. Object আগেই clone হয়ে থাকলে আগের copy-টাই return করি — এতে cycle handle হয় **এবং** shared reference shared-ই থাকে।\n3. `Date`, `RegExp`, `Map` আর `Set` আলাদাভাবে handle করি। `Map`/`Set`-এর ক্ষেত্রে খালি copy-টা ভরার **আগেই** `seen`-এ register করি, যাতে container-কে ফিরে point করা entry ঠিকভাবে resolve হয়।\n4. Array আর plain/class object-এর জন্য খোলসটা তৈরি করি (`new Array(length)` বা `Object.create(Object.getPrototypeOf(value))`), register করি, তারপর `Reflect.ownKeys` থেকে প্রতিটি নিজস্ব enumerable key (string আর symbol) copy করি। `Object.defineProperty` ব্যবহার করি, যাতে `\"__proto__\"` নামের key prototype setter trigger না করে সাধারণ নিজস্ব property হয়।\n\nReachable value-র সংখ্যার হিসাবে time আর space O(n)।\n\nবাস্তবে আমি প্রথমে **`structuredClone`** ব্যবহার করি: এটা built-in (Baseline widely available, Node 17+), cycle, `Date`, `RegExp`, `Map`, `Set`, typed array সহ আরও অনেক কিছু handle করে। Custom clone লিখি কেবল তখনই, যখন এমন কিছু দরকার যা এটা করে না: class prototype রাখা, symbol key, বা function share করা।"
+  },
+  "explanation": {
+   "en": "What each approach loses:\n\n- **`JSON.parse(JSON.stringify(x))`:** drops `undefined`, functions and symbols; turns `Date` into a string, `Map`/`Set` into `{}`, `NaN`/`Infinity` into `null`; loses prototypes; throws on cycles and `BigInt`. Fine only for plain JSON-shaped data.\n- **`structuredClone(x)`:** throws `DataCloneError` for functions and DOM nodes; class instances come back as plain objects; symbol-keyed properties, getters/setters (only their current values survive), property descriptors and private `#fields` are not preserved. It also supports a `transfer` option to move `ArrayBuffer`s instead of copying.\n- **My `deepClone`:** keeps prototypes and symbol keys, shares functions by reference, snapshots getter values, and skips non-enumerable properties. It doesn't handle typed arrays, `ArrayBuffer`, `Error` or private fields (no generic code can copy `#private` state).\n\nEdge cases to mention: very deep structures can overflow the call stack with recursion — an explicit stack/queue makes it iterative. Cloning is also a security boundary: never deep-merge/clone untrusted input with code that assigns `obj[key] = ...` blindly (prototype pollution).",
+   "bn": "প্রতিটি পদ্ধতিতে কী হারায়:\n\n- **`JSON.parse(JSON.stringify(x))`:** `undefined`, function আর symbol বাদ পড়ে; `Date` string হয়ে যায়, `Map`/`Set` হয়ে যায় `{}`, `NaN`/`Infinity` হয়ে যায় `null`; prototype হারায়; cycle আর `BigInt` পেলে throw করে। শুধু সাধারণ JSON-আকৃতির data-র জন্য ঠিক আছে।\n- **`structuredClone(x)`:** function আর DOM node পেলে `DataCloneError` throw করে; class instance plain object হয়ে ফেরে; symbol-key-ওয়ালা property, getter/setter (শুধু তাদের current value থাকে), property descriptor আর private `#field` রক্ষা হয় না। এতে একটা `transfer` option-ও আছে, যা `ArrayBuffer` copy না করে সরিয়ে দেয়।\n- **আমার `deepClone`:** prototype আর symbol key রাখে, function reference দিয়ে share করে, getter-এর value-র snapshot নেয়, আর non-enumerable property বাদ দেয়। এটা typed array, `ArrayBuffer`, `Error` বা private field handle করে না (কোনো generic code-ই `#private` state copy করতে পারে না)।\n\nযে edge case-গুলো বলা ভালো: খুব গভীর structure-এ recursion call stack overflow করতে পারে — explicit stack/queue দিয়ে iterative করা যায়। Cloning একটা security boundary-ও: অবিশ্বস্ত input-কে এমন code দিয়ে deep-merge/clone কোরো না যেটা অন্ধভাবে `obj[key] = ...` assign করে (prototype pollution)।"
+  },
+  "interviewTip": {
+   "en": "Start by asking which types must be supported — it shows you know there's no universal deep clone. Code the cycle handling early (it's what's being tested), then close with \"in production I'd use `structuredClone` unless I need prototypes\".",
+   "bn": "শুরুতেই জিজ্ঞেস করো কোন কোন type support করতে হবে — এতে বোঝা যায় তুমি জানো যে সর্বজনীন deep clone বলে কিছু নেই। Cycle handling আগে লেখো (এটাই মূলত যাচাই হচ্ছে), তারপর শেষ করো \"production-এ prototype দরকার না হলে আমি `structuredClone` ব্যবহার করব\" দিয়ে।"
+  },
+  "references": [
+   {
+    "title": "MDN — structuredClone()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone"
+   },
+   {
+    "title": "MDN — WeakMap",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap"
+   },
+   {
+    "title": "MDN — Reflect.ownKeys()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect/ownKeys"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you make it iterative to avoid stack overflow on very deep data?",
+    "bn": "খুব গভীর data-তে stack overflow এড়াতে এটা iterative কীভাবে করবে?"
+   },
+   {
+    "en": "Why is `WeakMap` used for `seen` instead of `Map`?",
+    "bn": "`seen`-এর জন্য `Map`-এর বদলে `WeakMap` কেন?"
+   }
+  ],
+  "related": [
+   "js-009",
+   "js-030",
+   "js-014"
+  ],
+  "commonMistakes": {
+   "en": "Forgetting cycles (infinite recursion), registering the copy in `seen` *after* recursing into children, using `{}` for class instances (losing methods), or treating `JSON.parse(JSON.stringify())` as a general deep clone.",
+   "bn": "Cycle ভুলে যাওয়া (অসীম recursion), child-এ recurse করার *পরে* copy-টা `seen`-এ register করা, class instance-এর জন্য `{}` ব্যবহার করা (method হারিয়ে যায়), অথবা `JSON.parse(JSON.stringify())`-কে সাধারণ deep clone ভাবা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function deepClone(value, seen = new WeakMap()) {\n  if (value === null || typeof value !== 'object') return value; // primitives, functions\n  if (seen.has(value)) return seen.get(value); // cycles & shared references\n\n  if (value instanceof Date) return new Date(value.getTime());\n  if (value instanceof RegExp) return new RegExp(value.source, value.flags);\n\n  if (value instanceof Map) {\n    const copy = new Map();\n    seen.set(value, copy);\n    for (const [k, v] of value) copy.set(deepClone(k, seen), deepClone(v, seen));\n    return copy;\n  }\n\n  if (value instanceof Set) {\n    const copy = new Set();\n    seen.set(value, copy);\n    for (const v of value) copy.add(deepClone(v, seen));\n    return copy;\n  }\n\n  const copy = Array.isArray(value)\n    ? new Array(value.length)\n    : Object.create(Object.getPrototypeOf(value)); // keep class prototype\n  seen.set(value, copy);\n\n  for (const key of Reflect.ownKeys(value)) { // string + symbol keys\n    if (!Object.getOwnPropertyDescriptor(value, key).enumerable) continue;\n    Object.defineProperty(copy, key, { // avoids the __proto__ setter\n      value: deepClone(value[key], seen),\n      writable: true,\n      enumerable: true,\n      configurable: true,\n    });\n  }\n  return copy;\n}\n\nclass Point {\n  constructor(x, y) { this.x = x; this.y = y; }\n  norm() { return Math.hypot(this.x, this.y); }\n}\n\nconst original = {\n  createdAt: new Date('2026-01-01T00:00:00Z'),\n  tags: new Set(['js', 'bd']),\n  point: new Point(3, 4),\n  [Symbol.for('meta')]: 'kept',\n};\noriginal.self = original;\n\nconst copy = deepClone(original);\nconsole.log(copy.self === copy, copy.point.norm(), copy.createdAt !== original.createdAt); // true 5 true\nconsole.log(structuredClone(original).point instanceof Point); // false — prototype lost"
+  },
+  "complexity": {
+   "time": "O(n) — n reachable values",
+   "space": "O(n)"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-037",
+  "subtopic": "Concurrency & Async Patterns",
+  "difficulty": "extreme",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 18,
+  "tags": [
+   "concurrency",
+   "promise-pool",
+   "rate-limiting",
+   "abortcontroller",
+   "async-patterns"
+  ],
+  "technologyVersion": "ES2017+ async/await; `AbortSignal.throwIfAborted` Baseline widely available; Node.js 24/26",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You must call an API for 10,000 items, but the server allows at most 5 concurrent requests. Implement `promisePool(tasks, limit, { signal })` where `tasks` is an array of **functions** that return promises.\n\nRequirements:\n- never more than `limit` tasks in flight;\n- results in **input order**;\n- fail fast: after the first failure, start no new tasks and reject with that error;\n- cancellation via an `AbortSignal`.\n\nDiscuss the design choices and how this differs from processing in batches of 5.",
+   "bn": "তোমাকে ১০,০০০ item-এর জন্য একটা API call করতে হবে, কিন্তু server একসাথে সর্বোচ্চ ৫টা concurrent request নিতে পারে। `promisePool(tasks, limit, { signal })` implement করো, যেখানে `tasks` হলো promise return করা **function**-এর array।\n\nRequirement:\n- কখনো `limit`-এর বেশি task একসাথে চলবে না;\n- result আসবে **input-এর ক্রমে**;\n- fail fast: প্রথম failure-এর পর নতুন কোনো task শুরু হবে না, আর সেই error দিয়ে reject করবে;\n- একটা `AbortSignal` দিয়ে cancellation।\n\nDesign-এর সিদ্ধান্তগুলো আলোচনা করো, আর ৫টা করে batch-এ process করার সাথে এর পার্থক্য কী সেটা বলো।"
+  },
+  "answer": {
+   "en": "(Advanced.) I use the **worker-pool** pattern: start `min(limit, tasks.length)` async workers that all pull from a shared index.\n\n- Each worker loops: check the abort signal, take `nextIndex++`, `await tasks[index]()`, store the result at `results[index]`. Taking the index is race-free because JavaScript runs one piece of code at a time on a thread — there's no interleaving between reading and incrementing.\n- `Promise.all(workers)` resolves when every worker has run out of work, and returns the ordered `results`.\n- **Fail fast:** a worker that catches an error sets a shared `failed` flag and rethrows. The other workers check the flag before taking new work, and `Promise.all` rejects with the first error. Tasks already in flight can't be force-stopped; they receive the `signal` so they can abort themselves.\n- **Cancellation:** `signal.throwIfAborted()` before each new task.\n\nWhy `tasks` must be functions: a promise starts running the moment it's created. If the caller passed 10,000 promises, all 10,000 requests would already be in flight and no pool could limit them.\n\n**Vs batches of 5** (`Promise.all` on chunks): each batch waits for its slowest request, so slots sit idle (head-of-line blocking). The pool refills a slot the moment any task finishes, keeping exactly `limit` requests busy — usually much faster overall.",
+   "bn": "(Advanced বিষয়।) আমি **worker-pool** pattern ব্যবহার করি: `min(limit, tasks.length)`-টা async worker শুরু করি, যারা সবাই একটা shared index থেকে কাজ টেনে নেয়।\n\n- প্রতিটি worker loop করে: abort signal check করে, `nextIndex++` নেয়, `await tasks[index]()` করে, result রাখে `results[index]`-এ। Index নেওয়াটা race-free, কারণ JavaScript একটা thread-এ একবারে একটাই code চালায় — পড়া আর বাড়ানোর মাঝখানে অন্য কিছু ঢুকতে পারে না।\n- সব worker-এর কাজ ফুরালে `Promise.all(workers)` resolve হয়, আর ক্রমানুসারে সাজানো `results` return করে।\n- **Fail fast:** কোনো worker error ধরলে একটা shared `failed` flag সেট করে আবার throw করে। বাকি worker-রা নতুন কাজ নেওয়ার আগে flag check করে, আর `Promise.all` প্রথম error দিয়ে reject করে। ইতিমধ্যে চলমান task জোর করে থামানো যায় না; তারা `signal` পায়, যাতে নিজেরাই abort করতে পারে।\n- **Cancellation:** প্রতিটি নতুন task-এর আগে `signal.throwIfAborted()`।\n\n`tasks` কেন function হতে হবে: promise তৈরি হওয়ার মুহূর্তেই চলতে শুরু করে। Caller যদি ১০,০০০টা promise পাঠাত, তাহলে ১০,০০০টা request ইতিমধ্যেই চলত, আর কোনো pool সেগুলো সীমিত করতে পারত না।\n\n**৫টা করে batch-এর সাথে পার্থক্য** (chunk-এ `Promise.all`): প্রতিটি batch তার সবচেয়ে ধীর request-এর জন্য অপেক্ষা করে, ফলে slot খালি পড়ে থাকে (head-of-line blocking)। Pool যেকোনো task শেষ হওয়ার সাথে সাথে slot ভরে ফেলে, ঠিক `limit`-সংখ্যক request সবসময় ব্যস্ত রাখে — সাধারণত মোট সময় অনেক কম লাগে।"
+  },
+  "explanation": {
+   "en": "Design variations an interviewer may push on:\n\n- **Settle-all mode:** instead of fail-fast, store `{ status, value | reason }` per item (like `allSettled`) and keep going — better for bulk jobs where you report failures at the end.\n- **Retries per task:** wrap each task with the retry-with-backoff helper; count retries against a global budget so an outage doesn't multiply load.\n- **Lazy input / backpressure:** accept an iterable or async iterable instead of an array, so you don't materialise 10,000 functions (or millions of rows) up front. Workers pull the next item only when they're free.\n- **Streaming results:** expose an async generator so the caller can process results as they complete instead of waiting for all of them.\n- **Concurrency ≠ rate limit:** \"max 5 in flight\" is different from \"max 50 requests per second\". A rate limit needs a token bucket or a scheduled release, and you should honour `429` + `Retry-After` from the server.\n- **Node specifics:** HTTP clients have their own connection-pool settings (e.g. `maxSockets` on an `http.Agent`), and database pools (e.g. `pg.Pool({ max })`) already limit concurrency — know which limit is actually in effect instead of stacking them blindly.\n- Production libraries such as `p-limit` implement the same idea; knowing how they work lets you debug them.",
+   "bn": "Interviewer যেসব variation নিয়ে চাপ দিতে পারেন:\n\n- **Settle-all mode:** fail-fast-এর বদলে প্রতিটি item-এর জন্য `{ status, value | reason }` রাখো (`allSettled`-এর মতো) আর কাজ চালিয়ে যাও — bulk job-এর জন্য ভালো, যেখানে শেষে failure report করা হয়।\n- **প্রতি task-এ retry:** প্রতিটি task-কে retry-with-backoff helper দিয়ে wrap করো; retry-গুলো একটা global budget-এর মধ্যে গোনো, যাতে outage-এর সময় load কয়েকগুণ না হয়।\n- **Lazy input / backpressure:** array-র বদলে iterable বা async iterable নাও, যাতে শুরুতেই ১০,০০০টা function (বা লাখো row) তৈরি করতে না হয়। Worker ফাঁকা হলেই কেবল পরের item টানে।\n- **Streaming result:** একটা async generator দাও, যাতে caller সবগুলোর জন্য অপেক্ষা না করে যেটা শেষ হচ্ছে সেটা process করতে পারে।\n- **Concurrency ≠ rate limit:** \"একসাথে সর্বোচ্চ ৫টা\" আর \"প্রতি second-এ সর্বোচ্চ ৫০টা request\" আলাদা জিনিস। Rate limit-এর জন্য token bucket বা নির্ধারিত সময়ে ছাড়া লাগে, আর server-এর `429` + `Retry-After` মানা উচিত।\n- **Node-এর খুঁটিনাটি:** HTTP client-এর নিজস্ব connection-pool setting থাকে (যেমন `http.Agent`-এর `maxSockets`), আর database pool (যেমন `pg.Pool({ max })`) আগে থেকেই concurrency সীমিত করে — না বুঝে limit-এর উপর limit না চাপিয়ে জেনে নাও আসলে কোনটা কার্যকর।\n- `p-limit`-এর মতো production library একই ধারণা implement করে; কীভাবে কাজ করে জানলে এগুলো debug করতে পারবে।"
+  },
+  "interviewTip": {
+   "en": "Start by explaining why the input must be functions — it's the insight most candidates miss. Then code the worker loop, and only after it works add fail-fast and cancellation. Comparing with naive batching shows you think about throughput, not just correctness.",
+   "bn": "শুরুতেই ব্যাখ্যা করো কেন input function হতে হবে — বেশিরভাগ candidate এই অন্তর্দৃষ্টিটা মিস করে। তারপর worker loop লেখো, আর সেটা কাজ করার পরেই fail-fast ও cancellation যোগ করো। সাধারণ batching-এর সাথে তুলনা করলে বোঝা যায় তুমি শুধু সঠিকতা নয়, throughput নিয়েও ভাবো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Promise.all()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"
+   },
+   {
+    "title": "MDN — AbortSignal.throwIfAborted()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/throwIfAborted"
+   },
+   {
+    "title": "MDN — async function",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you turn this into an async generator that yields results as they finish?",
+    "bn": "এটাকে এমন async generator-এ কীভাবে রূপান্তর করবে, যেটা কাজ শেষ হওয়ার সাথে সাথে result yield করবে?"
+   },
+   {
+    "en": "How is a concurrency limit different from a rate limit, and how would you implement the latter?",
+    "bn": "Concurrency limit আর rate limit-এর পার্থক্য কী, আর rate limit কীভাবে implement করবে?"
+   }
+  ],
+  "related": [
+   "js-021",
+   "js-024",
+   "js-033"
+  ],
+  "commonMistakes": {
+   "en": "Passing already-created promises (no limit is possible), pushing results in completion order, using `setInterval` polling to manage slots, or forgetting the empty-array and `limit < 1` cases.",
+   "bn": "আগেই তৈরি promise pass করা (তখন কোনো limit সম্ভব নয়), শেষ হওয়ার ক্রমে result push করা, slot সামলাতে `setInterval` দিয়ে polling করা, অথবা খালি array আর `limit < 1`-এর case ভুলে যাওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "async function promisePool(tasks, limit, { signal } = {}) {\n  if (!Number.isInteger(limit) || limit < 1) {\n    throw new RangeError('limit must be a positive integer');\n  }\n\n  const results = new Array(tasks.length);\n  let nextIndex = 0;\n  let failed = false;\n\n  async function worker() {\n    while (!failed && nextIndex < tasks.length) {\n      signal?.throwIfAborted();\n      const index = nextIndex++; // safe: no other code runs between read and increment\n      try {\n        results[index] = await tasks[index]({ signal });\n      } catch (err) {\n        failed = true; // other workers stop picking up new tasks\n        throw err;\n      }\n    }\n  }\n\n  const workerCount = Math.min(limit, tasks.length);\n  await Promise.all(Array.from({ length: workerCount }, worker));\n  return results;\n}\n\n// Usage: 10,000 items, max 5 requests in flight, cancellable\nconst controller = new AbortController();\nconst tasks = itemIds.map((id) => ({ signal }) =>\n  fetch(`/api/items/${id}`, { signal }).then((res) => {\n    if (!res.ok) throw new Error(`Item ${id}: HTTP ${res.status}`);\n    return res.json();\n  }),\n);\n\nconst items = await promisePool(tasks, 5, { signal: controller.signal });"
+  },
+  "complexity": {
+   "time": "O(n) scheduling overhead; wall time ≈ total work / limit",
+   "space": "O(n) results + O(limit) in flight"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-038",
+  "subtopic": "Design Patterns (Observer & Reactive State)",
+  "difficulty": "extreme",
+  "type": "architecture",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "observer-pattern",
+   "state-management",
+   "immutability",
+   "batching",
+   "use-sync-external-store"
+  ],
+  "technologyVersion": "ECMAScript 2026 (framework-agnostic); React 19.3 `useSyncExternalStore` for integration",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Design and implement a tiny framework-agnostic reactive state store: `getState`, `setState`, `subscribe`, plus selector-based subscriptions so a UI part is notified only when the slice it uses changes. Discuss batching, immutability, error isolation, memory, and how you would plug it into React.",
+   "bn": "একটা ছোট, framework-নিরপেক্ষ reactive state store design ও implement করো: `getState`, `setState`, `subscribe`, সাথে selector-ভিত্তিক subscription, যাতে UI-এর একটা অংশ কেবল তখনই notify হয় যখন তার ব্যবহৃত slice বদলায়। Batching, immutability, error isolation, memory, আর React-এ কীভাবে যুক্ত করবে — এগুলো আলোচনা করো।"
+  },
+  "answer": {
+   "en": "(Advanced design question.) My design is the observer pattern around a single immutable state value.\n\n**Core API**\n- `state` lives in a closure; `getState()` returns it.\n- `setState(update)` accepts a new state or an updater `(prev) => next`. If `Object.is(next, prev)`, nothing happens — cheap no-op detection that only works because state is treated as **immutable** (updates create new objects; unchanged branches keep their references).\n- `subscribe(listener)` adds to a `Set` and returns an `unsubscribe` function.\n\n**Batching:** several `setState` calls in the same tick schedule **one** notification via `queueMicrotask`. Listeners see only the final, consistent state (no intermediate \"glitches\"), and the UI renders once instead of three times. Trade-off: notifications are asynchronous, so tests must `await` a microtask.\n\n**Selectors:** `subscribeSelector(store, selector, onChange)` remembers the last selected value and calls `onChange` only when `Object.is` (or a supplied `shallowEqual`) says it changed. Because untouched slices keep their references, most selectors short-circuit.\n\n**Robustness:** iterate over a copy of the listener set (unsubscribing during notify is safe), and wrap each listener in `try/catch` so one buggy subscriber can't break the others; report errors instead of swallowing them.\n\n**Memory:** every subscription must be undone; the returned unsubscribe makes cleanup explicit, and in React the hook handles it.\n\n**React integration:** `useSyncExternalStore(store.subscribe, () => selector(store.getState()))` subscribes safely with concurrent rendering and avoids tearing. Zustand and Redux Toolkit are production versions of this model; signals (Preact, Solid, Angular, Vue refs) are the fine-grained alternative.",
+   "bn": "(Advanced design প্রশ্ন।) আমার design হলো একটা single immutable state value ঘিরে observer pattern।\n\n**মূল API**\n- `state` থাকে একটা closure-এ; `getState()` সেটা return করে।\n- `setState(update)` নতুন state বা একটা updater `(prev) => next` নেয়। `Object.is(next, prev)` হলে কিছুই হয় না — সস্তায় no-op ধরা, যেটা কাজ করে কারণ state-কে **immutable** হিসেবে ধরা হয় (update নতুন object তৈরি করে; অপরিবর্তিত branch তাদের reference রেখে দেয়)।\n- `subscribe(listener)` listener-কে একটা `Set`-এ যোগ করে আর একটা `unsubscribe` function return করে।\n\n**Batching:** একই tick-এ কয়েকটা `setState` হলে `queueMicrotask` দিয়ে **একটাই** notification schedule হয়। Listener শুধু চূড়ান্ত, সামঞ্জস্যপূর্ণ state দেখে (মাঝখানের কোনো \"glitch\" নয়), আর UI তিনবারের বদলে একবার render হয়। Trade-off: notification asynchronous, তাই test-এ একটা microtask `await` করতে হয়।\n\n**Selector:** `subscribeSelector(store, selector, onChange)` শেষ selected value মনে রাখে, আর `Object.is` (বা দেওয়া `shallowEqual`) বদল দেখালেই কেবল `onChange` call করে। অপরিবর্তিত slice-গুলো reference রাখে বলে বেশিরভাগ selector তাড়াতাড়ি থেমে যায়।\n\n**Robustness:** listener set-এর একটা copy ঘুরে notify করো (notify চলাকালীন unsubscribe নিরাপদ থাকে), আর প্রতিটি listener `try/catch`-এ রাখো যাতে একটা buggy subscriber বাকিদের ভাঙতে না পারে; error গিলে না ফেলে report করো।\n\n**Memory:** প্রতিটি subscription-কে অবশ্যই undo করতে হবে; return করা unsubscribe cleanup-কে স্পষ্ট করে, আর React-এ hook নিজেই এটা সামলায়।\n\n**React-এ যুক্ত করা:** `useSyncExternalStore(store.subscribe, () => selector(store.getState()))` concurrent rendering-এর সাথে নিরাপদে subscribe করে আর tearing এড়ায়। Zustand আর Redux Toolkit এই model-এরই production version; signals (Preact, Solid, Angular, Vue ref) হলো fine-grained বিকল্প।"
+  },
+  "explanation": {
+   "en": "Trade-offs and failure scenarios to discuss:\n\n- **Sync vs batched notifications:** sync notification is simpler to test but causes multiple renders and lets listeners observe half-finished multi-step updates. UI frameworks batch updates (React's automatic batching, Vue's microtask scheduler), while stores such as Redux and Zustand notify synchronously and leave batching to the UI layer — both are valid choices. With microtask batching, add a `flush()` for tests.\n- **Mutation bugs:** if someone mutates `state.cart.push(x)` and calls `setState(state)`, `Object.is` sees no change and nobody is notified. Freeze state in development (`Object.freeze` recursively) or use Immer to make accidental mutation fail loudly.\n- **Derived data:** a selector that returns a new array every time (`state.items.filter(...)`) always looks \"changed\" — memoize derived selectors or compare with `shallowEqual`.\n- **Re-entrancy:** a listener that calls `setState` schedules another batch instead of recursing — safe, but watch for infinite update loops.\n- **Middleware & devtools:** wrapping `setState` gives logging, persistence (`localStorage` with try/catch), undo/time-travel (immutable snapshots make this cheap).\n- **Scaling:** split into slices or multiple stores; keep server state (fetching, caching) in a dedicated tool instead of a global store.\n- **Standards note:** a Signals proposal exists at TC39 but is early-stage and not part of ECMAScript — use library implementations.",
+   "bn": "যেসব trade-off আর failure scenario আলোচনা করা উচিত:\n\n- **Sync বনাম batched notification:** sync notification test করা সহজ, কিন্তু একাধিক render ঘটায় এবং listener-কে বহু-ধাপের update-এর অর্ধেক অবস্থা দেখতে দেয়। UI framework update batch করে (React-এর automatic batching, Vue-র microtask scheduler), আর Redux বা Zustand-এর মতো store synchronously notify করে batching-এর দায়িত্ব UI layer-কে দেয় — দুটোই গ্রহণযোগ্য পছন্দ। Microtask batching করলে test-এর জন্য একটা `flush()` যোগ করো।\n- **Mutation bug:** কেউ যদি `state.cart.push(x)` করে `setState(state)` call করে, `Object.is` কোনো বদল দেখে না আর কেউ notify হয় না। Development-এ state freeze করো (recursively `Object.freeze`) বা Immer ব্যবহার করো, যাতে ভুল করে mutate করলে জোরালোভাবে fail করে।\n- **Derived data:** যে selector প্রতিবার নতুন array return করে (`state.items.filter(...)`), সেটা সবসময় \"বদলেছে\" মনে হয় — derived selector memoize করো বা `shallowEqual` দিয়ে compare করো।\n- **Re-entrancy:** কোনো listener `setState` call করলে recursion না হয়ে আরেকটা batch schedule হয় — নিরাপদ, তবে অসীম update loop-এর দিকে খেয়াল রাখো।\n- **Middleware ও devtools:** `setState` wrap করে logging, persistence (try/catch সহ `localStorage`), undo/time-travel পাওয়া যায় (immutable snapshot থাকায় এটা সস্তা)।\n- **Scaling:** slice বা একাধিক store-এ ভাগ করো; server state (fetching, caching) global store-এ না রেখে আলাদা tool-এ রাখো।\n- **Standard-এর কথা:** TC39-তে একটা Signals proposal আছে, তবে সেটা প্রাথমিক পর্যায়ে এবং ECMAScript-এর অংশ নয় — library implementation ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Structure it like a design review: requirements → API → core implementation → batching → selectors → failure modes → integration. Writing the 30-line store live and then discussing trade-offs is far more convincing than naming libraries.",
+   "bn": "এটাকে design review-এর মতো সাজাও: requirement → API → মূল implementation → batching → selector → failure mode → integration। ৩০ লাইনের store সরাসরি লিখে তারপর trade-off আলোচনা করা, শুধু library-র নাম বলার চেয়ে অনেক বেশি বিশ্বাসযোগ্য।"
+  },
+  "references": [
+   {
+    "title": "MDN — queueMicrotask()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/queueMicrotask"
+   },
+   {
+    "title": "MDN — Set",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set"
+   },
+   {
+    "title": "React — useSyncExternalStore",
+    "url": "https://react.dev/reference/react/useSyncExternalStore"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why does `useSyncExternalStore` exist instead of `useEffect` + `useState` for external stores?",
+    "bn": "External store-এর জন্য `useEffect` + `useState`-এর বদলে `useSyncExternalStore` কেন আছে?"
+   },
+   {
+    "en": "How would you add computed (derived) values that update automatically?",
+    "bn": "স্বয়ংক্রিয়ভাবে update হওয়া computed (derived) value কীভাবে যোগ করবে?"
+   }
+  ],
+  "related": [
+   "js-014",
+   "js-032",
+   "js-016"
+  ],
+  "commonMistakes": {
+   "en": "Mutating state in place (breaking change detection), notifying synchronously inside a loop of updates, forgetting to return an unsubscribe function, or letting one throwing listener stop the rest.",
+   "bn": "State সরাসরি mutate করা (change detection ভেঙে যায়), update-এর loop-এর ভেতরে synchronously notify করা, unsubscribe function return করতে ভুলে যাওয়া, অথবা একটা throw করা listener-কে বাকিদের থামিয়ে দিতে দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function createStore(initialState) {\n  let state = initialState;\n  const listeners = new Set();\n  let scheduled = false;\n\n  function notify() {\n    scheduled = false;\n    const snapshot = state;\n    for (const listener of [...listeners]) { // copy: safe if a listener unsubscribes\n      try {\n        listener(snapshot);\n      } catch (err) {\n        console.error('Store listener failed', err); // isolate failures\n      }\n    }\n  }\n\n  return {\n    getState: () => state,\n    setState(update) {\n      const next = typeof update === 'function' ? update(state) : update;\n      if (Object.is(next, state)) return; // immutable updates → cheap change check\n      state = next;\n      if (!scheduled) {\n        scheduled = true;\n        queueMicrotask(notify); // batch: one notification per tick\n      }\n    },\n    subscribe(listener) {\n      listeners.add(listener);\n      return () => listeners.delete(listener);\n    },\n  };\n}\n\nfunction subscribeSelector(store, selector, onChange, isEqual = Object.is) {\n  let current = selector(store.getState());\n  return store.subscribe((state) => {\n    const next = selector(state);\n    if (isEqual(next, current)) return;\n    const previous = current;\n    current = next;\n    onChange(next, previous);\n  });\n}\n\n// Usage\nconst store = createStore({ cart: [], user: null });\nconst stop = subscribeSelector(store, (s) => s.cart.length, (n, prev) => console.log(`cart: ${prev} -> ${n}`));\n\nstore.setState((s) => ({ ...s, cart: [...s.cart, 'mouse'] }));\nstore.setState((s) => ({ ...s, cart: [...s.cart, 'keyboard'] }));\n// one log after the current tick: \"cart: 0 -> 2\"\n\n// React integration\n// const cartCount = useSyncExternalStore(store.subscribe, () => store.getState().cart.length);"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-039",
+  "subtopic": "DOM Manipulation & Performance",
+  "difficulty": "extreme",
+  "type": "scenario",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "performance",
+   "dom",
+   "requestanimationframe",
+   "web-workers",
+   "virtualization",
+   "websocket"
+  ],
+  "technologyVersion": "Web platform, 2026 (rAF, Web Workers, `content-visibility` Baseline newly available)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A live market-price dashboard receives about 1,000 WebSocket messages per second and shows a table of 5,000 rows. The UI stutters, CPU usage is high and clicks feel laggy. How do you find the bottlenecks and re-architect the client so it stays smooth at 60 fps?",
+   "bn": "একটা live market-price dashboard প্রতি second-এ প্রায় ১,০০০টা WebSocket message পায় আর ৫,০০০ row-এর একটা table দেখায়। UI আটকে আটকে চলে, CPU usage বেশি, আর click করলে দেরিতে সাড়া দেয়। Bottleneck কীভাবে খুঁজবে, আর client-কে কীভাবে নতুন করে সাজাবে যাতে 60 fps-এ smooth থাকে?"
+  },
+  "answer": {
+   "en": "(Advanced scenario.) At 60 fps each frame has about 16 ms for JavaScript, style, layout and paint combined. Updating the DOM once per message — 1,000 times a second — can't fit.\n\n**1. Clarify & measure.** How many rows are visible? Do users need every tick or only the latest price? Record a DevTools Performance profile: look for long tasks, \"Forced reflow\" warnings (layout thrashing) and per-message work. Track INP for click latency.\n\n**2. Decouple message rate from render rate.** Buffer incoming ticks in a `Map` keyed by symbol (latest value wins), and flush **once per frame** with `requestAnimationFrame`. 1,000 messages/s become at most 60 DOM updates/s, and the buffer stays bounded because coalescing overwrites old ticks.\n\n**3. Move parsing off the main thread.** Run the WebSocket, `JSON.parse` and aggregation inside a **Web Worker**; post one batched diff per frame to the UI thread (transfer `ArrayBuffer`s for binary data).\n\n**4. Touch less DOM.** Virtualise the table (render only the ~40 visible rows plus a buffer), keep references to cell nodes and update only changed cells via `textContent`, use event delegation for row clicks, and use CSS `transform`/`opacity` for \"price flash\" effects so they run on the compositor.\n\n**5. Avoid layout thrashing.** Within a frame, do all reads (measurements) first, then all writes. Never read `offsetHeight` or `getBoundingClientRect()` inside the update loop.\n\n**6. Protect the system.** Cap history arrays (ring buffers), handle hidden tabs (rAF pauses, so coalescing keeps the buffer small), reconnect with backoff and resync from a snapshot using sequence numbers. Ask the backend to send only subscribed/visible symbols or pre-aggregate.",
+   "bn": "(Advanced scenario।) 60 fps-এ প্রতিটি frame-এ JavaScript, style, layout আর paint মিলিয়ে মোটামুটি 16 ms সময় থাকে। প্রতিটি message-এ একবার করে DOM update — second-এ ১,০০০ বার — এর মধ্যে আঁটে না।\n\n**1. পরিষ্কার করো ও মাপো।** কয়টা row দেখা যায়? User-এর কি প্রতিটি tick দরকার, নাকি শুধু সর্বশেষ দাম? DevTools Performance profile record করো: long task, \"Forced reflow\" warning (layout thrashing) আর প্রতি message-এর কাজ খোঁজো। Click-এর দেরির জন্য INP মাপো।\n\n**2. Message-এর হার আর render-এর হার আলাদা করো।** আসা tick-গুলো symbol-কে key ধরে একটা `Map`-এ buffer করো (সর্বশেষ value জেতে), আর `requestAnimationFrame` দিয়ে **প্রতি frame-এ একবার** flush করো। ১,০০০ message/s হয়ে যায় সর্বোচ্চ 60টা DOM update/s, আর coalescing পুরনো tick overwrite করে বলে buffer সীমিত থাকে।\n\n**3. Parsing main thread থেকে সরাও।** WebSocket, `JSON.parse` আর aggregation একটা **Web Worker**-এর ভেতরে চালাও; প্রতি frame-এ UI thread-এ একটা batched diff পাঠাও (binary data হলে `ArrayBuffer` transfer করো)।\n\n**4. কম DOM ছোঁও।** Table virtualise করো (শুধু দৃশ্যমান ~৪০টা row আর একটু buffer render), cell node-এর reference রেখে শুধু বদলানো cell `textContent` দিয়ে update করো, row click-এর জন্য event delegation ব্যবহার করো, আর \"price flash\" effect-এর জন্য CSS `transform`/`opacity` ব্যবহার করো যাতে সেটা compositor-এ চলে।\n\n**5. Layout thrashing এড়াও।** একটা frame-এর মধ্যে আগে সব read (measurement), তারপর সব write। Update loop-এর ভেতরে কখনো `offsetHeight` বা `getBoundingClientRect()` পড়ো না।\n\n**6. System রক্ষা করো।** History array-র সীমা দাও (ring buffer), hidden tab handle করো (rAF থেমে যায়, তাই coalescing buffer ছোট রাখে), backoff সহ reconnect করো আর sequence number দিয়ে snapshot থেকে resync করো। Backend-কে বলো শুধু subscribed/দৃশ্যমান symbol পাঠাতে বা আগে থেকে aggregate করতে।"
+  },
+  "explanation": {
+   "en": "- **Why rAF and not a timer?** `requestAnimationFrame` runs right before the browser paints, so all DOM writes for a frame land together. A `setInterval(16)` drifts relative to the display and can update twice in one frame or miss frames.\n- **Layout thrashing explained:** writing a style then reading a layout property forces the browser to recalculate layout synchronously. In a loop over 5,000 rows that's 5,000 forced layouts per frame.\n- **Rendering cost levers:** `content-visibility: auto` (Baseline newly available) skips rendering work for off-screen sections; CSS `contain` limits how far layout changes propagate.\n- **Worker trade-offs:** messages are structured-cloned, so post compact diffs, not the whole table. If the main thread still dominates, the bottleneck is DOM work, not parsing — measure before and after.\n- **Success criteria:** no long tasks during steady load, frame time under ~16 ms, INP under 200 ms, flat memory over hours.\n- **Framework note:** in React, keep the high-frequency stream outside component state (an external store read with `useSyncExternalStore` per visible row, or direct DOM updates in a ref) so 1,000 messages don't trigger 1,000 renders.",
+   "bn": "- **Timer নয়, rAF কেন?** `requestAnimationFrame` browser paint করার ঠিক আগে চলে, তাই একটা frame-এর সব DOM write একসাথে পড়ে। `setInterval(16)` display-এর সাথে তাল হারায় — এক frame-এ দুইবার update করতে পারে বা frame মিস করতে পারে।\n- **Layout thrashing-এর ব্যাখ্যা:** style লিখে তারপর layout property পড়লে browser-কে synchronously layout আবার হিসাব করতে হয়। ৫,০০০ row-এর loop-এ সেটা প্রতি frame-এ ৫,০০০টা forced layout।\n- **Rendering খরচ কমানোর উপায়:** `content-visibility: auto` (Baseline newly available) screen-এর বাইরের অংশের rendering-এর কাজ বাদ দেয়; CSS `contain` layout change কতদূর ছড়াবে তা সীমিত করে।\n- **Worker-এর trade-off:** message structured-clone হয়, তাই পুরো table নয়, ছোট diff পাঠাও। তারপরও main thread ব্যস্ত থাকলে bottleneck parsing নয়, DOM-এর কাজ — আগে-পরে মেপে দেখো।\n- **সাফল্যের মাপকাঠি:** স্থির load-এ কোনো long task নেই, frame time ~16 ms-এর নিচে, INP 200 ms-এর নিচে, ঘণ্টার পর ঘণ্টা memory সমতল।\n- **Framework-এর কথা:** React-এ high-frequency stream component state-এর বাইরে রাখো (প্রতি দৃশ্যমান row-এ `useSyncExternalStore` দিয়ে পড়া একটা external store, বা ref-এ সরাসরি DOM update), যাতে ১,০০০ message ১,০০০টা render না ঘটায়।"
+  },
+  "interviewTip": {
+   "en": "Open with the frame budget (\"~16 ms per frame, 1,000 updates/s can't fit\"), then present the fixes in order of impact: coalesce per frame → virtualise → worker → layout hygiene. Ending with measurable success criteria makes it a senior answer.",
+   "bn": "শুরু করো frame budget দিয়ে (\"প্রতি frame-এ ~16 ms, ১,০০০ update/s আঁটবে না\"), তারপর প্রভাব অনুযায়ী সমাধান সাজাও: প্রতি frame-এ coalesce → virtualise → worker → layout-এর পরিচ্ছন্নতা। মাপা যায় এমন সাফল্যের মাপকাঠি দিয়ে শেষ করলে উত্তরটা senior-level হয়।"
+  },
+  "references": [
+   {
+    "title": "MDN — Window.requestAnimationFrame()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame"
+   },
+   {
+    "title": "web.dev — Avoid large, complex layouts and layout thrashing",
+    "url": "https://web.dev/articles/avoid-large-complex-layouts-and-layout-thrashing"
+   },
+   {
+    "title": "web.dev — Optimize long tasks",
+    "url": "https://web.dev/articles/optimize-long-tasks"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement list virtualisation without a library?",
+    "bn": "Library ছাড়া list virtualisation কীভাবে implement করবে?"
+   },
+   {
+    "en": "What changes if users need every tick for an audit log, not only the latest price?",
+    "bn": "User-দের যদি শুধু সর্বশেষ দাম নয়, audit log-এর জন্য প্রতিটি tick দরকার হয়, তাহলে কী বদলাবে?"
+   }
+  ],
+  "related": [
+   "js-034",
+   "js-020",
+   "js-010",
+   "js-032"
+  ],
+  "commonMistakes": {
+   "en": "Re-rendering the whole table with `innerHTML` on every message, throttling with `setTimeout` but still doing per-message DOM work, or moving work to a worker without measuring that parsing was the bottleneck.",
+   "bn": "প্রতিটি message-এ `innerHTML` দিয়ে পুরো table আবার render করা, `setTimeout` দিয়ে throttle করেও প্রতি message-এ DOM-এর কাজ করা, অথবা parsing-ই যে bottleneck তা না মেপে কাজ worker-এ সরিয়ে দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const pending = new Map(); // symbol -> latest tick (coalesced)\nlet frameRequested = false;\n\nsocket.addEventListener('message', (event) => {\n  const tick = JSON.parse(event.data); // move to a Worker if profiling shows parsing is heavy\n  pending.set(tick.symbol, tick);\n  if (!frameRequested) {\n    frameRequested = true;\n    requestAnimationFrame(flush);\n  }\n});\n\nfunction flush() {\n  frameRequested = false;\n  // Writes only — no layout reads inside this loop\n  for (const [symbol, tick] of pending) {\n    const row = visibleRows.get(symbol); // only rows currently rendered (virtualised)\n    if (!row) continue;\n    row.priceCell.textContent = tick.price.toFixed(2);\n    row.el.classList.toggle('up', tick.change >= 0);\n  }\n  pending.clear();\n}\n\n// Layout thrashing (avoid): read → write → read → write ... forces layout every iteration\n// for (const el of cells) { el.style.width = el.parentNode.offsetWidth / 2 + 'px'; }\n// Better: read everything first, then write everything\n// const widths = cells.map((el) => el.parentNode.offsetWidth);\n// cells.forEach((el, i) => { el.style.width = widths[i] / 2 + 'px'; });"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-040",
+  "subtopic": "Performance (Engine Optimisations)",
+  "difficulty": "extreme",
+  "type": "security-performance",
+  "market": "international",
+  "priority": "low",
+  "estimatedMinutes": 15,
+  "tags": [
+   "performance",
+   "v8",
+   "hidden-classes",
+   "inline-caches",
+   "deoptimization",
+   "nodejs"
+  ],
+  "technologyVersion": "V8 (Chrome, Node.js 24/26) — engine internals, may change between versions",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "After a refactor, a Node.js service that transforms about a million order objects per minute became several times slower, although the algorithm didn't change. The diff shows that objects now get optional fields added conditionally, some fields are removed with `delete`, and one hot function now receives objects from many different sources. What likely happened inside V8, how would you confirm it, and how would you fix it?",
+   "bn": "একটা refactor-এর পর প্রতি মিনিটে প্রায় ১০ লাখ order object transform করা একটা Node.js service কয়েকগুণ ধীর হয়ে গেছে, যদিও algorithm বদলায়নি। Diff-এ দেখা যাচ্ছে object-এ এখন শর্তসাপেক্ষে optional field যোগ হয়, কিছু field `delete` দিয়ে মোছা হয়, আর একটা hot function এখন অনেক আলাদা উৎস থেকে object পায়। V8-এর ভেতরে সম্ভবত কী ঘটেছে, কীভাবে নিশ্চিত হবে, আর কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "(Advanced — engine internals; profile before acting on any of this.)\n\n**What probably happened:** V8 gives every object a hidden class (V8 calls it a *Map*, often called a \"shape\") describing which properties it has and in what order. Objects created the same way share a shape, and optimised code uses **inline caches** keyed by shape to read a property with a single check and a fixed offset.\n\n- Adding properties conditionally or in different orders produces **different shapes** for \"the same\" kind of object.\n- A hot function that sees one shape is *monomorphic* (fastest); a few shapes is *polymorphic*; many shapes makes the access site *megamorphic*, falling back to a slower generic lookup.\n- `delete` usually switches the object to **dictionary (slow) mode** — properties are then stored in a hash table.\n- Optimised code built on assumptions that are later violated gets **deoptimised** back to the interpreter, sometimes repeatedly.\n\n**Confirm:** profile first (`node --cpu-prof`, flame graphs) to find the hot function. Then run with `--trace-deopt` to see deopt reasons such as \"wrong map\". In a micro-test with `--allow-natives-syntax`, `%HaveSameMap(a, b)` and `%HasFastProperties(obj)` show the shape problem directly.\n\n**Fix:**\n- Create objects in one place with **all fields in the same order** (a factory or class), using `null`/`undefined` for \"missing\" instead of adding fields later.\n- Replace `delete obj.field` with `obj.field = undefined`, or build a new object without the field at the boundary.\n- Normalise heterogeneous inputs into one internal shape at the edge of the system, so the hot path stays monomorphic.\n- Keep arrays dense and homogeneous (no holes; don't mix integers, doubles and objects).\n- Use `Map` for genuinely dynamic keys — that's what it's for.",
+   "bn": "(Advanced — engine-এর ভেতরের বিষয়; এর কোনোটার উপর কাজ করার আগে profile করো।)\n\n**সম্ভবত যা ঘটেছে:** V8 প্রতিটি object-কে একটা hidden class দেয় (V8 একে *Map* বলে, প্রায়ই \"shape\" বলা হয়), যেটা বলে object-এ কোন property আছে আর কোন ক্রমে। একইভাবে তৈরি object একই shape share করে, আর optimised code shape-কে key ধরে **inline cache** ব্যবহার করে — একটা check আর নির্দিষ্ট offset দিয়েই property পড়ে ফেলে।\n\n- শর্তসাপেক্ষে বা ভিন্ন ক্রমে property যোগ করলে \"একই\" ধরনের object-এর **আলাদা shape** তৈরি হয়।\n- কোনো hot function একটা shape দেখলে সেটা *monomorphic* (সবচেয়ে দ্রুত); কয়েকটা shape হলে *polymorphic*; অনেক shape হলে access site *megamorphic* হয়ে ধীর generic lookup-এ ফিরে যায়।\n- `delete` সাধারণত object-কে **dictionary (slow) mode**-এ নিয়ে যায় — তখন property একটা hash table-এ থাকে।\n- যে optimised code-এর অনুমান পরে ভেঙে যায়, সেটা **deoptimise** হয়ে আবার interpreter-এ ফেরে, কখনো বারবার।\n\n**নিশ্চিত হওয়া:** আগে profile করো (`node --cpu-prof`, flame graph) hot function খুঁজতে। তারপর `--trace-deopt` দিয়ে চালিয়ে \"wrong map\"-এর মতো deopt-এর কারণ দেখো। `--allow-natives-syntax` সহ একটা micro-test-এ `%HaveSameMap(a, b)` আর `%HasFastProperties(obj)` সরাসরি shape-এর সমস্যা দেখায়।\n\n**সমাধান:**\n- Object এক জায়গায় তৈরি করো, **সব field একই ক্রমে** (factory বা class), পরে field যোগ না করে \"নেই\" বোঝাতে `null`/`undefined` ব্যবহার করো।\n- `delete obj.field`-এর বদলে `obj.field = undefined`, অথবা boundary-তে field ছাড়া নতুন object বানাও।\n- System-এর প্রান্তে ভিন্ন ভিন্ন input-কে একটা internal shape-এ normalise করো, যাতে hot path monomorphic থাকে।\n- Array dense আর একই ধরনের রাখো (hole নয়; integer, double আর object মেশানো নয়)।\n- সত্যিকারের dynamic key-এর জন্য `Map` ব্যবহার করো — এটা সেজন্যই।"
+  },
+  "explanation": {
+   "en": "- **Elements kinds:** V8 also tracks array element types (small integers → doubles → generic objects, packed vs holey). Transitions only go towards the more general kind — one `arr.push(1.5)` or a hole can permanently slow down a hot array.\n- **Type stability:** changing a field's type (number ↔ string) also creates new shapes/representations; keep fields monomorphic in type, not just in presence.\n- **Other engines** (SpiderMonkey \"shapes\", JavaScriptCore \"structures\") use similar ideas, but details differ and change between versions — that's why you verify with a profiler on your target runtime instead of following folklore.\n- **When it matters:** only in genuinely hot paths (millions of operations). For typical app code, readability wins; these rules are cheap to follow in factories/classes anyway.\n- **Prevent regressions:** add a benchmark (e.g. with `node:test` + a timing budget or a dedicated benchmark suite) for the hot transform so a future refactor that changes shapes is caught in CI.\n- TypeScript helps indirectly: well-typed objects with fixed fields tend to produce consistent shapes, but types are erased at runtime, so they guarantee nothing by themselves.",
+   "bn": "- **Elements kinds:** V8 array-র element type-ও track করে (ছোট integer → double → generic object, packed বনাম holey)। Transition শুধু আরও সাধারণ kind-এর দিকে যায় — একটা `arr.push(1.5)` বা একটা hole একটা hot array-কে স্থায়ীভাবে ধীর করে দিতে পারে।\n- **Type stability:** কোনো field-এর type বদলালে (number ↔ string) নতুন shape/representation তৈরি হয়; field শুধু উপস্থিতিতে নয়, type-এও monomorphic রাখো।\n- **অন্য engine** (SpiderMonkey-র \"shapes\", JavaScriptCore-এর \"structures\") একই রকম ধারণা ব্যবহার করে, কিন্তু খুঁটিনাটি আলাদা এবং version-ভেদে বদলায় — এজন্যই প্রচলিত ধারণা না মেনে নিজের target runtime-এ profiler দিয়ে যাচাই করো।\n- **কখন গুরুত্বপূর্ণ:** শুধু সত্যিকারের hot path-এ (লাখো operation)। সাধারণ app code-এ readability-ই জেতে; তবে factory/class-এ এই নিয়মগুলো মানা এমনিতেই সস্তা।\n- **Regression ঠেকাও:** hot transform-এর জন্য একটা benchmark যোগ করো (যেমন `node:test` + timing budget বা আলাদা benchmark suite), যাতে ভবিষ্যতের কোনো refactor shape বদলালে CI-তেই ধরা পড়ে।\n- TypeScript পরোক্ষভাবে সাহায্য করে: নির্দিষ্ট field সহ ভালোভাবে typed object সাধারণত একই shape তৈরি করে, কিন্তু runtime-এ type মুছে যায়, তাই নিজে থেকে কিছুই নিশ্চিত করে না।"
+  },
+  "interviewTip": {
+   "en": "Say \"I'd profile first\" before any theory. Then explain shapes → inline caches → megamorphic/deopt in three sentences, and finish with concrete code-level fixes. Interviewers value the measured approach more than V8 vocabulary.",
+   "bn": "যেকোনো তত্ত্বের আগে বলো \"আমি আগে profile করব\"। তারপর তিন বাক্যে shape → inline cache → megamorphic/deopt ব্যাখ্যা করো, আর শেষ করো code-level-এর নির্দিষ্ট সমাধান দিয়ে। Interviewer V8-এর শব্দভান্ডারের চেয়ে মেপে কাজ করার পদ্ধতিকে বেশি মূল্য দেন।"
+  },
+  "references": [
+   {
+    "title": "V8 — Maps (Hidden Classes) in V8",
+    "url": "https://v8.dev/docs/hidden-classes"
+   },
+   {
+    "title": "V8 blog — Fast properties in V8",
+    "url": "https://v8.dev/blog/fast-properties"
+   },
+   {
+    "title": "V8 blog — Elements kinds in V8",
+    "url": "https://v8.dev/blog/elements-kinds"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the difference between monomorphic, polymorphic and megamorphic inline caches?",
+    "bn": "Monomorphic, polymorphic আর megamorphic inline cache-এর পার্থক্য কী?"
+   },
+   {
+    "en": "How would you add a performance regression test to CI?",
+    "bn": "CI-তে একটা performance regression test কীভাবে যোগ করবে?"
+   }
+  ],
+  "related": [
+   "js-039",
+   "js-036"
+  ],
+  "commonMistakes": {
+   "en": "Micro-optimising without a profile, believing `delete` is \"free\", or assuming TypeScript types guarantee consistent runtime shapes.",
+   "bn": "Profile ছাড়াই micro-optimise করা, ভাবা যে `delete` \"বিনামূল্যে\", অথবা ধরে নেওয়া যে TypeScript type runtime-এ একই shape নিশ্চিত করে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// Slow: shape depends on the input → polymorphic/megamorphic access, plus dictionary mode\nfunction toOrderSlow(raw) {\n  const order = {};\n  if (raw.coupon) order.discount = raw.coupon.amount; // optional field first, sometimes\n  order.id = raw.id;\n  order.total = raw.total;\n  if (order.discount === 0) delete order.discount;     // delete → slow properties\n  return order;\n}\n\n// Fast: one factory, same fields, same order, every time\nfunction toOrder(raw) {\n  return {\n    id: raw.id,\n    total: raw.total,\n    discount: raw.coupon ? raw.coupon.amount : 0,\n    giftNote: raw.isGift ? raw.note : null,\n  };\n}\n\n// Verify in a micro-test:  node --allow-natives-syntax shapes.js\n// console.log(%HaveSameMap(toOrder(a), toOrder(b)));   // true\n// console.log(%HasFastProperties(toOrderSlow({ id: 3, total: 30, coupon: { amount: 0 } }))); // false after delete\n// Find deopts in the real service:  node --trace-deopt server.js | grep -i \"wrong map\""
+  },
+  "technology": "javascript"
+ }
+]

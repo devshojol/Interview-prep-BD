@@ -1,0 +1,571 @@
+[
+ {
+  "id": "nest-009",
+  "subtopic": "NestJS 12 Changes",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "nestjs-12",
+   "esm",
+   "nodejs",
+   "upgrade"
+  ],
+  "technologyVersion": "NestJS 12.1 (v11 = legacy line)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Which statement about NestJS 12 is correct?",
+   "bn": "NestJS 12 সম্পর্কে কোন কথাটি সঠিক?"
+  },
+  "answer": {
+   "en": "The first one. In v12 all core packages are published as ESM, and the minimum runtime is Node.js 20.19+ or 22.12+ — the versions where `require(esm)` works by default, which is how most CommonJS apps keep working.",
+   "bn": "প্রথমটা। v12-এ সব core package ESM হিসেবে publish হয়, আর minimum runtime হলো Node.js 20.19+ বা 22.12+ — এই version গুলোতেই `require(esm)` default-এ কাজ করে, আর এভাবেই বেশিরভাগ CommonJS app চলতে থাকে।"
+  },
+  "explanation": {
+   "en": "Other v12 points worth knowing:\n- **Express stays the default** adapter (`@nestjs/platform-express` 12 uses Express 5.x); Fastify remains an optional adapter. Express 5 already became the default in Nest 11, so route wildcards follow the newer path syntax.\n- **Standard Schema validation is added, not a replacement.** `StandardSchemaValidationPipe` and the `schema` option on `@Body()`/`@Query()`/`@Param()` let you use zod, Valibot or ArkType. `ValidationPipe` with class-validator still works, and both pipes can run side by side.\n- New projects from the CLI default to ESM with Vitest (a CommonJS + Jest option is still offered), and `@nestjs/config` validation accepts Standard Schema schemas (Joi needs v18+).\n- Option 4 is tempting because Express 5 itself supports Node 18, but Nest 12 needs the newer Node lines because of the ESM packaging.\n\nPractical upgrade check: confirm your Node version in Docker images and CI first — Node 18, or any version below 20.19 (20.x) / 22.12 (22.x), isn't supported.",
+   "bn": "v12-এর আরও কিছু জানার মতো point:\n- **Express-ই default** adapter থাকছে (`@nestjs/platform-express` 12, Express 5.x ব্যবহার করে); Fastify optional adapter হিসেবেই আছে। Express 5 আসলে Nest 11-এই default হয়েছিল, তাই route wildcard নতুন path syntax মেনে চলে।\n- **Standard Schema validation যোগ হয়েছে, replace করেনি।** `StandardSchemaValidationPipe` আর `@Body()`/`@Query()`/`@Param()`-এর `schema` option দিয়ে zod, Valibot বা ArkType ব্যবহার করা যায়। class-validator সহ `ValidationPipe` এখনো কাজ করে, দুটো pipe পাশাপাশি চলতে পারে।\n- CLI দিয়ে নতুন project default-এ ESM আর Vitest দিয়ে তৈরি হয় (CommonJS + Jest option এখনো আছে), আর `@nestjs/config`-এর validation Standard Schema schema নেয় (Joi হলে v18+ লাগবে)।\n- Option 4 লোভনীয় কারণ Express 5 নিজে Node 18 support করে, কিন্তু ESM packaging-এর কারণে Nest 12-এর নতুন Node line লাগে।\n\nPractical upgrade check: আগে Docker image আর CI-তে Node version নিশ্চিত করো — Node 18, বা 20.19 (20.x) / 22.12 (22.x)-এর নিচের কোনো version support করা হয় না।"
+  },
+  "interviewTip": {
+   "en": "If asked about upgrades, connect the dots: \"ESM packages → needs `require(esm)` → Node 20.19+/22.12+ → check Docker base images and CI.\" That reasoning impresses more than the version number alone.",
+   "bn": "Upgrade নিয়ে প্রশ্ন এলে বিষয়গুলো জোড়া লাগাও: \"ESM package → `require(esm)` লাগে → Node 20.19+/22.12+ → Docker base image আর CI check করো।\" শুধু version number বলার চেয়ে এই যুক্তি বেশি impress করে।"
+  },
+  "references": [
+   {
+    "title": "NestJS releases (GitHub)",
+    "url": "https://github.com/nestjs/nest/releases"
+   },
+   {
+    "title": "NestJS docs — Migration guide",
+    "url": "https://docs.nestjs.com/migration-guide"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-017",
+   "nest-026"
+  ],
+  "options": [
+   {
+    "en": "Core packages ship as ES modules and require Node.js 20.19+ or 22.12+; existing CommonJS apps can still load them through `require(esm)`",
+    "bn": "Core package গুলো ES module হিসেবে আসে এবং Node.js 20.19+ বা 22.12+ লাগে; পুরোনো CommonJS app-ও `require(esm)`-এর মাধ্যমে এগুলো load করতে পারে"
+   },
+   {
+    "en": "It drops the Express adapter and makes Fastify the default HTTP platform",
+    "bn": "এটা Express adapter বাদ দিয়ে Fastify-কে default HTTP platform বানিয়েছে"
+   },
+   {
+    "en": "It removes `class-validator` and `ValidationPipe` in favour of Standard Schema validation",
+    "bn": "Standard Schema validation-এর জন্য `class-validator` আর `ValidationPipe` সরিয়ে দিয়েছে"
+   },
+   {
+    "en": "It runs on Node.js 18 or newer, the same baseline as Express 5",
+    "bn": "এটা Node.js 18 বা নতুন version-এ চলে, Express 5-এর মতোই baseline"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-010",
+  "subtopic": "Configuration",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "config",
+   "environment-variables",
+   "validation",
+   "zod"
+  ],
+  "technologyVersion": "NestJS 12.1 / @nestjs/config 12",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "The app module uses the configuration below. `DATABASE_URL` is **not** set when the app boots. What happens?",
+   "bn": "App module-এ নিচের configuration আছে। App boot হওয়ার সময় `DATABASE_URL` set **করা নেই**। কী হবে?"
+  },
+  "answer": {
+   "en": "Bootstrap fails. `ConfigModule.forRoot()` validates `process.env` against the schema while the module is initialised; a required variable without a default is missing, so it throws \"Config validation error: DATABASE_URL: ...\" and the app never starts.",
+   "bn": "Bootstrap fail করে। Module initialise হওয়ার সময় `ConfigModule.forRoot()` schema দিয়ে `process.env` validate করে; default ছাড়া একটা required variable নেই, তাই \"Config validation error: DATABASE_URL: ...\" throw করে আর app কখনো চালু হয় না।"
+  },
+  "explanation": {
+   "en": "This is the **fail-fast** behaviour you want: a misconfigured deployment crashes immediately (and the orchestrator shows it) instead of serving traffic and failing on the first query. Option one is what happens **without** a schema — the tempting answer if you've only used plain `process.env`.\n\nNotes for NestJS 12:\n- `validationSchema` accepts any Standard Schema (zod, Valibot, ArkType); Joi still works from v18. `z.coerce.number()` turns the string `\"3000\"` into a number, and variables with defaults are optional.\n- A custom synchronous `validate(config)` function is the alternative (e.g. with class-validator).\n- `isGlobal: true` avoids importing `ConfigModule` everywhere; `configService.getOrThrow('KEY')` throws instead of returning `undefined`; `registerAs('database', () => ({...}))` gives namespaced config.\n- Never commit `.env` files with real secrets; in production, inject env vars from the platform or a secrets manager.",
+   "bn": "এটাই কাঙ্ক্ষিত **fail-fast** behaviour: ভুল config-এর deployment সাথে সাথে crash করে (আর orchestrator সেটা দেখায়), traffic serve করে প্রথম query-তে গিয়ে fail করে না। Schema **ছাড়া** যা হয় সেটা option এক — শুধু plain `process.env` ব্যবহার করা থাকলে এটাই লোভনীয় উত্তর।\n\nNestJS 12-এর নোট:\n- `validationSchema` যেকোনো Standard Schema নেয় (zod, Valibot, ArkType); Joi এখনো চলে v18 থেকে। `z.coerce.number()` string `\"3000\"`-কে number বানায়, আর default থাকা variable optional।\n- বিকল্প হলো একটা custom synchronous `validate(config)` function (যেমন class-validator দিয়ে)।\n- `isGlobal: true` দিলে সব জায়গায় `ConfigModule` import করতে হয় না; `configService.getOrThrow('KEY')` `undefined` না দিয়ে throw করে; `registerAs('database', () => ({...}))` দিয়ে namespaced config পাওয়া যায়।\n- আসল secret সহ `.env` file কখনো commit করো না; production-এ env var platform বা secrets manager থেকে inject করো।"
+  },
+  "interviewTip": {
+   "en": "Say \"fail fast at startup\" and connect it to deployments: a pod that crashes on boot is caught by health checks before it receives traffic.",
+   "bn": "\"Startup-এই fail fast\" কথাটা বলো আর deployment-এর সাথে মেলাও: boot-এর সময় crash করা pod traffic পাওয়ার আগেই health check-এ ধরা পড়ে।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Configuration",
+    "url": "https://docs.nestjs.com/application/configuration"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-019",
+   "nest-022"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "import { Module } from '@nestjs/common';\nimport { ConfigModule } from '@nestjs/config';\nimport { z } from 'zod';\n\n@Module({\n  imports: [\n    ConfigModule.forRoot({\n      isGlobal: true,\n      validationSchema: z.object({\n        DATABASE_URL: z.url(),\n        PORT: z.coerce.number().default(3000),\n      }),\n    }),\n  ],\n})\nexport class AppModule {}"
+  },
+  "options": [
+   {
+    "en": "The app starts; `configService.get('DATABASE_URL')` simply returns `undefined`",
+    "bn": "App চালু হয়; `configService.get('DATABASE_URL')` শুধু `undefined` return করে"
+   },
+   {
+    "en": "The app starts and logs a warning; the first database query fails later",
+    "bn": "App চালু হয় আর একটা warning log করে; পরে প্রথম database query fail করে"
+   },
+   {
+    "en": "Bootstrap fails with a config validation error, so the app never starts listening",
+    "bn": "Bootstrap-এর সময়েই config validation error হয়, তাই app কখনো listen করা শুরু করে না"
+   },
+   {
+    "en": "`PORT` gets its default and `DATABASE_URL` falls back to an empty string",
+    "bn": "`PORT` default value পায় আর `DATABASE_URL` empty string হয়ে যায়"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-011",
+  "subtopic": "NestJS vs Express",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "nestjs",
+   "express",
+   "architecture",
+   "trade-offs"
+  ],
+  "technologyVersion": "NestJS 12.1 / Express 5.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "NestJS vs plain Express: what are the main differences, and when would you choose each?",
+   "bn": "NestJS আর plain Express-এর মূল পার্থক্য কী, আর কখন কোনটা বেছে নেবে?"
+  },
+  "answer": {
+   "en": "Express is a minimal, unopinionated HTTP library: routing plus middleware, and you decide the structure. NestJS is an opinionated framework that runs **on top of** Express by default (or Fastify) and adds an architecture: modules, dependency injection, decorators, and building blocks like pipes, guards, interceptors and exception filters, plus testing utilities and first-class TypeScript.\n\n- **Choose Express** for small services, prototypes, simple webhooks or serverless functions, or when the team wants full control and minimal abstraction.\n- **Choose NestJS** for larger or long-lived codebases and bigger teams, where consistent structure, DI-based testing and built-in patterns (validation, auth guards, microservices, WebSockets) save time.\n\nNestJS doesn't replace Express — it organises it.",
+   "bn": "Express হলো minimal, unopinionated HTTP library: routing আর middleware, structure তুমি নিজে ঠিক করো। NestJS হলো একটা opinionated framework, যেটা default-এ Express-এর **উপরে** চলে (অথবা Fastify) এবং একটা architecture যোগ করে: module, dependency injection, decorator, আর pipe, guard, interceptor, exception filter-এর মতো building block, সাথে testing utility আর first-class TypeScript।\n\n- **Express নাও** ছোট service, prototype, simple webhook বা serverless function-এর জন্য, অথবা team যখন পুরো control আর কম abstraction চায়।\n- **NestJS নাও** বড় বা দীর্ঘমেয়াদি codebase আর বড় team-এর জন্য, যেখানে consistent structure, DI-based testing আর built-in pattern (validation, auth guard, microservice, WebSocket) সময় বাঁচায়।\n\nNestJS, Express-কে replace করে না — বরং গুছিয়ে দেয়।"
+  },
+  "explanation": {
+   "en": "- **Structure:** Express — you design it; NestJS — modules, controllers, providers.\n- **Validation / auth:** Express — pick libraries and wire them manually; NestJS — pipes, guards, decorators.\n- **Testing:** Express — manual mocking; NestJS — `Test.createTestingModule()` with provider overrides.\n- **Learning curve:** Express — low; NestJS — higher (DI, decorators, RxJS in interceptors).\n- **Overhead:** Express — minimal; NestJS — small runtime cost and more boilerplate.\n\nTrade-offs to mention honestly: more files and abstraction, decorator/reflection \"magic\" that confuses juniors, and slightly slower cold starts (relevant for serverless). On the plus side, a new developer can open any Nest project and find things in predictable places.\n\nYou can still use Express middleware (`helmet`, `cors`, `cookie-parser`) inside Nest, and drop down to the raw request/response when needed. In Bangladesh many MERN/NestJS job posts list both — knowing that Nest uses Express 5 underneath is a good bridge.",
+   "bn": "- **Structure:** Express — নিজে design করো; NestJS — module, controller, provider।\n- **Validation / auth:** Express — library বেছে নিজে জোড়া লাগাও; NestJS — pipe, guard, decorator।\n- **Testing:** Express — manual mocking; NestJS — provider override সহ `Test.createTestingModule()`।\n- **Learning curve:** Express — কম; NestJS — বেশি (DI, decorator, interceptor-এ RxJS)।\n- **Overhead:** Express — খুব কম; NestJS — সামান্য runtime cost আর বেশি boilerplate।\n\nসৎভাবে trade-off গুলো বলো: বেশি file আর abstraction, decorator/reflection-এর \"magic\" যা junior-দের বিভ্রান্ত করে, আর একটু ধীর cold start (serverless-এ প্রাসঙ্গিক)। সুবিধার দিকে, নতুন developer যেকোনো Nest project খুললেই জিনিস predictable জায়গায় পায়।\n\nNest-এর ভেতরেও Express middleware (`helmet`, `cors`, `cookie-parser`) ব্যবহার করা যায়, আর দরকার হলে raw request/response-এ নামা যায়। বাংলাদেশে অনেক MERN/NestJS job post-এ দুটোই থাকে — Nest যে ভেতরে Express 5 ব্যবহার করে, এটা জানা ভালো একটা bridge।"
+  },
+  "interviewTip": {
+   "en": "Avoid \"Nest is better\". Frame it as \"structure vs freedom\" and give one concrete scenario for each. Interviewers want to see that you pick tools based on team size and project lifetime.",
+   "bn": "\"Nest ভালো\" বলা এড়িয়ে চলো। \"structure বনাম স্বাধীনতা\" হিসেবে বলো আর প্রতিটার জন্য একটা করে বাস্তব scenario দাও। Interviewer দেখতে চায় তুমি team size আর project-এর আয়ু দেখে tool বেছে নাও।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — First steps",
+    "url": "https://docs.nestjs.com/first-steps"
+   },
+   {
+    "title": "Express — Migrating to Express 5",
+    "url": "https://expressjs.com/en/guide/migrating-5.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can you use existing Express middleware in a NestJS app?",
+    "bn": "NestJS app-এ existing Express middleware ব্যবহার করা যায়?"
+   },
+   {
+    "en": "Would you use NestJS for an AWS Lambda function? Why or why not?",
+    "bn": "AWS Lambda function-এর জন্য NestJS ব্যবহার করবে? কেন বা কেন না?"
+   }
+  ],
+  "related": [
+   "nest-001",
+   "nest-026"
+  ],
+  "commonMistakes": {
+   "en": "Saying NestJS \"replaces\" Express or is \"faster\"; claiming Express can't scale to large apps (it can, with discipline); ignoring the learning-curve and boilerplate cost.",
+   "bn": "বলা যে NestJS, Express-কে \"replace\" করে বা \"দ্রুত\"; দাবি করা যে Express বড় app-এ scale করে না (discipline থাকলে করে); learning curve আর boilerplate-এর খরচ উপেক্ষা করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "// Express 5: you wire everything yourself\napp.get('/users/:id', async (req, res) => {\n  const id = Number(req.params.id);\n  if (!Number.isInteger(id)) return res.status(400).json({ message: 'Invalid id' });\n  res.json(await usersService.findOne(id)); // rejected promises reach the error handler in Express 5\n});\n\n// NestJS: the same route, with conversion/validation and DI built in\n@Controller('users')\nexport class UsersController {\n  constructor(private readonly usersService: UsersService) {}\n\n  @Get(':id')\n  findOne(@Param('id', ParseIntPipe) id: number) {\n    return this.usersService.findOne(id);\n  }\n}"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-012",
+  "subtopic": "Request Lifecycle",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "request-lifecycle",
+   "middleware",
+   "guards",
+   "interceptors",
+   "pipes"
+  ],
+  "technologyVersion": "NestJS 12.1",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In what order does NestJS process an incoming HTTP request when middleware, a guard, an interceptor, a pipe and an exception filter are all bound to the route?",
+   "bn": "একটা route-এ middleware, guard, interceptor, pipe আর exception filter সব bind করা থাকলে NestJS কোন ক্রমে incoming HTTP request process করে?"
+  },
+  "answer": {
+   "en": "Middleware → guards → interceptors (before the handler) → pipes → route handler → interceptors (after, on the way out) → exception filters, which only run if something throws.",
+   "bn": "Middleware → guard → interceptor (handler-এর আগে) → pipe → route handler → interceptor (পরে, ফেরার পথে) → exception filter, যেটা শুধু কিছু throw হলে চলে।"
+  },
+  "explanation": {
+   "en": "The order follows responsibility: middleware does generic request work (logging, request ids, body parsing); guards decide **whether** the request may continue (so no time is wasted validating a body for an unauthenticated user); interceptors wrap the handler call; pipes transform and validate the handler's arguments right before it runs.\n\nWithin each stage: global → controller → route (pipes also run per parameter). On the way out, interceptors unwind in reverse order. Exception filters are resolved from the most specific (route) to global.\n\nOption C is the most tempting — interceptors feel like \"outer\" wrappers. But guards run **before** interceptors, which has a practical effect: an exception thrown by a guard is never seen by an interceptor's `catchError`. Pipe and handler errors are.",
+   "bn": "এই ক্রম দায়িত্ব অনুযায়ী: middleware generic request-এর কাজ করে (logging, request id, body parsing); guard ঠিক করে request এগোবে **কি না** (তাই unauthenticated user-এর body validate করে সময় নষ্ট হয় না); interceptor handler call-কে wrap করে; pipe handler চলার ঠিক আগে argument transform ও validate করে।\n\nপ্রতিটা stage-এর ভেতরে: global → controller → route (pipe আবার প্রতিটা parameter-এর জন্যও চলে)। ফেরার পথে interceptor উল্টো ক্রমে unwind হয়। Exception filter সবচেয়ে specific (route) থেকে global-এর দিকে resolve হয়।\n\nOption C সবচেয়ে লোভনীয় — interceptor-কে \"বাইরের\" wrapper মনে হয়। কিন্তু guard চলে interceptor-এর **আগে**, আর এর practical প্রভাব আছে: guard-এ throw হওয়া exception কখনো interceptor-এর `catchError` দেখতে পায় না। Pipe আর handler-এর error দেখতে পায়।"
+  },
+  "interviewTip": {
+   "en": "Don't just recite the order — justify it (\"authorize before validating\"). Then add the practical consequence about interceptors not seeing guard errors; that's a senior-level detail.",
+   "bn": "শুধু ক্রম মুখস্থ বোলো না — কারণ বলো (\"validate করার আগে authorize\")। তারপর interceptor যে guard-এর error দেখে না, সেই practical ফলাফল যোগ করো; এটা senior-level detail।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Request lifecycle",
+    "url": "https://docs.nestjs.com/faq/request-lifecycle"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "nest-021",
+   "nest-029"
+  ],
+  "options": [
+   {
+    "en": "Guards → Middleware → Pipes → Interceptors → Handler → Exception filters",
+    "bn": "Guards → Middleware → Pipes → Interceptors → Handler → Exception filters"
+   },
+   {
+    "en": "Middleware → Pipes → Guards → Interceptors → Handler → Exception filters",
+    "bn": "Middleware → Pipes → Guards → Interceptors → Handler → Exception filters"
+   },
+   {
+    "en": "Middleware → Interceptors (before) → Guards → Pipes → Handler → Interceptors (after)",
+    "bn": "Middleware → Interceptors (before) → Guards → Pipes → Handler → Interceptors (after)"
+   },
+   {
+    "en": "Middleware → Guards → Interceptors (before) → Pipes → Handler → Interceptors (after) → Exception filters (when something throws)",
+    "bn": "Middleware → Guards → Interceptors (before) → Pipes → Handler → Interceptors (after) → Exception filters (কিছু throw হলে)"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-013",
+  "subtopic": "Interceptors",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "interceptors",
+   "rxjs",
+   "logging",
+   "response-mapping"
+  ],
+  "technologyVersion": "NestJS 12.1 / RxJS 7",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write two global interceptors:\n\n1. `LoggingInterceptor` — logs method, URL and duration for every request, **including failed ones**.\n2. `EnvelopeInterceptor` — wraps every successful response as `{ data, meta: { requestId } }` and returns the id in an `x-request-id` header (reuse the incoming header if present).\n\nExample: a handler returning `{ \"id\": 1 }` should produce `{ \"data\": { \"id\": 1 }, \"meta\": { \"requestId\": \"...\" } }`. Register both so they can use dependency injection.",
+   "bn": "দুটো global interceptor লেখো:\n\n1. `LoggingInterceptor` — প্রতিটা request-এর method, URL আর duration log করবে, **fail হওয়া request-ও**।\n2. `EnvelopeInterceptor` — প্রতিটা successful response-কে `{ data, meta: { requestId } }` আকারে wrap করবে আর `x-request-id` header-এ id ফেরত দেবে (incoming header থাকলে সেটাই reuse করবে)।\n\nউদাহরণ: handler `{ \"id\": 1 }` return করলে response হবে `{ \"data\": { \"id\": 1 }, \"meta\": { \"requestId\": \"...\" } }`। দুটোই এমনভাবে register করো যাতে dependency injection ব্যবহার করা যায়।"
+  },
+  "answer": {
+   "en": "An interceptor implements `intercept(context, next)`. Code before `next.handle()` runs before the handler; `next.handle()` returns an RxJS `Observable` of the handler's result, so I use operators for the \"after\" part:\n\n- `tap({ next, error })` for side effects — logging on success **and** on error without changing the stream.\n- `map()` to transform the response into the envelope.\n\nI register them with `{ provide: APP_INTERCEPTOR, useClass: ... }` in a module (instead of `app.useGlobalInterceptors(new ...)`) so Nest can inject dependencies such as a logger or `ConfigService`. Interceptors registered this way run in registration order before the handler and in reverse order after it.",
+   "bn": "Interceptor `intercept(context, next)` implement করে। `next.handle()`-এর আগের code handler-এর আগে চলে; `next.handle()` handler-এর result-এর একটা RxJS `Observable` return করে, তাই \"পরের\" অংশের জন্য operator ব্যবহার করি:\n\n- `tap({ next, error })` side effect-এর জন্য — stream না বদলে success **এবং** error দুই ক্ষেত্রেই log করা।\n- `map()` দিয়ে response-কে envelope-এ transform করা।\n\nModule-এ `{ provide: APP_INTERCEPTOR, useClass: ... }` দিয়ে register করি (`app.useGlobalInterceptors(new ...)` না দিয়ে), যাতে Nest logger বা `ConfigService`-এর মতো dependency inject করতে পারে। এভাবে register করা interceptor handler-এর আগে registration-এর ক্রমে আর পরে উল্টো ক্রমে চলে।"
+  },
+  "explanation": {
+   "en": "- **Error path:** `tap`'s `error` callback sees errors thrown by pipes, the handler and services — but not by guards or middleware, which run before interceptors.\n- **Don't swallow errors:** if you use `catchError`, rethrow with `throwError(() => err)` so exception filters still produce the right status.\n- **Edge cases for the envelope:** file downloads (`StreamableFile`), Server-Sent Events and routes using `@Res()` shouldn't be wrapped. A common pattern is a `@SkipEnvelope()` metadata decorator checked with `Reflector` inside the interceptor.\n- **Other typical interceptors:** timeouts (`timeout(5000)` + map `TimeoutError` to `RequestTimeoutException`), caching (`CacheInterceptor` from `@nestjs/cache-manager`), and serialization (`ClassSerializerInterceptor`).\n- Use `performance.now()` for durations; `Date.now()` can jump if the system clock changes.",
+   "bn": "- **Error path:** `tap`-এর `error` callback pipe, handler আর service-এর error দেখে — কিন্তু guard বা middleware-এর না, কারণ ওরা interceptor-এর আগে চলে।\n- **Error গিলে ফেলো না:** `catchError` ব্যবহার করলে `throwError(() => err)` দিয়ে আবার throw করো, যাতে exception filter ঠিক status দিতে পারে।\n- **Envelope-এর edge case:** file download (`StreamableFile`), Server-Sent Events আর `@Res()` ব্যবহার করা route wrap করা উচিত না। Common pattern হলো একটা `@SkipEnvelope()` metadata decorator, যেটা interceptor-এর ভেতরে `Reflector` দিয়ে check করা হয়।\n- **আরও typical interceptor:** timeout (`timeout(5000)` + `TimeoutError`-কে `RequestTimeoutException`-এ map), caching (`@nestjs/cache-manager`-এর `CacheInterceptor`), আর serialization (`ClassSerializerInterceptor`)।\n- Duration মাপতে `performance.now()` ব্যবহার করো; system clock বদলালে `Date.now()` লাফ দিতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Explain the Observable model in one line: \"before `next.handle()` = pre-processing, operators on the returned stream = post-processing\". Then mention the guard-error blind spot — few candidates know it.",
+   "bn": "এক লাইনে Observable model বোঝাও: \"`next.handle()`-এর আগে = pre-processing, ফেরত stream-এর operator = post-processing\"। তারপর guard-error-এর blind spot-এর কথা বলো — খুব কম candidate এটা জানে।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Interceptors",
+    "url": "https://docs.nestjs.com/interceptors"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add a 5-second timeout to every request with an interceptor?",
+    "bn": "Interceptor দিয়ে প্রতিটা request-এ ৫ সেকেন্ডের timeout কীভাবে যোগ করবে?"
+   },
+   {
+    "en": "How do you skip the envelope for file downloads?",
+    "bn": "File download-এর জন্য envelope কীভাবে skip করবে?"
+   }
+  ],
+  "related": [
+   "nest-012",
+   "nest-029"
+  ],
+  "commonMistakes": {
+   "en": "Using `map` for logging (it changes the value if you forget to return it); catching errors without rethrowing (turns failures into 200 responses); wrapping file streams in JSON; `new`-ing interceptors that need DI.",
+   "bn": "Logging-এর জন্য `map` ব্যবহার করা (return করতে ভুলে গেলে value বদলে যায়); error ধরে আবার throw না করা (failure 200 response হয়ে যায়); file stream-কে JSON-এ wrap করা; DI লাগে এমন interceptor `new` করে বানানো।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';\nimport { Observable, map, tap } from 'rxjs';\nimport { randomUUID } from 'node:crypto';\nimport type { Request, Response } from 'express';\n\n@Injectable()\nexport class LoggingInterceptor implements NestInterceptor {\n  private readonly logger = new Logger('HTTP');\n\n  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {\n    const req = context.switchToHttp().getRequest<Request>();\n    const started = performance.now();\n    const elapsed = () => `${Math.round(performance.now() - started)}ms`;\n\n    return next.handle().pipe(\n      tap({\n        next: () => this.logger.log(`${req.method} ${req.originalUrl} ${elapsed()}`),\n        error: (err: unknown) =>\n          this.logger.warn(`${req.method} ${req.originalUrl} failed after ${elapsed()}: ${String(err)}`),\n      }),\n    );\n  }\n}\n\nexport interface Envelope<T> {\n  data: T;\n  meta: { requestId: string };\n}\n\n@Injectable()\nexport class EnvelopeInterceptor<T> implements NestInterceptor<T, Envelope<T>> {\n  intercept(context: ExecutionContext, next: CallHandler<T>): Observable<Envelope<T>> {\n    const http = context.switchToHttp();\n    const req = http.getRequest<Request>();\n    const res = http.getResponse<Response>();\n    const requestId = req.header('x-request-id') ?? randomUUID();\n    res.setHeader('x-request-id', requestId);\n\n    return next.handle().pipe(map((data) => ({ data, meta: { requestId } })));\n  }\n}\n\n// app.module.ts — global registration with DI support\nimport { Module } from '@nestjs/common';\nimport { APP_INTERCEPTOR } from '@nestjs/core';\n\n@Module({\n  providers: [\n    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },\n    { provide: APP_INTERCEPTOR, useClass: EnvelopeInterceptor },\n  ],\n})\nexport class AppModule {}"
+  },
+  "complexity": {
+   "time": "O(1) extra work per request",
+   "space": "O(1) per request"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-014",
+  "subtopic": "Custom Decorators",
+  "difficulty": "medium",
+  "type": "coding",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 7,
+  "tags": [
+   "decorators",
+   "createparamdecorator",
+   "applydecorators",
+   "setmetadata",
+   "reflector"
+  ],
+  "technologyVersion": "NestJS 12.1",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Create two custom decorators:\n\n1. `@CurrentUser()` — a parameter decorator that returns `request.user` (set by an auth guard), or one field of it, e.g. `@CurrentUser('sub') userId: number`.\n2. `@Auth(...roles)` — one decorator that attaches role metadata **and** applies `JwtAuthGuard` + `RolesGuard`, so a route can be protected with `@Auth('admin')`.\n\nShow how both are used on a controller.",
+   "bn": "দুটো custom decorator বানাও:\n\n1. `@CurrentUser()` — একটা parameter decorator যেটা `request.user` (auth guard set করে) return করবে, অথবা তার একটা field, যেমন `@CurrentUser('sub') userId: number`।\n2. `@Auth(...roles)` — একটাই decorator যেটা role metadata লাগাবে **এবং** `JwtAuthGuard` + `RolesGuard` apply করবে, যাতে `@Auth('admin')` দিয়ে route protect করা যায়।\n\nএকটা controller-এ দুটো কীভাবে ব্যবহার হবে দেখাও।"
+  },
+  "answer": {
+   "en": "- `createParamDecorator((data, ctx) => ...)` builds a parameter decorator. `data` is whatever is passed in the parentheses (here a field name), and `ctx` is the `ExecutionContext`, so I read `request.user` from it.\n- `SetMetadata(ROLES_KEY, roles)` attaches metadata to the handler or class; a guard reads it with `Reflector`.\n- `applyDecorators(...)` composes several decorators into one, so `@Auth('admin')` = `@Roles('admin')` + `@UseGuards(JwtAuthGuard, RolesGuard)`.\n\nThis removes repeated boilerplate from controllers and keeps the \"how\" of auth in one place.",
+   "bn": "- `createParamDecorator((data, ctx) => ...)` দিয়ে parameter decorator বানানো হয়। `data` হলো bracket-এর ভেতরে যা pass করা হয় (এখানে field-এর নাম), আর `ctx` হলো `ExecutionContext`, সেখান থেকে `request.user` পড়ি।\n- `SetMetadata(ROLES_KEY, roles)` handler বা class-এ metadata লাগায়; guard সেটা `Reflector` দিয়ে পড়ে।\n- `applyDecorators(...)` কয়েকটা decorator-কে একটায় জোড়া দেয়, তাই `@Auth('admin')` = `@Roles('admin')` + `@UseGuards(JwtAuthGuard, RolesGuard)`।\n\nএতে controller-এর repeated boilerplate কমে আর auth-এর \"কীভাবে\" অংশ এক জায়গায় থাকে।"
+  },
+  "explanation": {
+   "en": "- **Metadata lookup:** in the guard, `reflector.getAllAndOverride(ROLES_KEY, [context.getHandler(), context.getClass()])` lets a method-level `@Roles()` override a class-level one; `getAllAndMerge` combines them.\n- **Type-safe alternative:** `export const Roles = Reflector.createDecorator<Role[]>()` creates a decorator and its metadata key in one go; read it with `reflector.get(Roles, context.getHandler())`.\n- **Validation gotcha:** `ValidationPipe` skips custom parameter decorators unless you set `validateCustomDecorators: true`.\n- **Design choice:** if guards are already global (`APP_GUARD`), `@Auth()` only needs the role metadata — applying guards again would run them twice.\n- Decorators are evaluated once at class definition time; the function passed to `createParamDecorator` runs on every request.",
+   "bn": "- **Metadata lookup:** guard-এ `reflector.getAllAndOverride(ROLES_KEY, [context.getHandler(), context.getClass()])` দিলে method-level `@Roles()` class-level-টাকে override করে; `getAllAndMerge` দুটো মিলিয়ে দেয়।\n- **Type-safe বিকল্প:** `export const Roles = Reflector.createDecorator<Role[]>()` একবারে decorator আর তার metadata key দুটোই বানায়; `reflector.get(Roles, context.getHandler())` দিয়ে পড়া যায়।\n- **Validation-এর ফাঁদ:** `validateCustomDecorators: true` না দিলে `ValidationPipe` custom parameter decorator skip করে।\n- **Design choice:** guard যদি আগেই global থাকে (`APP_GUARD`), তাহলে `@Auth()`-এ শুধু role metadata লাগবে — আবার guard লাগালে দুবার চলবে।\n- Decorator class define হওয়ার সময় একবার evaluate হয়; কিন্তু `createParamDecorator`-এ দেওয়া function প্রতিটা request-এ চলে।"
+  },
+  "interviewTip": {
+   "en": "Show the usage first (`@Auth('admin')`, `@CurrentUser('sub')`) and then the implementation. Interviewers care that you can design a clean developer-facing API, not just call `createParamDecorator`.",
+   "bn": "আগে usage দেখাও (`@Auth('admin')`, `@CurrentUser('sub')`), তারপর implementation। Interviewer দেখতে চায় তুমি developer-দের জন্য একটা পরিষ্কার API design করতে পারো, শুধু `createParamDecorator` call করতে পারো তা না।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Custom decorators",
+    "url": "https://docs.nestjs.com/custom-decorators"
+   },
+   {
+    "title": "NestJS docs — Authorization",
+    "url": "https://docs.nestjs.com/security/authorization"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What's the difference between `getAllAndOverride` and `getAllAndMerge`?",
+    "bn": "`getAllAndOverride` আর `getAllAndMerge`-এর পার্থক্য কী?"
+   },
+   {
+    "en": "How would you validate a value returned by a custom parameter decorator?",
+    "bn": "Custom parameter decorator যে value return করে সেটা কীভাবে validate করবে?"
+   }
+  ],
+  "related": [
+   "nest-015",
+   "nest-007"
+  ],
+  "commonMistakes": {
+   "en": "Reading metadata only from the handler and ignoring class-level decorators; expecting custom param decorators to be validated automatically; using raw string keys scattered across files instead of exported constants.",
+   "bn": "শুধু handler থেকে metadata পড়া আর class-level decorator উপেক্ষা করা; ধরে নেওয়া যে custom param decorator নিজে থেকেই validate হবে; exported constant না রেখে বিভিন্ন file-এ raw string key ছড়িয়ে রাখা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import {\n  ExecutionContext, SetMetadata, UseGuards, applyDecorators, createParamDecorator,\n} from '@nestjs/common';\nimport { JwtAuthGuard, RolesGuard } from './guards.js';\n\nexport type Role = 'user' | 'admin';\nexport interface AuthUser { sub: number; email: string; roles: Role[] }\n\n// 1) parameter decorator\nexport const CurrentUser = createParamDecorator(\n  (field: keyof AuthUser | undefined, ctx: ExecutionContext) => {\n    const request = ctx.switchToHttp().getRequest<{ user?: AuthUser }>();\n    const user = request.user;\n    return field ? user?.[field] : user;\n  },\n);\n\n// 2) metadata + composed decorator\nexport const ROLES_KEY = 'roles';\nexport const Roles = (...roles: Role[]) => SetMetadata(ROLES_KEY, roles);\n\nexport function Auth(...roles: Role[]) {\n  return applyDecorators(Roles(...roles), UseGuards(JwtAuthGuard, RolesGuard));\n}\n\n// usage (controller imports omitted)\n@Controller('users')\nexport class UsersController {\n  constructor(private readonly usersService: UsersService) {}\n\n  @Get('me')\n  @Auth()\n  me(@CurrentUser() user: AuthUser) {\n    return user;\n  }\n\n  @Delete(':id')\n  @Auth('admin')\n  remove(@Param('id', ParseIntPipe) id: number, @CurrentUser('sub') actorId: number) {\n    return this.usersService.remove(id, actorId);\n  }\n}"
+  },
+  "complexity": {
+   "time": "O(1) per request",
+   "space": "O(1)"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-015",
+  "subtopic": "Authentication & Authorization",
+  "difficulty": "medium",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "jwt",
+   "rbac",
+   "guards",
+   "authentication",
+   "authorization"
+  ],
+  "technologyVersion": "NestJS 12.1 / @nestjs/jwt 12",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You're building an API where most routes need a logged-in user, a few are public (login, health check), and some are admin-only. How would you implement JWT authentication and role-based authorization in NestJS?",
+   "bn": "তুমি এমন একটা API বানাচ্ছ যেখানে বেশিরভাগ route-এ logged-in user লাগবে, কয়েকটা public (login, health check), আর কিছু শুধু admin-এর জন্য। NestJS-এ JWT authentication আর role-based authorization কীভাবে implement করবে?"
+  },
+  "answer": {
+   "en": "**Clarify first:** token lifetime, whether there are refresh tokens, browser vs mobile clients (cookie vs `Authorization` header), and where roles come from.\n\n**My design — secure by default:**\n1. `JwtModule.registerAsync()` with the secret from `ConfigService` and a short access-token expiry (e.g. 15 minutes).\n2. A **global** `JwtAuthGuard` (`APP_GUARD`) that verifies `Bearer` tokens with `jwtService.verifyAsync()` and sets `request.user`. A `@Public()` decorator marks the few open routes, so a forgotten decorator means \"protected\", not \"open\".\n3. A global `RolesGuard`, registered after the auth guard, reads `@Roles('admin')` via `Reflector` and returns 403 if the user lacks the role.\n4. Ownership checks (\"can edit only their own order\") live in the service or a policy layer, because they need data, not just roles.\n\n**Options:** Passport (`@nestjs/passport` + `passport-jwt` strategy) is fine if you need many strategies (Google, local, SAML). For JWT alone, a small custom guard with `@nestjs/jwt` is simpler and easier to debug.",
+   "bn": "**আগে clarify করি:** token কতক্ষণ valid, refresh token আছে কি না, browser নাকি mobile client (cookie নাকি `Authorization` header), আর role কোথা থেকে আসে।\n\n**আমার design — default-এ secure:**\n1. `JwtModule.registerAsync()`, secret আসবে `ConfigService` থেকে, access token-এর expiry ছোট (যেমন ১৫ মিনিট)।\n2. একটা **global** `JwtAuthGuard` (`APP_GUARD`), যেটা `jwtService.verifyAsync()` দিয়ে `Bearer` token verify করে `request.user` set করে। অল্প কয়েকটা খোলা route-কে `@Public()` decorator দিয়ে mark করি, তাই decorator দিতে ভুলে গেলে route \"protected\" থাকে, \"open\" হয় না।\n3. একটা global `RolesGuard`, auth guard-এর পরে register করা, `Reflector` দিয়ে `@Roles('admin')` পড়ে আর role না থাকলে 403 দেয়।\n4. Ownership check (\"শুধু নিজের order edit করতে পারবে\") service বা policy layer-এ থাকে, কারণ এর জন্য শুধু role না, data লাগে।\n\n**Option:** অনেক strategy (Google, local, SAML) লাগলে Passport (`@nestjs/passport` + `passport-jwt` strategy) ঠিক আছে। শুধু JWT-র জন্য `@nestjs/jwt` দিয়ে ছোট একটা custom guard সহজ আর debug করাও সহজ।"
+  },
+  "explanation": {
+   "en": "- **Why global + `@Public()`:** opt-out security is safer than opt-in. One missing `@UseGuards()` in an opt-in design exposes data.\n- **401 vs 403:** missing/invalid token → `UnauthorizedException` (401); valid user without the role → `false` from the guard (403).\n- **Token hygiene:** pin the algorithm, keep secrets out of code, use short expiry; store refresh tokens hashed in the DB and rotate them so a stolen one can be revoked. For browsers, prefer `httpOnly`, `Secure`, `SameSite` cookies over `localStorage`.\n- **Don't trust the token forever:** roles inside a JWT are a snapshot. For sensitive actions or instant revocation, re-check the user in the DB or keep tokens very short-lived.\n- **Beyond RBAC:** attribute/policy-based checks (e.g. CASL) when rules depend on resource fields.",
+   "bn": "- **কেন global + `@Public()`:** opt-out security, opt-in-এর চেয়ে নিরাপদ। Opt-in design-এ একটা `@UseGuards()` বাদ পড়লেই data expose হয়ে যায়।\n- **401 বনাম 403:** token নেই/invalid → `UnauthorizedException` (401); valid user কিন্তু role নেই → guard থেকে `false` (403)।\n- **Token hygiene:** algorithm pin করো, secret code-এর বাইরে রাখো, expiry ছোট রাখো; refresh token DB-তে hash করে রাখো আর rotate করো, যাতে চুরি হলে revoke করা যায়। Browser-এর জন্য `localStorage`-এর বদলে `httpOnly`, `Secure`, `SameSite` cookie ভালো।\n- **Token-কে চিরকাল বিশ্বাস কোরো না:** JWT-র ভেতরের role একটা snapshot। Sensitive action বা সাথে সাথে revoke করার দরকার হলে DB-তে user আবার check করো, অথবা token খুব অল্প সময়ের জন্য রাখো।\n- **RBAC-এর বাইরে:** rule যখন resource-এর field-এর উপর নির্ভর করে, তখন attribute/policy-based check (যেমন CASL)।"
+  },
+  "interviewTip": {
+   "en": "Lead with \"secure by default: global guard plus `@Public()` opt-out\". Then cover 401 vs 403 and refresh-token rotation. Mention Passport as an option rather than a requirement — it shows you understand what it actually does.",
+   "bn": "\"Default-এ secure: global guard আর `@Public()` opt-out\" দিয়ে শুরু করো। তারপর 401 বনাম 403 আর refresh-token rotation বলো। Passport-কে বাধ্যতামূলক না বলে একটা option হিসেবে বলো — এতে বোঝা যায় এটা আসলে কী করে তুমি জানো।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Authentication",
+    "url": "https://docs.nestjs.com/security/authentication"
+   },
+   {
+    "title": "NestJS docs — Authorization",
+    "url": "https://docs.nestjs.com/security/authorization"
+   },
+   {
+    "title": "OWASP — JSON Web Token Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement refresh-token rotation and logout?",
+    "bn": "Refresh-token rotation আর logout কীভাবে implement করবে?"
+   },
+   {
+    "en": "How would you authenticate WebSocket connections with the same JWT?",
+    "bn": "একই JWT দিয়ে WebSocket connection কীভাবে authenticate করবে?"
+   },
+   {
+    "en": "When would you choose Passport over a custom guard?",
+    "bn": "কখন custom guard-এর বদলে Passport বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "nest-007",
+   "nest-014",
+   "nest-028"
+  ],
+  "commonMistakes": {
+   "en": "Putting auth in middleware (no access to route metadata); storing access tokens in `localStorage` without considering XSS; long-lived access tokens with no revocation; checking roles but not resource ownership.",
+   "bn": "Auth middleware-এ রাখা (route metadata পাওয়া যায় না); XSS না ভেবে `localStorage`-এ access token রাখা; revoke করার উপায় ছাড়া দীর্ঘমেয়াদি access token; role check করা কিন্তু resource ownership check না করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import {\n  CanActivate, ExecutionContext, Injectable, Module, SetMetadata, UnauthorizedException,\n} from '@nestjs/common';\nimport { APP_GUARD, Reflector } from '@nestjs/core';\nimport { JwtModule, JwtService } from '@nestjs/jwt';\nimport { ConfigService } from '@nestjs/config';\nimport type { Request } from 'express';\nimport { ROLES_KEY, type AuthUser, type Role } from './auth.decorators.js';\n\nexport const IS_PUBLIC_KEY = 'isPublic';\nexport const Public = () => SetMetadata(IS_PUBLIC_KEY, true);\n\n@Injectable()\nexport class JwtAuthGuard implements CanActivate {\n  constructor(private readonly jwt: JwtService, private readonly reflector: Reflector) {}\n\n  async canActivate(context: ExecutionContext): Promise<boolean> {\n    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [\n      context.getHandler(),\n      context.getClass(),\n    ]);\n    if (isPublic) return true;\n\n    const req = context.switchToHttp().getRequest<Request & { user?: AuthUser }>();\n    const [type, token] = req.headers.authorization?.split(' ') ?? [];\n    if (type !== 'Bearer' || !token) throw new UnauthorizedException();\n\n    try {\n      req.user = await this.jwt.verifyAsync<AuthUser>(token);\n    } catch {\n      throw new UnauthorizedException('Invalid or expired token');\n    }\n    return true;\n  }\n}\n\n@Injectable()\nexport class RolesGuard implements CanActivate {\n  constructor(private readonly reflector: Reflector) {}\n\n  canActivate(context: ExecutionContext): boolean {\n    const required = this.reflector.getAllAndOverride<Role[] | undefined>(ROLES_KEY, [\n      context.getHandler(),\n      context.getClass(),\n    ]);\n    if (!required?.length) return true;\n\n    const { user } = context.switchToHttp().getRequest<{ user?: AuthUser }>();\n    return !!user && required.some((role) => user.roles.includes(role)); // false -> 403\n  }\n}\n\n@Module({\n  imports: [\n    JwtModule.registerAsync({\n      global: true,\n      inject: [ConfigService],\n      useFactory: (config: ConfigService) => ({\n        secret: config.getOrThrow<string>('JWT_SECRET'),\n        signOptions: { expiresIn: '15m' },\n      }),\n    }),\n  ],\n  providers: [\n    { provide: APP_GUARD, useClass: JwtAuthGuard }, // runs first: sets request.user\n    { provide: APP_GUARD, useClass: RolesGuard },   // then checks @Roles()\n  ],\n})\nexport class AuthModule {}"
+  },
+  "technology": "nestjs"
+ },
+ {
+  "id": "nest-016",
+  "subtopic": "Validation (class-validator)",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "validation",
+   "class-validator",
+   "class-transformer",
+   "nested-dto"
+  ],
+  "technologyVersion": "NestJS 12.1 (class-validator ValidationPipe)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`POST /orders` with `{ \"customerId\": \"c1\", \"items\": [{ \"productId\": \"abc\", \"quantity\": -5, \"hack\": 1 }] }` passes validation and reaches the service unchanged — even the unknown `hack` field. The app uses `new ValidationPipe({ whitelist: true })`. Find the bug and fix it.",
+   "bn": "`POST /orders`-এ `{ \"customerId\": \"c1\", \"items\": [{ \"productId\": \"abc\", \"quantity\": -5, \"hack\": 1 }] }` পাঠালে validation pass করে আর data অপরিবর্তিত অবস্থায় service-এ পৌঁছে যায় — অজানা `hack` field-ও। App-এ `new ValidationPipe({ whitelist: true })` আছে। Bug খুঁজে fix করো।"
+  },
+  "answer": {
+   "en": "The nested objects are never validated. `@IsArray()` only checks that `items` is an array. class-validator validates nested objects only when the property has `@ValidateNested()`, and class-transformer only turns the plain JSON elements into `OrderItemDto` instances when it knows the type via `@Type(() => OrderItemDto)` — TypeScript's `OrderItemDto[]` annotation is not available at runtime for array elements.\n\nBecause the elements stay plain objects, their decorators are never looked at, and `whitelist` can't strip `hack` either. Adding `@ValidateNested({ each: true })` and `@Type(() => OrderItemDto)` fixes both.",
+   "bn": "Nested object গুলো কখনো validate হচ্ছে না। `@IsArray()` শুধু check করে `items` একটা array কি না। class-validator nested object validate করে কেবল তখনই যখন property-তে `@ValidateNested()` থাকে, আর class-transformer plain JSON element-কে `OrderItemDto` instance বানায় কেবল তখন যখন `@Type(() => OrderItemDto)` দিয়ে type জানানো থাকে — array element-এর জন্য TypeScript-এর `OrderItemDto[]` annotation runtime-এ পাওয়া যায় না।\n\nElement গুলো plain object থেকে যায় বলে তাদের decorator কখনো দেখা হয় না, আর `whitelist`-ও `hack` সরাতে পারে না। `@ValidateNested({ each: true })` আর `@Type(() => OrderItemDto)` যোগ করলে দুটো সমস্যাই মিটে যায়।"
+  },
+  "explanation": {
+   "en": "- **Root cause:** decorator metadata stores `Array` as the design type of `items`, not `OrderItemDto[]`. Without `@Type`, class-transformer has no idea what to instantiate.\n- **Security impact:** with `whitelist` silently not applying to nested data, extra fields (`isAdmin`, `price`) can reach the service — a mass-assignment risk if you spread the DTO into a DB insert.\n- **Recommended global setup:** `new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`. `forbidNonWhitelisted` returns 400 for unknown fields instead of stripping silently, which helps API clients notice mistakes.\n- The same applies to single nested objects (`@ValidateNested() @Type(() => AddressDto) address: AddressDto`).\n- Write an e2e test with an invalid nested payload so this can't regress.",
+   "bn": "- **Root cause:** decorator metadata `items`-এর design type হিসেবে `OrderItemDto[]` না, `Array` রাখে। `@Type` ছাড়া class-transformer জানে না কোন class-এর instance বানাতে হবে।\n- **Security প্রভাব:** nested data-তে `whitelist` চুপচাপ কাজ না করলে বাড়তি field (`isAdmin`, `price`) service পর্যন্ত পৌঁছাতে পারে — DTO spread করে DB-তে insert করলে এটা mass-assignment ঝুঁকি।\n- **Recommended global setup:** `new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`। `forbidNonWhitelisted` অজানা field চুপচাপ না সরিয়ে 400 দেয়, ফলে API client ভুল ধরতে পারে।\n- একক nested object-এর ক্ষেত্রেও একই নিয়ম (`@ValidateNested() @Type(() => AddressDto) address: AddressDto`)।\n- Invalid nested payload দিয়ে একটা e2e test লেখো, যাতে এই bug আবার ফিরে না আসে।"
+  },
+  "interviewTip": {
+   "en": "Explain *why* both decorators are needed — one for class-transformer (instantiation), one for class-validator (recursion). Mentioning the mass-assignment risk turns a bug fix into a security discussion.",
+   "bn": "দুটো decorator *কেন* লাগে বোঝাও — একটা class-transformer-এর জন্য (instance বানানো), একটা class-validator-এর জন্য (ভেতরে ঢুকে validate)। Mass-assignment ঝুঁকির কথা বললে bug fix-টা security আলোচনায় পরিণত হয়।"
+  },
+  "references": [
+   {
+    "title": "NestJS docs — Validation",
+    "url": "https://docs.nestjs.com/application/validation"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What do `whitelist`, `forbidNonWhitelisted` and `transform` each do?",
+    "bn": "`whitelist`, `forbidNonWhitelisted` আর `transform` আলাদাভাবে কী করে?"
+   },
+   {
+    "en": "How would the same validation look with a zod schema in NestJS 12?",
+    "bn": "NestJS 12-এ zod schema দিয়ে একই validation কেমন হবে?"
+   }
+  ],
+  "related": [
+   "nest-005",
+   "nest-006",
+   "nest-017"
+  ],
+  "commonMistakes": {
+   "en": "Adding only `@ValidateNested()` (elements still plain objects, so nothing is validated); adding only `@Type()`; assuming `whitelist` protects nested objects automatically.",
+   "bn": "শুধু `@ValidateNested()` দেওয়া (element তখনও plain object, তাই কিছুই validate হয় না); শুধু `@Type()` দেওয়া; ধরে নেওয়া যে `whitelist` নিজে থেকেই nested object রক্ষা করে।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import { ArrayMinSize, IsArray, IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator';\n\nexport class OrderItemDto {\n  @IsInt() @Min(1) productId: number;\n  @IsInt() @Min(1) @Max(100) quantity: number;\n}\n\nexport class CreateOrderDto {\n  @IsString() @IsNotEmpty() customerId: string;\n\n  @IsArray()\n  @ArrayMinSize(1)\n  items: OrderItemDto[];\n}\n\n// main.ts\napp.useGlobalPipes(new ValidationPipe({ whitelist: true }));"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "import { Type } from 'class-transformer';\nimport {\n  ArrayMinSize, IsArray, IsInt, IsNotEmpty, IsString, Max, Min, ValidateNested,\n} from 'class-validator';\n\nexport class OrderItemDto {\n  @IsInt() @Min(1) productId: number;\n  @IsInt() @Min(1) @Max(100) quantity: number;\n}\n\nexport class CreateOrderDto {\n  @IsString() @IsNotEmpty() customerId: string;\n\n  @IsArray()\n  @ArrayMinSize(1)\n  @ValidateNested({ each: true }) // validate every element\n  @Type(() => OrderItemDto)       // turn plain objects into OrderItemDto instances\n  items: OrderItemDto[];\n}\n\n// Response now: 400\n// [\"items.0.productId must not be less than 1\",\n//  \"items.0.productId must be an integer number\",\n//  \"items.0.quantity must not be less than 1\"]",
+    "label": {
+     "en": "Fixed DTO",
+     "bn": "সংশোধিত DTO"
+    }
+   }
+  ],
+  "technology": "nestjs"
+ }
+]

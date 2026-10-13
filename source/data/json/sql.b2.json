@@ -1,0 +1,642 @@
+[
+ {
+  "id": "sql-009",
+  "subtopic": "DELETE vs TRUNCATE vs DROP",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "delete",
+   "truncate",
+   "drop",
+   "ddl",
+   "dml"
+  ],
+  "technologyVersion": "Version-independent (behaviour varies by database)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Which statement about `DELETE`, `TRUNCATE`, and `DROP TABLE` is correct?",
+   "bn": "`DELETE`, `TRUNCATE` আর `DROP TABLE` নিয়ে কোন কথাটা সঠিক?"
+  },
+  "answer": {
+   "en": "The second option. `DELETE` is DML: it can filter with `WHERE`, removes rows individually, and fires row-level triggers. `TRUNCATE` removes **all** rows at once by deallocating the table's storage (no `WHERE`, no per-row work). `DROP TABLE` deletes the table definition, its data, indexes, and constraints.",
+   "bn": "দ্বিতীয় option। `DELETE` হলো DML: `WHERE` দিয়ে filter করা যায়, row আলাদা আলাদাভাবে মোছে, আর row-level trigger চালায়। `TRUNCATE` table-এর storage ছেড়ে দিয়ে একবারে **সব** row মোছে (`WHERE` নেই, প্রতি row-এর কাজ নেই)। `DROP TABLE` table definition, data, index আর constraint সব মুছে ফেলে।"
+  },
+  "explanation": {
+   "en": "Option D is the tempting trap, and it's backwards *and* database-dependent:\n- `DELETE` inside a transaction can always be rolled back.\n- `TRUNCATE` is transactional in PostgreSQL (can be rolled back), but in MySQL and Oracle it's treated as DDL with an implicit commit, so it **can't** be rolled back there.\n\nOther differences worth mentioning:\n- `TRUNCATE` doesn't fire `ON DELETE` triggers, and fails if another table's foreign key references the table (PostgreSQL offers `TRUNCATE ... CASCADE`).\n- `TRUNCATE` can reset identity/auto-increment counters (`RESTART IDENTITY` in PostgreSQL; MySQL resets `AUTO_INCREMENT` automatically).\n- A big `DELETE` writes a log record per row and, in PostgreSQL, leaves dead tuples for VACUUM — use `TRUNCATE` (or drop a partition) to empty large tables.",
+   "bn": "Option D হলো লোভনীয় ফাঁদ, আর এটা উল্টো *এবং* database-নির্ভর:\n- Transaction-এর ভেতরে `DELETE` সবসময় rollback করা যায়।\n- PostgreSQL-এ `TRUNCATE` transactional (rollback করা যায়), কিন্তু MySQL আর Oracle-এ এটাকে implicit commit-সহ DDL ধরা হয়, তাই সেখানে rollback **করা যায় না**।\n\nআরও কিছু পার্থক্য যা বলার মতো:\n- `TRUNCATE` `ON DELETE` trigger চালায় না, আর অন্য table-এর foreign key এই table-কে refer করলে fail করে (PostgreSQL-এ `TRUNCATE ... CASCADE` আছে)।\n- `TRUNCATE` identity/auto-increment counter reset করতে পারে (PostgreSQL-এ `RESTART IDENTITY`; MySQL নিজে থেকেই `AUTO_INCREMENT` reset করে)।\n- বড় `DELETE` প্রতিটা row-এর জন্য log record লেখে, আর PostgreSQL-এ VACUUM-এর জন্য dead tuple রেখে যায় — বড় table খালি করতে `TRUNCATE` (বা partition drop) ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Give the three-way difference in one sentence each, then add the rollback nuance across databases — that detail separates memorised answers from real understanding.",
+   "bn": "তিনটার পার্থক্য এক বাক্যে করে বলো, তারপর বিভিন্ন database-এ rollback-এর সূক্ষ্ম পার্থক্যটা যোগ করো — এই খুঁটিনাটিই মুখস্থ উত্তর আর আসল বোঝাপড়ার পার্থক্য গড়ে দেয়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — TRUNCATE",
+    "url": "https://www.postgresql.org/docs/current/sql-truncate.html"
+   },
+   {
+    "title": "PostgreSQL docs — DELETE",
+    "url": "https://www.postgresql.org/docs/current/sql-delete.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "sql-017"
+  ],
+  "options": [
+   {
+    "en": "`TRUNCATE` removes the rows and the table definition, while `DROP` removes only the rows.",
+    "bn": "`TRUNCATE` row আর table definition দুটোই মুছে দেয়, আর `DROP` শুধু row মোছে।"
+   },
+   {
+    "en": "`DELETE` without `WHERE` removes rows one by one (row-level delete triggers fire), `TRUNCATE` empties the table quickly without scanning rows, and `DROP TABLE` removes the table itself.",
+    "bn": "`WHERE` ছাড়া `DELETE` row-গুলো একটা একটা করে মোছে (row-level delete trigger চলে), `TRUNCATE` row scan না করে দ্রুত table খালি করে, আর `DROP TABLE` table-টাই মুছে ফেলে।"
+   },
+   {
+    "en": "`TRUNCATE` accepts a `WHERE` clause and removes the selected rows faster than `DELETE`.",
+    "bn": "`TRUNCATE` `WHERE` clause নেয় আর বাছাই করা row `DELETE`-এর চেয়ে দ্রুত মোছে।"
+   },
+   {
+    "en": "`DELETE` can never be rolled back, while `TRUNCATE` always can.",
+    "bn": "`DELETE` কখনো rollback করা যায় না, আর `TRUNCATE` সবসময় rollback করা যায়।"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "sql"
+ },
+ {
+  "id": "sql-010",
+  "subtopic": "Transactions & ACID",
+  "difficulty": "easy",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "transactions",
+   "acid",
+   "commit",
+   "rollback",
+   "bank-transfer"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "During a money transfer, the database server crashes right after debiting 500 from account A but before crediting account B. How do transactions and the ACID properties prevent the money from disappearing? Write the SQL you would use.",
+   "bn": "টাকা transfer করার সময় account A থেকে 500 কেটে নেওয়ার ঠিক পরে, কিন্তু account B-তে জমা হওয়ার আগে database server crash করল। Transaction আর ACID property কীভাবে টাকা হারিয়ে যাওয়া ঠেকায়? তুমি যে SQL ব্যবহার করবে সেটা লেখো।"
+  },
+  "answer": {
+   "en": "I wrap the debit, the credit, and the transfer record in **one transaction**. Until `COMMIT` succeeds, none of the changes are permanent. If the server crashes in the middle, crash recovery replays the write-ahead log and treats the unfinished transaction as aborted (PostgreSQL simply never marks it committed, so its row versions stay invisible; engines like InnoDB or Oracle roll it back with their undo logs). After restart account A still has its 500 — as if the transfer never started.\n\nACID in this example:\n- **Atomicity:** debit and credit happen together or not at all.\n- **Consistency:** constraints (e.g. `CHECK (balance >= 0)`, foreign keys) hold before and after.\n- **Isolation:** other transactions don't see the half-done state (A debited, B not yet credited).\n- **Durability:** once `COMMIT` returns, the transfer survives a crash or power loss, because the log is flushed to disk first.",
+   "bn": "আমি debit, credit আর transfer record — তিনটাকেই **একটা transaction**-এ মুড়ে দিই। `COMMIT` সফল না হওয়া পর্যন্ত কোনো পরিবর্তন স্থায়ী হয় না। মাঝপথে server crash করলে crash recovery write-ahead log replay করে আর অসমাপ্ত transaction-টাকে aborted ধরে (PostgreSQL এটাকে কখনো committed হিসেবে চিহ্নিতই করে না, তাই এর row version-গুলো অদৃশ্য থাকে; InnoDB বা Oracle-এর মতো engine undo log দিয়ে rollback করে)। তাই restart-এর পর account A-তে তার 500 থেকেই যায় — যেন transfer শুরুই হয়নি।\n\nএই উদাহরণে ACID:\n- **Atomicity:** debit আর credit একসাথে হয়, নয়তো একটাও হয় না।\n- **Consistency:** আগে-পরে constraint (যেমন `CHECK (balance >= 0)`, foreign key) ঠিক থাকে।\n- **Isolation:** অন্য transaction অর্ধেক-হওয়া অবস্থা দেখে না (A থেকে কাটা হয়েছে, B-তে এখনো জমা হয়নি)।\n- **Durability:** `COMMIT` return করার পর crash বা বিদ্যুৎ চলে গেলেও transfer টিকে থাকে, কারণ log আগে disk-এ flush হয়।"
+  },
+  "explanation": {
+   "en": "- Most databases run in **autocommit** mode by default: each statement commits on its own. Without an explicit transaction, the debit would be committed alone — exactly the bug in this scenario.\n- The guard `AND balance >= 500` plus checking the affected-row count prevents overdrafts even with concurrent transfers (the `UPDATE` locks the row).\n- On any application error, send `ROLLBACK`. Keep transactions short and never wait for user input or slow external API calls inside one — they hold locks.\n- Syntax differs slightly: standard `START TRANSACTION` (PostgreSQL, MySQL); `BEGIN` also works in PostgreSQL and MySQL and is the only form SQLite accepts; SQL Server uses `BEGIN TRANSACTION`.\n- Concurrency anomalies and isolation levels are the next layer of this topic.",
+   "bn": "- বেশিরভাগ database default-ভাবে **autocommit** mode-এ চলে: প্রতিটা statement নিজে নিজে commit হয়। Explicit transaction না থাকলে debit-টা একাই commit হয়ে যেত — এই scenario-র ঠিক সেই bug।\n- `AND balance >= 500` guard আর কতগুলো row affected হলো সেটা check করা — concurrent transfer-এর মধ্যেও overdraft আটকায় (`UPDATE` row lock করে)।\n- Application-এ যেকোনো error হলে `ROLLBACK` পাঠাও। Transaction ছোট রাখো, আর এর ভেতরে কখনো user input বা ধীর external API call-এর জন্য অপেক্ষা কোরো না — এগুলো lock ধরে রাখে।\n- Syntax একটু আলাদা: standard `START TRANSACTION` (PostgreSQL, MySQL); PostgreSQL আর MySQL-এ `BEGIN`-ও চলে, আর SQLite শুধু `BEGIN`-ই মানে; SQL Server-এ `BEGIN TRANSACTION`।\n- Concurrency anomaly আর isolation level এই বিষয়ের পরের স্তর।"
+  },
+  "interviewTip": {
+   "en": "Map each ACID letter to the transfer example rather than reciting definitions. Mentioning autocommit as the root cause of the bug shows practical insight.",
+   "bn": "সংজ্ঞা মুখস্থ না বলে ACID-এর প্রতিটা অক্ষরকে transfer-এর উদাহরণের সাথে মেলাও। Bug-এর মূল কারণ হিসেবে autocommit-এর কথা বললে practical বোঝাপড়া দেখা যায়।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Transactions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-transactions.html"
+   },
+   {
+    "title": "PostgreSQL docs — Write-Ahead Logging",
+    "url": "https://www.postgresql.org/docs/current/wal-intro.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens if two transfers from the same account run at the same time?",
+    "bn": "একই account থেকে দুটো transfer একসাথে চললে কী হয়?"
+   },
+   {
+    "en": "What is autocommit, and how do you turn it off in your client?",
+    "bn": "Autocommit কী, আর তোমার client-এ এটা কীভাবে বন্ধ করো?"
+   }
+  ],
+  "related": [
+   "sql-029"
+  ],
+  "commonMistakes": {
+   "en": "Saying \"Consistency\" means replicas are in sync (that's the CAP-theorem meaning, not ACID), or running the two `UPDATE`s as separate autocommitted statements.",
+   "bn": "\"Consistency\" মানে replica-গুলো sync-এ আছে বলা (ওটা CAP theorem-এর অর্থ, ACID-এর নয়), অথবা দুটো `UPDATE` আলাদা autocommit statement হিসেবে চালানো।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "START TRANSACTION;          -- SQLite: BEGIN;  SQL Server: BEGIN TRANSACTION;\n\nUPDATE accounts\n   SET balance = balance - 500\n WHERE id = 1 AND balance >= 500;\n-- application: if 0 rows were updated -> ROLLBACK (insufficient funds)\n\nUPDATE accounts\n   SET balance = balance + 500\n WHERE id = 2;\n\nINSERT INTO transfers (from_account, to_account, amount)\nVALUES (1, 2, 500);\n\nCOMMIT;                     -- on any error: ROLLBACK;"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-011",
+  "subtopic": "Normalization",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "normalization",
+   "2nf",
+   "3nf",
+   "bcnf",
+   "denormalization"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In the table below, `product_name` depends only on `product_id`, while `quantity` and `unit_price` (the price charged in that order) depend on the whole key. Which normal form does this table violate?",
+   "bn": "নিচের table-এ `product_name` শুধু `product_id`-এর উপর নির্ভর করে, আর `quantity` ও `unit_price` (ওই order-এ নেওয়া দাম) পুরো key-এর উপর নির্ভর করে। Table-টা কোন normal form ভাঙছে?"
+  },
+  "answer": {
+   "en": "**2NF.** The key is composite `(order_id, product_id)`, and `product_name` depends on only *part* of it (`product_id`) — a **partial dependency**. Fix: move `product_name` into a `products(product_id, product_name, ...)` table and keep only `product_id` in `order_items`.",
+   "bn": "**2NF।** Key-টা composite `(order_id, product_id)`, আর `product_name` এর শুধু *একটা অংশের* (`product_id`) উপর নির্ভর করে — এটা **partial dependency**। সমাধান: `product_name`-কে একটা `products(product_id, product_name, ...)` table-এ সরাও, আর `order_items`-এ শুধু `product_id` রাখো।"
+  },
+  "explanation": {
+   "en": "The normal forms in one line each:\n- **1NF:** atomic values, no repeating groups (no comma-separated lists, no `phone1, phone2, phone3`). This table is fine there.\n- **2NF:** 1NF + no non-key column depends on only part of a composite key. Violated here.\n- **3NF:** 2NF + no **transitive** dependency (non-key → non-key), e.g. `customers(id, zip_code, city)` where `city` depends on `zip_code`. Option C is the tempting wrong answer because people mix up partial and transitive dependencies.\n- **BCNF:** every determinant must be a candidate key — a stricter 3NF that matters with overlapping candidate keys.\n\nWhy it matters: with `product_name` repeated in every order line, renaming a product means updating thousands of rows (update anomaly), and the copies can disagree.\n\nNote that `unit_price` is **not** redundant: it records what the customer paid at that time, which can differ from today's catalogue price. Deliberate denormalization (snapshots, cached totals, reporting tables) is fine when you know why you're doing it.",
+   "bn": "এক লাইনে normal form-গুলো:\n- **1NF:** atomic value, কোনো repeating group নেই (comma-separated list নেই, `phone1, phone2, phone3` নেই)। এই table এখানে ঠিক আছে।\n- **2NF:** 1NF + কোনো non-key column composite key-এর শুধু একটা অংশের উপর নির্ভর করবে না। এখানে এটাই ভেঙেছে।\n- **3NF:** 2NF + কোনো **transitive** dependency নেই (non-key → non-key), যেমন `customers(id, zip_code, city)`, যেখানে `city` নির্ভর করে `zip_code`-এর উপর। Option C লোভনীয় ভুল উত্তর, কারণ অনেকে partial আর transitive dependency গুলিয়ে ফেলে।\n- **BCNF:** প্রতিটা determinant-কে candidate key হতে হবে — 3NF-এর কড়া রূপ, যা overlapping candidate key থাকলে গুরুত্বপূর্ণ।\n\nকেন গুরুত্বপূর্ণ: প্রতিটা order line-এ `product_name` বারবার থাকলে একটা product rename করতে হাজারো row update করতে হয় (update anomaly), আর copy-গুলো একে অপরের সাথে না-ও মিলতে পারে।\n\nখেয়াল করো, `unit_price` redundant **নয়**: এটা সেই সময়ে customer কত দিয়েছে তা রেকর্ড করে, যা আজকের catalogue দাম থেকে আলাদা হতে পারে। কেন করছ জানলে ইচ্ছাকৃত denormalization (snapshot, cached total, reporting table) ঠিক আছে।"
+  },
+  "interviewTip": {
+   "en": "Name the dependency type (\"partial dependency on a composite key\"), then contrast with a 3NF transitive example. Bringing up the `unit_price` snapshot shows you understand when denormalization is intentional.",
+   "bn": "Dependency-র ধরনের নাম বলো (\"composite key-এর উপর partial dependency\"), তারপর 3NF-এর একটা transitive উদাহরণের সাথে তুলনা করো। `unit_price` snapshot-এর কথা তুললে বোঝা যায় তুমি জানো কখন denormalization ইচ্ছাকৃত।"
+  },
+  "references": [
+   {
+    "title": "Microsoft Learn — Database normalization description",
+    "url": "https://learn.microsoft.com/en-us/office/troubleshoot/access/database-normalization-description"
+   },
+   {
+    "title": "Wikipedia — Database normalization",
+    "url": "https://en.wikipedia.org/wiki/Database_normalization"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "sql-007",
+   "sql-032"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE order_items (\n  order_id     INT,\n  product_id   INT,\n  quantity     INT,\n  unit_price   NUMERIC(10,2),   -- price charged in this order\n  product_name VARCHAR(100),\n  PRIMARY KEY (order_id, product_id)\n);"
+  },
+  "options": [
+   {
+    "en": "First Normal Form (1NF)",
+    "bn": "First Normal Form (1NF)"
+   },
+   {
+    "en": "Second Normal Form (2NF)",
+    "bn": "Second Normal Form (2NF)"
+   },
+   {
+    "en": "Third Normal Form (3NF), because of a transitive dependency",
+    "bn": "Third Normal Form (3NF), transitive dependency-র কারণে"
+   },
+   {
+    "en": "None — the table is already in BCNF",
+    "bn": "কোনোটাই না — table-টা আগে থেকেই BCNF-এ আছে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "sql"
+ },
+ {
+  "id": "sql-012",
+  "subtopic": "Ranking: Second-Highest Salary",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "dense-rank",
+   "window-functions",
+   "subquery",
+   "nth-highest",
+   "ties"
+  ],
+  "technologyVersion": "Version-independent (SQL:2003 window functions; output from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Find the employee(s) with the **second-highest salary**. Several employees can share the same salary, so return everyone at that salary level.",
+   "bn": "**দ্বিতীয় সর্বোচ্চ বেতন** পাওয়া employee(-দের) বের করো। একাধিক employee-এর বেতন সমান হতে পারে, তাই ওই বেতন-স্তরের সবাইকে return করো।"
+  },
+  "answer": {
+   "en": "`DENSE_RANK()` numbers the **distinct salary levels** without gaps: 120000 → 1, 95000 → 2, 87000 → 3. Filtering `salary_rank = 2` returns everyone earning 95000 — Ayesha and Esha. The window function can't go in `WHERE` directly (it's computed after `WHERE`), so it's wrapped in a CTE.\n\nWhy not the others?\n- `ROW_NUMBER()` gives every row a unique number, so \"row 2\" is Chandni (120000) — wrong with ties.\n- `RANK()` leaves gaps after ties (1, 1, **3**), so `RANK() = 2` returns nothing here.\n- `LIMIT 1 OFFSET 1` has the same problem as `ROW_NUMBER()`.\n\nFor the N-th highest salary, just change `2` to `N`.",
+   "bn": "`DENSE_RANK()` **আলাদা বেতন-স্তরগুলোকে** ফাঁক ছাড়াই নম্বর দেয়: 120000 → 1, 95000 → 2, 87000 → 3। `salary_rank = 2` filter করলে 95000 পাওয়া সবাই আসে — Ayesha আর Esha। Window function সরাসরি `WHERE`-এ বসানো যায় না (এটা `WHERE`-এর পরে হিসাব হয়), তাই CTE-তে মুড়ে নেওয়া হয়েছে।\n\nঅন্যগুলো কেন নয়?\n- `ROW_NUMBER()` প্রতিটা row-কে আলাদা নম্বর দেয়, তাই \"row 2\" হলো Chandni (120000) — tie থাকলে ভুল।\n- `RANK()` tie-এর পরে ফাঁক রাখে (1, 1, **3**), তাই এখানে `RANK() = 2` কিছুই return করে না।\n- `LIMIT 1 OFFSET 1`-এরও `ROW_NUMBER()`-এর মতো একই সমস্যা।\n\nN-তম সর্বোচ্চ বেতনের জন্য শুধু `2`-কে `N` করে দাও।"
+  },
+  "explanation": {
+   "en": "- **Edge case:** if everyone has the same salary, the `DENSE_RANK` query returns no rows, while the `MAX(...) WHERE salary < MAX(...)` version returns a single NULL. Clarify which behaviour the caller expects.\n- The `MAX` subquery version only returns the *value*; to get names you'd need `WHERE salary = (that subquery)`.\n- `LIMIT/OFFSET` is PostgreSQL/MySQL/SQLite syntax; the SQL standard (also supported by PostgreSQL, Oracle, SQL Server) is `OFFSET 1 ROWS FETCH FIRST 1 ROW ONLY`.\n- Window functions are available in PostgreSQL, MySQL 8+, SQL Server, Oracle, and SQLite 3.25+.",
+   "bn": "- **Edge case:** সবার বেতন সমান হলে `DENSE_RANK` query কোনো row দেয় না, আর `MAX(...) WHERE salary < MAX(...)` version একটা NULL দেয়। Caller কোন আচরণ চায় সেটা জিজ্ঞেস করে নাও।\n- `MAX` subquery version শুধু *value* দেয়; নাম পেতে হলে `WHERE salary = (ওই subquery)` লাগবে।\n- `LIMIT/OFFSET` হলো PostgreSQL/MySQL/SQLite syntax; SQL standard (PostgreSQL, Oracle, SQL Server-ও support করে) হলো `OFFSET 1 ROWS FETCH FIRST 1 ROW ONLY`।\n- Window function PostgreSQL, MySQL 8+, SQL Server, Oracle আর SQLite 3.25+-এ আছে।"
+  },
+  "interviewTip": {
+   "en": "Ask \"what about ties?\" before writing anything — interviewers love that question. Then show the DENSE_RANK solution and explain the ROW_NUMBER/RANK/DENSE_RANK difference with the sample data.",
+   "bn": "কিছু লেখার আগেই জিজ্ঞেস করো \"tie থাকলে কী হবে?\" — interviewer এই প্রশ্নটা খুব পছন্দ করে। তারপর DENSE_RANK সমাধান দেখাও আর sample data দিয়ে ROW_NUMBER/RANK/DENSE_RANK-এর পার্থক্য বোঝাও।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Window Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-window.html"
+   },
+   {
+    "title": "PostgreSQL docs — Window Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+   },
+   {
+    "title": "SQLite — Window Functions",
+    "url": "https://www.sqlite.org/windowfunctions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Return the third-highest salary in each department.",
+    "bn": "প্রতিটা department-এর তৃতীয় সর্বোচ্চ বেতন বের করো।"
+   },
+   {
+    "en": "How would you solve this on a database without window functions?",
+    "bn": "Window function নেই এমন database-এ এটা কীভাবে সমাধান করবে?"
+   }
+  ],
+  "related": [
+   "sql-013",
+   "sql-025"
+  ],
+  "commonMistakes": {
+   "en": "Using `ORDER BY salary DESC LIMIT 1 OFFSET 1` (fails with ties), or using `RANK()` and getting an empty result.",
+   "bn": "`ORDER BY salary DESC LIMIT 1 OFFSET 1` ব্যবহার করা (tie থাকলে ভুল হয়), অথবা `RANK()` ব্যবহার করে খালি ফলাফল পাওয়া।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "WITH ranked AS (\n  SELECT name, salary,\n         DENSE_RANK() OVER (ORDER BY salary DESC) AS salary_rank\n  FROM employees\n)\nSELECT name, salary\nFROM ranked\nWHERE salary_rank = 2\nORDER BY name;",
+   "output": "  name  | salary\n--------+--------\n Ayesha |  95000\n Esha   |  95000"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE employees (\n  id     INT PRIMARY KEY,\n  name   VARCHAR(50) NOT NULL,\n  salary INT NOT NULL\n);\n\nINSERT INTO employees (id, name, salary) VALUES\n  (1, 'Ayesha',   95000),\n  (2, 'Bilal',   120000),\n  (3, 'Chandni', 120000),\n  (4, 'Dipu',     87000),\n  (5, 'Esha',     95000),\n  (6, 'Farhan',   60000);"
+  },
+  "extraCode": [
+   {
+    "language": "sql",
+    "source": "-- value only (works everywhere, even without window functions) -> 95000\nSELECT MAX(salary) AS second_highest\nFROM employees\nWHERE salary < (SELECT MAX(salary) FROM employees);\n\n-- TRAP: ignores ties -> returns 120000 (Chandni), not the second-highest salary\nSELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1;\n-- fix: SELECT DISTINCT salary ... ORDER BY salary DESC LIMIT 1 OFFSET 1;\n-- standard syntax: ... OFFSET 1 ROWS FETCH FIRST 1 ROW ONLY",
+    "label": {
+     "en": "Other approaches and the classic trap",
+     "bn": "অন্য পদ্ধতি আর classic ফাঁদ"
+    }
+   },
+   {
+    "language": "text",
+    "source": "  name   | salary | row_number | rank | dense_rank\n---------+--------+------------+------+------------\n Bilal   | 120000 |          1 |    1 |          1\n Chandni | 120000 |          2 |    1 |          1\n Ayesha  |  95000 |          3 |    3 |          2\n Esha    |  95000 |          4 |    3 |          2\n Dipu    |  87000 |          5 |    5 |          3\n Farhan  |  60000 |          6 |    6 |          4",
+    "label": {
+     "en": "ROW_NUMBER vs RANK vs DENSE_RANK on this data",
+     "bn": "এই data-য় ROW_NUMBER বনাম RANK বনাম DENSE_RANK"
+    }
+   }
+  ],
+  "technology": "sql"
+ },
+ {
+  "id": "sql-013",
+  "subtopic": "Top-N per Group",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "row-number",
+   "partition-by",
+   "top-n",
+   "window-functions"
+  ],
+  "technologyVersion": "Version-independent (SQL:2003 window functions; output from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Return the **top 2 highest-paid employees in each department** (department name, employee name, salary, and position). If two employees in a department have the same salary, break the tie alphabetically by name.",
+   "bn": "**প্রতিটা department-এর সবচেয়ে বেশি বেতন পাওয়া ২ জন employee** বের করো (department-এর নাম, employee-এর নাম, বেতন আর অবস্থান)। একই department-এ দুজনের বেতন সমান হলে নামের বর্ণানুক্রমে tie ভাঙো।"
+  },
+  "answer": {
+   "en": "- `PARTITION BY e.dept_id` restarts the numbering for each department; `ORDER BY e.salary DESC, e.name` decides the order inside it, with the name as the tie-breaker the question asked for.\n- `ROW_NUMBER()` gives 1, 2, 3... with no duplicates, so `rn <= 2` returns **exactly two people** per department (or fewer — HR has only Hasan).\n- In Sales, Esha and Farhan both earn 61,000; the alphabetical tie-breaker makes Esha 1 and Farhan 2, and Dipu (55,000) is excluded.\n- The filter is applied in the outer query because window functions are evaluated after `WHERE`.",
+   "bn": "- `PARTITION BY e.dept_id` প্রতিটা department-এর জন্য নম্বর আবার শুরু করে; `ORDER BY e.salary DESC, e.name` তার ভেতরের ক্রম ঠিক করে, প্রশ্ন অনুযায়ী নামকে tie-breaker রেখে।\n- `ROW_NUMBER()` 1, 2, 3... দেয়, কোনো duplicate নেই, তাই `rn <= 2` প্রতি department-এ **ঠিক দুজন মানুষ** দেয় (বা কম — HR-এ শুধু Hasan)।\n- Sales-এ Esha আর Farhan দুজনেই 61,000 পায়; বর্ণানুক্রমিক tie-breaker-এ Esha 1 আর Farhan 2, আর Dipu (55,000) বাদ পড়ে।\n- Filter-টা outer query-তে দেওয়া হয়েছে, কারণ window function `WHERE`-এর পরে evaluate হয়।"
+  },
+  "explanation": {
+   "en": "- **Clarify the requirement:** \"top 2 per department\" can mean two *people* (`ROW_NUMBER`), or everyone in the top two *salary levels* (`DENSE_RANK`, see the extra output — Sales returns three people), or the top two with ties at the boundary included (`RANK`).\n- Without a deterministic tie-breaker, `ROW_NUMBER` may pick a different person between runs.\n- Performance on big tables: an index on `(dept_id, salary DESC)` helps. In PostgreSQL, a `LATERAL` subquery with `ORDER BY salary DESC LIMIT 2` per department can be much faster when there are few departments and many employees. PostgreSQL also has `DISTINCT ON` for the top-1 case.\n- Some databases offer `QUALIFY rn <= 2` (Snowflake, BigQuery, DuckDB) to filter window results without a subquery; it isn't available in PostgreSQL or MySQL.",
+   "bn": "- **Requirement পরিষ্কার করো:** \"প্রতি department-এ শীর্ষ ২\" মানে হতে পারে দুজন *মানুষ* (`ROW_NUMBER`), অথবা শীর্ষ দুটো *বেতন-স্তরের* সবাই (`DENSE_RANK`, extra output দেখো — Sales-এ তিনজন আসে), অথবা সীমানায় tie থাকলে তাদেরও রেখে শীর্ষ দুই (`RANK`)।\n- Deterministic tie-breaker না থাকলে `ROW_NUMBER` বিভিন্ন run-এ আলাদা মানুষকে বেছে নিতে পারে।\n- বড় table-এ performance: `(dept_id, salary DESC)`-এ index সাহায্য করে। PostgreSQL-এ department কম আর employee অনেক হলে প্রতি department-এর জন্য `ORDER BY salary DESC LIMIT 2`-সহ `LATERAL` subquery অনেক দ্রুত হতে পারে। Top-1-এর জন্য PostgreSQL-এ `DISTINCT ON`-ও আছে।\n- কিছু database-এ subquery ছাড়াই window result filter করার জন্য `QUALIFY rn <= 2` আছে (Snowflake, BigQuery, DuckDB); PostgreSQL বা MySQL-এ এটা নেই।"
+  },
+  "interviewTip": {
+   "en": "Before writing the query, ask which tie semantics they want — then pick `ROW_NUMBER`, `RANK`, or `DENSE_RANK` accordingly. That clarifying question is often what the interviewer is waiting for.",
+   "bn": "Query লেখার আগে জিজ্ঞেস করো tie-এর ক্ষেত্রে কোন অর্থ চায় — তারপর সেই অনুযায়ী `ROW_NUMBER`, `RANK` বা `DENSE_RANK` বেছে নাও। Interviewer প্রায়ই ঠিক এই প্রশ্নটার অপেক্ষাতেই থাকে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Window Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-window.html"
+   },
+   {
+    "title": "PostgreSQL docs — Window Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+   },
+   {
+    "title": "SQLite — Window Functions",
+    "url": "https://www.sqlite.org/windowfunctions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you write this without window functions (e.g. MySQL 5.7)?",
+    "bn": "Window function ছাড়া এটা কীভাবে লিখবে (যেমন MySQL 5.7-এ)?"
+   },
+   {
+    "en": "Return the latest order per customer.",
+    "bn": "প্রতি customer-এর সর্বশেষ order বের করো।"
+   }
+  ],
+  "related": [
+   "sql-012",
+   "sql-014"
+  ],
+  "commonMistakes": {
+   "en": "Writing `WHERE ROW_NUMBER() OVER (...) <= 2` directly (not allowed), forgetting `PARTITION BY` (gives the top 2 overall), or omitting a tie-breaker.",
+   "bn": "সরাসরি `WHERE ROW_NUMBER() OVER (...) <= 2` লেখা (অনুমোদিত নয়), `PARTITION BY` ভুলে যাওয়া (তখন পুরো company-র শীর্ষ ২ আসে), অথবা tie-breaker না দেওয়া।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "WITH ranked AS (\n  SELECT d.name AS department,\n         e.name AS employee,\n         e.salary,\n         ROW_NUMBER() OVER (PARTITION BY e.dept_id\n                            ORDER BY e.salary DESC, e.name) AS rn\n  FROM employees e\n  JOIN departments d ON d.id = e.dept_id\n)\nSELECT department, employee, salary, rn\nFROM ranked\nWHERE rn <= 2\nORDER BY department, rn;",
+   "output": " department  | employee | salary | rn\n-------------+----------+--------+----\n Engineering | Bilal    | 120000 |  1\n Engineering | Ayesha   |  95000 |  2\n HR          | Hasan    |  52000 |  1\n Sales       | Esha     |  61000 |  1\n Sales       | Farhan   |  61000 |  2"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE departments (\n  id   INT PRIMARY KEY,\n  name VARCHAR(30) NOT NULL\n);\n\nCREATE TABLE employees (\n  id      INT PRIMARY KEY,\n  name    VARCHAR(50) NOT NULL,\n  dept_id INT NOT NULL REFERENCES departments(id),\n  salary  INT NOT NULL\n);\n\nINSERT INTO departments (id, name) VALUES (1, 'Engineering'), (2, 'Sales'), (3, 'HR');\n\nINSERT INTO employees (id, name, dept_id, salary) VALUES\n  (1, 'Ayesha',  1,  95000),\n  (2, 'Bilal',   1, 120000),\n  (3, 'Chandni', 1,  87000),\n  (4, 'Dipu',    2,  55000),\n  (5, 'Esha',    2,  61000),\n  (6, 'Farhan',  2,  61000),\n  (7, 'Gazi',    2,  40000),\n  (8, 'Hasan',   3,  52000);"
+  },
+  "extraCode": [
+   {
+    "language": "text",
+    "source": " department  | employee | salary | dr\n-------------+----------+--------+----\n Engineering | Bilal    | 120000 |  1\n Engineering | Ayesha   |  95000 |  2\n HR          | Hasan    |  52000 |  1\n Sales       | Esha     |  61000 |  1\n Sales       | Farhan   |  61000 |  1\n Sales       | Dipu     |  55000 |  2",
+    "label": {
+     "en": "Same query with DENSE_RANK() <= 2 (top 2 salary LEVELS instead of top 2 people)",
+     "bn": "একই query DENSE_RANK() <= 2 দিয়ে (শীর্ষ ২ জন মানুষ নয়, শীর্ষ ২টা বেতন-স্তর)"
+    }
+   }
+  ],
+  "technology": "sql"
+ },
+ {
+  "id": "sql-014",
+  "subtopic": "Running Totals",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "running-total",
+   "window-functions",
+   "sum-over",
+   "window-frame"
+  ],
+  "technologyVersion": "Version-independent (SQL:2003 window functions; output from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Show each day's sales with a **running total per region** (cumulative sum from the region's first sale up to that day).",
+   "bn": "প্রতিদিনের sale-এর সাথে **প্রতি region-এর running total** দেখাও (region-এর প্রথম sale থেকে ওই দিন পর্যন্ত cumulative যোগফল)।"
+  },
+  "answer": {
+   "en": "`SUM(amount) OVER (...)` is an aggregate used as a **window function**: unlike `GROUP BY`, it keeps every row and adds a computed column.\n- `PARTITION BY region` restarts the sum for each region (Ctg and Dhaka are independent).\n- `ORDER BY sale_date` defines the sequence inside each region.\n- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` is the **frame**: sum from the first row of the partition up to the current one. For Dhaka: 500 → 500 + 300 = 800 → 800 + 700 = 1500.",
+   "bn": "`SUM(amount) OVER (...)` হলো **window function** হিসেবে ব্যবহার করা একটা aggregate: `GROUP BY`-এর মতো row কমায় না, প্রতিটা row রেখে একটা হিসাব করা column যোগ করে।\n- `PARTITION BY region` প্রতিটা region-এর জন্য যোগফল আবার শুরু করে (Ctg আর Dhaka আলাদা)।\n- `ORDER BY sale_date` প্রতিটা region-এর ভেতরের ক্রম ঠিক করে।\n- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` হলো **frame**: partition-এর প্রথম row থেকে current row পর্যন্ত যোগফল। Dhaka-র জন্য: 500 → 500 + 300 = 800 → 800 + 700 = 1500।"
+  },
+  "explanation": {
+   "en": "- **Why spell out the frame?** With `ORDER BY` but no frame, the default is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, which treats rows with the same `sale_date` as **peers** and gives them all the same (combined) total. With one row per day it makes no difference, but with several sales on the same day it surprises people. `ROWS` counts physical rows.\n- Other useful frames: a 7-day moving average with `AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` (7 rows, assuming one row per day).\n- Missing days (Dhaka has no 10-03 row) simply don't appear — generate a calendar and `LEFT JOIN` if the report needs every day.\n- The old pre-window way was a correlated subquery (`SELECT SUM(...) WHERE s2.sale_date <= s.sale_date`), which is O(n²) and much slower.",
+   "bn": "- **Frame কেন স্পষ্ট করে লিখব?** `ORDER BY` থাকলে কিন্তু frame না দিলে default হয় `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, যেটা একই `sale_date`-এর row-গুলোকে **peer** ধরে সবাইকে একই (মিলিত) total দেয়। দিনে একটা row হলে পার্থক্য নেই, কিন্তু একই দিনে একাধিক sale থাকলে মানুষ অবাক হয়। `ROWS` physical row গোনে।\n- আরও কাজের frame: `AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` দিয়ে 7-দিনের moving average (৭টা row, ধরে নিচ্ছি দিনে একটা row)।\n- যেদিন sale নেই (Dhaka-র 10-03 row নেই) সেদিন আসেই না — report-এ প্রতিটা দিন লাগলে একটা calendar বানিয়ে `LEFT JOIN` করো।\n- Window function-এর আগের পুরনো পদ্ধতি ছিল correlated subquery (`SELECT SUM(...) WHERE s2.sale_date <= s.sale_date`), যেটা O(n²) আর অনেক ধীর।"
+  },
+  "interviewTip": {
+   "en": "Explain the three parts of `OVER (...)` — partition, order, frame — and mention the RANGE-vs-ROWS default. That frame detail is what distinguishes a mid-level answer.",
+   "bn": "`OVER (...)`-এর তিনটা অংশ ব্যাখ্যা করো — partition, order, frame — আর RANGE বনাম ROWS default-এর কথা বলো। এই frame-এর খুঁটিনাটিই mid-level উত্তরকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Window Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+   },
+   {
+    "title": "PostgreSQL docs — Window Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-window.html"
+   },
+   {
+    "title": "SQLite — Window Functions",
+    "url": "https://www.sqlite.org/windowfunctions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Add a 3-day moving average column.",
+    "bn": "একটা 3-দিনের moving average column যোগ করো।"
+   },
+   {
+    "en": "What changes if there are two sales on the same day and you omit the frame clause?",
+    "bn": "একই দিনে দুটো sale থাকলে আর frame clause না দিলে কী বদলায়?"
+   }
+  ],
+  "related": [
+   "sql-025",
+   "sql-024"
+  ],
+  "commonMistakes": {
+   "en": "Using `GROUP BY` (which collapses rows) for a running total, or forgetting `PARTITION BY` so the total runs across all regions.",
+   "bn": "Running total-এর জন্য `GROUP BY` ব্যবহার করা (যা row-গুলো এক করে ফেলে), অথবা `PARTITION BY` ভুলে যাওয়া যাতে সব region মিলিয়ে total চলতে থাকে।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT region,\n       sale_date,\n       amount,\n       SUM(amount) OVER (PARTITION BY region\n                         ORDER BY sale_date\n                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total\nFROM sales\nORDER BY region, sale_date;",
+   "output": " region | sale_date  | amount | running_total\n--------+------------+--------+---------------\n Ctg    | 2026-10-01 |    400 |           400\n Ctg    | 2026-10-03 |    250 |           650\n Ctg    | 2026-10-04 |    100 |           750\n Dhaka  | 2026-10-01 |    500 |           500\n Dhaka  | 2026-10-02 |    300 |           800\n Dhaka  | 2026-10-04 |    700 |          1500"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE sales (\n  id        INT PRIMARY KEY,\n  region    VARCHAR(20) NOT NULL,\n  sale_date DATE NOT NULL,\n  amount    INT NOT NULL\n);\n\nINSERT INTO sales (id, region, sale_date, amount) VALUES\n  (1, 'Dhaka', '2026-10-01', 500),\n  (2, 'Dhaka', '2026-10-02', 300),\n  (3, 'Dhaka', '2026-10-04', 700),\n  (4, 'Ctg',   '2026-10-01', 400),\n  (5, 'Ctg',   '2026-10-03', 250),\n  (6, 'Ctg',   '2026-10-04', 100);"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-015",
+  "subtopic": "Correlated Subqueries",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "correlated-subquery",
+   "avg",
+   "window-functions",
+   "employees"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL; output from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "List the employees who earn **more than the average salary of their own department**.",
+   "bn": "যেসব employee **নিজের department-এর গড় বেতনের চেয়ে বেশি** পায়, তাদের তালিকা বের করো।"
+  },
+  "answer": {
+   "en": "A **correlated subquery** references a column from the outer query (`e.dept`), so conceptually it's re-evaluated for each outer row: \"what's the average salary of *this* employee's department?\"\n- Engineering average = (95000 + 120000 + 70000) / 3 = 95000 → only Bilal is above. Ayesha earns exactly the average, and `>` is strict, so she's excluded.\n- Sales average = (55000 + 61000 + 40000) / 3 = 52000 → Esha and Dipu.\n- HR has only Gazi, who equals his own average → nobody.\n\nThe window-function version computes each department's average once with `AVG(salary) OVER (PARTITION BY dept)` and can show it alongside each row.",
+   "bn": "**Correlated subquery** outer query-র একটা column (`e.dept`) refer করে, তাই ধারণাগতভাবে প্রতিটা outer row-এর জন্য এটা আবার evaluate হয়: \"*এই* employee-এর department-এর গড় বেতন কত?\"\n- Engineering-এর গড় = (95000 + 120000 + 70000) / 3 = 95000 → শুধু Bilal বেশি পায়। Ayesha ঠিক গড়ের সমান পায়, আর `>` strict, তাই সে বাদ।\n- Sales-এর গড় = (55000 + 61000 + 40000) / 3 = 52000 → Esha আর Dipu।\n- HR-এ শুধু Gazi, যে নিজের গড়ের সমান → কেউ না।\n\nWindow-function version প্রতিটা department-এর গড় একবারই হিসাব করে `AVG(salary) OVER (PARTITION BY dept)` দিয়ে, আর প্রতিটা row-এর পাশে সেটা দেখাতেও পারে।"
+  },
+  "explanation": {
+   "en": "- **Correlated vs non-correlated:** a non-correlated subquery (e.g. `WHERE salary > (SELECT AVG(salary) FROM employees)`) runs once and compares against the company-wide average — a different question.\n- **Performance:** \"re-evaluated per row\" is the logical model. Modern optimizers often decorrelate it into a join with a grouped derived table, but not always — check `EXPLAIN` on big tables. An index on `(dept, salary)` helps the subquery.\n- A third option is joining to a pre-aggregated derived table: `JOIN (SELECT dept, AVG(salary) AS avg_sal FROM employees GROUP BY dept) a ON a.dept = e.dept`.\n- A scalar subquery must return at most one row; if it can return more, the query errors at runtime.",
+   "bn": "- **Correlated বনাম non-correlated:** non-correlated subquery (যেমন `WHERE salary > (SELECT AVG(salary) FROM employees)`) একবারই চলে আর পুরো company-র গড়ের সাথে তুলনা করে — এটা ভিন্ন প্রশ্ন।\n- **Performance:** \"প্রতি row-এ আবার evaluate\" হলো logical model। আধুনিক optimizer প্রায়ই এটাকে grouped derived table-এর সাথে join-এ রূপান্তর (decorrelate) করে, কিন্তু সবসময় না — বড় table-এ `EXPLAIN` দেখো। `(dept, salary)`-এ index subquery-কে সাহায্য করে।\n- তৃতীয় উপায় হলো আগে aggregate করা derived table-এর সাথে join: `JOIN (SELECT dept, AVG(salary) AS avg_sal FROM employees GROUP BY dept) a ON a.dept = e.dept`।\n- Scalar subquery সর্বোচ্চ একটা row দিতে পারে; বেশি দিলে runtime-এ query error দেয়।"
+  },
+  "interviewTip": {
+   "en": "Explicitly say \"correlated, because it references `e.dept`\", then offer the window-function alternative and when you'd prefer it. Mentioning the strict `>` edge case (Ayesha) shows care with data.",
+   "bn": "স্পষ্ট করে বলো \"correlated, কারণ এটা `e.dept` refer করছে\", তারপর window-function বিকল্পটা দাও আর কখন সেটা বেশি পছন্দ করবে বলো। Strict `>`-এর edge case (Ayesha) উল্লেখ করলে বোঝা যায় তুমি data নিয়ে সতর্ক।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Subquery Expressions (EXISTS, IN, NOT IN)",
+    "url": "https://www.postgresql.org/docs/current/functions-subquery.html"
+   },
+   {
+    "title": "PostgreSQL docs — Window Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Rewrite it with a JOIN to a grouped derived table.",
+    "bn": "Grouped derived table-এর সাথে JOIN করে এটা আবার লেখো।"
+   },
+   {
+    "en": "How would you also show by how much each employee exceeds the average?",
+    "bn": "প্রত্যেক employee গড়ের চেয়ে কত বেশি পায় সেটাও কীভাবে দেখাবে?"
+   }
+  ],
+  "related": [
+   "sql-016",
+   "sql-013"
+  ],
+  "commonMistakes": {
+   "en": "Comparing against the overall average (non-correlated), or trying `WHERE salary > AVG(salary)` directly (aggregates aren't allowed in `WHERE`).",
+   "bn": "পুরো company-র গড়ের সাথে তুলনা করা (non-correlated), অথবা সরাসরি `WHERE salary > AVG(salary)` লেখার চেষ্টা করা (`WHERE`-এ aggregate অনুমোদিত নয়)।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT e.name, e.dept, e.salary\nFROM employees e\nWHERE e.salary > (\n  SELECT AVG(e2.salary)\n  FROM employees e2\n  WHERE e2.dept = e.dept        -- correlated: refers to the outer row\n)\nORDER BY e.dept, e.salary DESC;",
+   "output": " name  |    dept     | salary\n-------+-------------+--------\n Bilal | Engineering | 120000\n Esha  | Sales       |  61000\n Dipu  | Sales       |  55000"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE employees (\n  id     INT PRIMARY KEY,\n  name   VARCHAR(50) NOT NULL,\n  dept   VARCHAR(30) NOT NULL,\n  salary INT NOT NULL\n);\n\nINSERT INTO employees (id, name, dept, salary) VALUES\n  (1, 'Ayesha',  'Engineering',  95000),\n  (2, 'Bilal',   'Engineering', 120000),\n  (3, 'Chandni', 'Engineering',  70000),\n  (4, 'Dipu',    'Sales',        55000),\n  (5, 'Esha',    'Sales',        61000),\n  (6, 'Farhan',  'Sales',        40000),\n  (7, 'Gazi',    'HR',           52000);"
+  },
+  "extraCode": [
+   {
+    "language": "sql",
+    "source": "SELECT name, dept, salary, dept_avg\nFROM (\n  SELECT name, dept, salary,\n         ROUND(AVG(salary) OVER (PARTITION BY dept), 2) AS dept_avg\n  FROM employees\n) t\nWHERE salary > dept_avg\nORDER BY dept, salary DESC;\n\n--  name  |    dept     | salary | dept_avg\n-- -------+-------------+--------+----------\n--  Bilal | Engineering | 120000 | 95000.00\n--  Esha  | Sales       |  61000 | 52000.00\n--  Dipu  | Sales       |  55000 | 52000.00",
+    "label": {
+     "en": "Window-function version (one pass, can also show the average)",
+     "bn": "Window-function version (এক pass-এ, গড়-ও দেখানো যায়)"
+    }
+   }
+  ],
+  "technology": "sql"
+ },
+ {
+  "id": "sql-016",
+  "subtopic": "Anti-Joins & the NOT IN NULL Trap",
+  "difficulty": "medium",
+  "type": "query",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "not-exists",
+   "not-in",
+   "left-join",
+   "anti-join",
+   "null"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL; output from PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Find the customers who have **never placed an order**. Note that `orders` contains a guest checkout with `customer_id = NULL`. Also explain why `WHERE id NOT IN (SELECT customer_id FROM orders)` returns no rows on this data.",
+   "bn": "যেসব customer **কখনো কোনো order দেয়নি** তাদের বের করো। খেয়াল করো, `orders`-এ একটা guest checkout আছে যার `customer_id = NULL`। আর ব্যাখ্যা করো কেন এই data-য় `WHERE id NOT IN (SELECT customer_id FROM orders)` কোনো row return করে না।"
+  },
+  "answer": {
+   "en": "`NOT EXISTS` keeps a customer when the correlated subquery finds **no** matching order. Rahim and Nadia have orders; Karim and Sumi don't. The guest order (NULL) can never equal any `c.id`, so it's simply ignored — exactly what we want.\n\n**Why `NOT IN` returns nothing:** `2 NOT IN (1, 1, 3, NULL)` expands to `2 <> 1 AND 2 <> 1 AND 2 <> 3 AND 2 <> NULL`. The last comparison is UNKNOWN, so the whole `AND` chain is UNKNOWN (never TRUE), and `WHERE` drops every row. One NULL in the subquery wipes out the result.\n\nSo I default to `NOT EXISTS` (or `LEFT JOIN ... IS NULL`) for anti-joins.",
+   "bn": "Correlated subquery যদি কোনো matching order **না** পায়, তাহলে `NOT EXISTS` customer-টাকে রাখে। Rahim আর Nadia-র order আছে; Karim আর Sumi-র নেই। Guest order (NULL) কখনো কোনো `c.id`-এর সমান হতে পারে না, তাই সেটা স্বাভাবিকভাবেই উপেক্ষিত হয় — ঠিক যা আমরা চাই।\n\n**`NOT IN` কেন কিছুই দেয় না:** `2 NOT IN (1, 1, 3, NULL)` ভাঙলে দাঁড়ায় `2 <> 1 AND 2 <> 1 AND 2 <> 3 AND 2 <> NULL`। শেষ তুলনাটা UNKNOWN, তাই পুরো `AND` chain UNKNOWN (কখনো TRUE নয়), আর `WHERE` প্রতিটা row বাদ দেয়। Subquery-তে একটা NULL পুরো ফলাফল মুছে দেয়।\n\nতাই anti-join-এর জন্য আমি default হিসেবে `NOT EXISTS` (বা `LEFT JOIN ... IS NULL`) ব্যবহার করি।"
+  },
+  "explanation": {
+   "en": "- **`LEFT JOIN ... WHERE o.id IS NULL`:** check a column that can't be NULL in a real match (the primary key), not a nullable column.\n- **Performance:** PostgreSQL, SQL Server, and Oracle plan `NOT EXISTS` as an efficient anti-join. `NOT IN` can't always be turned into an anti-join precisely *because* of the NULL semantics, so it may be slower too.\n- `IN` (without `NOT`) is safe with NULLs: `1 IN (1, NULL)` is TRUE. The trap is specific to `NOT IN`.\n- Make the foreign key `NOT NULL` when a NULL has no business meaning; here NULL meaningfully represents a guest checkout.",
+   "bn": "- **`LEFT JOIN ... WHERE o.id IS NULL`:** এমন column check করো যেটা আসল match-এ কখনো NULL হতে পারে না (primary key), nullable column নয়।\n- **Performance:** PostgreSQL, SQL Server আর Oracle `NOT EXISTS`-কে একটা দক্ষ anti-join হিসেবে plan করে। NULL-এর এই অর্থের *কারণেই* `NOT IN`-কে সবসময় anti-join-এ রূপান্তর করা যায় না, তাই এটা ধীরও হতে পারে।\n- `NOT` ছাড়া `IN` NULL-এর সাথে নিরাপদ: `1 IN (1, NULL)` TRUE। ফাঁদটা শুধু `NOT IN`-এর।\n- NULL-এর কোনো business অর্থ না থাকলে foreign key `NOT NULL` করো; এখানে NULL অর্থবহভাবে guest checkout বোঝায়।"
+  },
+  "interviewTip": {
+   "en": "Write `NOT EXISTS` first, then volunteer the `NOT IN` + NULL explanation by expanding it into `<>` comparisons — that expansion is the clearest way to show you truly understand three-valued logic.",
+   "bn": "আগে `NOT EXISTS` লেখো, তারপর নিজে থেকেই `NOT IN` + NULL ব্যাখ্যা দাও — `<>` তুলনাগুলোতে ভেঙে দেখিয়ে। Three-valued logic যে তুমি সত্যিই বোঝো, সেটা দেখানোর সবচেয়ে পরিষ্কার উপায় এই ভেঙে দেখানো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Subquery Expressions (EXISTS, IN, NOT IN)",
+    "url": "https://www.postgresql.org/docs/current/functions-subquery.html"
+   },
+   {
+    "title": "PostgreSQL docs — Joins Between Tables",
+    "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Find customers who ordered in September but not in October.",
+    "bn": "যারা September-এ order দিয়েছে কিন্তু October-এ দেয়নি, তাদের বের করো।"
+   },
+   {
+    "en": "Is `EXCEPT` another way to do this? What are its limitations?",
+    "bn": "`EXCEPT` কি এটা করার আরেকটা উপায়? এর সীমাবদ্ধতা কী?"
+   }
+  ],
+  "related": [
+   "sql-006",
+   "sql-015"
+  ],
+  "commonMistakes": {
+   "en": "Using `NOT IN` against a nullable column, or checking a nullable right-table column for `IS NULL` in the LEFT JOIN version.",
+   "bn": "Nullable column-এর বিরুদ্ধে `NOT IN` ব্যবহার করা, অথবা LEFT JOIN version-এ ডান table-এর nullable column-এ `IS NULL` check করা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "SELECT c.id, c.name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1\n  FROM orders o\n  WHERE o.customer_id = c.id\n)\nORDER BY c.id;",
+   "output": " id | name\n----+-------\n  2 | Karim\n  4 | Sumi"
+  },
+  "setup": {
+   "language": "sql",
+   "source": "CREATE TABLE customers (\n  id   INT PRIMARY KEY,\n  name VARCHAR(50) NOT NULL\n);\n\nCREATE TABLE orders (\n  id          INT PRIMARY KEY,\n  customer_id INT REFERENCES customers(id),   -- NULL = guest checkout\n  amount      NUMERIC(10,2) NOT NULL\n);\n\nINSERT INTO customers (id, name) VALUES\n  (1, 'Rahim'), (2, 'Karim'), (3, 'Nadia'), (4, 'Sumi');\n\nINSERT INTO orders (id, customer_id, amount) VALUES\n  (101, 1,    1500.00),\n  (102, 1,     700.00),\n  (103, 3,    1200.00),\n  (104, NULL,  450.00);"
+  },
+  "extraCode": [
+   {
+    "language": "sql",
+    "source": "-- LEFT JOIN ... IS NULL: also returns Karim and Sumi\nSELECT c.id, c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL\nORDER BY c.id;\n\n-- TRAP: returns 0 rows, because the subquery contains a NULL\nSELECT c.id, c.name\nFROM customers c\nWHERE c.id NOT IN (SELECT customer_id FROM orders);\n\n-- if you must use NOT IN, exclude NULLs explicitly\nSELECT c.id, c.name\nFROM customers c\nWHERE c.id NOT IN (SELECT customer_id FROM orders WHERE customer_id IS NOT NULL);",
+    "label": {
+     "en": "LEFT JOIN version (same result) and the NOT IN trap (0 rows)",
+     "bn": "LEFT JOIN version (একই ফলাফল) আর NOT IN ফাঁদ (0 row)"
+    }
+   }
+  ],
+  "technology": "sql"
+ }
+]

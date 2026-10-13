@@ -1,0 +1,576 @@
+[
+ {
+  "id": "css-001",
+  "subtopic": "Box Model",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "box-model",
+   "box-sizing",
+   "padding",
+   "margin",
+   "output"
+  ],
+  "technologyVersion": "Version-independent (CSS)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the rendered width (border edge to border edge) of `.a` and of `.b`, and how wide is the content area of `.b`? How much vertical space separates the two boxes?",
+   "bn": "`.a` আর `.b`-এর rendered width (এক border থেকে আরেক border পর্যন্ত) কত, আর `.b`-এর content area কতটা চওড়া? দুটো box-এর মাঝে vertical ফাঁক কতটুকু?"
+  },
+  "answer": {
+   "en": "With the default `box-sizing: content-box`, `width` sets only the **content** width; padding and border are added on top, so `.a` is 200 + 40 + 10 = **250px**. With `box-sizing: border-box`, `width` includes padding and border, so `.b` stays **200px** and its content area becomes 200 − 40 − 10 = **150px**. Margin is never part of the box's width.\n\nThe gap between them is **10px**, not 20px: adjacent vertical margins of block boxes in normal flow **collapse** to the larger of the two.",
+   "bn": "Default `box-sizing: content-box`-এ `width` শুধু **content**-এর width ঠিক করে; padding আর border তার উপর যোগ হয়, তাই `.a` হয় 200 + 40 + 10 = **250px**। `box-sizing: border-box`-এ `width`-এর মধ্যেই padding আর border ধরা হয়, তাই `.b` **200px**-ই থাকে আর তার content area হয় 200 − 40 − 10 = **150px**। Margin কখনো box-এর width-এর অংশ নয়।\n\nদুটোর মাঝের ফাঁক **10px**, 20px নয়: normal flow-তে পাশাপাশি থাকা block box-এর vertical margin **collapse** করে দুটোর মধ্যে বড়টার সমান হয়।"
+  },
+  "explanation": {
+   "en": "- **Why teams reset to `border-box`:** it makes `width: 50%` plus padding behave intuitively. The common reset is `*, *::before, *::after { box-sizing: border-box; }`.\n- **Edge case:** with `border-box`, if padding + border exceed the width, the content area becomes 0 and the box grows anyway.\n- **Margin collapsing** only happens to vertical margins of blocks in normal flow. It doesn't happen inside flex or grid containers, or for floated/absolutely positioned elements, which is why the same margins can \"double\" after switching a parent to `display: flex`.\n- **DevTools:** the box-model diagram in the Computed tab shows content, padding, border and margin values — the fastest way to settle \"why is this box wider than I expected?\".",
+   "bn": "- **Team-রা কেন `border-box`-এ reset করে:** এতে padding-সহ `width: 50%` প্রত্যাশামতো আচরণ করে। সাধারণ reset হলো `*, *::before, *::after { box-sizing: border-box; }`।\n- **Edge case:** `border-box`-এ padding + border যদি width-এর চেয়ে বেশি হয়, তাহলে content area 0 হয়ে যায় আর box তবুও বড় হয়।\n- **Margin collapsing** শুধু normal flow-এর block-এর vertical margin-এ ঘটে। Flex বা grid container-এর ভেতরে, কিংবা float/absolutely positioned element-এ এটা হয় না — তাই parent-কে `display: flex` করার পর একই margin \"দ্বিগুণ\" হয়ে যেতে পারে।\n- **DevTools:** Computed tab-এর box-model diagram-এ content, padding, border আর margin-এর মান দেখা যায় — \"box-টা কেন প্রত্যাশার চেয়ে চওড়া?\" প্রশ্নের দ্রুততম সমাধান।"
+  },
+  "interviewTip": {
+   "en": "Show the arithmetic aloud for both boxes, then add the margin-collapse twist — interviewers often hide it in box-model questions to see if you notice.",
+   "bn": "দুটো box-এর হিসাবই মুখে মুখে দেখাও, তারপর margin collapse-এর মোড়টা যোগ করো — interviewer প্রায়ই box-model প্রশ্নে এটা লুকিয়ে রাখে, তুমি খেয়াল করো কি না দেখতে।"
+  },
+  "references": [
+   {
+    "title": "MDN — box-sizing",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing"
+   },
+   {
+    "title": "web.dev — Learn CSS: Box model",
+    "url": "https://web.dev/learn/css/box-model"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When do vertical margins NOT collapse?",
+    "bn": "কখন vertical margin collapse করে না?"
+   },
+   {
+    "en": "Why is `box-sizing` often set with `inherit` on `*` and `border-box` on `html`?",
+    "bn": "কেন অনেক সময় `html`-এ `border-box` আর `*`-এ `inherit` দিয়ে `box-sizing` set করা হয়?"
+   }
+  ],
+  "related": [
+   "css-014"
+  ],
+  "commonMistakes": {
+   "en": "Including margin in the width, assuming `border-box` is the default, or answering 20px for the gap.",
+   "bn": "Width-এর মধ্যে margin ধরা, `border-box`-কে default ভাবা, অথবা ফাঁক 20px বলা।"
+  },
+  "code": {
+   "language": "html",
+   "source": "<div class=\"a\">A</div>\n<div class=\"b\">B</div>\n\n<style>\n  .a, .b {\n    width: 200px;\n    padding: 20px;\n    border: 5px solid #333;\n    margin: 10px;\n  }\n  .b { box-sizing: border-box; }\n</style>",
+   "output": ".a → 250px wide (200 content + 2×20 padding + 2×5 border)\n.b → 200px wide; its content area shrinks to 150px\nGap between them → 10px (the vertical margins collapse)"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-002",
+  "subtopic": "Specificity and Inheritance",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "specificity",
+   "cascade",
+   "selectors"
+  ],
+  "technologyVersion": "Version-independent (CSS)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What colour is the text \"Hello\"?",
+   "bn": "\"Hello\" text-এর রং কী হবে?"
+  },
+  "answer": {
+   "en": "**Red.** Specificity is compared as a tuple (IDs, classes/attributes/pseudo-classes, elements/pseudo-elements):\n- `#main p` → (1, 0, 1)\n- `.content .text` → (0, 2, 0)\n- `p.text` → (0, 1, 1)\n\nThe ID column is compared first, so (1, 0, 1) wins.",
+   "bn": "**লাল (red)।** Specificity একটা tuple হিসেবে তুলনা করা হয় (ID, class/attribute/pseudo-class, element/pseudo-element):\n- `#main p` → (1, 0, 1)\n- `.content .text` → (0, 2, 0)\n- `p.text` → (0, 1, 1)\n\nID column আগে তুলনা হয়, তাই (1, 0, 1) জেতে।"
+  },
+  "explanation": {
+   "en": "The tempting answer is green: \"two classes beat one ID plus one element\" sounds reasonable if you add up points. But specificity isn't a single number — columns are compared left to right, and no number of classes ever beats one ID ((0, 11, 0) still loses to (1, 0, 0)).\n\nSource order only matters when specificity is equal. Above all of this sit inline `style` attributes and `!important` declarations, and — in modern CSS — cascade layers, which are compared *before* specificity.\n\nPractical takeaway: avoid IDs in selectors for styling. They create specificity \"spikes\" that force others to escalate with more IDs or `!important`.",
+   "bn": "প্রলোভনজনক উত্তর সবুজ: point যোগ করে ভাবলে \"দুটো class একটা ID আর একটা element-কে হারায়\" যুক্তিসংগত শোনায়। কিন্তু specificity একক কোনো সংখ্যা নয় — column-গুলো বাঁ থেকে ডানে তুলনা হয়, আর যত class-ই থাকুক, একটা ID-কে কখনো হারাতে পারে না ((0, 11, 0) তখনো (1, 0, 0)-এর কাছে হারে)।\n\nSpecificity সমান হলেই কেবল source order গুরুত্বপূর্ণ। এসবের উপরে আছে inline `style` attribute আর `!important` declaration, আর আধুনিক CSS-এ cascade layer, যেগুলো specificity-র *আগেই* তুলনা হয়।\n\nবাস্তব শিক্ষা: styling-এর selector-এ ID এড়িয়ে চলো। এগুলো specificity-তে হঠাৎ \"লাফ\" তৈরি করে, ফলে অন্যদের আরও ID বা `!important` দিয়ে পাল্লা দিতে হয়।"
+  },
+  "interviewTip": {
+   "en": "Write the three tuples out loud before answering. Saying \"columns, not points\" signals you know why the intuitive answer is wrong.",
+   "bn": "উত্তর দেওয়ার আগে তিনটা tuple মুখে বলো। \"Point নয়, column\" — এটা বললে বোঝা যায় তুমি জানো সহজাত উত্তরটা কেন ভুল।"
+  },
+  "references": [
+   {
+    "title": "web.dev — Learn CSS: Specificity",
+    "url": "https://web.dev/learn/css/specificity"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "code": {
+   "language": "html",
+   "source": "<div id=\"main\" class=\"content\">\n  <p class=\"text\">Hello</p>\n</div>\n\n<style>\n  #main p        { color: red; }\n  .content .text { color: green; }\n  p.text         { color: blue; }\n</style>"
+  },
+  "options": [
+   {
+    "en": "Red",
+    "bn": "লাল (red)"
+   },
+   {
+    "en": "Green",
+    "bn": "সবুজ (green)"
+   },
+   {
+    "en": "Blue",
+    "bn": "নীল (blue)"
+   },
+   {
+    "en": "Green, because it has two classes and appears after `#main p`",
+    "bn": "সবুজ, কারণ এতে দুটো class আছে আর এটা `#main p`-এর পরে লেখা"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "css"
+ },
+ {
+  "id": "css-003",
+  "subtopic": "Specificity and Inheritance",
+  "difficulty": "easy",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "inheritance",
+   "specificity",
+   "cascade",
+   "output"
+  ],
+  "technologyVersion": "Version-independent (CSS)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What colour and font weight do the paragraph text and the `<span>` end up with?",
+   "bn": "Paragraph-এর text আর `<span>` শেষ পর্যন্ত কোন রং আর কোন font weight পাবে?"
+  },
+  "answer": {
+   "en": "- `<p>` is **blue**: a rule that targets an element directly always beats a value it would inherit — no matter how specific the ancestor's selector is. `#card` has high specificity, but specificity only competes between rules that match the *same* element.\n- `<p>` is **bold**: no rule sets `font-weight` on `<p>`, and `font-weight` is an inherited property, so it inherits from `#card`.\n- `<span>` is **blue and bold**: nothing targets the span, so it inherits both values from its parent `<p>`.",
+   "bn": "- `<p>` **নীল**: যে rule সরাসরি element-টাকে target করে, সেটা সবসময় inherit হয়ে আসা value-কে হারায় — ancestor-এর selector যত specific-ই হোক। `#card`-এর specificity বেশি, কিন্তু specificity-র প্রতিযোগিতা শুধু *একই* element-কে match করা rule-গুলোর মধ্যে।\n- `<p>` **bold**: কোনো rule `<p>`-এ `font-weight` set করেনি, আর `font-weight` একটা inherited property, তাই এটা `#card` থেকে inherit করে।\n- `<span>` **নীল আর bold**: কোনো rule span-কে target করেনি, তাই দুটো value-ই parent `<p>` থেকে inherit করে।"
+  },
+  "explanation": {
+   "en": "- **Inherited vs non-inherited properties:** text-related properties (`color`, `font-*`, `line-height`, `letter-spacing`, `visibility`, `cursor`) inherit by default; box-related ones (`margin`, `padding`, `border`, `background`, `width`) don't.\n- **Keywords to control it:** `inherit` (take the parent's value), `initial` (the property's spec default — e.g. `display: initial` is `inline`, which surprises people), `unset` (inherit if inheritable, else initial) and `revert` (go back to the browser's default style), plus `revert-layer`.\n- **Classic surprise:** form controls don't inherit `font` from the page in most browser default styles — that's why resets include `button, input, select, textarea { font: inherit; }`.",
+   "bn": "- **Inherited বনাম non-inherited property:** text-সংক্রান্ত property (`color`, `font-*`, `line-height`, `letter-spacing`, `visibility`, `cursor`) default-ভাবে inherit হয়; box-সংক্রান্তগুলো (`margin`, `padding`, `border`, `background`, `width`) হয় না।\n- **নিয়ন্ত্রণের keyword:** `inherit` (parent-এর value নাও), `initial` (property-র spec অনুযায়ী default — যেমন `display: initial` হলো `inline`, যা অনেককে অবাক করে), `unset` (inheritable হলে inherit, নইলে initial) আর `revert` (browser-এর default style-এ ফিরে যাও), সাথে `revert-layer`।\n- **পরিচিত চমক:** বেশিরভাগ browser-এর default style-এ form control page থেকে `font` inherit করে না — এজন্যই reset-এ থাকে `button, input, select, textarea { font: inherit; }`।"
+  },
+  "interviewTip": {
+   "en": "State the rule in one line — \"an inherited value has no specificity; any matching rule beats it\" — then apply it to each element.",
+   "bn": "এক লাইনে নিয়মটা বলো — \"inherit হওয়া value-র কোনো specificity নেই; match করা যেকোনো rule তাকে হারায়\" — তারপর প্রতিটা element-এ প্রয়োগ করো।"
+  },
+  "references": [
+   {
+    "title": "web.dev — Learn CSS: Inheritance",
+    "url": "https://web.dev/learn/css/inheritance"
+   },
+   {
+    "title": "web.dev — Learn CSS: Specificity",
+    "url": "https://web.dev/learn/css/specificity"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What's the difference between `initial`, `unset` and `revert`?",
+    "bn": "`initial`, `unset` আর `revert`-এর পার্থক্য কী?"
+   },
+   {
+    "en": "Why don't buttons pick up your page font by default?",
+    "bn": "Button কেন default-ভাবে তোমার page-এর font নেয় না?"
+   }
+  ],
+  "related": [
+   "css-002",
+   "css-009"
+  ],
+  "commonMistakes": {
+   "en": "Answering red because `#card` \"has higher specificity\", or assuming `font-weight` stops at the `<p>`.",
+   "bn": "`#card`-এর \"specificity বেশি\" বলে লাল বলা, অথবা `font-weight` `<p>`-এ গিয়ে থেমে যায় বলে ধরে নেওয়া।"
+  },
+  "code": {
+   "language": "html",
+   "source": "<div id=\"card\">\n  <p>Price: <span>৳1,250</span></p>\n</div>\n\n<style>\n  #card { color: red; font-weight: bold; }\n  p     { color: blue; }\n</style>",
+   "output": "<p> text  → blue, bold\n<span>    → blue, bold"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-012",
+  "subtopic": "Cascade and Layers",
+  "difficulty": "medium",
+  "type": "output",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "cascade-layers",
+   "layer",
+   "cascade",
+   "specificity",
+   "output"
+  ],
+  "technologyVersion": "CSS Cascade Level 5; @layer Baseline widely available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What background colour does each element get?",
+   "bn": "প্রতিটা element কোন background colour পাবে?"
+  },
+  "answer": {
+   "en": "In the cascade, **layer order is decided before specificity**.\n- The `@layer reset, base, components;` statement fixes the order: later layers win, so `components` beats `base`.\n- Styles **not in any layer** form an implicit final layer that beats all layered styles (for normal, non-`!important` declarations).\n\nSo `#buy` is **gray**: the unlayered `button` selector, with a tiny specificity of (0, 0, 1), beats both layered rules. `#cart` is **green**: `.btn` in `components` beats the ID selector in `base`, because the layer comparison happens first.",
+   "bn": "Cascade-এ **specificity-র আগেই layer-এর ক্রম ঠিক হয়**।\n- `@layer reset, base, components;` statement ক্রমটা ঠিক করে দেয়: পরের layer জেতে, তাই `components` `base`-কে হারায়।\n- **কোনো layer-এ নেই** এমন style একটা অদৃশ্য শেষ layer তৈরি করে, যেটা সব layered style-কে হারায় (normal, অর্থাৎ `!important` নয় এমন declaration-এর ক্ষেত্রে)।\n\nতাই `#buy` **ধূসর (gray)**: unlayered `button` selector, যার specificity মাত্র (0, 0, 1), দুটো layered rule-কেই হারায়। `#cart` **সবুজ (green)**: `components`-এর `.btn` `base`-এর ID selector-কে হারায়, কারণ layer-এর তুলনা আগে হয়।"
+  },
+  "explanation": {
+   "en": "Step by step for `#cart`: candidates are `base` → red (specificity 1,0,0) and `components` → green (0,1,0). Different layers, so specificity is never compared — the later layer wins.\n\n**`!important` reverses layer order:** an `!important` declaration in an *earlier* layer beats `!important` in later layers, and layered `!important` beats unlayered `!important`. This lets a `reset` layer protect a few critical rules.\n\n**Why it's useful:**\n- Put third-party CSS in a low layer — `@import url(\"vendor.css\") layer(vendor);` — and your component styles override it without specificity hacks.\n- Layer order is declared once at the top, so file load order stops mattering.\n- Gotcha during migration: unlayered legacy CSS beats everything you put in layers. Wrap legacy code in its own layer too.",
+   "bn": "`#cart`-এর জন্য ধাপে ধাপে: প্রার্থী দুটো — `base` → লাল (specificity 1,0,0) আর `components` → সবুজ (0,1,0)। দুটো আলাদা layer-এ, তাই specificity তুলনাই হয় না — পরের layer জেতে।\n\n**`!important` layer-এর ক্রম উল্টে দেয়:** *আগের* layer-এর `!important` declaration পরের layer-এর `!important`-কে হারায়, আর layered `!important` unlayered `!important`-কে হারায়। এতে একটা `reset` layer কয়েকটা গুরুত্বপূর্ণ rule রক্ষা করতে পারে।\n\n**কেন কাজের:**\n- Third-party CSS নিচের দিকের একটা layer-এ রাখো — `@import url(\"vendor.css\") layer(vendor);` — তাহলে specificity hack ছাড়াই তোমার component style সেটাকে override করবে।\n- Layer-এর ক্রম শুরুতে একবারই ঘোষণা করা হয়, তাই file কোন ক্রমে load হলো তা আর গুরুত্বপূর্ণ থাকে না।\n- Migration-এর সময়ের ফাঁদ: unlayered legacy CSS layer-এ রাখা সবকিছুকে হারায়। তাই legacy code-কেও নিজস্ব একটা layer-এ wrap করো।"
+  },
+  "interviewTip": {
+   "en": "Say the cascade order explicitly — origin/importance → layers → specificity → source order — then apply it. Mentioning that unlayered styles win shows you've actually migrated code to layers.",
+   "bn": "Cascade-এর ক্রম স্পষ্ট করে বলো — origin/importance → layer → specificity → source order — তারপর প্রয়োগ করো। Unlayered style যে জেতে, এটা বললে বোঝা যায় তুমি সত্যিই code layer-এ migrate করেছ।"
+  },
+  "references": [
+   {
+    "title": "MDN — @layer",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@layer"
+   },
+   {
+    "title": "web.dev — Learn CSS: The cascade",
+    "url": "https://web.dev/learn/css/the-cascade"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens if a rule in the `reset` layer uses `!important`?",
+    "bn": "`reset` layer-এর কোনো rule-এ `!important` থাকলে কী হবে?"
+   },
+   {
+    "en": "How would you bring Bootstrap into a layer?",
+    "bn": "Bootstrap-কে কীভাবে একটা layer-এ আনবে?"
+   }
+  ],
+  "related": [
+   "css-002",
+   "css-030"
+  ],
+  "commonMistakes": {
+   "en": "Assuming the ID selector wins because of specificity, assuming unlayered styles have the *lowest* priority, or forgetting that `!important` flips layer order.",
+   "bn": "Specificity-র কারণে ID selector জিতবে ধরে নেওয়া, unlayered style-এর priority *সবচেয়ে কম* ভাবা, অথবা ভুলে যাওয়া যে `!important` layer-এর ক্রম উল্টে দেয়।"
+  },
+  "code": {
+   "language": "html",
+   "source": "<button class=\"btn\" id=\"buy\">Buy now</button>\n<a class=\"btn\" id=\"cart\" href=\"/cart\">Cart</a>\n\n<style>\n  @layer reset, base, components;\n\n  @layer components {\n    .btn { background: green; }\n  }\n\n  @layer base {\n    #buy.btn, #cart { background: red; }\n  }\n\n  button { background: gray; }\n</style>",
+   "output": "#buy  (button) → gray\n#cart (link)   → green"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-013",
+  "subtopic": "Pseudo-classes and Pseudo-elements",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "has",
+   "parent-selector",
+   "selectors",
+   "performance"
+  ],
+  "technologyVersion": "CSS Selectors Level 4; :has() Baseline widely available (since Dec 2023)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What does `:has()` let you do that CSS couldn't do before? Give practical examples, and explain its limits and performance considerations.",
+   "bn": "`:has()` দিয়ে এমন কী করা যায় যা আগে CSS-এ করা যেত না? বাস্তব উদাহরণ দাও, আর এর সীমাবদ্ধতা ও performance-এর দিকগুলো ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "`:has()` is the long-awaited **\"parent\" (relational) selector**: it matches an element based on what's inside it or after it. `.card:has(img)` selects cards that *contain* an image — previously you needed JavaScript to add a class.\n\nPractical uses:\n- **Form state:** highlight a whole field group when its input is invalid — `.field:has(input:user-invalid)`.\n- **Layout by content:** a card switches to a two-column layout only if it has an image — `.card:has(> img)`.\n- **Quantity queries:** compact rows when a list has five or more items — `.cart-items:has(> li:nth-child(5))`.\n- **Sibling-aware styling:** `h2:has(+ p)` styles a heading only when a paragraph follows it.\n\nLimits: `:has()` can't be nested inside another `:has()`, pseudo-elements aren't allowed inside it, and its specificity is that of its most specific argument (like `:is()`). It's Baseline widely available, so it's safe to use; for very old browsers, design it as an enhancement.",
+   "bn": "`:has()` হলো বহু প্রতীক্ষিত **\"parent\" (relational) selector**: কোনো element-এর ভেতরে বা পরে কী আছে তার ভিত্তিতে সেটাকে match করে। `.card:has(img)` সেই card-গুলো select করে যাদের ভেতরে image *আছে* — আগে এর জন্য JavaScript দিয়ে class যোগ করতে হতো।\n\nবাস্তব ব্যবহার:\n- **Form state:** input invalid হলে পুরো field group highlight করা — `.field:has(input:user-invalid)`।\n- **Content অনুযায়ী layout:** card-এ image থাকলেই কেবল দুই-column layout — `.card:has(> img)`।\n- **Quantity query:** list-এ পাঁচ বা তার বেশি item থাকলে compact row — `.cart-items:has(> li:nth-child(5))`।\n- **Sibling দেখে styling:** `h2:has(+ p)` heading-কে শুধু তখনই style করে, যখন তার পরে একটা paragraph থাকে।\n\nসীমাবদ্ধতা: `:has()`-এর ভেতরে আরেকটা `:has()` nest করা যায় না, এর ভেতরে pseudo-element চলে না, আর এর specificity হয় এর সবচেয়ে specific argument-এর সমান (`:is()`-এর মতো)। এটা Baseline widely available, তাই নিরাপদে ব্যবহার করা যায়; খুব পুরোনো browser-এর জন্য এটাকে enhancement হিসেবে design করো।"
+  },
+  "explanation": {
+   "en": "**Performance:** `:has()` makes the browser re-check the subject element when its descendants change. Keep it cheap:\n- Anchor it to a specific, small container (`.filters:has(...)`), not `body`, `:root` or `*` — on a big page every DOM change below the anchor can trigger re-evaluation.\n- Constrain the inner selector with `>` or `+` instead of open-ended descendant matching.\n- Patterns like `body:has(dialog[open])` for scroll locking are common and fine in moderation, but don't build your whole state system on body-level `:has()`.\n\n**Robustness:** unlike `:is()`/`:where()`, an unsupported or invalid selector inside `:has()` invalidates the whole rule, so test new pseudo-classes carefully. Feature-detect with `@supports selector(:has(a))` if you need a fallback.\n\n**Combined with `:user-invalid`**, `:has()` gives you \"show errors only after interaction\" styling with zero JavaScript.",
+   "bn": "**Performance:** descendant বদলালে `:has()`-এর কারণে browser-কে subject element আবার check করতে হয়। খরচ কম রাখতে:\n- একে নির্দিষ্ট, ছোট container-এ anchor করো (`.filters:has(...)`), `body`, `:root` বা `*`-এ নয় — বড় page-এ anchor-এর নিচের প্রতিটা DOM পরিবর্তন re-evaluation ঘটাতে পারে।\n- ভেতরের selector খোলা descendant matching না করে `>` বা `+` দিয়ে সীমিত করো।\n- Scroll lock-এর জন্য `body:has(dialog[open])`-এর মতো pattern প্রচলিত এবং পরিমিতভাবে ঠিক আছে, কিন্তু পুরো state system body-level `:has()`-এর উপর দাঁড় করিও না।\n\n**নির্ভরযোগ্যতা:** `:is()`/`:where()`-এর মতো নয় — `:has()`-এর ভেতরে unsupported বা invalid selector থাকলে পুরো rule-টাই invalid হয়ে যায়, তাই নতুন pseudo-class সাবধানে test করো। Fallback লাগলে `@supports selector(:has(a))` দিয়ে feature detect করো।\n\n**`:user-invalid`-এর সাথে মিলিয়ে** `:has()` দিয়ে কোনো JavaScript ছাড়াই \"interaction-এর পরেই শুধু error দেখাও\" ধরনের styling করা যায়।"
+  },
+  "interviewTip": {
+   "en": "Give one example that used to require JavaScript (form group error state) — that's the \"why it matters\". Then show you know the performance guidance about broad anchors; few candidates mention it.",
+   "bn": "এমন একটা উদাহরণ দাও যেটার জন্য আগে JavaScript লাগত (form group-এর error state) — এটাই \"কেন গুরুত্বপূর্ণ\"। তারপর দেখাও যে তুমি broad anchor নিয়ে performance-এর নির্দেশনা জানো; খুব কম candidate এটা বলে।"
+  },
+  "references": [
+   {
+    "title": "MDN — :has()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/:has"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is `:has()` specificity calculated for `.card:has(#promo, .badge)`?",
+    "bn": "`.card:has(#promo, .badge)`-এর specificity কীভাবে হিসাব হয়?"
+   },
+   {
+    "en": "What's the difference between `:invalid` and `:user-invalid`?",
+    "bn": "`:invalid` আর `:user-invalid`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "css-023",
+   "css-031"
+  ],
+  "commonMistakes": {
+   "en": "Calling it \"only a parent selector\" (it also handles siblings), using `body:has(...)` for everything, or assuming `:has()` adds zero specificity like `:where()`.",
+   "bn": "একে \"শুধু parent selector\" বলা (এটা sibling-ও সামলায়), সবকিছুর জন্য `body:has(...)` ব্যবহার করা, অথবা ধরে নেওয়া যে `:where()`-এর মতো `:has()`-ও কোনো specificity যোগ করে না।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* Error state on the whole field after the user interacts */\n.field:has(input:user-invalid) {\n  border-inline-start: 4px solid #b00020;\n}\n.field:has(input:user-invalid) .hint { color: #b00020; }\n\n/* Two-column card only when it has a direct image child */\n.card:has(> img) {\n  display: grid;\n  grid-template-columns: 7.5rem 1fr;\n  gap: 0.75rem;\n}\n\n/* Quantity query: tighter rows when the cart has 5+ items */\n.cart-items:has(> li:nth-child(5)) { --row-padding: 0.25rem; }\n\n/* Fallback-aware enhancement */\n@supports not selector(:has(a)) {\n  .field.is-invalid { border-inline-start: 4px solid #b00020; }\n}"
+  },
+  "technology": "css"
+ },
+ {
+  "id": "css-014",
+  "subtopic": "Flexbox",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "flexbox",
+   "min-width",
+   "overflow",
+   "text-overflow",
+   "debugging"
+  ],
+  "technologyVersion": "Version-independent (CSS Flexbox)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "On a 360px-wide phone, this contact row overflows horizontally: the long name doesn't get an ellipsis, the \"Call\" button is pushed off-screen, and the page scrolls sideways. Why, and how do you fix it?",
+   "bn": "360px চওড়া phone-এ এই contact row horizontally overflow করছে: লম্বা নামে ellipsis আসছে না, \"Call\" button screen-এর বাইরে চলে যাচ্ছে, আর page পাশে scroll হচ্ছে। কেন, আর কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**Root cause:** flex items have `min-width: auto` by default, which means they can't shrink below their **min-content width**. `.body` contains a `nowrap` line and a long unbreakable tracking code, so its min-content width is huge. `flex: 1` asks it to shrink, but `min-width: auto` forbids it — the row overflows, and the ellipsis never triggers because `.name` is never narrower than its text.\n\n**Fix:**\n- `min-width: 0` on `.body` lets it shrink below its content size, so `overflow: hidden` + `text-overflow: ellipsis` on `.name` can finally kick in.\n- `overflow-wrap: anywhere` on the tracking code lets the long string wrap (and, unlike `break-word`, it also reduces the min-content size).\n- `flex-shrink: 0` on the avatar and button makes it explicit that those keep their size.",
+   "bn": "**মূল কারণ:** flex item-এর default `min-width: auto`, অর্থাৎ এগুলো নিজের **min-content width**-এর চেয়ে ছোট হতে পারে না। `.body`-র ভেতরে একটা `nowrap` line আর ভাঙা যায় না এমন লম্বা tracking code আছে, তাই এর min-content width বিশাল। `flex: 1` একে ছোট হতে বলে, কিন্তু `min-width: auto` তা হতে দেয় না — row overflow করে, আর ellipsis কখনো কাজ করে না কারণ `.name` কখনো তার text-এর চেয়ে সরু হয় না।\n\n**সমাধান:**\n- `.body`-তে `min-width: 0` দিলে এটা content size-এর চেয়েও ছোট হতে পারে, তখন `.name`-এর `overflow: hidden` + `text-overflow: ellipsis` অবশেষে কাজ করে।\n- Tracking code-এ `overflow-wrap: anywhere` দিলে লম্বা string wrap হতে পারে (আর `break-word`-এর মতো নয়, এটা min-content size-ও কমায়)।\n- Avatar আর button-এ `flex-shrink: 0` দিলে স্পষ্ট হয় যে এগুলো নিজেদের মাপ বজায় রাখবে।"
+  },
+  "explanation": {
+   "en": "- **Why `min-width: auto` exists:** it protects content from being crushed by default. The downside shows up with long words, URLs, `<pre>`/`<code>`, tables or nested flex containers.\n- **Same bug in Grid:** `1fr` means `minmax(auto, 1fr)`, so a grid column with a long `<pre>` refuses to shrink. Use `minmax(0, 1fr)`.\n- **Nested flex:** if `.body` is itself a flex container, its children may need `min-width: 0` too — the constraint applies at each level.\n- **Debugging tip:** in DevTools, hover the flex item and check its computed `min-width`; Chrome's flexbox overlay also shows how much each item shrank or grew.\n- `overflow: hidden` on the item also resets the automatic minimum (because it's a scroll container), but `min-width: 0` is the clearer intent.",
+   "bn": "- **`min-width: auto` কেন আছে:** default-ভাবে content যেন চেপে না যায়, সেজন্য। এর অসুবিধা দেখা দেয় লম্বা শব্দ, URL, `<pre>`/`<code>`, table বা nested flex container থাকলে।\n- **Grid-এ একই bug:** `1fr` মানে `minmax(auto, 1fr)`, তাই লম্বা `<pre>` থাকা grid column ছোট হতে চায় না। `minmax(0, 1fr)` ব্যবহার করো।\n- **Nested flex:** `.body` নিজেও যদি flex container হয়, তাহলে তার children-এরও `min-width: 0` লাগতে পারে — এই সীমাবদ্ধতা প্রতিটা স্তরে প্রযোজ্য।\n- **Debugging tip:** DevTools-এ flex item-এর উপর hover করে তার computed `min-width` দেখো; Chrome-এর flexbox overlay প্রতিটা item কতটা ছোট বা বড় হলো তাও দেখায়।\n- Item-এ `overflow: hidden` দিলেও automatic minimum reset হয় (কারণ এটা তখন scroll container), তবে `min-width: 0` উদ্দেশ্যটা বেশি স্পষ্ট করে।"
+  },
+  "interviewTip": {
+   "en": "Name the property (`min-width: auto`) and the concept (min-content size) in your first sentence. That's the insight; the fix is one line once you've said it.",
+   "bn": "প্রথম বাক্যেই property (`min-width: auto`) আর ধারণাটার (min-content size) নাম বলো। মূল অন্তর্দৃষ্টি এটাই; এটা বলার পর সমাধান মাত্র এক লাইন।"
+  },
+  "references": [
+   {
+    "title": "MDN — min-width",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/min-width"
+   },
+   {
+    "title": "MDN — overflow-wrap",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-wrap"
+   },
+   {
+    "title": "web.dev — Learn CSS: Flexbox",
+    "url": "https://web.dev/learn/css/flexbox"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why does `1fr` in a grid sometimes overflow, and what's the fix?",
+    "bn": "Grid-এ `1fr` কেন মাঝে মাঝে overflow করে, আর সমাধান কী?"
+   },
+   {
+    "en": "What's the difference between `overflow-wrap: break-word` and `anywhere`?",
+    "bn": "`overflow-wrap: break-word` আর `anywhere`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "css-005",
+   "css-027"
+  ],
+  "commonMistakes": {
+   "en": "Adding `overflow: hidden` to `body`, setting a fixed `width` on `.body`, or putting `text-overflow` on the flex item instead of the element whose text overflows.",
+   "bn": "`body`-তে `overflow: hidden` দেওয়া, `.body`-তে নির্দিষ্ট `width` দেওয়া, অথবা যে element-এর text overflow করছে তাতে না দিয়ে flex item-এ `text-overflow` দেওয়া।"
+  },
+  "code": {
+   "language": "html",
+   "source": "<div class=\"row\">\n  <img class=\"avatar\" src=\"/u/42.jpg\" width=\"48\" height=\"48\" alt=\"\">\n  <div class=\"body\">\n    <p class=\"name\">Mohammad Abdullah Al Mamun — Senior Procurement Officer, Chattogram</p>\n    <code class=\"tracking\">DK-TRACK-2026-000000000000000000000042</code>\n  </div>\n  <button type=\"button\">Call</button>\n</div>\n\n<style>\n  .row  { display: flex; gap: 12px; align-items: center; }\n  .body { flex: 1; }\n  .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n</style>"
+  },
+  "extraCode": [
+   {
+    "language": "css",
+    "source": ".row  { display: flex; gap: 12px; align-items: center; }\n.avatar, .row > button { flex-shrink: 0; }\n.body { flex: 1; min-width: 0; }   /* allow shrinking below min-content */\n.name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.tracking { overflow-wrap: anywhere; }",
+    "label": {
+     "en": "Fixed CSS",
+     "bn": "সংশোধিত CSS"
+    }
+   }
+  ],
+  "technology": "css"
+ },
+ {
+  "id": "css-023",
+  "subtopic": "Specificity and Inheritance",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 4,
+  "tags": [
+   "specificity",
+   "is",
+   "where",
+   "not",
+   "selectors"
+  ],
+  "technologyVersion": "CSS Selectors Level 4; :is()/:where()/:not() lists Baseline widely available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What colour is the \"Home\" link?",
+   "bn": "\"Home\" link-এর রং কী হবে?"
+  },
+  "answer": {
+   "en": "**Green.** Specificities:\n- `:where(#site-nav) .link.active` → `:where()` always counts as **zero** → (0, 2, 0)\n- `.nav a:not(#x)` → `:not()` takes its most specific argument, `#x` → (1, 1, 1)\n- `:is(.nav, #site-nav) .link` → `:is()` takes its most specific argument, `#site-nav` → (1, 1, 0)\n- `nav > a.link.active` → (0, 2, 2)\n\n(1, 1, 1) is the highest.",
+   "bn": "**সবুজ (green)।** Specificity-গুলো:\n- `:where(#site-nav) .link.active` → `:where()` সবসময় **শূন্য** গণ্য হয় → (0, 2, 0)\n- `.nav a:not(#x)` → `:not()` তার সবচেয়ে specific argument নেয়, `#x` → (1, 1, 1)\n- `:is(.nav, #site-nav) .link` → `:is()` তার সবচেয়ে specific argument নেয়, `#site-nav` → (1, 1, 0)\n- `nav > a.link.active` → (0, 2, 2)\n\n(1, 1, 1) সবচেয়ে বেশি।"
+  },
+  "explanation": {
+   "en": "The tempting answer is **blue**, for one of two reasons: people either think `:is()` only counts the argument that actually matched (it doesn't — it always uses the most specific argument in the list), or they forget that `:not(#x)` contributes a full ID even though the element doesn't have that ID. Both rules give green the edge: (1, 1, 1) beats (1, 1, 0) in the last column.\n\nPractical uses of these rules:\n- **`:where()`** is perfect for resets and library defaults that should be trivially overridable — zero specificity no matter what's inside.\n- **`:is()`** shortens long selector lists, but one ID inside it raises the whole selector's specificity — a hidden source of \"why can't I override this?\".\n- **`:not(#something)`** is an old hack to bump specificity; prefer cascade layers to control priority instead.\n- Native nesting's `&` behaves like `:is()` for specificity, so the same rule applies to nested selectors.",
+   "bn": "প্রলোভনজনক উত্তর **নীল**, দুটো কারণের একটায়: অনেকে ভাবে `:is()` শুধু আসলে match করা argument-টা গোনে (তা নয় — এটা সবসময় list-এর সবচেয়ে specific argument ব্যবহার করে), অথবা ভুলে যায় যে element-এর ওই ID না থাকলেও `:not(#x)` একটা পূর্ণ ID যোগ করে। এই দুই নিয়মে সবুজ এগিয়ে থাকে: শেষ column-এ (1, 1, 1) (1, 1, 0)-কে হারায়।\n\nএই নিয়মগুলোর বাস্তব ব্যবহার:\n- **`:where()`** reset আর library-র default-এর জন্য চমৎকার, যেগুলো সহজেই override করা যাওয়া উচিত — ভেতরে যাই থাকুক, specificity শূন্য।\n- **`:is()`** লম্বা selector list ছোট করে, কিন্তু এর ভেতরে একটা ID থাকলে পুরো selector-এর specificity বেড়ে যায় — \"এটা override করতে পারছি না কেন?\" সমস্যার একটা লুকানো উৎস।\n- **`:not(#something)`** specificity বাড়ানোর একটা পুরোনো hack; priority নিয়ন্ত্রণের জন্য এর বদলে cascade layer ব্যবহার করো।\n- Native nesting-এর `&` specificity-র ক্ষেত্রে `:is()`-এর মতো আচরণ করে, তাই nested selector-এও একই নিয়ম খাটে।"
+  },
+  "interviewTip": {
+   "en": "Compute all four tuples before picking. Then add one sentence on *when you'd use* `:where()` deliberately — that moves the answer from arithmetic to design.",
+   "bn": "উত্তর বাছার আগে চারটা tuple-ই হিসাব করো। তারপর এক বাক্যে বলো তুমি কখন ইচ্ছা করে `:where()` ব্যবহার করবে — এতে উত্তরটা শুধু অঙ্ক থেকে design-এর আলোচনায় পৌঁছায়।"
+  },
+  "references": [
+   {
+    "title": "MDN — :is()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/:is"
+   },
+   {
+    "title": "MDN — :where()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/:where"
+   },
+   {
+    "title": "web.dev — Learn CSS: Specificity",
+    "url": "https://web.dev/learn/css/specificity"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "code": {
+   "language": "html",
+   "source": "<nav id=\"site-nav\" class=\"nav\">\n  <a class=\"link active\" href=\"/\">Home</a>\n</nav>\n\n<style>\n  :where(#site-nav) .link.active  { color: red; }\n  .nav a:not(#x)                  { color: green; }\n  :is(.nav, #site-nav) .link      { color: blue; }\n  nav > a.link.active             { color: orange; }\n</style>"
+  },
+  "options": [
+   {
+    "en": "Red",
+    "bn": "লাল (red)"
+   },
+   {
+    "en": "Green",
+    "bn": "সবুজ (green)"
+   },
+   {
+    "en": "Blue",
+    "bn": "নীল (blue)"
+   },
+   {
+    "en": "Orange",
+    "bn": "কমলা (orange)"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "css"
+ },
+ {
+  "id": "css-030",
+  "subtopic": "CSS Architecture",
+  "difficulty": "extreme",
+  "type": "architecture",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "css-architecture",
+   "cascade-layers",
+   "design-tokens",
+   "scope",
+   "migration"
+  ],
+  "technologyVersion": "CSS Cascade 5/6; @layer widely available; @scope Baseline newly available (Mar 2026); light-dark() newly available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "You join a five-year-old e-commerce codebase with about 40,000 lines of CSS: Bootstrap overrides, page-specific files from three teams, `!important` everywhere, and nobody dares delete anything. Design a CSS architecture that brings it under control without a full rewrite, and that supports a new design system with dark mode.",
+   "bn": "তুমি একটা পাঁচ বছরের পুরোনো e-commerce codebase-এ যোগ দিয়েছ, যেখানে প্রায় 40,000 লাইন CSS: Bootstrap override, তিনটা team-এর page-ভিত্তিক file, সব জায়গায় `!important`, আর কেউ কিছু delete করার সাহস পায় না। পুরোটা rewrite না করে এটাকে নিয়ন্ত্রণে আনার মতো একটা CSS architecture design করো, যেটা dark mode-সহ নতুন একটা design system-ও support করবে।"
+  },
+  "answer": {
+   "en": "This is advanced material; the goal is a **predictable cascade** and **safe, incremental change**.\n\n**1. Cascade layers as the backbone.** Declare the order once: `@layer reset, vendor, legacy, tokens, base, components, utilities;`. Import Bootstrap with `layer(vendor)` and wrap all existing CSS in `legacy`. New component code in later layers now wins *without* specificity battles.\n- Gotcha 1: unlayered CSS beats every layer, so legacy code **must** go into a layer, or it will override the new system.\n- Gotcha 2: `!important` reverses layer order — a legacy `!important` beats even an `!important` in `components`. Inventory and remove legacy `!important` early; lint against new ones.\n\n**2. Design tokens as custom properties.** Primitive tokens (`--green-600`) → semantic tokens (`--color-action-bg`, `--color-surface`) → used by components. Dark mode switches semantic tokens only: `color-scheme: light dark` plus `light-dark()` or a `[data-theme=\"dark\"]` override. Components never hard-code colours.\n\n**3. Component boundaries.** One convention for new code: CSS Modules (build-time scoping) or `@scope` (Baseline newly available since March 2026, so with a fallback plan). Keep selector specificity flat — single classes, `:where()` for defaults — and use container queries so components adapt to their slot.\n\n**4. Migrate with a strangler pattern.** Rebuild one component or page at a time in the new layers; delete the matching legacy rules once screenshots match. Use the DevTools **Coverage** panel and visual regression tests to delete dead CSS safely.\n\n**5. Guardrails.** Stylelint rules (no IDs, no new `!important`, max specificity, token-only colours), code ownership per team, and a CSS size budget in CI.",
+   "bn": "এটা advanced বিষয়; লক্ষ্য হলো একটা **অনুমানযোগ্য cascade** আর **নিরাপদ, ধাপে ধাপে পরিবর্তন**।\n\n**1. মেরুদণ্ড হিসেবে cascade layer।** শুরুতে একবারই ক্রম ঘোষণা করো: `@layer reset, vendor, legacy, tokens, base, components, utilities;`। Bootstrap `layer(vendor)` দিয়ে import করো আর বিদ্যমান সব CSS `legacy`-তে wrap করো। এখন পরের layer-এর নতুন component code specificity-র লড়াই *ছাড়াই* জেতে।\n- ফাঁদ 1: unlayered CSS সব layer-কে হারায়, তাই legacy code-কে **অবশ্যই** একটা layer-এ রাখতে হবে, নইলে সেটা নতুন system-কে override করবে।\n- ফাঁদ 2: `!important` layer-এর ক্রম উল্টে দেয় — legacy-র একটা `!important` এমনকি `components`-এর `!important`-কেও হারায়। শুরুতেই legacy `!important`-এর তালিকা করে সরাও; নতুনগুলো lint দিয়ে আটকাও।\n\n**2. Custom property হিসেবে design token।** Primitive token (`--green-600`) → semantic token (`--color-action-bg`, `--color-surface`) → component সেগুলো ব্যবহার করে। Dark mode শুধু semantic token বদলায়: `color-scheme: light dark` সাথে `light-dark()`, অথবা `[data-theme=\"dark\"]` override। Component কখনো রং hard-code করে না।\n\n**3. Component-এর সীমানা।** নতুন code-এর জন্য একটাই নিয়ম: CSS Modules (build-time scoping) অথবা `@scope` (March 2026 থেকে Baseline newly available, তাই fallback পরিকল্পনাসহ)। Selector specificity সমতল রাখো — single class, default-এর জন্য `:where()` — আর container query ব্যবহার করো যাতে component তার জায়গা অনুযায়ী মানিয়ে নেয়।\n\n**4. Strangler pattern-এ migrate করো।** একবারে একটা component বা page নতুন layer-এ বানাও; screenshot মিলে গেলে সংশ্লিষ্ট legacy rule delete করো। নিরাপদে dead CSS মুছতে DevTools-এর **Coverage** panel আর visual regression test ব্যবহার করো।\n\n**5. পাহারাদার নিয়ম।** Stylelint rule (ID নয়, নতুন `!important` নয়, সর্বোচ্চ specificity সীমা, শুধু token দিয়ে রং), team অনুযায়ী code ownership, আর CI-তে CSS size budget।"
+  },
+  "explanation": {
+   "en": "**Trade-offs:**\n- Layers vs CSS Modules/`@scope` solve different problems: layers control *priority*, scoping controls *reach*. Large codebases usually want both.\n- Wrapping legacy CSS in a layer can change today's rendering where legacy rules used to win over unlayered third-party CSS — do it behind visual regression tests.\n- Utility-first frameworks (e.g. Tailwind) reduce cascade problems but move complexity into markup; mixing paradigms without layers recreates the specificity war.\n\n**Failure scenarios:** a team ships a new unlayered stylesheet and silently overrides the design system (lint for unlayered CSS); token renames break pages (keep aliases for one release); dark mode misses third-party widgets (audit with `color-scheme`).\n\n**Performance:** split CSS by route, inline critical CSS for landing pages, and remove dead CSS — on slow mobile connections, 40k lines is also a loading problem, not just a maintenance one.",
+   "bn": "**Trade-off:**\n- Layer আর CSS Modules/`@scope` আলাদা সমস্যার সমাধান করে: layer নিয়ন্ত্রণ করে *priority*, scoping নিয়ন্ত্রণ করে *নাগাল (reach)*। বড় codebase-এ সাধারণত দুটোই দরকার।\n- Legacy CSS layer-এ wrap করলে বর্তমান rendering বদলে যেতে পারে, যেখানে আগে legacy rule unlayered third-party CSS-কে হারাত — তাই এটা visual regression test-এর পাহারায় করো।\n- Utility-first framework (যেমন Tailwind) cascade-এর সমস্যা কমায়, কিন্তু জটিলতা markup-এ সরিয়ে দেয়; layer ছাড়া বিভিন্ন পদ্ধতি মেশালে আবার সেই specificity-র যুদ্ধ ফিরে আসে।\n\n**ব্যর্থতার পরিস্থিতি:** কোনো team নতুন unlayered stylesheet ship করে চুপচাপ design system override করে ফেলে (unlayered CSS-এর জন্য lint করো); token-এর নাম বদলালে page ভেঙে যায় (এক release-এর জন্য alias রাখো); dark mode-এ third-party widget বাদ পড়ে যায় (`color-scheme` দিয়ে audit করো)।\n\n**Performance:** route অনুযায়ী CSS ভাগ করো, landing page-এর জন্য critical CSS inline করো, আর dead CSS মুছে ফেলো — ধীর mobile connection-এ 40k লাইন শুধু maintenance নয়, loading-এরও সমস্যা।"
+  },
+  "interviewTip": {
+   "en": "Lead with the two layer gotchas (unlayered wins; `!important` reverses) — they prove hands-on experience. Then talk about migration and guardrails; interviewers care more about how you change a live system safely than about the ideal end state.",
+   "bn": "Layer-এর দুটো ফাঁদ দিয়ে শুরু করো (unlayered জেতে; `!important` ক্রম উল্টায়) — এতে হাতে-কলমে অভিজ্ঞতা প্রমাণ হয়। তারপর migration আর guardrail নিয়ে বলো; আদর্শ শেষ অবস্থার চেয়ে চালু system নিরাপদে কীভাবে বদলাবে, interviewer সেটাই বেশি জানতে চায়।"
+  },
+  "references": [
+   {
+    "title": "MDN — @layer",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@layer"
+   },
+   {
+    "title": "MDN — @scope",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@scope"
+   },
+   {
+    "title": "MDN — light-dark()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you stop a team from shipping a new unlayered stylesheet?",
+    "bn": "কোনো team যাতে নতুন unlayered stylesheet ship না করে, তা কীভাবে ঠেকাবে?"
+   },
+   {
+    "en": "Layers or CSS Modules — which would you introduce first, and why?",
+    "bn": "Layer নাকি CSS Modules — কোনটা আগে চালু করবে, আর কেন?"
+   },
+   {
+    "en": "How do you measure progress on a CSS cleanup?",
+    "bn": "CSS cleanup-এর অগ্রগতি কীভাবে মাপবে?"
+   }
+  ],
+  "related": [
+   "css-012",
+   "css-028"
+  ],
+  "commonMistakes": {
+   "en": "Proposing a big-bang rewrite, adding layers but leaving legacy CSS unlayered, ignoring legacy `!important`, or hard-coding dark-mode colours per component.",
+   "bn": "একবারে সব rewrite করার প্রস্তাব দেওয়া, layer যোগ করে legacy CSS unlayered রেখে দেওয়া, legacy `!important` উপেক্ষা করা, অথবা প্রতিটা component-এ আলাদা করে dark-mode-এর রং hard-code করা।"
+  },
+  "code": {
+   "language": "css",
+   "source": "/* main.css — the only file that defines layer order */\n@layer reset, vendor, legacy, tokens, base, components, utilities;\n\n@import url(\"reset.css\") layer(reset);\n@import url(\"bootstrap.min.css\") layer(vendor);\n@import url(\"legacy/all.css\") layer(legacy);\n\n@layer tokens {\n  :root {\n    color-scheme: light dark;\n    --green-600: #0b6e4f;\n    --color-action-bg: var(--green-600);\n    --color-on-action: #ffffff;\n    --color-surface: light-dark(#ffffff, #121212);\n    --color-text: light-dark(#1a1a1a, #f1f1f1);\n  }\n  [data-theme=\"dark\"] { color-scheme: dark; }\n}\n\n@layer components {\n  .button {\n    background: var(--color-action-bg);\n    color: var(--color-on-action);\n  }\n  .card {\n    background: var(--color-surface);\n    color: var(--color-text);\n  }\n}\n\n@layer utilities {\n  .visually-hidden { /* ... */ }\n}"
+  },
+  "technology": "css"
+ }
+]

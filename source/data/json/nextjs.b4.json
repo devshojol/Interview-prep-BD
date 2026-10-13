@@ -1,0 +1,597 @@
+[
+ {
+  "id": "next-011",
+  "subtopic": "Proxy (formerly Middleware)",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "proxy",
+   "middleware",
+   "nextjs-16",
+   "file-conventions"
+  ],
+  "technologyVersion": "Next.js 16.4",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "In a new Next.js 16 project you want to redirect some requests based on a cookie **before** routing happens. Which file do you create?",
+   "bn": "একটা নতুন Next.js 16 project-এ তুমি cookie দেখে কিছু request routing হওয়ার **আগেই** redirect করতে চাও। কোন file তৈরি করবে?"
+  },
+  "answer": {
+   "en": "Next.js 16 renamed Middleware to **Proxy**: create `proxy.ts` (or `.js`) at the project root — or inside `src/` — at the same level as `app/`, and export a `proxy` function (or a default export). An optional `config.matcher` limits which paths it runs on.",
+   "bn": "Next.js 16 Middleware-এর নাম বদলে **Proxy** রেখেছে: project root-এ — অথবা `src/`-এর ভেতরে — `app/`-এর একই স্তরে `proxy.ts` (বা `.js`) তৈরি করো, আর একটা `proxy` function (বা default export) export করো। ঐচ্ছিক `config.matcher` ঠিক করে এটা কোন path-এ চলবে।"
+  },
+  "explanation": {
+   "en": "The tempting answer is `middleware.ts` — it's in countless tutorials and still exists, but it's **deprecated** in v16 (kept only for Edge-runtime use cases). The rename makes the purpose clearer: it's a network-boundary layer in front of the app, not Express-style middleware. `proxy.ts` runs on the **Node.js runtime** by default, and `npx @next/codemod@canary middleware-to-proxy .` renames both the file and the function.\n\n`pages/_middleware.ts` was the short-lived Next.js 12 beta convention, and a Route Handler only runs when its own URL is requested — it can't intercept other routes.\n\nTypical uses: auth redirects (optimistic, cookie-based), locale redirects, rewrites for A/B tests, and setting headers. Keep it fast and don't use it as your only authorization layer.",
+   "bn": "লোভনীয় উত্তর হলো `middleware.ts` — অসংখ্য tutorial-এ আছে আর এখনো এর অস্তিত্ব আছে, কিন্তু v16-এ এটা **deprecated** (শুধু Edge-runtime-এর ক্ষেত্রে রাখা হয়েছে)। নাম বদলানোয় উদ্দেশ্যটা স্পষ্ট হয়েছে: এটা app-এর সামনের একটা network-boundary layer, Express-ধরনের middleware না। `proxy.ts` default-ভাবে **Node.js runtime**-এ চলে, আর `npx @next/codemod@canary middleware-to-proxy .` file আর function — দুটোরই নাম বদলে দেয়।\n\n`pages/_middleware.ts` ছিল Next.js 12 beta-র স্বল্পস্থায়ী নিয়ম, আর Route Handler শুধু তার নিজের URL-এ request এলেই চলে — অন্য route intercept করতে পারে না।\n\nসাধারণ ব্যবহার: auth redirect (optimistic, cookie-ভিত্তিক), locale redirect, A/B test-এর জন্য rewrite, আর header set করা। এটা দ্রুত রাখো, আর একমাত্র authorization layer হিসেবে ব্যবহার করো না।"
+  },
+  "interviewTip": {
+   "en": "Mention the rename *and* the reason (clearer purpose, Node.js runtime by default). Interviewers often ask this to see whether your knowledge is current.",
+   "bn": "নাম বদল *আর* তার কারণ — দুটোই বলো (উদ্দেশ্য স্পষ্ট, default-ভাবে Node.js runtime)। তোমার জ্ঞান আপডেটেড কি না দেখতে interviewer প্রায়ই এটা জিজ্ঞেস করে।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — proxy.js",
+    "url": "https://nextjs.org/docs/app/api-reference/file-conventions/proxy"
+   },
+   {
+    "title": "Next.js Docs — Proxy (getting started)",
+    "url": "https://nextjs.org/docs/app/getting-started/proxy"
+   },
+   {
+    "title": "Next.js Docs — Upgrading to Version 16",
+    "url": "https://nextjs.org/docs/app/guides/upgrading/version-16"
+   }
+  ],
+  "followUps": [],
+  "related": [],
+  "options": [
+   {
+    "en": "`middleware.ts` in the project root, exporting a `middleware` function",
+    "bn": "Project root-এ `middleware.ts`, যেটা একটা `middleware` function export করে"
+   },
+   {
+    "en": "`proxy.ts` in the project root (next to `app/`), exporting a `proxy` function",
+    "bn": "Project root-এ (`app/`-এর পাশে) `proxy.ts`, যেটা একটা `proxy` function export করে"
+   },
+   {
+    "en": "`pages/_middleware.ts`, exporting a default function",
+    "bn": "`pages/_middleware.ts`, যেটা একটা default function export করে"
+   },
+   {
+    "en": "`app/proxy/route.ts`, exporting a `GET` handler",
+    "bn": "`app/proxy/route.ts`, যেটা একটা `GET` handler export করে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-020",
+  "subtopic": "Authentication",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "authentication",
+   "authorization",
+   "server-actions",
+   "proxy",
+   "dal"
+  ],
+  "technologyVersion": "Next.js 16.4 (App Router)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "`proxy.ts` redirects users without a session cookie away from `/dashboard`. The dashboard has a delete button that calls the `deletePost` Server Action. Where must the **authoritative** check \"is this user allowed to delete this post?\" happen?",
+   "bn": "`proxy.ts` session cookie ছাড়া user-দের `/dashboard` থেকে সরিয়ে দেয়। Dashboard-এ একটা delete button আছে, যেটা `deletePost` Server Action call করে। \"এই user কি এই post মুছতে পারবে?\" — এই **চূড়ান্ত** check কোথায় হতে হবে?"
+  },
+  "answer": {
+   "en": "Inside the Server Action (ideally via a server-only data-access layer). A Server Action is a public POST endpoint: anyone can call it directly with any post id, so it must verify the session **and** ownership/role itself every time.",
+   "bn": "Server Action-এর ভেতরে (আদর্শভাবে একটা server-only data-access layer-এর মাধ্যমে)। Server Action হলো একটা public POST endpoint: যে কেউ যেকোনো post id দিয়ে সরাসরি এটা call করতে পারে, তাই প্রতিবার এটাকে নিজেই session **আর** ownership/role যাচাই করতে হবে।"
+  },
+  "explanation": {
+   "en": "The tempting answer is `proxy.ts`. Proxy is great for **optimistic** checks (is there a session cookie? redirect early), but it isn't the security boundary: Server Actions are handled as POST requests to the route where they're used, so a matcher change or moving the action to another route can silently remove proxy coverage — and proxy doesn't know who owns post 123 anyway.\n\nThe layout is wrong too: layouts don't re-render on every client navigation and aren't involved when an action is invoked. Hiding the button is UX, not security.\n\nRecommended pattern: a **Data Access Layer** — `server-only` functions such as `verifySession()` and `canDeletePost(user, post)` — called from every Server Component, Server Action and Route Handler that touches protected data.",
+   "bn": "লোভনীয় উত্তর হলো `proxy.ts`। **Optimistic** check-এর জন্য proxy দারুণ (session cookie আছে কি? আগেভাগেই redirect), কিন্তু এটা security boundary না: Server Action যে route-এ ব্যবহার হয় সেখানে POST request হিসেবে সামলানো হয়, তাই matcher বদলালে বা action অন্য route-এ সরালে চুপচাপ proxy-র সুরক্ষা হারিয়ে যেতে পারে — আর post 123-এর মালিক কে, proxy সেটা জানেই না।\n\nLayout-ও ভুল: প্রতিটা client navigation-এ layout re-render হয় না, আর action call হলে layout জড়িতই থাকে না। Button লুকানো হলো UX, security না।\n\nRecommended pattern: একটা **Data Access Layer** — `verifySession()` আর `canDeletePost(user, post)`-এর মতো `server-only` function — যেগুলো protected data ছোঁয় এমন প্রতিটা Server Component, Server Action আর Route Handler থেকে call হয়।"
+  },
+  "interviewTip": {
+   "en": "Distinguish \"optimistic checks\" (proxy, UI) from \"authoritative checks\" (next to the data). That vocabulary, straight from how Next.js recommends structuring auth, signals real experience.",
+   "bn": "\"Optimistic check\" (proxy, UI) আর \"authoritative check\" (data-র পাশে) আলাদা করে বলো। Next.js যেভাবে auth সাজাতে recommend করে, সেখান থেকে আসা এই শব্দগুলো আসল অভিজ্ঞতার ইঙ্গিত দেয়।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Authentication",
+    "url": "https://nextjs.org/docs/app/guides/authentication"
+   },
+   {
+    "title": "Next.js Docs — Data Security",
+    "url": "https://nextjs.org/docs/app/guides/data-security"
+   },
+   {
+    "title": "Next.js Docs — proxy.js",
+    "url": "https://nextjs.org/docs/app/api-reference/file-conventions/proxy"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "next-011"
+  ],
+  "options": [
+   {
+    "en": "Only in `proxy.ts`, because it runs before every request to `/dashboard`",
+    "bn": "শুধু `proxy.ts`-এ, কারণ এটা `/dashboard`-এর প্রতিটা request-এর আগে চলে"
+   },
+   {
+    "en": "Inside the `deletePost` Server Action (or the data-access function it calls), on every call",
+    "bn": "`deletePost` Server Action-এর ভেতরে (বা এটা যে data-access function call করে সেখানে), প্রতিটা call-এ"
+   },
+   {
+    "en": "In `app/dashboard/layout.tsx`, since every dashboard page renders inside it",
+    "bn": "`app/dashboard/layout.tsx`-এ, কারণ প্রতিটা dashboard page এর ভেতরেই render হয়"
+   },
+   {
+    "en": "In the Client Component, by hiding the delete button from users who don't own the post",
+    "bn": "Client Component-এ, post-এর মালিক না এমন user-দের থেকে delete button লুকিয়ে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-021",
+  "subtopic": "Client Components and Providers",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "context",
+   "providers",
+   "use-client",
+   "root-layout",
+   "debugging"
+  ],
+  "technologyVersion": "Next.js 16.4 (App Router, React 19.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "A developer moving from a Vite SPA adds a theme provider to the root layout. The build fails with an error saying `useState` only works in a Client Component. Why does it fail, and what's the right fix?",
+   "bn": "Vite SPA থেকে আসা একজন developer root layout-এ একটা theme provider যোগ করল। Build fail করছে, error বলছে `useState` শুধু Client Component-এ কাজ করে। কেন fail করছে, আর সঠিক সমাধান কী?"
+  },
+  "answer": {
+   "en": "In the App Router, `layout.tsx` is a **Server Component** by default. Server Components run once on the server and can't hold state, run effects, or create context — so `useState` and `createContext` fail there.\n\nThe fix is to move the stateful provider into its own **Client Component** file (`app/providers.tsx` with `'use client'`) and render it from the layout around `{children}`.\n\nThe layout stays a Server Component (so it can still export `metadata`), and the pages passed as `children` **stay Server Components too** — a Client Component can render Server Components it receives as children. Only the provider's own code ships to the browser.",
+   "bn": "App Router-এ `layout.tsx` default-ভাবে একটা **Server Component**। Server Component server-এ একবার চলে, আর state রাখতে, effect চালাতে বা context তৈরি করতে পারে না — তাই সেখানে `useState` আর `createContext` fail করে।\n\nসমাধান হলো stateful provider-টাকে তার নিজস্ব **Client Component** file-এ সরানো (`'use client'`-সহ `app/providers.tsx`), আর layout থেকে `{children}`-এর চারপাশে এটা render করা।\n\nLayout Server Component-ই থাকে (তাই এখনো `metadata` export করতে পারে), আর `children` হিসেবে পাঠানো page-গুলোও **Server Component-ই থাকে** — Client Component তার children হিসেবে পাওয়া Server Component render করতে পারে। শুধু provider-এর নিজের code browser-এ যায়।"
+  },
+  "explanation": {
+   "en": "- **Don't put `'use client'` on the root layout itself.** It would turn the layout and everything it imports into client code and you'd lose the `metadata` export.\n- **Render providers as deep as possible**, e.g. a cart provider only around the shop section, so more of the tree can be optimised.\n- **Store libraries:** create Redux/Zustand stores inside the client provider per request (e.g. in a `useRef`/`useState` initialiser), never as a module-level singleton that the server would share between users.\n- **React 19.3 detail:** a Server Component can now render `<SomeContext value={…}>` directly when the context is imported from a `'use client'` module — handy for passing server data (like the current user) into client context. Stateful providers still need a Client Component.",
+   "bn": "- **Root layout-এ নিজেই `'use client'` দিও না।** তাহলে layout আর সে যা import করে সব client code হয়ে যাবে, আর `metadata` export হারাবে।\n- **Provider যত গভীরে সম্ভব render করো**, যেমন cart provider শুধু shop section-এর চারপাশে, যাতে tree-র বেশি অংশ optimise করা যায়।\n- **Store library:** Redux/Zustand store client provider-এর ভেতরে প্রতি request-এ তৈরি করো (যেমন `useRef`/`useState` initialiser-এ), কখনো module-level singleton হিসেবে না — সেটা server-এ বিভিন্ন user-এর মধ্যে share হয়ে যেত।\n- **React 19.3-এর খুঁটিনাটি:** context যদি `'use client'` module থেকে import করা হয়, Server Component এখন সরাসরি `<SomeContext value={…}>` render করতে পারে — server data (যেমন current user) client context-এ পাঠানোর জন্য সুবিধাজনক। তবে stateful provider-এর জন্য এখনো Client Component লাগে।"
+  },
+  "interviewTip": {
+   "en": "Explain the root cause in one line (\"layouts are Server Components; state needs a Client Component\"), then the providers pattern, then the key insight that children stay Server Components. That last point is what most candidates miss.",
+   "bn": "এক লাইনে root cause বলো (\"layout হলো Server Component; state-এর জন্য Client Component লাগে\"), তারপর providers pattern, তারপর মূল অন্তর্দৃষ্টি — children Server Component-ই থাকে। বেশিরভাগ candidate শেষের পয়েন্টটাই মিস করে।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Server and Client Components",
+    "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components"
+   },
+   {
+    "title": "react.dev — createContext",
+    "url": "https://react.dev/reference/react/createContext"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why do pages passed as `children` to a Client Component remain Server Components?",
+    "bn": "Client Component-এ `children` হিসেবে পাঠানো page কেন Server Component-ই থাকে?"
+   },
+   {
+    "en": "Why must a Redux store not be a module-level singleton in a Next.js app?",
+    "bn": "Next.js app-এ Redux store কেন module-level singleton হওয়া উচিত না?"
+   }
+  ],
+  "related": [
+   "next-004",
+   "next-003"
+  ],
+  "commonMistakes": {
+   "en": "Adding `'use client'` to `app/layout.tsx`, or believing that everything rendered inside a client provider becomes a Client Component.",
+   "bn": "`app/layout.tsx`-এ `'use client'` দেওয়া, অথবা ভাবা যে client provider-এর ভেতরে render হওয়া সবকিছুই Client Component হয়ে যায়।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// app/layout.tsx\nimport { createContext, useState } from 'react';\n\nexport const ThemeContext = createContext('light');\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  const [theme, setTheme] = useState('light');\n  return (\n    <html lang=\"en\">\n      <body>\n        <ThemeContext value={theme}>{children}</ThemeContext>\n      </body>\n    </html>\n  );\n}"
+  },
+  "extraCode": [
+   {
+    "language": "tsx",
+    "source": "// app/providers.tsx\n'use client';\n\nimport { createContext, useState } from 'react';\n\ntype Theme = 'light' | 'dark';\nexport const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void } | null>(null);\n\nexport function Providers({ children }: { children: React.ReactNode }) {\n  const [theme, setTheme] = useState<Theme>('light');\n  return <ThemeContext value={{ theme, setTheme }}>{children}</ThemeContext>;\n}\n\n// app/layout.tsx — still a Server Component\nimport type { Metadata } from 'next';\nimport { Providers } from './providers';\n\nexport const metadata: Metadata = { title: { default: 'Shop', template: '%s | Shop' } };\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang=\"en\">\n      <body>\n        <Providers>{children}</Providers>\n      </body>\n    </html>\n  );\n}",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-022",
+  "subtopic": "ISR and Static Generation",
+  "difficulty": "medium",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 7,
+  "tags": [
+   "isr",
+   "static-generation",
+   "generatestaticparams",
+   "revalidation",
+   "legacy"
+  ],
+  "technologyVersion": "Next.js 16.4 (Cache Components; previous model and Pages Router labelled)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How do you implement Incremental Static Regeneration (ISR) for a blog in Next.js 16? Compare the Pages Router, the previous App Router model and Cache Components.",
+   "bn": "Next.js 16-এ একটা blog-এর জন্য Incremental Static Regeneration (ISR) কীভাবে implement করবে? Pages Router, আগের App Router model আর Cache Components-এর তুলনা করো।"
+  },
+  "answer": {
+   "en": "ISR means: serve a static page, and regenerate it in the background after a time window or when content changes — static speed with fresh-enough data.\n\n- **Pages Router (legacy):** `getStaticProps` returns `{ props, revalidate: 3600 }`; `getStaticPaths` lists slugs to prebuild with `fallback: 'blocking'` for the rest; on-demand regeneration uses `res.revalidate('/blog/slug')` from an API route.\n- **App Router, previous model** (Cache Components off): `export const revalidate = 3600` in the page, or per request `fetch(url, { next: { revalidate: 3600, tags: ['post-x'] } })`; `generateStaticParams` replaces `getStaticPaths`; on-demand with `revalidateTag`/`revalidatePath`.\n- **Cache Components (current):** put `'use cache'` with `cacheLife('hours')` and `cacheTag('post-' + slug)` in the data function; `generateStaticParams` prerenders known slugs at build; other slugs are rendered on first request and then cached. When the CMS publishes, a webhook Route Handler calls `revalidateTag('post-' + slug, 'max')`; an editor's Server Action can call `updateTag` for an immediate update.\n\nIn all models, time-based (and `'max'` tag-based) regeneration is stale-while-revalidate: the first visitor after the revalidation window still gets the old page and triggers the rebuild. Exceptions: `updateTag` / `revalidateTag(tag, { expire: 0 })`, and with Cache Components an entry past its `cacheLife` `expire` time, make the next request wait for fresh content.",
+   "bn": "ISR মানে: একটা static page serve করো, আর নির্দিষ্ট সময় পর বা content বদলালে background-এ সেটা আবার তৈরি করো — static-এর গতি আর যথেষ্ট fresh data।\n\n- **Pages Router (legacy):** `getStaticProps` return করে `{ props, revalidate: 3600 }`; `getStaticPaths` কোন slug আগে build হবে তার তালিকা দেয়, বাকিগুলোর জন্য `fallback: 'blocking'`; দরকারমতো regeneration হয় API route থেকে `res.revalidate('/blog/slug')` দিয়ে।\n- **App Router, আগের model** (Cache Components বন্ধ): page-এ `export const revalidate = 3600`, অথবা প্রতি request-এ `fetch(url, { next: { revalidate: 3600, tags: ['post-x'] } })`; `getStaticPaths`-এর জায়গায় `generateStaticParams`; দরকারমতো `revalidateTag`/`revalidatePath`।\n- **Cache Components (বর্তমান):** data function-এ `cacheLife('hours')` আর `cacheTag('post-' + slug)`-সহ `'use cache'` দাও; `generateStaticParams` build-এ জানা slug prerender করে; বাকি slug প্রথম request-এ render হয়ে তারপর cache হয়। CMS publish করলে একটা webhook Route Handler `revalidateTag('post-' + slug, 'max')` call করে; editor-এর Server Action সাথে সাথে update-এর জন্য `updateTag` call করতে পারে।\n\nসব model-এই time-based (আর `'max'`-সহ tag-based) regeneration হলো stale-while-revalidate: revalidation সময় পার হওয়ার পর প্রথম visitor তখনো পুরনো page পায় আর নতুন build শুরু করিয়ে দেয়। ব্যতিক্রম: `updateTag` / `revalidateTag(tag, { expire: 0 })`, আর Cache Components-এ `cacheLife`-এর `expire` সময় পার হওয়া entry — এসব ক্ষেত্রে পরের request fresh content-এর জন্য অপেক্ষা করে।"
+  },
+  "explanation": {
+   "en": "- **Why tags beat time-based revalidation for a blog:** with a long `cacheLife` plus a tag, posts update within seconds of publishing but aren't regenerated needlessly every hour.\n- **Don't mix models:** in a Cache Components app, `export const revalidate` and `fetch(..., { next: { revalidate } })` are the old way; caching belongs in `'use cache'` scopes.\n- **Self-hosting:** the regenerated pages live in the server cache (disk/memory per instance by default). With several instances you need a shared cache handler, or instances serve different versions.\n- **`generateStaticParams` size:** prebuild only popular slugs to keep build times short; the rest are generated on demand.",
+   "bn": "- **Blog-এর জন্য tag কেন time-based revalidation-এর চেয়ে ভালো:** লম্বা `cacheLife` আর একটা tag থাকলে publish-এর কয়েক সেকেন্ডের মধ্যে post update হয়, কিন্তু প্রতি ঘণ্টায় অকারণে regenerate হয় না।\n- **Model গুলিয়ে ফেলো না:** Cache Components app-এ `export const revalidate` আর `fetch(..., { next: { revalidate } })` পুরনো উপায়; caching থাকবে `'use cache'` scope-এ।\n- **Self-hosting:** regenerate হওয়া page থাকে server cache-এ (default-ভাবে প্রতি instance-এর disk/memory)। একাধিক instance থাকলে shared cache handler লাগে, নইলে instance-গুলো আলাদা version দেখায়।\n- **`generateStaticParams`-এর আকার:** build time কম রাখতে শুধু জনপ্রিয় slug আগে build করো; বাকিগুলো দরকারমতো তৈরি হয়।"
+  },
+  "interviewTip": {
+   "en": "Define ISR first, then present the three models side by side with clear labels (legacy / previous / current). Finishing with stale-while-revalidate semantics shows you understand what users actually see.",
+   "bn": "আগে ISR define করো, তারপর তিনটা model স্পষ্ট label-সহ পাশাপাশি দেখাও (legacy / আগের / বর্তমান)। শেষে stale-while-revalidate semantics বললে বোঝা যায় user আসলে কী দেখে তা তুমি বোঝো।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Incremental Static Regeneration",
+    "url": "https://nextjs.org/docs/app/guides/incremental-static-regeneration"
+   },
+   {
+    "title": "Next.js Docs — ISR with Cache Components",
+    "url": "https://nextjs.org/docs/app/guides/incremental-static-regeneration-cache-components"
+   },
+   {
+    "title": "Next.js Docs — getStaticProps (Pages Router)",
+    "url": "https://nextjs.org/docs/pages/building-your-application/data-fetching/get-static-props"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does the first visitor see after a page's revalidation time has passed?",
+    "bn": "Page-এর revalidation সময় পার হওয়ার পর প্রথম visitor কী দেখে?"
+   },
+   {
+    "en": "Why might different users see different versions of a page on a self-hosted cluster?",
+    "bn": "Self-hosted cluster-এ বিভিন্ন user কেন একই page-এর আলাদা version দেখতে পারে?"
+   }
+  ],
+  "related": [
+   "next-014",
+   "next-015",
+   "next-010"
+  ],
+  "commonMistakes": {
+   "en": "Expecting `revalidate: 60` to update the page exactly every 60 seconds for everyone (it only marks it stale; regeneration happens on the next request), or using `getStaticProps` inside `app/`.",
+   "bn": "আশা করা যে `revalidate: 60` সবার জন্য ঠিক প্রতি ৬০ সেকেন্ডে page update করবে (এটা শুধু stale চিহ্নিত করে; regeneration হয় পরের request-এ), অথবা `app/`-এর ভেতরে `getStaticProps` ব্যবহার করা।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// 1) Pages Router (legacy) — pages/blog/[slug].tsx\nexport async function getStaticProps({ params }) {\n  const post = await cms.getPost(params.slug);\n  if (!post) return { notFound: true };\n  return { props: { post }, revalidate: 3600 };\n}\nexport async function getStaticPaths() {\n  return { paths: [], fallback: 'blocking' };\n}\n\n// 2) App Router, previous model (cacheComponents: false) — app/blog/[slug]/page.tsx\nexport const revalidate = 3600;\nexport default async function Post({ params }: { params: Promise<{ slug: string }> }) {\n  const { slug } = await params;\n  const post = await fetch(`https://cms.example.com/posts/${slug}`, {\n    next: { tags: [`post-${slug}`] },\n  }).then((r) => r.json());\n  return <Article post={post} />;\n}\n\n// 3) Cache Components (current) — app/blog/[slug]/page.tsx\nimport { cacheLife, cacheTag } from 'next/cache';\n\nasync function getPost(slug: string) {\n  'use cache';\n  cacheLife('days');           // long lifetime…\n  cacheTag(`post-${slug}`);    // …but invalidated on publish\n  return cms.getPost(slug);\n}\n\nexport async function generateStaticParams() {\n  const slugs = await cms.getPopularSlugs(100);\n  return slugs.map((slug) => ({ slug }));\n}\n\nexport default async function Post({ params }: { params: Promise<{ slug: string }> }) {\n  const { slug } = await params;\n  const post = await getPost(slug);\n  return <Article post={post} />;\n}\n\n// app/api/cms-webhook/route.ts → revalidateTag(`post-${slug}`, 'max')"
+  },
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-027",
+  "subtopic": "Parallel and Intercepting Routes",
+  "difficulty": "hard",
+  "type": "conceptual",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 8,
+  "tags": [
+   "parallel-routes",
+   "intercepting-routes",
+   "modals",
+   "default-js"
+  ],
+  "technologyVersion": "Next.js 16.4 (App Router; default.js required for parallel slots since v16)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Build an Instagram-style photo modal: clicking a photo in the feed opens it in a modal with its own shareable URL (`/photos/42`), but visiting that URL directly or refreshing shows a full photo page. Explain how parallel routes, intercepting routes and `default.tsx` make this work.",
+   "bn": "Instagram-ধরনের একটা photo modal বানাও: feed-এ কোনো photo-তে click করলে সেটা নিজস্ব শেয়ারযোগ্য URL (`/photos/42`)-সহ একটা modal-এ খোলে, কিন্তু সরাসরি ওই URL-এ গেলে বা refresh করলে পুরো photo page দেখায়। Parallel route, intercepting route আর `default.tsx` কীভাবে এটা সম্ভব করে, ব্যাখ্যা করো।"
+  },
+  "answer": {
+   "en": "**Parallel routes** let a layout render more than one page at the same time. A folder named with `@`, like `app/@modal`, is a **slot**: the root layout receives it as a `modal` prop next to `children`. Slots don't change the URL.\n\n**Intercepting routes** let you show a different route for a URL when you navigate to it **from inside the app** (a soft navigation). `app/@modal/(.)photos/[id]/page.tsx` intercepts `/photos/[id]`: clicking a photo in the feed keeps the feed in `children` and renders the photo inside the `modal` slot. The convention is `(.)` same level, `(..)` one level up, `(..)(..)` two levels up, `(...)` from the app root — based on route segments, so slots don't count.\n\nOn a **hard navigation** (direct visit, refresh, shared link) there's no interception, so `app/photos/[id]/page.tsx` renders the full page.\n\n**`default.tsx`** tells Next.js what a slot shows when it has no matching active state — for example on a hard load of `/` the `@modal` slot has nothing to show, so `@modal/default.tsx` returns `null`. Since Next.js 16 every parallel slot needs a `default` file, or the build fails.\n\nTo close the modal, a Client Component calls `router.back()`; the user gets a shareable URL, a working back button, and context preserved behind the modal.",
+   "bn": "**Parallel route** একটা layout-কে একসাথে একাধিক page render করতে দেয়। `@` দিয়ে নাম দেওয়া folder, যেমন `app/@modal`, হলো একটা **slot**: root layout এটাকে `children`-এর পাশে একটা `modal` prop হিসেবে পায়। Slot URL বদলায় না।\n\n**Intercepting route** দিয়ে কোনো URL-এ **app-এর ভেতর থেকে** navigate করলে (soft navigation) আলাদা একটা route দেখানো যায়। `app/@modal/(.)photos/[id]/page.tsx` `/photos/[id]`-কে intercept করে: feed-এ photo-তে click করলে feed `children`-এ থেকে যায়, আর photo render হয় `modal` slot-এর ভেতরে। নিয়ম হলো `(.)` একই স্তর, `(..)` এক স্তর উপরে, `(..)(..)` দুই স্তর উপরে, `(...)` app root থেকে — route segment অনুযায়ী, তাই slot গোনা হয় না।\n\n**Hard navigation**-এ (সরাসরি visit, refresh, শেয়ার করা link) কোনো interception হয় না, তাই `app/photos/[id]/page.tsx` পুরো page render করে।\n\n**`default.tsx`** Next.js-কে বলে কোনো slot-এর মেলানো active state না থাকলে সে কী দেখাবে — যেমন `/` hard load করলে `@modal` slot-এর দেখানোর কিছু নেই, তাই `@modal/default.tsx` `null` return করে। Next.js 16 থেকে প্রতিটা parallel slot-এ একটা `default` file লাগে, নইলে build fail করে।\n\nModal বন্ধ করতে একটা Client Component `router.back()` call করে; user পায় শেয়ারযোগ্য URL, কাজ করা back button, আর modal-এর পেছনে আগের context অক্ষত।"
+  },
+  "explanation": {
+   "en": "- **Why `default.tsx` matters:** on soft navigation Next.js remembers each slot's active state; on a hard load it can't, so it needs a fallback. Before v16 a missing default led to a 404 on hard navigation; now the build fails instead — a common upgrade failure.\n- **Closing on other navigations:** add a catch-all `@modal/[...catchAll]/page.tsx` returning `null`, so navigating to another page via `<Link>` clears the modal.\n- **Other uses of parallel routes:** dashboards with independent sections that load and error separately (each slot can have its own `loading.tsx` and `error.tsx`), and conditional UI by role (`{isAdmin ? admin : user}`).\n- **Accessibility:** the modal component still needs focus management, `Escape` to close and `aria-modal` — the routing pattern doesn't provide that.",
+   "bn": "- **`default.tsx` কেন জরুরি:** soft navigation-এ Next.js প্রতিটা slot-এর active state মনে রাখে; hard load-এ পারে না, তাই একটা fallback লাগে। v16-এর আগে default না থাকলে hard navigation-এ 404 দেখাত; এখন এর বদলে build fail করে — upgrade-এর সময় সাধারণ একটা ব্যর্থতা।\n- **অন্য navigation-এ বন্ধ করা:** একটা catch-all `@modal/[...catchAll]/page.tsx` যোগ করো, যেটা `null` return করে, যাতে `<Link>` দিয়ে অন্য page-এ গেলে modal মুছে যায়।\n- **Parallel route-এর অন্য ব্যবহার:** এমন dashboard যার অংশগুলো আলাদাভাবে load আর error হয় (প্রতিটা slot-এর নিজস্ব `loading.tsx` আর `error.tsx` থাকতে পারে), আর role অনুযায়ী conditional UI (`{isAdmin ? admin : user}`)।\n- **Accessibility:** modal component-এর এখনো focus management, `Escape` চাপলে বন্ধ হওয়া আর `aria-modal` লাগে — routing pattern এগুলো দেয় না।"
+  },
+  "interviewTip": {
+   "en": "Explain the two navigation types first (soft vs hard) — the whole pattern depends on them. Then map files to behaviour, and mention the v16 `default.tsx` requirement as a practical gotcha.",
+   "bn": "আগে দুই ধরনের navigation ব্যাখ্যা করো (soft বনাম hard) — পুরো pattern-টাই এর উপর নির্ভর করে। তারপর কোন file কী আচরণ দেয় মিলিয়ে দেখাও, আর ব্যবহারিক gotcha হিসেবে v16-এর `default.tsx` শর্তের কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Parallel Routes",
+    "url": "https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes"
+   },
+   {
+    "title": "Next.js Docs — Intercepting Routes",
+    "url": "https://nextjs.org/docs/app/api-reference/file-conventions/intercepting-routes"
+   },
+   {
+    "title": "Next.js Docs — Upgrading to Version 16",
+    "url": "https://nextjs.org/docs/app/guides/upgrading/version-16"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What exactly happens if `@modal/default.tsx` is missing in Next.js 16?",
+    "bn": "Next.js 16-এ `@modal/default.tsx` না থাকলে ঠিক কী হয়?"
+   },
+   {
+    "en": "How would you use parallel routes to let dashboard sections fail independently?",
+    "bn": "Dashboard-এর অংশগুলো যাতে আলাদাভাবে fail করতে পারে, তার জন্য parallel route কীভাবে ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "next-003",
+   "next-006"
+  ],
+  "commonMistakes": {
+   "en": "Counting the `@modal` slot as a route segment when choosing `(.)` vs `(..)`, or forgetting `default.tsx` so the v16 build fails.",
+   "bn": "`(.)` বনাম `(..)` বেছে নেওয়ার সময় `@modal` slot-কে route segment হিসেবে গোনা, অথবা `default.tsx` ভুলে যাওয়া — ফলে v16 build fail করে।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "app/\n├── layout.tsx                 // renders {children} and {modal}\n├── page.tsx                   // the feed\n├── photos/\n│   └── [id]/\n│       └── page.tsx           // full page: direct visit / refresh\n└── @modal/\n    ├── default.tsx            // returns null when no modal is active\n    ├── [...catchAll]/\n    │   └── page.tsx           // returns null: closes the modal on other navigations\n    └── (.)photos/\n        └── [id]/\n            └── page.tsx       // modal version: soft navigation from the feed\n\n// app/layout.tsx\nexport default function RootLayout({\n  children,\n  modal,\n}: {\n  children: React.ReactNode;\n  modal: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>\n        {children}\n        {modal}\n      </body>\n    </html>\n  );\n}\n\n// app/@modal/(.)photos/[id]/page.tsx\nimport { Modal } from '@/components/modal'; // 'use client', calls router.back() on close\n\nexport default async function PhotoModal({ params }: { params: Promise<{ id: string }> }) {\n  const { id } = await params;\n  const photo = await getPhoto(id);\n  return (\n    <Modal>\n      <img src={photo.url} alt={photo.caption} />\n    </Modal>\n  );\n}\n\n// app/@modal/default.tsx\nexport default function Default() {\n  return null;\n}"
+  },
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-028",
+  "subtopic": "Performance and Bundle Size",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "bundle-size",
+   "performance",
+   "use-client",
+   "code-splitting",
+   "inp"
+  ],
+  "technologyVersion": "Next.js 16.4 (Turbopack; `next analyze` since 16.1)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Lighthouse reports about 900 KB of client JavaScript on your Next.js home page, and real-user data shows poor INP on mid-range Android phones. How do you find what's in the bundle and reduce it?",
+   "bn": "Lighthouse জানাচ্ছে তোমার Next.js home page-এ প্রায় ৯০০ KB client JavaScript, আর real-user data দেখাচ্ছে মাঝারি মানের Android phone-এ INP খারাপ। Bundle-এ কী আছে কীভাবে খুঁজবে, আর কীভাবে কমাবে?"
+  },
+  "answer": {
+   "en": "**Measure first.** Next.js 16 removed the per-route `size` / `First Load JS` columns from `next build` output (they were inaccurate with Server Components), so I run the Turbopack bundle analyzer, `npx next analyze` (available since 16.1), to see every client and server module per route with its import chain; `next analyze --output` saves a snapshot to compare before/after. (With `--webpack` builds, `@next/bundle-analyzer` does the same job.) Lighthouse and real-user data confirm what actually ships and how it affects the page.\n\n**Typical causes and fixes:**\n1. **`'use client'` too high in the tree.** A `'use client'` on a page or big layout pulls everything it imports into the browser. Push it down to small interactive leaves and keep pages as Server Components.\n2. **Heavy work that could run on the server.** Markdown parsing, syntax highlighting, date formatting libraries, chart-to-SVG rendering — do them in Server Components so the libraries never ship.\n3. **Code needed later.** Lazy-load below-the-fold or on-interaction widgets (rich text editor, map, chart) with `next/dynamic` or `React.lazy`.\n4. **Packages with many exports.** Icon and utility libraries: use `experimental.optimizePackageImports` (many popular ones are optimised automatically) and per-function imports.\n5. **Third-party scripts.** Load analytics/chat widgets with `next/script` and a non-blocking strategy (`afterInteractive`/`lazyOnload`).\n\nThen verify: compare analyzer snapshots and watch INP and LCP in real-user monitoring. Less JavaScript means less parsing and hydration work on the main thread, which directly helps INP.",
+   "bn": "**আগে মাপো।** Next.js 16 `next build` output থেকে প্রতিটা route-এর `size` / `First Load JS` column সরিয়ে দিয়েছে (Server Components-এর সাথে এগুলো সঠিক হিসাব দিত না), তাই আমি Turbopack bundle analyzer চালাই, `npx next analyze` (16.1 থেকে আছে), যেটা প্রতিটা route-এর প্রতিটা client আর server module import chain-সহ দেখায়; `next analyze --output` আগে-পরে তুলনার জন্য snapshot save করে। (`--webpack` build-এ `@next/bundle-analyzer` একই কাজ করে।) আসলে কী ship হচ্ছে আর page-এ তার প্রভাব কী, তা Lighthouse আর real-user data দিয়ে নিশ্চিত করি।\n\n**সাধারণ কারণ আর সমাধান:**\n1. **Tree-র অনেক উপরে `'use client'`।** Page বা বড় layout-এ `'use client'` থাকলে সে যা import করে সব browser-এ চলে যায়। এটা ছোট interactive leaf-এ নামিয়ে আনো, আর page Server Component রাখো।\n2. **Server-এ চালানো যায় এমন ভারী কাজ।** Markdown parsing, syntax highlighting, date formatting library, chart থেকে SVG rendering — এগুলো Server Component-এ করো, তাহলে library-গুলো কখনো browser-এ যায় না।\n3. **পরে দরকার হবে এমন code।** Screen-এর নিচের বা interaction-এ লাগে এমন widget (rich text editor, map, chart) `next/dynamic` বা `React.lazy` দিয়ে lazy-load করো।\n4. **অনেক export-ওয়ালা package।** Icon আর utility library: `experimental.optimizePackageImports` ব্যবহার করো (অনেক জনপ্রিয় library নিজে থেকেই optimise হয়) আর function ধরে import করো।\n5. **Third-party script।** Analytics/chat widget `next/script` আর non-blocking strategy (`afterInteractive`/`lazyOnload`) দিয়ে load করো।\n\nতারপর যাচাই: analyzer snapshot তুলনা করো আর real-user monitoring-এ INP আর LCP দেখো। কম JavaScript মানে main thread-এ কম parsing আর hydration-এর কাজ, যেটা সরাসরি INP-তে সাহায্য করে।"
+  },
+  "explanation": {
+   "en": "**Why `'use client'` placement is the biggest lever:** the directive marks a module-graph boundary. One directive on `app/page.tsx` can drag a CMS SDK, a markdown parser and every child component into the client bundle, even though the output is static HTML.\n\n**Security angle:** the same boundary mistake can leak server-only code (API keys in imported config, internal URLs). Import `server-only` in such modules so the build fails instead of shipping them.\n\n**Don't over-split:** too many tiny lazy chunks add request overhead and loading spinners; lazy-load what is big *and* not needed for first interaction.\n\n**INP specifically:** besides bundle size, long tasks during interactions (expensive re-renders) hurt INP — React Compiler, memoization, transitions and virtualisation address that part.",
+   "bn": "**`'use client'`-এর জায়গাই কেন সবচেয়ে বড় হাতিয়ার:** directive একটা module-graph boundary চিহ্নিত করে। `app/page.tsx`-এ একটা directive একটা CMS SDK, একটা markdown parser আর প্রতিটা child component client bundle-এ টেনে আনতে পারে, যদিও output হলো static HTML।\n\n**Security দিক:** একই boundary-র ভুলে server-only code leak হতে পারে (import করা config-এ API key, internal URL)। এমন module-এ `server-only` import করো, যাতে ship না করে build fail করে।\n\n**অতিরিক্ত ভাগ করো না:** অনেক ছোট ছোট lazy chunk request-এর খরচ আর loading spinner বাড়ায়; যা বড় *আর* প্রথম interaction-এ দরকার নেই, সেটাই lazy-load করো।\n\n**বিশেষ করে INP:** bundle size ছাড়াও interaction-এর সময় long task (expensive re-render) INP খারাপ করে — React Compiler, memoization, transition আর virtualisation সেই অংশটা সামলায়।"
+  },
+  "interviewTip": {
+   "en": "Follow measure → identify → fix → verify. Naming `next analyze` and the `'use client'` boundary as the main lever shows App Router-specific expertise rather than generic web-performance advice.",
+   "bn": "Measure → identify → fix → verify — এই ক্রম মেনে চলো। `next analyze` আর প্রধান হাতিয়ার হিসেবে `'use client'` boundary-র নাম বললে সাধারণ web-performance পরামর্শের বদলে App Router-নির্দিষ্ট দক্ষতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Optimizing package bundling",
+    "url": "https://nextjs.org/docs/app/guides/package-bundling"
+   },
+   {
+    "title": "Next.js Docs — Lazy Loading",
+    "url": "https://nextjs.org/docs/app/guides/lazy-loading"
+   },
+   {
+    "title": "Next.js Docs — optimizePackageImports",
+    "url": "https://nextjs.org/docs/app/api-reference/config/next-config-js/optimizePackageImports"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why can't you use `next/dynamic` with `ssr: false` directly in a Server Component?",
+    "bn": "Server Component-এ সরাসরি `ssr: false`-সহ `next/dynamic` কেন ব্যবহার করা যায় না?"
+   },
+   {
+    "en": "How would you stop a server-only module from ever being imported into client code?",
+    "bn": "Server-only কোনো module যাতে কখনো client code-এ import না হয়, সেটা কীভাবে নিশ্চিত করবে?"
+   }
+  ],
+  "related": [
+   "next-004",
+   "next-019"
+  ],
+  "commonMistakes": {
+   "en": "Starting with micro-optimisations (minifier settings) before measuring, lazy-loading above-the-fold content, or making the whole page a Client Component \"because it has one button\".",
+   "bn": "মাপার আগেই micro-optimisation (minifier setting) দিয়ে শুরু করা, screen-এর উপরের দিকের content lazy-load করা, অথবা \"একটা button আছে বলে\" পুরো page Client Component বানিয়ে ফেলা।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// BEFORE — app/blog/[slug]/page.tsx: the whole page ships to the browser\n'use client';\nimport { marked } from 'marked';\nimport { format } from 'date-fns';\n// ...page renders markdown + a like button\n\n// AFTER — page stays a Server Component; only the button is a client island\n// app/blog/[slug]/page.tsx\nimport { marked } from 'marked';            // runs on the server only\nimport { LikeButton } from './like-button'; // 'use client' leaf\nimport { CommentsSection } from './comments-section';\n\nexport default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {\n  const { slug } = await params;\n  const post = await getPost(slug);\n  const html = await marked.parse(post.markdown);\n  return (\n    <article>\n      <h1>{post.title}</h1>\n      <div dangerouslySetInnerHTML={{ __html: html }} /> {/* sanitise CMS HTML */}\n      <LikeButton postId={post.id} />\n      <CommentsSection postId={post.id} />\n    </article>\n  );\n}\n\n// app/blog/[slug]/comments-section.tsx\n'use client';\nimport dynamic from 'next/dynamic';\n\n// Heavy editor loads only in the browser, after the page is interactive\nconst CommentEditor = dynamic(() => import('./comment-editor'), {\n  ssr: false,\n  loading: () => <p>Loading editor…</p>,\n});\n\nexport function CommentsSection({ postId }: { postId: string }) {\n  return <CommentEditor postId={postId} />;\n}"
+  },
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-029",
+  "subtopic": "Error Handling",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 3,
+  "tags": [
+   "error-boundary",
+   "error-js",
+   "layouts",
+   "global-error"
+  ],
+  "technologyVersion": "Next.js 16.4 (App Router)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`app/dashboard/layout.tsx` throws while loading the current user. Both `app/error.tsx` and `app/dashboard/error.tsx` exist. Which error UI does the user see?",
+   "bn": "`app/dashboard/layout.tsx` current user load করার সময় throw করল। `app/error.tsx` আর `app/dashboard/error.tsx` — দুটোই আছে। User কোন error UI দেখবে?"
+  },
+  "answer": {
+   "en": "`app/error.tsx`. Inside a segment the nesting is `layout` → `template` → `error` → `loading` → `not-found` → `page`, so the error boundary from `dashboard/error.tsx` sits **inside** `dashboard/layout.tsx` and can't catch what the layout throws. The error bubbles to the nearest boundary above — the parent segment's `error.tsx`, rendered inside the root layout.",
+   "bn": "`app/error.tsx`। একটা segment-এর ভেতরে nesting হলো `layout` → `template` → `error` → `loading` → `not-found` → `page`, তাই `dashboard/error.tsx`-এর error boundary `dashboard/layout.tsx`-এর **ভেতরে** বসে, আর layout যা throw করে তা ধরতে পারে না। Error উপরের সবচেয়ে কাছের boundary-তে যায় — parent segment-এর `error.tsx`, যেটা root layout-এর ভেতরে render হয়।"
+  },
+  "explanation": {
+   "en": "The tempting answer is the same-folder `dashboard/error.tsx`. It *does* catch errors from `dashboard/page.tsx` and nested segments — just not from its sibling layout, because a boundary can't catch errors in the component that renders it.\n\n`global-error.tsx` is only for errors in the **root** layout/template; it replaces the root layout and must render its own `<html>` and `<body>`.\n\nPractical consequences: keep risky data fetching out of layouts where possible (or handle failures inside the layout), and if a layout *must* fetch, make sure the parent segment has a sensible `error.tsx`. In production, errors from Server Components arrive with a generic message plus `error.digest` for log correlation; the `retry()` prop (stable since 16.3) re-fetches and re-renders the segment. For component-level boundaries that aren't tied to route segments, Next.js also documents a `catchError` helper.",
+   "bn": "লোভনীয় উত্তর হলো একই folder-এর `dashboard/error.tsx`। এটা `dashboard/page.tsx` আর nested segment-এর error *ধরে* — শুধু তার পাশের layout-এর error ধরে না, কারণ যে component একটা boundary render করে, সেই boundary তার error ধরতে পারে না।\n\n`global-error.tsx` শুধু **root** layout/template-এর error-এর জন্য; এটা root layout-কে replace করে আর নিজের `<html>` ও `<body>` render করতে হয়।\n\nবাস্তব ফলাফল: সম্ভব হলে ঝুঁকিপূর্ণ data fetching layout-এর বাইরে রাখো (অথবা layout-এর ভেতরেই failure সামলাও), আর layout-কে fetch করতেই হলে নিশ্চিত করো parent segment-এ একটা যুক্তিসঙ্গত `error.tsx` আছে। Production-এ Server Component-এর error আসে একটা generic message আর log মেলানোর জন্য `error.digest`-সহ; `retry()` prop (16.3 থেকে stable) segment আবার fetch করে re-render করে। Route segment-এর সাথে যুক্ত না এমন component-level boundary-র জন্য Next.js একটা `catchError` helper-ও document করে।"
+  },
+  "interviewTip": {
+   "en": "Quote the nesting order — it answers this question and several follow-ups (why `loading.tsx` doesn't cover layouts, why `not-found` sits inside the error boundary).",
+   "bn": "Nesting-এর ক্রমটা বলো — এটা দিয়েই এই প্রশ্ন আর পরের কয়েকটা প্রশ্নের উত্তর হয়ে যায় (কেন `loading.tsx` layout কভার করে না, কেন `not-found` error boundary-র ভেতরে থাকে)।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — error.js",
+    "url": "https://nextjs.org/docs/app/api-reference/file-conventions/error"
+   },
+   {
+    "title": "Next.js Docs — Error Handling",
+    "url": "https://nextjs.org/docs/app/getting-started/error-handling"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "next-006",
+   "next-003"
+  ],
+  "code": {
+   "language": "text",
+   "source": "app/\n├── layout.tsx\n├── error.tsx\n└── dashboard/\n    ├── layout.tsx     ← throws\n    ├── error.tsx\n    └── page.tsx"
+  },
+  "options": [
+   {
+    "en": "`app/dashboard/error.tsx`, because it's in the same folder as the failing layout",
+    "bn": "`app/dashboard/error.tsx`, কারণ এটা ব্যর্থ layout-এর একই folder-এ আছে"
+   },
+   {
+    "en": "`app/error.tsx`, because a segment's `error.tsx` wraps its page and children but not that segment's own `layout.tsx`",
+    "bn": "`app/error.tsx`, কারণ একটা segment-এর `error.tsx` তার page আর children-কে wrap করে, কিন্তু ওই segment-এর নিজের `layout.tsx`-কে না"
+   },
+   {
+    "en": "`app/global-error.tsx`, which always handles errors thrown in any layout",
+    "bn": "`app/global-error.tsx`, যেটা যেকোনো layout-এ throw হওয়া error সবসময় সামলায়"
+   },
+   {
+    "en": "No error UI — the error is swallowed and the page renders without the layout",
+    "bn": "কোনো error UI না — error চাপা পড়ে যায় আর page layout ছাড়াই render হয়"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "nextjs"
+ },
+ {
+  "id": "next-032",
+  "subtopic": "Caching Architecture for Personalised E-commerce",
+  "difficulty": "extreme",
+  "type": "architecture",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 25,
+  "tags": [
+   "caching",
+   "e-commerce",
+   "personalisation",
+   "cache-components",
+   "architecture"
+  ],
+  "technologyVersion": "Next.js 16.4 (Cache Components)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Design the rendering and caching strategy for a large marketplace on Next.js 16 with Cache Components: 2 million products, flash sales, regional prices (BDT for Bangladesh, USD elsewhere) and logged-in personalisation (cart count, \"recommended for you\"). Product pages must load fast on 4G, and prices and stock must never be wrong at checkout.",
+   "bn": "Cache Components-সহ Next.js 16-এ একটা বড় marketplace-এর rendering আর caching strategy design করো: ২০ লাখ product, flash sale, অঞ্চলভিত্তিক দাম (বাংলাদেশে BDT, অন্য জায়গায় USD) আর logged-in personalisation (cart count, \"recommended for you\")। 4G-তে product page দ্রুত load হতে হবে, আর checkout-এ দাম ও stock কখনো ভুল হওয়া চলবে না।"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level architecture question.)* I'd classify every piece of data by **who it's for** and **how fresh it must be**, then map each class to a caching tool.\n\n1. **Public, slow-changing** (title, images, specs): `'use cache'` + `cacheLife('days')` + `cacheTag('product-<id>')`. Prerender the top sellers with `generateStaticParams`; the long tail is rendered on first visit and cached.\n2. **Public, fast-changing** (price, stock badge, flash-sale state): a separate cached function with a short profile (`'minutes'`) and its own tag (`price-<id>`). The pricing system's webhook calls `revalidateTag('price-<id>', { expire: 0 })` so prices never stay stale; admin edits via Server Actions use `updateTag`.\n3. **Per region/currency:** put the region in the URL (`/bd/...`, `/us/...`) and pass it as an argument to cached functions. That keeps a small, bounded number of variants, stays prerenderable and is SEO-friendly — better than reading a currency cookie.\n4. **Per user** (cart count, recommendations, wishlist): read cookies inside `<Suspense>` boundaries so they stream after the static shell. Never put this in a shared cache; `'use cache: private'` can make per-user results prefetchable in the browser.\n5. **Checkout:** always dynamic. The order Server Action re-reads price and stock inside a database transaction — the cache is never the source of truth for money.\n\n**Infrastructure:** CDN for static shells and hashed assets, a shared cache handler (Redis) with tag coordination across instances, an image CDN, and streaming-capable proxies.",
+   "bn": "*(Advanced, senior-level architecture প্রশ্ন।)* আমি প্রতিটা data-কে ভাগ করব **কার জন্য** আর **কতটা fresh হতে হবে** অনুযায়ী, তারপর প্রতিটা ভাগকে একটা caching tool-এর সাথে মেলাব।\n\n1. **Public, ধীরে বদলায়** (title, image, spec): `'use cache'` + `cacheLife('days')` + `cacheTag('product-<id>')`। Top seller-গুলো `generateStaticParams` দিয়ে prerender করো; বাকি long tail প্রথম visit-এ render হয়ে cache হয়।\n2. **Public, দ্রুত বদলায়** (দাম, stock badge, flash-sale অবস্থা): ছোট profile (`'minutes'`) আর নিজস্ব tag (`price-<id>`)-সহ আলাদা একটা cached function। Pricing system-এর webhook `revalidateTag('price-<id>', { expire: 0 })` call করে, যাতে দাম কখনো stale না থাকে; Server Action দিয়ে admin-এর edit-এ `updateTag`।\n3. **অঞ্চল/currency অনুযায়ী:** অঞ্চলটা URL-এ রাখো (`/bd/...`, `/us/...`) আর cached function-এ argument হিসেবে পাঠাও। এতে variant-এর সংখ্যা ছোট আর সীমিত থাকে, prerender করা যায় আর SEO-বান্ধব — currency cookie পড়ার চেয়ে ভালো।\n4. **প্রতি user-এ আলাদা** (cart count, recommendation, wishlist): `<Suspense>` boundary-র ভেতরে cookie পড়ো, যাতে static shell-এর পরে stream হয়। এগুলো কখনো shared cache-এ রাখবে না; `'use cache: private'` per-user result browser-এ prefetch করার উপযোগী করতে পারে।\n5. **Checkout:** সবসময় dynamic। Order Server Action একটা database transaction-এর ভেতরে দাম আর stock আবার পড়ে — টাকার ব্যাপারে cache কখনো source of truth না।\n\n**Infrastructure:** static shell আর hash-যুক্ত asset-এর জন্য CDN, instance-গুলোর মধ্যে tag coordination-সহ shared cache handler (Redis), image CDN, আর streaming সমর্থন করে এমন proxy।"
+  },
+  "explanation": {
+   "en": "**Tag taxonomy:** `product-<id>`, `price-<id>`, `category-<slug>`, `sale-<id>`. Fine-grained tags avoid invalidating millions of entries at once; a single `products` tag for everything would cause a regeneration stampede.\n\n**Flash sales:** the sale page and its shell are prerendered *before* the start time; the sale state (started/ended, remaining stock) is a small, short-lived or dynamic hole. Expect traffic spikes — stale-while-revalidate (`'max'`) on non-price data spreads regeneration load.\n\n**Failure scenarios**\n- Cache handler down → fall back to rendering from the database with rate limits; prices are still correct because checkout re-validates.\n- Price shown on the page changed before payment → checkout shows \"price updated\" and asks for confirmation.\n- Crawlers that can't handle streamed metadata are served a fully rendered response — capacity-plan for bot traffic hitting dynamic rendering.\n\n**Measure:** cache hit ratio per tag family, LCP/INP by region, invalidation latency, and checkout price-mismatch rate.",
+   "bn": "**Tag-এর বিন্যাস:** `product-<id>`, `price-<id>`, `category-<slug>`, `sale-<id>`। সূক্ষ্ম tag থাকলে একসাথে লাখ লাখ entry invalidate হয় না; সবকিছুর জন্য একটাই `products` tag থাকলে regeneration-এর হুড়োহুড়ি (stampede) লেগে যেত।\n\n**Flash sale:** sale page আর তার shell শুরু হওয়ার *আগেই* prerender করা থাকে; sale-এর অবস্থা (শুরু/শেষ, বাকি stock) একটা ছোট, স্বল্পস্থায়ী বা dynamic অংশ। Traffic হঠাৎ বাড়বে ধরে নাও — দাম ছাড়া অন্য data-য় stale-while-revalidate (`'max'`) regeneration-এর চাপ ছড়িয়ে দেয়।\n\n**Failure scenario**\n- Cache handler বন্ধ → rate limit-সহ database থেকে render করার fallback; checkout আবার যাচাই করে বলে দাম তখনো সঠিক থাকে।\n- Payment-এর আগে page-এ দেখানো দাম বদলে গেছে → checkout \"দাম update হয়েছে\" দেখিয়ে নিশ্চিত করতে বলে।\n- যে crawler stream হওয়া metadata সামলাতে পারে না, তাকে পুরোপুরি render করা response দেওয়া হয় — dynamic rendering-এ আসা bot traffic-এর জন্য capacity পরিকল্পনা করো।\n\n**যা মাপবে:** প্রতিটা tag family-র cache hit ratio, অঞ্চল অনুযায়ী LCP/INP, invalidation latency, আর checkout-এ দাম না মেলার হার।"
+  },
+  "interviewTip": {
+   "en": "Lead with the classification (\"who is it for, how fresh must it be?\") — it turns a vague question into a clear design. Then map each class to concrete APIs and finish with correctness at checkout and failure scenarios. That's what separates architects from framework users.",
+   "bn": "শ্রেণিবিভাগ দিয়ে শুরু করো (\"কার জন্য, কতটা fresh হতে হবে?\") — এতে অস্পষ্ট প্রশ্ন একটা স্পষ্ট design-এ পরিণত হয়। তারপর প্রতিটা ভাগকে নির্দিষ্ট API-র সাথে মেলাও, আর শেষে checkout-এর correctness আর failure scenario বলো। এটাই architect-কে সাধারণ framework user থেকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "Next.js Docs — Caching (Cache Components)",
+    "url": "https://nextjs.org/docs/app/getting-started/caching"
+   },
+   {
+    "title": "Next.js Docs — 'use cache: private'",
+    "url": "https://nextjs.org/docs/app/api-reference/directives/use-cache-private"
+   },
+   {
+    "title": "Next.js Docs — ISR with Cache Components",
+    "url": "https://nextjs.org/docs/app/guides/incremental-static-regeneration-cache-components"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you prevent a cache stampede at the exact second a flash sale starts?",
+    "bn": "Flash sale ঠিক যে সেকেন্ডে শুরু হয়, তখন cache stampede কীভাবে ঠেকাবে?"
+   },
+   {
+    "en": "Why is the region in the URL better than a currency cookie for caching and SEO?",
+    "bn": "Caching আর SEO-র জন্য currency cookie-র চেয়ে URL-এ region রাখা কেন ভালো?"
+   },
+   {
+    "en": "Where exactly do you guarantee price correctness, and why there?",
+    "bn": "দামের correctness ঠিক কোথায় নিশ্চিত করো, আর কেন সেখানে?"
+   }
+  ],
+  "related": [
+   "next-014",
+   "next-024",
+   "next-030"
+  ],
+  "commonMistakes": {
+   "en": "Making the whole product page dynamic because it shows a cart badge, caching per-user data in a shared cache, keying caches by a currency cookie (unbounded variants, not prerenderable), or trusting cached prices at checkout.",
+   "bn": "একটা cart badge দেখায় বলে পুরো product page dynamic করে ফেলা, per-user data shared cache-এ রাখা, currency cookie দিয়ে cache key বানানো (সীমাহীন variant, prerender করা যায় না), অথবা checkout-এ cached দামের উপর ভরসা করা।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// app/[region]/products/[id]/page.tsx\nimport { Suspense } from 'react';\nimport { notFound } from 'next/navigation';\nimport { cacheLife, cacheTag } from 'next/cache';\n\nasync function getProduct(id: string, region: string) {\n  'use cache';\n  cacheLife('days');\n  cacheTag(`product-${id}`);\n  return catalog.getProduct(id, region);\n}\n\nasync function getPrice(id: string, region: string) {\n  'use cache';\n  cacheLife('minutes');\n  cacheTag(`price-${id}`);\n  return pricing.getPrice(id, region); // BDT for 'bd', USD otherwise\n}\n\nexport async function generateStaticParams() {\n  const ids = await catalog.getTopSellerIds(1000);\n  return ['bd', 'us'].flatMap((region) => ids.map((id) => ({ region, id })));\n}\n\nexport default async function ProductPage({\n  params,\n}: {\n  params: Promise<{ region: string; id: string }>;\n}) {\n  const { region, id } = await params;\n  const [product, price] = await Promise.all([getProduct(id, region), getPrice(id, region)]);\n  if (!product) notFound();\n\n  return (\n    <main>\n      <ProductGallery images={product.images} />\n      <h1>{product.title}</h1>\n      <PriceTag price={price} />\n      <Suspense fallback={<CartBadgeSkeleton />}>\n        <CartBadge />                       {/* reads cookies(): per user, streamed */}\n      </Suspense>\n      <Suspense fallback={<RecommendationsSkeleton />}>\n        <PersonalRecommendations productId={id} />\n      </Suspense>\n    </main>\n  );\n}"
+  },
+  "technology": "nextjs"
+ }
+]

@@ -1,0 +1,482 @@
+[
+ {
+  "id": "aws-008",
+  "subtopic": "Security Groups vs NACLs",
+  "difficulty": "easy",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "vpc",
+   "security-groups",
+   "nacl",
+   "networking",
+   "firewall"
+  ],
+  "technologyVersion": "Version-independent concept (Amazon VPC)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between a security group and a network ACL (NACL) in a VPC?",
+   "bn": "VPC-তে security group আর network ACL (NACL)-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "- **Where they apply:** a security group attaches to network interfaces, so to instances, ALBs, RDS and so on. A NACL attaches to a subnet.\n- **State:** a security group is **stateful**. If inbound traffic is allowed, the response is automatically allowed back out. A NACL is **stateless**, so you need explicit rules in both directions, including the ephemeral port range (typically 1024–65535) for return traffic.\n- **Rule types:** security groups only have *allow* rules. NACLs have *allow* and *deny* rules, evaluated in rule-number order, and the first match wins.\n- **Defaults:** a new security group allows no inbound and all outbound traffic. The default NACL allows everything, but a newly created custom NACL denies everything until you add rules.\n\nIn practice I do almost all filtering with security groups. For example, the ALB's group allows 443 from the internet, and the app servers' group allows port 3000 only from the ALB's security group. I use NACLs as a coarse extra layer, like blocking a known bad IP range for a whole subnet.",
+   "bn": "- **কোথায় apply হয়:** security group network interface-এ attach হয়, মানে instance, ALB, RDS ইত্যাদিতে। NACL attach হয় subnet-এ।\n- **State:** security group **stateful**। Inbound traffic allow হলে তার response নিজে থেকেই বাইরে যেতে পারে। NACL **stateless**, তাই দুই দিকেই আলাদা rule লাগে, ফিরতি traffic-এর জন্য ephemeral port range (সাধারণত 1024–65535)-সহ।\n- **Rule-এর ধরন:** security group-এ শুধু *allow* rule থাকে। NACL-এ *allow* আর *deny* দুটোই থাকে; rule number অনুযায়ী ক্রমানুসারে evaluate হয়, প্রথম match-টাই কার্যকর।\n- **Default:** নতুন security group-এ কোনো inbound allow নেই, সব outbound allow। Default NACL সব allow করে, কিন্তু নতুন বানানো custom NACL rule যোগ না করা পর্যন্ত সব deny করে।\n\nবাস্তবে আমি প্রায় সব filtering security group দিয়েই করি। যেমন ALB-এর group internet থেকে 443 allow করে, আর app server-এর group port 3000 শুধু ALB-এর security group থেকে allow করে। NACL ব্যবহার করি বাড়তি একটা মোটা দাগের layer হিসেবে, যেমন পুরো subnet-এর জন্য পরিচিত কোনো খারাপ IP range block করা।"
+  },
+  "explanation": {
+   "en": "- **Security groups can reference other security groups** (\"allow 5432 from the app tier's SG\"). That keeps rules correct as instances scale in and out, and NACLs can't do it.\n- A classic NACL bug: you allow inbound 443 but forget the outbound ephemeral range, so connections hang and time out. Because NACLs are stateless, return traffic is just another rule to write.\n- To *block* a specific IP you need a NACL deny rule or AWS WAF, because security groups can't deny.\n- Rule changes apply immediately to new connections, and you don't need to restart the instance.",
+   "bn": "- **Security group অন্য security group-কে reference করতে পারে** (\"app tier-এর SG থেকে 5432 allow\")। Instance বাড়লে বা কমলেও rule ঠিক থাকে। NACL এটা পারে না।\n- Classic NACL bug: inbound 443 allow করেছ কিন্তু outbound ephemeral range দাওনি, তাই connection ঝুলে থেকে timeout হয়। NACL stateless বলে ফিরতি traffic-এর জন্যও আলাদা rule লিখতে হয়।\n- নির্দিষ্ট কোনো IP *block* করতে NACL-এর deny rule বা AWS WAF লাগে, কারণ security group deny করতে পারে না।\n- Rule পরিবর্তন নতুন connection-এ সাথে সাথে কার্যকর হয়, instance restart করতে হয় না।"
+  },
+  "interviewTip": {
+   "en": "Structure it as four rows: scope, state, rule types, defaults. Then give the \"ALB SG → app SG\" example. An answer laid out like a table is easy for an interviewer to follow.",
+   "bn": "চারটা row ধরে বলো: scope, state, rule-এর ধরন, default। তারপর \"ALB SG → app SG\" উদাহরণটা দাও। Table-এর মতো সাজানো উত্তর interviewer-এর জন্য বোঝা সহজ।"
+  },
+  "references": [
+   {
+    "title": "Amazon VPC — Security groups",
+    "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
+   },
+   {
+    "title": "Amazon VPC — Network ACLs",
+    "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why do NACL rules need the ephemeral port range for outbound traffic?",
+    "bn": "NACL-এর outbound rule-এ ephemeral port range কেন লাগে?"
+   },
+   {
+    "en": "How would you block a single abusive IP address hitting your ALB?",
+    "bn": "তোমার ALB-তে আঘাত করা একটা abusive IP address কীভাবে block করবে?"
+   }
+  ],
+  "related": [
+   "aws-009",
+   "aws-017"
+  ],
+  "commonMistakes": {
+   "en": "Saying security groups are stateless, trying to add a \"deny\" rule to a security group, or opening the app port (3000) to `0.0.0.0/0` instead of to the load balancer's security group.",
+   "bn": "Security group-কে stateless বলা, security group-এ \"deny\" rule দেওয়ার চেষ্টা করা, বা app port (3000) load balancer-এর security group-এর বদলে `0.0.0.0/0`-এর জন্য খুলে দেওয়া।"
+  },
+  "code": {
+   "language": "bash",
+   "source": "# Allow port 3000 on the app servers only from the load balancer's security group\naws ec2 authorize-security-group-ingress \\\n  --group-id sg-0app1234567890abc \\\n  --protocol tcp --port 3000 \\\n  --source-group sg-0alb1234567890abc"
+  },
+  "technology": "aws"
+ },
+ {
+  "id": "aws-009",
+  "subtopic": "EC2 Connectivity Troubleshooting",
+  "difficulty": "easy",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "ec2",
+   "ssh",
+   "security-groups",
+   "route-tables",
+   "troubleshooting"
+  ],
+  "technologyVersion": "Amazon EC2 (Amazon Linux 2023)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You launched an Amazon Linux 2023 instance in a new VPC, but SSH fails as shown below. What is wrong, and how do you fix it?",
+   "bn": "নতুন একটা VPC-তে Amazon Linux 2023 instance launch করেছ, কিন্তু নিচের মতো SSH fail করছে। সমস্যা কী, আর কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "\"Connection timed out\" means packets never get an answer. That's a network-path problem, not a key problem. There are two bugs here:\n1. **The subnet isn't public.** Its route table only has the `local` route, with no `0.0.0.0/0 → Internet Gateway` route. A public IP alone isn't enough, because return traffic has no path to the internet. Fix: attach an IGW to the VPC and add the default route.\n2. **The security group doesn't allow port 22.** Only 3000 is open (to the whole world, which is also bad). Fix: allow TCP 22 from *my own IP* (`/32`), not from `0.0.0.0/0`, and close 3000 or restrict it to the load balancer.\n\nIf there's a custom NACL, check that it allows inbound 22 and outbound ephemeral ports. Even better, skip port 22 altogether and use **SSM Session Manager** or EC2 Instance Connect.",
+   "bn": "\"Connection timed out\" মানে packet-এর কোনো উত্তর আসছে না। এটা network path-এর সমস্যা, key-এর না। এখানে দুইটা bug আছে:\n1. **Subnet-টা public না।** Route table-এ শুধু `local` route আছে, `0.0.0.0/0 → Internet Gateway` route নেই। শুধু public IP থাকলেই হয় না, কারণ ফিরতি traffic-এর internet-এ যাওয়ার পথ নেই। সমাধান: VPC-তে IGW attach করে default route যোগ করো।\n2. **Security group-এ port 22 allow করা নেই।** শুধু 3000 খোলা (তাও সারা দুনিয়ার জন্য, যেটা নিজেই খারাপ)। সমাধান: TCP 22 শুধু *নিজের IP* (`/32`) থেকে allow করো, `0.0.0.0/0` থেকে না; আর 3000 বন্ধ করো বা শুধু load balancer-এর জন্য রাখো।\n\nCustom NACL থাকলে দেখো inbound 22 আর outbound ephemeral port allow আছে কি না। আরও ভালো হয় port 22 একদম না খুলে **SSM Session Manager** বা EC2 Instance Connect ব্যবহার করলে।"
+  },
+  "explanation": {
+   "en": "The error message tells you where to look:\n- **`Connection timed out`**: packets are dropped. Check the security group, NACL, route table / IGW, whether the instance has a public IP, or whether your own network blocks outbound port 22.\n- **`Connection refused`**: you reached the host, but nothing is listening on port 22 (sshd stopped, wrong port).\n- **`Permission denied (publickey)`**: networking is fine. The key pair or the username is wrong (`ec2-user` on Amazon Linux, `ubuntu` on Ubuntu).\n- **`UNPROTECTED PRIVATE KEY FILE`**: run `chmod 400 mykey.pem`.\n\nThe VPC Reachability Analyzer can trace the path and point to the exact blocking component.",
+   "bn": "Error message-ই বলে দেয় কোথায় খুঁজতে হবে:\n- **`Connection timed out`**: packet drop হচ্ছে। Security group, NACL, route table / IGW, instance-এর public IP আছে কি না, আর তোমার নিজের network outbound port 22 block করছে কি না দেখো।\n- **`Connection refused`**: host পর্যন্ত পৌঁছেছ, কিন্তু port 22-এ কেউ listen করছে না (sshd বন্ধ, ভুল port)।\n- **`Permission denied (publickey)`**: network ঠিক আছে; key pair বা username ভুল (Amazon Linux-এ `ec2-user`, Ubuntu-তে `ubuntu`)।\n- **`UNPROTECTED PRIVATE KEY FILE`**: `chmod 400 mykey.pem` চালাও।\n\nVPC Reachability Analyzer পুরো path trace করে ঠিক কোন component block করছে তা দেখিয়ে দিতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Start by classifying the error (timeout vs refused vs permission denied), then walk outward: SG → NACL → route table/IGW → public IP. A systematic order impresses more than guessing.",
+   "bn": "প্রথমে error-টা শ্রেণিবদ্ধ করো (timeout, refused, নাকি permission denied), তারপর ধাপে ধাপে বাইরের দিকে যাও: SG → NACL → route table/IGW → public IP। অনুমানের চেয়ে এমন গোছানো ক্রম অনেক বেশি impress করে।"
+  },
+  "references": [
+   {
+    "title": "Amazon EC2 — Troubleshoot connecting to your instance",
+    "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html"
+   },
+   {
+    "title": "Amazon VPC — Internet gateways",
+    "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+   },
+   {
+    "title": "AWS Systems Manager — Session Manager",
+    "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What would `Permission denied (publickey)` tell you instead?",
+    "bn": "এর বদলে `Permission denied (publickey)` এলে সেটা কী বোঝাত?"
+   },
+   {
+    "en": "How does Session Manager let you connect without opening port 22?",
+    "bn": "Port 22 না খুলে Session Manager কীভাবে connect করতে দেয়?"
+   }
+  ],
+  "related": [
+   "aws-008",
+   "aws-017"
+  ],
+  "commonMistakes": {
+   "en": "Regenerating the key pair for a timeout error, or \"fixing\" it by opening all ports to `0.0.0.0/0`.",
+   "bn": "Timeout error-এর জন্য key pair নতুন করে বানানো, বা সব port `0.0.0.0/0`-এর জন্য খুলে দিয়ে \"ঠিক\" করা।"
+  },
+  "code": {
+   "language": "text",
+   "source": "$ ssh -i mykey.pem ec2-user@203.0.113.25\nssh: connect to host 203.0.113.25 port 22: Connection timed out\n\nInstance:          t3.micro, Amazon Linux 2023, state = running, all status checks passed\nPublic IPv4:       203.0.113.25\nSubnet route table:\n  Destination      Target\n  10.0.0.0/16      local\nSecurity group (inbound):\n  TCP 3000         0.0.0.0/0"
+  },
+  "extraCode": [
+   {
+    "language": "bash",
+    "source": "# 1. Make the subnet public: default route to the VPC's Internet Gateway\naws ec2 create-route --route-table-id rtb-0abc1234567890def \\\n  --destination-cidr-block 0.0.0.0/0 --gateway-id igw-0def1234567890abc\n\n# 2. Allow SSH only from your own public IP\naws ec2 authorize-security-group-ingress --group-id sg-0123456789abcdef0 \\\n  --protocol tcp --port 22 --cidr 198.51.100.7/32\n\n# 3. Correct key permissions and default user, then connect\nchmod 400 mykey.pem\nssh -i mykey.pem ec2-user@203.0.113.25\n\n# Better: no port 22 at all (needs the SSM agent + an instance role with AmazonSSMManagedInstanceCore)\naws ssm start-session --target i-0123456789abcdef0",
+    "label": {
+     "en": "Fix",
+     "bn": "সমাধান"
+    }
+   }
+  ],
+  "technology": "aws"
+ },
+ {
+  "id": "aws-010",
+  "subtopic": "Lambda Fundamentals",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "lambda",
+   "serverless",
+   "cold-start",
+   "nodejs24",
+   "concurrency"
+  ],
+  "technologyVersion": "AWS Lambda (nodejs24.x GA; nodejs26.x preview — 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is AWS Lambda, and what are its key characteristics and limits (Node.js runtimes, timeout, memory, cold starts, concurrency)?",
+   "bn": "AWS Lambda কী? এর মূল বৈশিষ্ট্য আর limit-গুলো কী (Node.js runtime, timeout, memory, cold start, concurrency)?"
+  },
+  "answer": {
+   "en": "Lambda runs your function in response to events, and you never manage servers. You pay per request and per unit of compute time (GB-seconds). Typical event sources are API Gateway or function URLs, S3 events, SQS, SNS, EventBridge (including schedules), DynamoDB Streams and Kinesis.\n\nKey facts:\n- **Maximum timeout is 15 minutes.** Memory goes from 128 MB to **10,240 MB (10 GB)**, and CPU scales with the memory you allocate.\n- **Node.js runtimes:** `nodejs24.x` is the current GA runtime and `nodejs22.x` is still supported. `nodejs26.x` is in public preview, so I don't use it in production yet. From Node.js 24 on, handlers must be `async` (or plain synchronous); callback-style handlers only work up to Node.js 22.\n- **Cold start:** when no warm execution environment is free, Lambda creates one, loads your code and runs the init code outside the handler, which adds latency. Warm invocations reuse the environment, so I create SDK clients and DB pools *outside* the handler.\n- **Concurrency:** each in-flight request needs its own environment, and there's a regional account-level quota. *Reserved concurrency* guarantees and caps a function's share. *Provisioned concurrency* keeps environments pre-initialised to remove cold starts for latency-sensitive paths.",
+   "bn": "Lambda event-এর response-এ তোমার function চালায়, server manage করতে হয় না। প্রতি request আর compute সময়ের (GB-second) হিসাবে টাকা দিতে হয়। সাধারণ event source: API Gateway বা function URL, S3 event, SQS, SNS, EventBridge (schedule-সহ), DynamoDB Streams, Kinesis।\n\nমূল তথ্য:\n- **সর্বোচ্চ timeout ১৫ মিনিট।** Memory 128 MB থেকে **10,240 MB (10 GB)** পর্যন্ত, আর যত memory দাও CPU-ও সেই অনুপাতে বাড়ে।\n- **Node.js runtime:** `nodejs24.x` বর্তমান GA runtime, `nodejs22.x`-ও এখনো supported। `nodejs26.x` public preview-তে আছে, তাই production-এ এখনো ব্যবহার করি না। Node.js 24 থেকে handler হতে হবে `async` (বা সাধারণ synchronous); callback-style handler শুধু Node.js 22 পর্যন্ত চলে।\n- **Cold start:** কোনো warm execution environment খালি না থাকলে Lambda নতুন একটা বানায়, code load করে, handler-এর বাইরের init code চালায়, ফলে latency বাড়ে। Warm invocation-এ environment reuse হয়, তাই SDK client আর DB pool আমি handler-এর *বাইরে* তৈরি করি।\n- **Concurrency:** চলমান প্রতিটা request-এর জন্য আলাদা environment লাগে, আর account-এর regional quota আছে। *Reserved concurrency* একটা function-এর ভাগ নিশ্চিত করে, আবার সর্বোচ্চ সীমাও বেঁধে দেয়। *Provisioned concurrency* environment আগে থেকে initialise করে রাখে, ফলে latency-sensitive path-এ cold start থাকে না।"
+  },
+  "explanation": {
+   "en": "- **When Lambda is a poor fit:** jobs longer than 15 minutes, steady high-throughput traffic (containers often cost less), workloads that need persistent connections or local state, or opening many direct connections to RDS (use RDS Proxy).\n- Synchronous invocations have a 6 MB request/response payload limit, so for large files hand the client a presigned S3 URL instead.\n- `/tmp` is ephemeral scratch space (512 MB by default, configurable up to 10 GB). It is not shared between environments and is not durable.\n- Lambda delivers events at least once for most async sources, so handlers that change data should be idempotent.",
+   "bn": "- **কখন Lambda ভালো choice না:** ১৫ মিনিটের বেশি সময়ের job, সারাক্ষণ বেশি throughput-এর traffic (container প্রায়ই সস্তা পড়ে), persistent connection বা local state লাগে এমন workload, বা RDS-এ সরাসরি অনেক connection খোলা (RDS Proxy ব্যবহার করো)।\n- Synchronous invocation-এ request/response payload-এর limit 6 MB, তাই বড় file-এর জন্য client-কে presigned S3 URL দাও।\n- `/tmp` সাময়িক scratch space (default 512 MB, 10 GB পর্যন্ত বাড়ানো যায়)। এটা environment-গুলোর মধ্যে shared না, আর durable-ও না।\n- বেশিরভাগ async source-এ Lambda event অন্তত একবার (at least once) deliver করে, তাই data পরিবর্তন করে এমন handler idempotent হওয়া উচিত।"
+  },
+  "interviewTip": {
+   "en": "Quote the hard limits correctly (15 minutes, 10 GB) and name the current runtime (`nodejs24.x`). Then explain cold starts with the \"init outside the handler\" trick. Precise numbers build credibility.",
+   "bn": "Hard limit-গুলো ঠিকভাবে বলো (১৫ মিনিট, 10 GB) আর বর্তমান runtime-এর নাম বলো (`nodejs24.x`)। তারপর \"handler-এর বাইরে init\" কৌশল দিয়ে cold start ব্যাখ্যা করো। সঠিক সংখ্যা বললে বিশ্বাসযোগ্যতা বাড়ে।"
+  },
+  "references": [
+   {
+    "title": "AWS Lambda — What is AWS Lambda?",
+    "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+   },
+   {
+    "title": "AWS Lambda — Runtimes",
+    "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html"
+   },
+   {
+    "title": "AWS Lambda — Define a Node.js function handler",
+    "url": "https://docs.aws.amazon.com/lambda/latest/dg/nodejs-handler.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the difference between reserved and provisioned concurrency?",
+    "bn": "Reserved আর provisioned concurrency-র পার্থক্য কী?"
+   },
+   {
+    "en": "How would you reduce cold-start latency for a Node.js function?",
+    "bn": "Node.js function-এর cold-start latency কীভাবে কমাবে?"
+   }
+  ],
+  "related": [
+   "aws-025",
+   "aws-031"
+  ],
+  "commonMistakes": {
+   "en": "Saying the timeout is 5 minutes (an old limit), writing callback-style handlers on `nodejs24.x`, or creating a new DB connection inside every invocation.",
+   "bn": "Timeout ৫ মিনিট বলা (পুরনো limit), `nodejs24.x`-এ callback-style handler লেখা, বা প্রতিটা invocation-এর ভেতরে নতুন DB connection তৈরি করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// index.mjs — runtime: nodejs24.x\nimport { S3Client, GetObjectCommand } from \"@aws-sdk/client-s3\";\n\n// Runs once per execution environment (during the cold start), then reused\nconst s3 = new S3Client({});\n\nexport const handler = async (event) => {\n  const { bucket, key } = event;\n  const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));\n  const text = await res.Body.transformToString();\n  return { statusCode: 200, body: JSON.stringify({ length: text.length }) };\n};"
+  },
+  "technology": "aws"
+ },
+ {
+  "id": "aws-011",
+  "subtopic": "Route 53 Records & Routing Policies",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "route53",
+   "dns",
+   "alias-record",
+   "alb",
+   "routing-policy"
+  ],
+  "technologyVersion": "Version-independent concept (Amazon Route 53)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You want both `example.com` (the apex/root domain) and `www.example.com` to point to your Application Load Balancer. Which Route 53 setup is correct?",
+   "bn": "`example.com` (apex/root domain) আর `www.example.com` দুটোই তোমার Application Load Balancer-এ point করাতে চাও। Route 53-এ কোন setup সঠিক?"
+  },
+  "answer": {
+   "en": "Option 3. An **alias record** is a Route 53 extension that points a name at an AWS resource (ALB, CloudFront, API Gateway, an S3 website endpoint, and others). Route 53 answers with the resource's *current* IPs. Unlike a CNAME, an alias works at the zone apex. Alias queries to AWS resources are free, and an alias can evaluate the target's health.",
+   "bn": "Option 3। **Alias record** হলো Route 53-এর একটা extension, যেটা একটা name-কে AWS resource-এ (ALB, CloudFront, API Gateway, S3 website endpoint ইত্যাদি) point করায়। Route 53 resource-এর *বর্তমান* IP দিয়ে উত্তর দেয়। CNAME-এর মতো না, alias zone apex-এও কাজ করে। AWS resource-এর জন্য alias query-তে টাকা লাগে না, আর alias target-এর health-ও evaluate করতে পারে।"
+  },
+  "explanation": {
+   "en": "- **Option 1 is the tempting one.** It works for `www`, but the DNS standard doesn't allow a CNAME at the zone apex, because it would conflict with the SOA and NS records there.\n- Option 2 breaks silently. ALB IP addresses change over time, so hardcoded IPs eventually point to nothing.\n- Option 4 is a misconception that alias records exist to solve.\n- Records can use **routing policies**: simple, weighted (canary or A/B splits), latency-based (send users to the closest Region), failover (with health checks, for DR), geolocation, geoproximity, multivalue answer and IP-based.",
+   "bn": "- **Option 1-টাই আকর্ষণীয়।** `www`-এর জন্য এটা কাজ করে, কিন্তু DNS standard zone apex-এ CNAME রাখতে দেয় না, কারণ সেখানকার SOA আর NS record-এর সাথে conflict হয়।\n- Option 2 নিঃশব্দে ভেঙে যায়। ALB-এর IP address সময়ের সাথে বদলায়, তাই hardcode করা IP একসময় ভুল জায়গায় point করে।\n- Option 4 একটা ভুল ধারণা, আর ঠিক এই সমস্যা সমাধানের জন্যই alias record আছে।\n- Record-এ **routing policy** ব্যবহার করা যায়: simple, weighted (canary বা A/B split), latency-based (user-কে সবচেয়ে কাছের Region-এ পাঠানো), failover (health check-সহ, DR-এর জন্য), geolocation, geoproximity, multivalue answer আর IP-based।"
+  },
+  "interviewTip": {
+   "en": "Explain *why* a CNAME can't sit at the apex (it would clash with SOA/NS records). Then name two or three routing policies with a use case each, like weighted for canary and failover for DR.",
+   "bn": "Apex-এ CNAME কেন রাখা যায় না সেটা ব্যাখ্যা করো (SOA/NS record-এর সাথে conflict হয়)। তারপর দুই-তিনটা routing policy-র নাম use case-সহ বলো, যেমন canary-র জন্য weighted, DR-এর জন্য failover।"
+  },
+  "references": [
+   {
+    "title": "Route 53 — Choosing between alias and non-alias records",
+    "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+   },
+   {
+    "title": "Route 53 — Choosing a routing policy",
+    "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html"
+   }
+  ],
+  "followUps": [],
+  "related": [
+   "aws-012",
+   "aws-020"
+  ],
+  "options": [
+   {
+    "en": "A CNAME record for `example.com` pointing to the ALB's DNS name",
+    "bn": "`example.com`-এর জন্য ALB-এর DNS name-এ point করা একটা CNAME record"
+   },
+   {
+    "en": "An A record for `example.com` containing the ALB's current IP addresses",
+    "bn": "`example.com`-এর জন্য ALB-এর বর্তমান IP address-গুলো দিয়ে একটা A record"
+   },
+   {
+    "en": "Alias A (and AAAA) records for `example.com` and `www.example.com` that target the ALB",
+    "bn": "`example.com` আর `www.example.com` দুটোর জন্যই ALB-কে target করা Alias A (ও AAAA) record"
+   },
+   {
+    "en": "Only a CNAME for `www.example.com`, because an apex domain cannot point to an AWS load balancer",
+    "bn": "শুধু `www.example.com`-এর জন্য একটা CNAME, কারণ apex domain AWS load balancer-এ point করানো যায় না"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "aws"
+ },
+ {
+  "id": "aws-012",
+  "subtopic": "Deploying Node.js on EC2",
+  "difficulty": "medium",
+  "type": "scenario",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 8,
+  "tags": [
+   "ec2",
+   "nginx",
+   "pm2",
+   "route53",
+   "deployment"
+  ],
+  "technologyVersion": "Amazon Linux 2023 / Ubuntu LTS, Node.js 24 LTS, NGINX 1.30, PM2",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Walk me through deploying an Express (Node.js) API to a single EC2 instance with NGINX as a reverse proxy, PM2 (or systemd) as the process manager, HTTPS, and a custom domain managed in Route 53.",
+   "bn": "একটা Express (Node.js) API একটা EC2 instance-এ deploy করার পুরো ধাপগুলো বলো: reverse proxy হিসেবে NGINX, process manager হিসেবে PM2 (বা systemd), HTTPS, আর Route 53-এ manage করা custom domain।"
+  },
+  "answer": {
+   "en": "1. **Launch:** an Amazon Linux 2023 or Ubuntu LTS instance (a small `t3`/`t4g` is fine to start) in a public subnet. Attach an **IAM role** (instance profile) instead of access keys, and allocate an **Elastic IP** so the address survives stop/start.\n2. **Security group:** 80 and 443 from anywhere, and 22 only from my IP (or no 22 at all, using SSM Session Manager). Port 3000 stays **closed** to the internet.\n3. **Install:** Node.js 24 LTS (NodeSource, nvm or official binaries), NGINX and git. Clone, build, and run `npm ci --omit=dev`.\n4. **Config and secrets:** read from SSM Parameter Store / Secrets Manager at startup instead of committing a `.env` file. The app listens on `127.0.0.1:3000`.\n5. **Process manager:** `pm2 start ecosystem.config.cjs`, then `pm2 startup` + `pm2 save` so it comes back after a reboot. Alternatively, write a systemd unit with `Restart=always`.\n6. **NGINX:** a server block with `server_name api.example.com` and `proxy_pass http://127.0.0.1:3000` plus the forwarding headers. Check with `nginx -t`, then reload.\n7. **DNS:** in the Route 53 hosted zone, an A record `api.example.com` → the Elastic IP. If the domain was bought elsewhere, point the registrar's nameservers to the hosted zone's four NS records.\n8. **HTTPS:** Let's Encrypt with `certbot --nginx` (with auto-renewal), or put an ALB in front with a free ACM certificate.\n9. **Operate:** CloudWatch agent for logs and memory metrics, log rotation, alarms, and EBS snapshots through AWS Backup.",
+   "bn": "1. **Launch:** public subnet-এ একটা Amazon Linux 2023 বা Ubuntu LTS instance (শুরুতে ছোট `t3`/`t4g`-ই যথেষ্ট)। Access key-এর বদলে **IAM role** (instance profile) attach করো, আর stop/start-এর পরেও address যেন না বদলায় সেজন্য **Elastic IP** নাও।\n2. **Security group:** 80 আর 443 সবার জন্য খোলা, 22 শুধু আমার IP থেকে (বা SSM Session Manager ব্যবহার করে 22 একদমই না খোলা)। Port 3000 internet-এর জন্য **বন্ধ** থাকবে।\n3. **Install:** Node.js 24 LTS (NodeSource, nvm বা official binary), NGINX, git। তারপর clone, build, আর `npm ci --omit=dev`।\n4. **Config আর secret:** `.env` file commit না করে startup-এ SSM Parameter Store / Secrets Manager থেকে পড়ো। App শুনবে `127.0.0.1:3000`-এ।\n5. **Process manager:** `pm2 start ecosystem.config.cjs`, তারপর `pm2 startup` + `pm2 save`, যাতে reboot-এর পরে app আবার চালু হয়। বিকল্প হিসেবে `Restart=always`-সহ systemd unit লেখা যায়।\n6. **NGINX:** `server_name api.example.com` আর `proxy_pass http://127.0.0.1:3000`-সহ forwarding header দিয়ে server block। `nginx -t` দিয়ে check করে reload করো।\n7. **DNS:** Route 53 hosted zone-এ `api.example.com` → Elastic IP একটা A record। Domain অন্য কোথাও থেকে কেনা হলে registrar-এর nameserver hosted zone-এর চারটা NS record-এ বদলে দাও।\n8. **HTTPS:** `certbot --nginx` দিয়ে Let's Encrypt (auto-renewal-সহ), অথবা সামনে ALB বসিয়ে free ACM certificate।\n9. **চালানো:** log আর memory metric-এর জন্য CloudWatch agent, log rotation, alarm, আর AWS Backup দিয়ে EBS snapshot।"
+  },
+  "explanation": {
+   "en": "- **Why NGINX in front of Node:** TLS termination, gzip, static files, request size limits and buffering of slow clients. Node also stays on an unprivileged port as a non-root user.\n- Set `app.set('trust proxy', 1)` in Express so `req.ip` and `req.protocol` reflect the real client behind NGINX. Rate limiters and secure cookies depend on this.\n- PM2 cluster mode (`instances: \"max\"`) uses all vCPUs, and `pm2 reload` restarts workers one at a time for near-zero-downtime updates.\n- **Trade-off:** a single instance is a single point of failure. The next steps are an ALB with an Auto Scaling group across two AZs (or ECS on Fargate), RDS instead of a database on the same box, and CI/CD through GitHub Actions with an OIDC role instead of stored keys.",
+   "bn": "- **Node-এর সামনে NGINX কেন:** TLS termination, gzip, static file, request size limit আর ধীর client-এর buffering সামলায়। Node-ও non-root user হিসেবে unprivileged port-এ থাকতে পারে।\n- Express-এ `app.set('trust proxy', 1)` দাও, যাতে NGINX-এর পেছনেও `req.ip` আর `req.protocol` আসল client-এর মান দেখায়। Rate limiter আর secure cookie এর উপর নির্ভর করে।\n- PM2 cluster mode (`instances: \"max\"`) সব vCPU ব্যবহার করে, আর `pm2 reload` worker-গুলো একটা একটা করে restart করে, ফলে update-এ downtime প্রায় শূন্য থাকে।\n- **Trade-off:** একটা instance মানে single point of failure। পরের ধাপ: দুইটা AZ জুড়ে ALB + Auto Scaling group (বা Fargate-এ ECS), একই server-এ database না রেখে RDS, আর key জমা না রেখে OIDC role দিয়ে GitHub Actions-এ CI/CD।"
+  },
+  "interviewTip": {
+   "en": "Present it as numbered steps from network to process to DNS to TLS. Then volunteer the weaknesses of the single-instance setup and how you'd evolve it. That shows you think beyond \"it works\".",
+   "bn": "Network → process → DNS → TLS, এই ক্রমে নম্বর দিয়ে ধাপগুলো বলো। তারপর নিজে থেকেই single-instance setup-এর দুর্বলতা আর কীভাবে এটাকে উন্নত করবে সেটা বলো। এতে বোঝা যায় তুমি \"চলছে তো\" পর্যন্ত থেমে থাকো না।"
+  },
+  "references": [
+   {
+    "title": "Amazon EC2 — IAM roles for Amazon EC2",
+    "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html"
+   },
+   {
+    "title": "Amazon EC2 — Elastic IP addresses",
+    "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html"
+   },
+   {
+    "title": "Route 53 — Making Route 53 the DNS service for a domain that's in use",
+    "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you deploy a new version with zero downtime on this setup?",
+    "bn": "এই setup-এ zero downtime-এ নতুন version কীভাবে deploy করবে?"
+   },
+   {
+    "en": "What changes when you add a second instance behind a load balancer?",
+    "bn": "Load balancer-এর পেছনে দ্বিতীয় instance যোগ করলে কী কী বদলাতে হবে?"
+   }
+  ],
+  "related": [
+   "aws-005",
+   "aws-016",
+   "aws-020",
+   "aws-023"
+  ],
+  "commonMistakes": {
+   "en": "Opening port 3000 to the world and skipping NGINX, running Node as root on port 80, putting AWS access keys in `.env`, or forgetting `pm2 startup` so the app is gone after a reboot.",
+   "bn": "Port 3000 সবার জন্য খুলে NGINX বাদ দেওয়া, port 80-তে root হিসেবে Node চালানো, `.env`-এ AWS access key রাখা, বা `pm2 startup` ভুলে যাওয়া, যার ফলে reboot-এর পরে app আর চলে না।"
+  },
+  "code": {
+   "language": "nginx",
+   "source": "# /etc/nginx/conf.d/api.conf  (certbot --nginx later adds the 443/TLS block)\nserver {\n    listen 80;\n    server_name api.example.com;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "module.exports = {\n  apps: [\n    {\n      name: \"api\",\n      script: \"dist/server.js\",\n      instances: \"max\",      // one worker per vCPU\n      exec_mode: \"cluster\",\n      env: { NODE_ENV: \"production\", PORT: 3000 },\n    },\n  ],\n};",
+    "label": {
+     "en": "ecosystem.config.cjs (PM2)",
+     "bn": "ecosystem.config.cjs (PM2)"
+    }
+   },
+   {
+    "language": "bash",
+    "source": "pm2 start ecosystem.config.cjs\npm2 save\npm2 startup systemd          # prints a command to run with sudo\nsudo nginx -t && sudo systemctl reload nginx\nsudo certbot --nginx -d api.example.com",
+    "label": {
+     "en": "Start, persist across reboots, enable HTTPS",
+     "bn": "Start, reboot-এর পরেও চালু রাখা, HTTPS চালু করা"
+    }
+   }
+  ],
+  "technology": "aws"
+ },
+ {
+  "id": "aws-013",
+  "subtopic": "S3 + CloudFront Static Hosting",
+  "difficulty": "medium",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 7,
+  "tags": [
+   "s3",
+   "cloudfront",
+   "oac",
+   "spa",
+   "nextjs-export"
+  ],
+  "technologyVersion": "Amazon S3 + CloudFront (OAC); Next.js 16.4 static export; Vite 8",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How would you host a React (Vite) SPA or a Next.js static export (`output: 'export'`) on S3 and CloudFront with HTTPS and a custom domain? How do you handle client-side routes like `/dashboard` and deep links like `/about`?",
+   "bn": "একটা React (Vite) SPA বা Next.js static export (`output: 'export'`) HTTPS আর custom domain-সহ S3 + CloudFront-এ কীভাবে host করবে? `/dashboard`-এর মতো client-side route আর `/about`-এর মতো deep link কীভাবে সামলাবে?"
+  },
+  "answer": {
+   "en": "1. **Build:** `vite build` produces `dist/`. Next.js with `output: 'export'` produces `out/`, which only works for static features: no SSR, no Server Actions, no ISR, and no default image optimisation.\n2. **Private bucket:** keep Block Public Access on and upload with `aws s3 sync`.\n3. **CloudFront + OAC:** use the bucket's **REST endpoint** as the origin with **Origin Access Control**. The bucket policy allows only the `cloudfront.amazonaws.com` service principal, with `AWS:SourceArn` set to this distribution. OAI is the legacy approach, and S3 *website* endpoints are HTTP-only and can't use OAC.\n4. **HTTPS and domain:** request an ACM certificate in **us-east-1** (CloudFront requires that Region), add the alternate domain name, redirect HTTP to HTTPS, and create Route 53 alias A/AAAA records to the distribution.\n5. **Routing:** set the default root object to `index.html`. For an **SPA**, map 403 and 404 errors to `/index.html` with status 200 (or rewrite with a CloudFront Function). For a **Next.js export**, pages are `about.html` or `about/index.html` (with `trailingSlash: true`). The default root object only applies to `/`, so add a CloudFront Function that rewrites `/about/` → `/about/index.html`.\n6. **Caching:** hashed assets get `Cache-Control: public, max-age=31536000, immutable`, and `index.html` gets `no-cache`. After each deploy, invalidate `/index.html` (or `/*`).",
+   "bn": "1. **Build:** `vite build` বানায় `dist/`। Next.js-এ `output: 'export'` দিলে বানায় `out/`, তবে এটা শুধু static feature-এর জন্য: SSR, Server Actions, ISR বা default image optimisation চলবে না।\n2. **Private bucket:** Block Public Access চালু রাখো, `aws s3 sync` দিয়ে upload করো।\n3. **CloudFront + OAC:** bucket-এর **REST endpoint**-কে origin বানাও, সাথে **Origin Access Control**। Bucket policy শুধু `cloudfront.amazonaws.com` service principal-কে allow করবে, `AWS:SourceArn` = এই distribution শর্তে। OAI হলো legacy পদ্ধতি, আর S3 *website* endpoint শুধু HTTP-তে চলে, OAC ব্যবহার করতে পারে না।\n4. **HTTPS ও domain:** ACM certificate নাও **us-east-1**-এ (CloudFront এই Region-ই চায়), alternate domain name যোগ করো, HTTP থেকে HTTPS-এ redirect করো, আর distribution-এর জন্য Route 53 alias A/AAAA record বানাও।\n5. **Routing:** default root object `index.html`। **SPA**-র জন্য 403 আর 404 error-কে status 200-সহ `/index.html`-এ map করো (বা CloudFront Function দিয়ে rewrite করো)। **Next.js export**-এ page হয় `about.html` বা `about/index.html` (`trailingSlash: true` দিলে)। Default root object শুধু `/`-এর জন্য কাজ করে, তাই একটা CloudFront Function দিয়ে `/about/` → `/about/index.html` rewrite করো।\n6. **Caching:** hash-যুক্ত asset-এ `Cache-Control: public, max-age=31536000, immutable`, আর `index.html`-এ `no-cache`। প্রতিটা deploy-এর পরে `/index.html` (বা `/*`) invalidate করো।"
+  },
+  "explanation": {
+   "en": "- **Why 403 and not 404?** With OAC, CloudFront can only `GetObject`. Without `s3:ListBucket`, S3 returns **403 Access Denied** for a missing key instead of 404, so the SPA fallback must handle 403 too.\n- S3 static website hosting still works for quick demos, but it needs a public bucket and only serves HTTP. CloudFront + OAC gives you HTTPS, a private bucket, caching at edge locations and AWS WAF support.\n- Next.js static export also can't run `proxy.ts`, rewrites/redirects/headers from `next.config`, or dynamic routes without `generateStaticParams`. If you need those, deploy the Node.js server (for example as a container) instead.\n- Invalidations take a few minutes, and only a limited number of invalidation paths are free each month. Content-hashed filenames mean you rarely need to invalidate more than `index.html`.\n- **Cache key:** use a cache policy such as the managed `CachingOptimized` for the S3 behaviour, and keep headers, cookies and query strings out of the cache key unless the content really varies by them. Forwarding everything destroys the cache hit ratio.",
+   "bn": "- **404-এর বদলে 403 কেন?** OAC-তে CloudFront শুধু `GetObject` করতে পারে। `s3:ListBucket` না থাকলে না-থাকা key-এর জন্য S3 404-এর বদলে **403 Access Denied** দেয়, তাই SPA fallback-এ 403-ও ধরতে হবে।\n- S3 static website hosting দ্রুত demo-র জন্য এখনো চলে, কিন্তু এতে public bucket লাগে আর শুধু HTTP serve করে। CloudFront + OAC দিলে HTTPS, private bucket, edge location-এ caching আর AWS WAF support পাওয়া যায়।\n- Next.js static export-এ `proxy.ts`, `next.config`-এর rewrites/redirects/headers, বা `generateStaticParams` ছাড়া dynamic route-ও চলে না। এগুলো লাগলে Node.js server deploy করো (যেমন container হিসেবে)।\n- Invalidation-এ কয়েক মিনিট লাগে, আর মাসে নির্দিষ্ট সংখ্যক invalidation path-ই free। File name-এ content hash থাকলে সাধারণত `index.html` ছাড়া আর কিছু invalidate করতে হয় না।\n- **Cache key:** S3 behaviour-এর জন্য managed `CachingOptimized`-এর মতো cache policy ব্যবহার করো। Content সত্যিই header, cookie বা query string অনুযায়ী না বদলালে এগুলো cache key-তে রেখো না। সব forward করলে cache hit ratio নষ্ট হয়ে যায়।"
+  },
+  "interviewTip": {
+   "en": "Name the three things juniors usually miss: OAC instead of a public bucket, the ACM certificate in us-east-1, and the 403/404 → `index.html` rule (or a CloudFront Function) for client-side routes.",
+   "bn": "Junior-রা সাধারণত যে তিনটা জিনিস মিস করে সেগুলো বলো: public bucket-এর বদলে OAC, us-east-1-এ ACM certificate, আর client-side route-এর জন্য 403/404 → `index.html` rule (বা CloudFront Function)।"
+  },
+  "references": [
+   {
+    "title": "CloudFront — Restrict access to an Amazon S3 origin (OAC)",
+    "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html"
+   },
+   {
+    "title": "CloudFront — Manage how long content stays in the cache",
+    "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html"
+   },
+   {
+    "title": "Next.js — Static Exports",
+    "url": "https://nextjs.org/docs/app/guides/static-exports"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why must the CloudFront certificate be in us-east-1?",
+    "bn": "CloudFront-এর certificate কেন us-east-1-এ হতে হয়?"
+   },
+   {
+    "en": "Users still see the old version after a deploy. What do you check?",
+    "bn": "Deploy-এর পরেও user পুরনো version দেখছে। কী কী check করবে?"
+   }
+  ],
+  "related": [
+   "aws-007",
+   "aws-011"
+  ],
+  "commonMistakes": {
+   "en": "Making the bucket public, requesting the ACM certificate in the app's Region (for example `ap-south-1`), or caching `index.html` for a year so users never see new deployments.",
+   "bn": "Bucket public করে দেওয়া, app-এর Region-এ (যেমন `ap-south-1`) ACM certificate নেওয়া, বা `index.html` এক বছরের জন্য cache করা, যার ফলে user নতুন deploy কখনো দেখে না।"
+  },
+  "code": {
+   "language": "json",
+   "source": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"AllowCloudFrontServicePrincipalReadOnly\",\n      \"Effect\": \"Allow\",\n      \"Principal\": { \"Service\": \"cloudfront.amazonaws.com\" },\n      \"Action\": \"s3:GetObject\",\n      \"Resource\": \"arn:aws:s3:::my-spa-bucket/*\",\n      \"Condition\": {\n        \"StringEquals\": {\n          \"AWS:SourceArn\": \"arn:aws:cloudfront::111122223333:distribution/EDFDVBD6EXAMPLE\"\n        }\n      }\n    }\n  ]\n}"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "// Runtime: cloudfront-js-2.0 — add index.html to \"directory\" URLs\nfunction handler(event) {\n  var request = event.request;\n  var uri = request.uri;\n  if (uri.endsWith('/')) {\n    request.uri += 'index.html';\n  } else if (!uri.includes('.')) {\n    request.uri += '/index.html';\n  }\n  return request;\n}",
+    "label": {
+     "en": "CloudFront Function (viewer request) for a Next.js export with trailingSlash: true",
+     "bn": "Next.js export (trailingSlash: true)-এর জন্য CloudFront Function (viewer request)"
+    }
+   },
+   {
+    "language": "bash",
+    "source": "# Long-lived, immutable hashed assets. No --delete: tabs still running the\n# previous build may lazy-load old chunks; prune them later (e.g. a cleanup job)\naws s3 sync dist/ s3://my-spa-bucket/ \\\n  --exclude index.html \\\n  --cache-control \"public, max-age=31536000, immutable\"\n# index.html must always be revalidated\naws s3 cp dist/index.html s3://my-spa-bucket/index.html \\\n  --cache-control \"no-cache\"\naws cloudfront create-invalidation --distribution-id EDFDVBD6EXAMPLE --paths \"/index.html\"",
+    "label": {
+     "en": "Deploy with correct cache headers",
+     "bn": "সঠিক cache header-সহ deploy"
+    }
+   }
+  ],
+  "technology": "aws"
+ }
+]

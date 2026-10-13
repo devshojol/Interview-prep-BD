@@ -1,0 +1,606 @@
+[
+ {
+  "id": "mongoose-006",
+  "subtopic": "References & Populate",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 3,
+  "tags": [
+   "populate",
+   "references",
+   "objectid",
+   "ref"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you model a relationship between `Post` and `User` using references in Mongoose, and what does `populate()` actually do?",
+   "bn": "Mongoose-এ reference ব্যবহার করে `Post` আর `User`-এর মধ্যে relationship কীভাবে model করবে, আর `populate()` আসলে কী করে?"
+  },
+  "answer": {
+   "en": "In the post schema I store the author's ID with `type: Schema.Types.ObjectId, ref: \"User\"`. The `ref` tells Mongoose which model the ID belongs to.\n\n`populate(\"author\")` replaces that ID with the actual user document. Under the hood it's **not a database join**: Mongoose runs the post query, collects all author IDs, then runs **one more query** like `User.find({ _id: { $in: ids } })` and stitches the results into the posts. I usually limit the fields — `.populate(\"author\", \"name avatarUrl\")` — so I don't send emails or password hashes to the client.\n\nIf a referenced user has been deleted, the populated field becomes `null`, so the code must handle that.",
+   "bn": "Post schema-তে আমি author-এর ID রাখি `type: Schema.Types.ObjectId, ref: \"User\"` দিয়ে। `ref` Mongoose-কে জানায় ID-টা কোন model-এর।\n\n`populate(\"author\")` ওই ID-কে আসল user document দিয়ে replace করে। ভেতরে ভেতরে এটা **database join না**: Mongoose আগে post query চালায়, সব author ID জড়ো করে, তারপর `User.find({ _id: { $in: ids } })`-এর মতো **আরেকটা query** চালিয়ে result-গুলো post-এর সাথে জুড়ে দেয়। আমি সাধারণত field সীমিত রাখি — `.populate(\"author\", \"name avatarUrl\")` — যাতে client-এ email বা password hash না যায়।\n\nReferenced user delete হয়ে গেলে populated field `null` হয়ে যায়, তাই code-এ সেটা handle করতে হয়।"
+  },
+  "explanation": {
+   "en": "- **Reference vs embed:** reference when the related data is shared, large or updated independently (a user's profile is used across posts, comments, orders). Embed subdocuments when the data belongs only to the parent and stays bounded (an order's items).\n- **Cost:** each populated path is an extra round trip. Populating inside a loop (one post at a time) recreates the N+1 problem — populate the whole result set at once.\n- **Arrays of refs** (`followers: [{ type: ObjectId, ref: \"User\" }]`) can grow unbounded; for one-to-many relationships prefer storing the parent ID on the child and using virtual populate.\n- **Works with `lean()`:** populated data is attached to the plain objects too.",
+   "bn": "- **Reference বনাম embed:** related data shared, বড় বা আলাদাভাবে update হলে reference করো (user-এর profile post, comment, order — সব জায়গায় ব্যবহার হয়)। Data শুধু parent-এর এবং bounded থাকলে subdocument embed করো (order-এর item)।\n- **খরচ:** প্রতিটি populated path মানে একটা বাড়তি round trip। Loop-এর ভেতরে (এক এক করে post) populate করলে N+1 সমস্যা ফিরে আসে — পুরো result set একবারে populate করো।\n- **Ref-এর array** (`followers: [{ type: ObjectId, ref: \"User\" }]`) সীমাহীনভাবে বাড়তে পারে; one-to-many relationship-এ child-এ parent ID রেখে virtual populate ব্যবহার করা ভালো।\n- **`lean()`-এর সাথেও কাজ করে:** populated data plain object-এও যুক্ত হয়।"
+  },
+  "interviewTip": {
+   "en": "Say explicitly \"populate is a second query, not a join\" — it's the one sentence that shows you understand its performance profile.",
+   "bn": "স্পষ্ট করে বলো \"populate হলো দ্বিতীয় একটা query, join না\" — এই এক বাক্যেই বোঝা যায় তুমি এর performance-এর ধরন বোঝো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Populate",
+    "url": "https://mongoosejs.com/docs/populate.html"
+   },
+   {
+    "title": "Mongoose — SchemaTypes",
+    "url": "https://mongoosejs.com/docs/schematypes.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you populate the author of each comment inside a post?",
+    "bn": "একটা post-এর ভেতরের প্রতিটি comment-এর author কীভাবে populate করবে?"
+   },
+   {
+    "en": "When would you embed an author snapshot instead of populating?",
+    "bn": "কখন populate না করে author-এর একটা snapshot embed করবে?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Thinking populate performs a server-side JOIN; populating full user documents (including sensitive fields); forgetting that deleted references populate as `null`.",
+   "bn": "ভাবা যে populate server-side JOIN করে; পুরো user document populate করা (sensitive field সহ); ভুলে যাওয়া যে delete হওয়া reference populate হলে `null` আসে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose, { Schema } from \"mongoose\";\n\nconst postSchema = new Schema({\n  title: { type: String, required: true },\n  body: String,\n  author: { type: Schema.Types.ObjectId, ref: \"User\", required: true },\n}, { timestamps: true });\nconst Post = mongoose.model(\"Post\", postSchema);\n\nconst posts = await Post.find()\n  .sort({ createdAt: -1 })\n  .limit(20)\n  .populate(\"author\", \"name avatarUrl\")   // 2 queries total: posts + users ($in)\n  .lean();\n\nposts[0].author;   // { _id: ..., name: \"Nusrat\", avatarUrl: \"...\" }  (or null if deleted)"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-007",
+  "subtopic": "Virtuals",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "bangladesh",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "virtuals",
+   "tojson",
+   "serialization"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You define the virtual below and return the user from an Express route with `res.json(user)`. Why is `fullName` missing from the JSON response?",
+   "bn": "নিচের virtual define করে Express route থেকে `res.json(user)` দিয়ে user return করছ। JSON response-এ `fullName` নেই কেন?"
+  },
+  "answer": {
+   "en": "`res.json()` calls `JSON.stringify`, which calls the document's `toJSON()`. Mongoose does **not** include virtuals in `toJSON()`/`toObject()` unless you set `{ toJSON: { virtuals: true } }` (and `toObject` if needed) in the schema options.",
+   "bn": "`res.json()` `JSON.stringify` call করে, যেটা document-এর `toJSON()` call করে। Schema option-এ `{ toJSON: { virtuals: true } }` (দরকার হলে `toObject`-ও) না দিলে Mongoose `toJSON()`/`toObject()`-এ virtual **রাখে না**।"
+  },
+  "explanation": {
+   "en": "Virtuals are computed properties — they're **never stored in MongoDB** (so D is wrong) and you can't query by them. Option C is backwards: arrow functions don't get their own `this`, so a getter written as an arrow function can't see the document at all.\n\nTwo related gotchas:\n- With `virtuals: true`, the built-in `id` virtual (string version of `_id`) also appears in the output.\n- `.lean()` returns plain objects, so virtuals don't exist on them at all — either skip `lean()` for that query or compute the field yourself (or use a plugin such as `mongoose-lean-virtuals`).",
+   "bn": "Virtual হলো computed property — এগুলো **কখনো MongoDB-তে store হয় না** (তাই D ভুল), আর এগুলো দিয়ে query করা যায় না। Option C উল্টো: arrow function-এর নিজস্ব `this` থাকে না, তাই arrow function দিয়ে লেখা getter document-টাই দেখতে পায় না।\n\nসম্পর্কিত দুইটা gotcha:\n- `virtuals: true` দিলে built-in `id` virtual-ও (`_id`-এর string রূপ) output-এ চলে আসে।\n- `.lean()` plain object return করে, তাই সেগুলোতে virtual থাকেই না — হয় ওই query-তে `lean()` বাদ দাও, নয়তো field-টা নিজে হিসাব করো (অথবা `mongoose-lean-virtuals`-এর মতো plugin ব্যবহার করো)।"
+  },
+  "interviewTip": {
+   "en": "Explain the chain `res.json → JSON.stringify → doc.toJSON()` — understanding *why* it's missing is more impressive than knowing the flag.",
+   "bn": "`res.json → JSON.stringify → doc.toJSON()` — এই chain-টা ব্যাখ্যা করো। শুধু flag-টা জানার চেয়ে *কেন* field-টা নেই তা বোঝা বেশি impressive।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Mongoose Virtuals",
+    "url": "https://mongoosejs.com/docs/tutorials/virtuals.html"
+   },
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why don't virtuals appear on documents returned by `.lean()`?",
+    "bn": "`.lean()`-এর document-এ virtual কেন থাকে না?"
+   }
+  ],
+  "related": [
+   "mongoose-002"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "userSchema.virtual(\"fullName\").get(function () {\n  return `${this.firstName} ${this.lastName}`;\n});\n\napp.get(\"/me\", async (req, res) => {\n  const user = await User.findById(req.userId);\n  res.json(user);\n});"
+  },
+  "options": [
+   {
+    "en": "Virtuals aren't included in `toJSON()` / `toObject()` output by default — enable `toJSON: { virtuals: true }` on the schema",
+    "bn": "Default-ভাবে `toJSON()` / `toObject()` output-এ virtual থাকে না — schema-তে `toJSON: { virtuals: true }` চালু করতে হবে"
+   },
+   {
+    "en": "Virtuals only work after the document has been saved at least once",
+    "bn": "Document অন্তত একবার save হওয়ার পরেই virtual কাজ করে"
+   },
+   {
+    "en": "The getter must be an arrow function so it can access the document",
+    "bn": "Document access করতে getter-কে arrow function হতে হবে"
+   },
+   {
+    "en": "Virtuals are stored in MongoDB, but `res.json()` strips fields not defined in the schema",
+    "bn": "Virtual MongoDB-তে store হয়, কিন্তু `res.json()` schema-তে না থাকা field বাদ দিয়ে দেয়"
+   }
+  ],
+  "correctIndex": 0,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-013",
+  "subtopic": "Middleware & Hooks",
+  "difficulty": "medium",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "middleware",
+   "pre-save",
+   "bcrypt",
+   "mongoose-9",
+   "next",
+   "ismodified"
+  ],
+  "technologyVersion": "Mongoose 9.11 (pre hooks receive no next() since 9.0)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "This password-hashing hook comes from an older project that was just upgraded to Mongoose 9. Saving a user now throws, and even before the upgrade some users couldn't log in after editing their profile. Find all the problems and fix the hook.",
+   "bn": "এই password-hashing hook একটা পুরনো project থেকে এসেছে, যেটা সদ্য Mongoose 9-এ upgrade করা হয়েছে। এখন user save করলেই error throw হয়, আর upgrade-এর আগেও কিছু user profile edit করার পর login করতে পারত না। সব সমস্যা খুঁজে বের করো আর hook-টা ঠিক করো।"
+  },
+  "answer": {
+   "en": "1. **Arrow function:** an arrow function doesn't get its own `this`, so `this` is not the document (in an ES module it's `undefined`) → `TypeError`. Document middleware must be a regular `function`.\n2. **`next()` in Mongoose 9:** pre middleware no longer receives `next`. Calling it throws a `TypeError`. Use an `async function` (or return a promise); to fail the save, just `throw`.\n3. **Re-hashing on every save:** without `if (!this.isModified(\"password\")) return;`, editing a user's name re-hashes the *already hashed* password, so the real password no longer matches — that's the \"can't log in after editing the profile\" bug.\n4. **`hashSync` blocks the event loop:** bcrypt is deliberately slow (tens of milliseconds or more per hash); doing it synchronously stalls every other request. Use the async `bcrypt.hash`.",
+   "bn": "1. **Arrow function:** arrow function-এর নিজস্ব `this` থাকে না, তাই `this` document না (ES module-এ এটা `undefined`) → `TypeError`। Document middleware অবশ্যই সাধারণ `function` হতে হবে।\n2. **Mongoose 9-এ `next()`:** pre middleware আর `next` পায় না। এটা call করলে `TypeError` throw হয়। `async function` ব্যবহার করো (বা promise return করো); save fail করাতে চাইলে শুধু `throw` করো।\n3. **প্রতিবার save-এ আবার hash:** `if (!this.isModified(\"password\")) return;` না থাকলে user-এর নাম edit করলেও *আগে থেকে hash করা* password আবার hash হয়, ফলে আসল password আর মেলে না — এটাই \"profile edit করার পর login করা যায় না\" bug।\n4. **`hashSync` event loop block করে:** bcrypt ইচ্ছাকৃতভাবে ধীর (প্রতিটি hash-এ কয়েক দশ millisecond বা তার বেশি); synchronously করলে বাকি সব request আটকে যায়। Async `bcrypt.hash` ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "- **This hook only covers `save()`** (and `create()`, which calls `save()`). A password reset done with `findOneAndUpdate`/`updateOne` bypasses it and stores plain text — route password changes through `save()`, or hash in the service layer.\n- **Error handling:** in an async pre hook, a thrown error or rejected promise aborts the save and rejects `doc.save()` — no `next(err)` needed.\n- **Storage hygiene:** store the hash in a field like `passwordHash` with `select: false`, and never return it from the API.\n- **Migration tip:** search the codebase for `pre(` hooks that take a parameter or call `next` — they all need converting when moving to Mongoose 9.",
+   "bn": "- **এই hook শুধু `save()` cover করে** (আর `create()`, কারণ সেটা `save()` call করে)। `findOneAndUpdate`/`updateOne` দিয়ে password reset করলে hook bypass হয়ে plain text store হয় — password পরিবর্তন `save()` দিয়ে করো, অথবা service layer-এ hash করো।\n- **Error handling:** async pre hook-এ error throw হলে বা promise reject হলে save abort হয় আর `doc.save()` reject করে — `next(err)` লাগে না।\n- **Storage-এর নিয়ম:** hash রাখো `passwordHash`-এর মতো field-এ, `select: false` সহ, আর API থেকে কখনো return কোরো না।\n- **Migration tip:** codebase-এ সেই সব `pre(` hook খোঁজো যেগুলো parameter নেয় বা `next` call করে — Mongoose 9-এ যাওয়ার সময় সবগুলো বদলাতে হবে।"
+  },
+  "interviewTip": {
+   "en": "Separate the version-specific bug (`next` removed in v9) from the timeless bugs (arrow function, missing `isModified`, sync hashing). Interviewers like hearing that you'd grep for every legacy hook during an upgrade.",
+   "bn": "Version-specific bug (v9-এ `next` সরানো) আর চিরকালীন bug (arrow function, `isModified` না থাকা, sync hashing) আলাদা করে বলো। Upgrade-এর সময় সব legacy hook grep করে খুঁজবে — এটা শুনতে interviewer পছন্দ করে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Middleware",
+    "url": "https://mongoosejs.com/docs/middleware.html"
+   },
+   {
+    "title": "Mongoose — Migrating to 9",
+    "url": "https://mongoosejs.com/docs/migrating_to_9.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you make sure a password reset via `findOneAndUpdate` is also hashed?",
+    "bn": "`findOneAndUpdate` দিয়ে password reset করলে সেটাও যেন hash হয়, কীভাবে নিশ্চিত করবে?"
+   },
+   {
+    "en": "What does `this` refer to in `pre('findOneAndUpdate')` middleware?",
+    "bn": "`pre('findOneAndUpdate')` middleware-এ `this` কী বোঝায়?"
+   }
+  ],
+  "related": [],
+  "commonMistakes": {
+   "en": "Keeping `next` \"just in case\"; using arrow functions for hooks, methods or virtual getters; assuming `pre('save')` also runs on `findByIdAndUpdate`.",
+   "bn": "\"যদি লাগে\" ভেবে `next` রেখে দেওয়া; hook, method বা virtual getter-এ arrow function ব্যবহার করা; ধরে নেওয়া `pre('save')` `findByIdAndUpdate`-এও চলে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "import bcrypt from \"bcrypt\";\n\nuserSchema.pre(\"save\", (next) => {\n  this.password = bcrypt.hashSync(this.password, 10);\n  next();\n});"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "import bcrypt from \"bcrypt\";\n\nuserSchema.pre(\"save\", async function () {\n  if (!this.isModified(\"password\")) return;      // only when it actually changed\n  this.password = await bcrypt.hash(this.password, 12);\n});",
+    "label": {
+     "en": "Fixed (Mongoose 9: async hook, no next)",
+     "bn": "সংশোধিত (Mongoose 9: async hook, next ছাড়া)"
+    }
+   },
+   {
+    "language": "javascript",
+    "source": "userSchema.pre(\"save\", function (next) {\n  if (!this.isModified(\"password\")) return next();\n  bcrypt.hash(this.password, 12)\n    .then((hash) => { this.password = hash; next(); })\n    .catch(next);\n});",
+    "label": {
+     "en": "Legacy (Mongoose 8 and earlier) — callback style, not supported in Mongoose 9",
+     "bn": "Legacy (Mongoose 8 ও তার আগের) — callback style, Mongoose 9-এ support নেই"
+    }
+   }
+  ],
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-014",
+  "subtopic": "Middleware & Hooks",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "middleware",
+   "pre-save",
+   "query-middleware",
+   "findbyidandupdate"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`userSchema.pre(\"save\", ...)` hashes passwords. Which of these calls will **not** run that hook — and therefore store the new password in plain text?",
+   "bn": "`userSchema.pre(\"save\", ...)` password hash করে। নিচের কোন call ওই hook **চালাবে না** — ফলে নতুন password plain text হিসেবে store হবে?"
+  },
+  "answer": {
+   "en": "`findByIdAndUpdate()` sends an update command directly to MongoDB. It triggers **query middleware** (`findOneAndUpdate`), not document `save` middleware, so the hash hook never runs. `create()` calls `save()` internally, and the other two options call `save()` explicitly.",
+   "bn": "`findByIdAndUpdate()` সরাসরি MongoDB-তে একটা update command পাঠায়। এটা **query middleware** (`findOneAndUpdate`) চালায়, document-এর `save` middleware না — তাই hash hook কখনো চলে না। `create()` ভেতরে `save()` call করে, আর বাকি দুইটা option explicitly `save()` call করে।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is A — many developers don't realise `create()` is just a convenience wrapper around `new Model(doc).save()`, so it *does* run save hooks.\n\nIn query middleware, `this` is the **Query**, not a document, so you'd have to read and rewrite the update (`this.getUpdate()` / `this.setUpdate()`) to hash there. The cleaner fix is a rule: password changes always go through load → set → `save()` (or a dedicated service function). Also note `insertMany()` triggers `insertMany` middleware, not `save` hooks.",
+   "bn": "সবচেয়ে বিভ্রান্তিকর ভুল উত্তর A — অনেক developer জানে না যে `create()` আসলে `new Model(doc).save()`-এর একটা সুবিধাজনক wrapper, তাই এটা save hook *চালায়*।\n\nQuery middleware-এ `this` হলো **Query**, document না — তাই সেখানে hash করতে হলে update পড়ে আবার লিখতে হয় (`this.getUpdate()` / `this.setUpdate()`)। পরিষ্কার সমাধান হলো একটা নিয়ম: password পরিবর্তন সবসময় load → set → `save()` দিয়ে (বা একটা dedicated service function দিয়ে) হবে। আরও মনে রেখো, `insertMany()` `insertMany` middleware চালায়, `save` hook না।"
+  },
+  "interviewTip": {
+   "en": "Name the two middleware families (document vs query) and what `this` is in each — that's the mental model behind every \"why didn't my hook run?\" bug.",
+   "bn": "দুই ধরনের middleware (document বনাম query) আর প্রতিটিতে `this` কী — সেটা বলো। \"আমার hook কেন চলল না?\" ধরনের প্রতিটি bug-এর পেছনে এই mental model-টাই কাজ করে।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Middleware",
+    "url": "https://mongoosejs.com/docs/middleware.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement an audit log that records every update, including `updateMany`?",
+    "bn": "`updateMany` সহ প্রতিটি update record করে এমন audit log কীভাবে implement করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-013",
+   "mongoose-004"
+  ],
+  "options": [
+   {
+    "en": "`await User.create({ email, password })`",
+    "bn": "`await User.create({ email, password })`"
+   },
+   {
+    "en": "`const u = new User({ email, password }); await u.save();`",
+    "bn": "`const u = new User({ email, password }); await u.save();`"
+   },
+   {
+    "en": "`await User.findByIdAndUpdate(id, { password: newPassword })`",
+    "bn": "`await User.findByIdAndUpdate(id, { password: newPassword })`"
+   },
+   {
+    "en": "`const u = await User.findById(id); u.password = newPassword; await u.save();`",
+    "bn": "`const u = await User.findById(id); u.password = newPassword; await u.save();`"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-015",
+  "subtopic": "References & Populate",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "populate",
+   "lookup",
+   "n-plus-one",
+   "aggregation",
+   "performance"
+  ],
+  "technologyVersion": "Mongoose 9.11, MongoDB 9.0",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Compare Mongoose `populate()` with an aggregation `$lookup`. What is the N+1 problem here, and when would you use each approach?",
+   "bn": "Mongoose-এর `populate()` আর aggregation `$lookup`-এর তুলনা করো। এখানে N+1 সমস্যা কী, আর কখন কোন পদ্ধতি ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "**N+1:** load 20 posts, then call `User.findById()` for each author in a loop → 1 + 20 queries. `populate()` fixes this by batching: one query for posts plus **one `$in` query per populated path** — 2 queries total.\n\n**`populate()`** is an application-side join:\n- Pros: very convenient, returns Mongoose documents (or works with `lean()`), applies schema casting, `select` limits fields, nested populate is easy.\n- Cons: an extra round trip per path (more for nested populate); you can't filter, sort or paginate the parents by populated fields — `match` in populate only nulls out non-matching children, it doesn't remove the parent.\n\n**`$lookup`** is a server-side join inside an aggregation pipeline:\n- Pros: one round trip; you can `$match`, `$sort`, `$group` on joined fields.\n- Cons: returns plain objects, no casting (you must convert string IDs to `ObjectId` yourself), no virtuals/getters/document middleware, more verbose.\n\n**My rule:** populate for normal CRUD pages (\"post with its author\"); `$lookup` for reports and for filtering or sorting by related data (\"posts by verified authors, newest first\"); and denormalise a small snapshot when a field is needed on every read.",
+   "bn": "**N+1:** 20টা post load করে loop-এ প্রতিটি author-এর জন্য `User.findById()` call করা → 1 + 20টা query। `populate()` এটা batch করে ঠিক করে: post-এর জন্য একটা query আর **প্রতিটি populated path-এর জন্য একটা `$in` query** — মোট 2টা query।\n\n**`populate()`** হলো application-side join:\n- সুবিধা: খুব সুবিধাজনক, Mongoose document return করে (বা `lean()`-এর সাথে কাজ করে), schema casting apply হয়, `select` দিয়ে field সীমিত করা যায়, nested populate সহজ।\n- অসুবিধা: প্রতিটি path-এ একটা বাড়তি round trip (nested populate-এ আরও বেশি); populated field দিয়ে parent-কে filter, sort বা paginate করা যায় না — populate-এর `match` শুধু না-মেলা child-কে null করে, parent বাদ দেয় না।\n\n**`$lookup`** হলো aggregation pipeline-এর ভেতরে server-side join:\n- সুবিধা: একটাই round trip; join করা field-এ `$match`, `$sort`, `$group` করা যায়।\n- অসুবিধা: plain object return করে, casting নেই (string ID নিজেকেই `ObjectId`-এ রূপান্তর করতে হয়), virtual/getter/document middleware নেই, code বেশি লম্বা।\n\n**আমার নিয়ম:** সাধারণ CRUD page-এ (\"author সহ post\") populate; report আর related data দিয়ে filter বা sort করতে (\"verified author-দের post, নতুনগুলো আগে\") `$lookup`; আর কোনো field প্রতিটি read-এ লাগলে ছোট একটা snapshot denormalise করা।"
+  },
+  "explanation": {
+   "en": "- **Aggregation casting gotcha:** `Post.aggregate([{ $match: { author: req.params.id } }])` matches nothing, because the string isn't cast to `ObjectId` in pipelines. Use `new mongoose.Types.ObjectId(id)`.\n- **Order of stages matters:** in the `$lookup` example, filtering on `author.verified` after the join means joining every post first. On a big collection, denormalise `authorVerified` onto posts or `$match` on post fields before the join.\n- **Populate performance:** keep `select` tight, avoid populating unbounded arrays, and use `perDocumentLimit` (not `limit`) when you want \"N children per parent\".\n- **Measure:** enable `mongoose.set(\"debug\", true)` in development to see every query a request triggers — N+1 problems become obvious.",
+   "bn": "- **Aggregation casting-এর gotcha:** `Post.aggregate([{ $match: { author: req.params.id } }])` কিছুই match করে না, কারণ pipeline-এ string `ObjectId`-এ cast হয় না। `new mongoose.Types.ObjectId(id)` ব্যবহার করো।\n- **Stage-এর ক্রম গুরুত্বপূর্ণ:** `$lookup` উদাহরণে join-এর পরে `author.verified` দিয়ে filter করা মানে আগে প্রতিটি post join করা। বড় collection-এ post-এ `authorVerified` denormalise করো, অথবা join-এর আগে post-এর field দিয়ে `$match` করো।\n- **Populate performance:** `select` সংক্ষিপ্ত রাখো, unbounded array populate এড়াও, আর \"প্রতি parent-এ Nটা child\" চাইলে `limit` না, `perDocumentLimit` ব্যবহার করো।\n- **মেপে দেখো:** development-এ `mongoose.set(\"debug\", true)` চালু করলে একটা request কতগুলো query চালায় সব দেখা যায় — N+1 সমস্যা সাথে সাথে চোখে পড়ে।"
+  },
+  "interviewTip": {
+   "en": "Give your decision rule in one line at the end — interviewers want to hear judgement (\"it depends on whether I filter by the related data\"), not just two feature lists.",
+   "bn": "শেষে এক লাইনে তোমার সিদ্ধান্তের নিয়মটা বলো — interviewer শুধু দুইটা feature-এর তালিকা না, বিচারবুদ্ধি শুনতে চায় (\"related data দিয়ে filter করব কি না তার ওপর নির্ভর করে\")।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Populate",
+    "url": "https://mongoosejs.com/docs/populate.html"
+   },
+   {
+    "title": "Mongoose API — Aggregate",
+    "url": "https://mongoosejs.com/docs/api/aggregate.html"
+   },
+   {
+    "title": "MongoDB Manual — $lookup (aggregation)",
+    "url": "https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you get each user's latest 3 posts efficiently?",
+    "bn": "প্রতিটি user-এর সর্বশেষ 3টা post দক্ষভাবে কীভাবে আনবে?"
+   },
+   {
+    "en": "How do you spot N+1 queries in an existing Express + Mongoose app?",
+    "bn": "একটা existing Express + Mongoose app-এ N+1 query কীভাবে ধরবে?"
+   }
+  ],
+  "related": [
+   "mongoose-006"
+  ],
+  "commonMistakes": {
+   "en": "Believing `populate()` is a JOIN; using populate's `match` expecting parents to be filtered; passing string IDs into aggregation `$match`.",
+   "bn": "`populate()`-কে JOIN মনে করা; parent filter হবে ভেবে populate-এর `match` ব্যবহার করা; aggregation-এর `$match`-এ string ID দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// N+1 — avoid: 1 query for posts + 1 per post\nconst slow = await Post.find().sort({ createdAt: -1 }).limit(20).lean();\nfor (const p of slow) p.author = await User.findById(p.author).select(\"name\").lean();\n\n// populate — 2 queries in total (posts + one $in query for authors)\nconst populated = await Post.find().sort({ createdAt: -1 }).limit(20)\n  .populate(\"author\", \"name avatarUrl\")\n  .lean();\n\n// $lookup — filter on joined data inside MongoDB (plain objects, no casting)\nconst verifiedOnly = await Post.aggregate([\n  { $sort: { createdAt: -1 } },\n  { $lookup: {\n      from: \"users\", localField: \"author\", foreignField: \"_id\",\n      pipeline: [{ $project: { name: 1, avatarUrl: 1, verified: 1 } }],\n      as: \"author\"\n  } },\n  { $unwind: \"$author\" },\n  { $match: { \"author.verified\": true } },\n  { $limit: 20 },\n]);"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-024",
+  "subtopic": "Query Performance",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 12,
+  "tags": [
+   "performance",
+   "lean",
+   "pagination",
+   "indexes",
+   "populate",
+   "validation"
+  ],
+  "technologyVersion": "Mongoose 9.11, Express 5, zod 4",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "`GET /api/products?category=electronics&page=500` takes 3–4 seconds and the Node.js process uses a lot of memory. On every request the handler does:\n\n- `const page = Number(req.query.page) || 1;`\n- `Product.find({ category: req.query.category }).populate(\"seller\").populate(\"reviews\").sort({ createdAt: -1 }).skip((page - 1) * 20).limit(20)`\n- `Product.countDocuments({ category: req.query.category })` for the total\n\nHow would you make it fast and safe?",
+   "bn": "`GET /api/products?category=electronics&page=500`-এ 3–4 second লাগে, আর Node.js process অনেক memory ব্যবহার করে। প্রতিটি request-এ handler এগুলো করে:\n\n- `const page = Number(req.query.page) || 1;`\n- `Product.find({ category: req.query.category }).populate(\"seller\").populate(\"reviews\").sort({ createdAt: -1 }).skip((page - 1) * 20).limit(20)`\n- total-এর জন্য `Product.countDocuments({ category: req.query.category })`\n\nএটাকে দ্রুত আর নিরাপদ কীভাবে করবে?"
+  },
+  "answer": {
+   "en": "**Performance problems:**\n1. **No suitable index** for \"filter by category, sort by newest\" → collection scan plus an in-memory sort. Add `{ category: 1, createdAt: -1, _id: -1 }` (equality → sort).\n2. **Deep `skip()`**: page 500 makes MongoDB walk and discard 9,980 entries before returning 20. Use **keyset (cursor) pagination**: \"items older than the last one I saw\", with `_id` as a tie-breaker.\n3. **Hydrated documents:** each result becomes a full Mongoose document with change tracking. For read-only lists, `.lean()` returns plain objects — much less memory and CPU.\n4. **Over-fetching:** no projection, the whole `seller` document, and **all reviews** of every product (an unbounded array of refs). Select only list fields, populate the seller with a few fields, and show computed `reviewCount`/`avgRating` instead of reviews.\n5. **`countDocuments` on every request** for a large category is expensive — drop the exact total (infinite scroll), cache it briefly, or show \"1,000+\".\n\n**Security problems:** `req.query.category` is used unvalidated — if a nested query parser is enabled it could be an object (`category[$ne]=x` → operator injection), and `page`/`limit` are unbounded, so a client can request huge pages. Validate with a schema (enum category, bounded limit).",
+   "bn": "**Performance-এর সমস্যা:**\n1. \"category দিয়ে filter, নতুন অনুযায়ী sort\"-এর জন্য **উপযুক্ত index নেই** → collection scan আর in-memory sort। `{ category: 1, createdAt: -1, _id: -1 }` যোগ করো (equality → sort)।\n2. **গভীর `skip()`:** page 500-এ 20টা return করার আগে MongoDB-কে 9,980টা entry পার হয়ে ফেলে দিতে হয়। **Keyset (cursor) pagination** ব্যবহার করো: \"শেষ যেটা দেখেছি তার চেয়ে পুরনো item\", tie-breaker হিসেবে `_id` সহ।\n3. **Hydrated document:** প্রতিটি result change tracking সহ পূর্ণ Mongoose document হয়। Read-only list-এর জন্য `.lean()` plain object দেয় — অনেক কম memory আর CPU।\n4. **প্রয়োজনের বেশি data আনা:** কোনো projection নেই, পুরো `seller` document, আর প্রতিটি product-এর **সব review** (ref-এর unbounded array)। শুধু list-এর field select করো, seller-কে কয়েকটা field সহ populate করো, আর review-এর বদলে computed `reviewCount`/`avgRating` দেখাও।\n5. বড় category-তে **প্রতিটি request-এ `countDocuments`** ব্যয়বহুল — exact total বাদ দাও (infinite scroll), অল্প সময়ের জন্য cache করো, অথবা \"1,000+\" দেখাও।\n\n**Security-র সমস্যা:** `req.query.category` validation ছাড়াই ব্যবহার হচ্ছে — nested query parser চালু থাকলে এটা object হতে পারে (`category[$ne]=x` → operator injection), আর `page`/`limit`-এর কোনো সীমা নেই, তাই client বিশাল page চাইতে পারে। Schema দিয়ে validate করো (enum category, সীমিত limit)।"
+  },
+  "explanation": {
+   "en": "- **Why keyset works:** with the index, MongoDB seeks directly to the cursor position and reads exactly `limit + 1` keys, so page 500 costs the same as page 1. The trade-off: no \"jump to page 37\" — fine for feeds and infinite scroll, while admin tables with page numbers can keep `skip` for shallow pages.\n- **Mongoose casting:** the `_id: { $lt: id }` string is cast to `ObjectId` by Mongoose because `_id` is in the schema — this does *not* happen inside `aggregate()`.\n- **`lean()` caveats:** no virtuals, getters, defaults applied on read, or `save()`; `_id` values are still `ObjectId` instances (they serialise to strings in JSON).\n- **Verify:** `Product.find(filter).sort(...).explain(\"executionStats\")` — expect `IXSCAN`, no `SORT` stage, keys examined ≈ `limit + 1`.\n- **Bigger lists or exports:** stream with `Product.find().lean().cursor()` instead of loading everything into memory.",
+   "bn": "- **Keyset কেন কাজ করে:** index থাকায় MongoDB সরাসরি cursor-এর অবস্থানে চলে যায় আর ঠিক `limit + 1`টা key পড়ে, তাই page 500-এর খরচ page 1-এর সমান। Trade-off: \"page 37-এ লাফ দাও\" করা যায় না — feed আর infinite scroll-এর জন্য ঠিক আছে, আর page number-ওয়ালা admin table অগভীর page-এর জন্য `skip` রাখতে পারে।\n- **Mongoose casting:** `_id` schema-তে আছে বলে `_id: { $lt: id }`-এর string Mongoose `ObjectId`-এ cast করে — `aggregate()`-এর ভেতরে এটা হয় *না*।\n- **`lean()`-এর সতর্কতা:** read-এ virtual, getter, default apply হয় না, `save()` নেই; `_id` value তখনও `ObjectId` instance (JSON-এ string হয়ে যায়)।\n- **Verify করো:** `Product.find(filter).sort(...).explain(\"executionStats\")` — `IXSCAN` আশা করো, কোনো `SORT` stage না, আর keys examined ≈ `limit + 1`।\n- **বড় list বা export:** সব memory-তে load না করে `Product.find().lean().cursor()` দিয়ে stream করো।"
+  },
+  "interviewTip": {
+   "en": "Rank the fixes by impact (index → pagination → lean/projection → populate → count) and add the validation point at the end. Treating performance and security together is what this question type rewards.",
+   "bn": "প্রভাব অনুযায়ী fix-গুলো সাজাও (index → pagination → lean/projection → populate → count), আর শেষে validation-এর কথা যোগ করো। এই ধরনের প্রশ্নে performance আর security একসাথে ভাবাকেই পুরস্কৃত করা হয়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Faster Mongoose Queries With Lean",
+    "url": "https://mongoosejs.com/docs/tutorials/lean.html"
+   },
+   {
+    "title": "Mongoose — Queries",
+    "url": "https://mongoosejs.com/docs/queries.html"
+   },
+   {
+    "title": "MongoDB Manual — The ESR (Equality, Sort, Range) Guideline",
+    "url": "https://www.mongodb.com/docs/manual/tutorial/equality-sort-range-guideline/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you support 'sort by price' as well as 'newest first' with keyset pagination?",
+    "bn": "Keyset pagination দিয়ে 'newest first'-এর পাশাপাশি 'price অনুযায়ী sort' কীভাবে support করবে?"
+   },
+   {
+    "en": "When is `skip()` still acceptable?",
+    "bn": "কখন `skip()` এখনো গ্রহণযোগ্য?"
+   }
+  ],
+  "related": [
+   "mongoose-015",
+   "mongoose-006"
+  ],
+  "commonMistakes": {
+   "en": "Adding `.lean()` and calling it done; adding an index on `category` alone (still sorts in memory); trusting `req.query` values as filter objects.",
+   "bn": "শুধু `.lean()` যোগ করে কাজ শেষ মনে করা; শুধু `category`-তে index দেওয়া (তবুও memory-তে sort হয়); `req.query`-র value-কে filter object হিসেবে বিশ্বাস করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "app.get(\"/api/products\", async (req, res) => {\n  const page = Number(req.query.page) || 1;\n  const products = await Product.find({ category: req.query.category })\n    .populate(\"seller\")\n    .populate(\"reviews\")\n    .sort({ createdAt: -1 })\n    .skip((page - 1) * 20)\n    .limit(20);\n  const total = await Product.countDocuments({ category: req.query.category });\n  res.json({ products, total });\n});"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "import { z } from \"zod\";\n\nproductSchema.index({ category: 1, createdAt: -1, _id: -1 });\n\nconst ListQuery = z.object({\n  category: z.enum([\"electronics\", \"fashion\", \"grocery\"]),\n  cursor: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z_[a-f0-9]{24}$/).optional(),\n  limit: z.coerce.number().int().min(1).max(50).default(20),\n});\n\napp.get(\"/api/products\", async (req, res) => {\n  const { category, cursor, limit } = ListQuery.parse(req.query);   // ZodError → 400\n\n  const filter = { category };\n  if (cursor) {\n    const [iso, id] = cursor.split(\"_\");\n    const createdAt = new Date(iso);\n    filter.$or = [\n      { createdAt: { $lt: createdAt } },\n      { createdAt, _id: { $lt: id } },          // tie-breaker for equal timestamps\n    ];\n  }\n\n  const rows = await Product.find(filter)\n    .select(\"name slug price thumbnail avgRating reviewCount seller createdAt\")\n    .populate(\"seller\", \"shopName rating\")\n    .sort({ createdAt: -1, _id: -1 })\n    .limit(limit + 1)\n    .lean();\n\n  const hasMore = rows.length > limit;\n  const items = rows.slice(0, limit);\n  const last = items.at(-1);\n  res.json({\n    items,\n    nextCursor: hasMore ? `${last.createdAt.toISOString()}_${last._id}` : null,\n  });\n});",
+    "label": {
+     "en": "Optimised handler (keyset pagination)",
+     "bn": "Optimise করা handler (keyset pagination)"
+    }
+   }
+  ],
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-025",
+  "subtopic": "Common Pitfalls",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "versioning",
+   "optimistic-concurrency",
+   "versionkey",
+   "lost-update",
+   "save"
+  ],
+  "technologyVersion": "Mongoose 9.11",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Two admins open the same product (price 1,200) at the same time. Admin A sets the price to 1,500 and calls `save()`. A second later, Admin B — still looking at 1,200 — sets it to 1,250 and calls `save()`. The schema uses Mongoose's default options. What happens?",
+   "bn": "দুইজন admin একই সময়ে একই product খুলেছে (price 1,200)। Admin A price 1,500 করে `save()` call করল। এক second পরে Admin B — যে এখনো 1,200 দেখছে — price 1,250 করে `save()` call করল। Schema-তে Mongoose-এর default option। কী হবে?"
+  },
+  "answer": {
+   "en": "By default Mongoose's `__v` versioning only protects **array** operations that could shift element positions. A plain field change is saved as `$set: { price }` filtered by `_id` only, so the last `save()` wins and A's update is lost without any error.",
+   "bn": "Default-ভাবে Mongoose-এর `__v` versioning শুধু সেই **array** operation রক্ষা করে, যেগুলো element-এর অবস্থান সরিয়ে দিতে পারে। সাধারণ field-এর পরিবর্তন শুধু `_id` filter দিয়ে `$set: { price }` হিসেবে save হয়, তাই শেষ `save()`-টাই জেতে আর কোনো error ছাড়াই A-এর update হারিয়ে যায়।"
+  },
+  "explanation": {
+   "en": "Option B is what many people assume because they see `__v` on every document. It becomes true only if you enable **`optimisticConcurrency: true`** on the schema: then every `save()` includes the current `__v` in its filter and increments it, so B's stale save matches nothing and throws a `VersionError` — your API can return 409 and ask B to reload.\n\nNotes: `updateOne()`/`findOneAndUpdate()` never use or bump `__v`, so optimistic concurrency only protects `save()`-based flows. For counters like stock, atomic operators (`$inc` with a conditional filter) are better than version checks. MongoDB doesn't lock documents between a read and a later write (option D).",
+   "bn": "Option B অনেকেই ধরে নেয়, কারণ প্রতিটি document-এ `__v` দেখা যায়। এটা সত্য হয় শুধু schema-তে **`optimisticConcurrency: true`** চালু করলে: তখন প্রতিটি `save()` filter-এ বর্তমান `__v` রাখে আর সেটা বাড়ায়, ফলে B-এর পুরনো save কিছুই match করে না আর `VersionError` throw করে — তোমার API তখন 409 return করে B-কে reload করতে বলতে পারে।\n\nখেয়াল রাখো: `updateOne()`/`findOneAndUpdate()` কখনো `__v` ব্যবহার করে না বা বাড়ায় না, তাই optimistic concurrency শুধু `save()`-ভিত্তিক flow রক্ষা করে। Stock-এর মতো counter-এর জন্য version check-এর চেয়ে atomic operator (conditional filter সহ `$inc`) ভালো। আর MongoDB read আর পরের write-এর মাঝে document lock করে না (option D)।"
+  },
+  "interviewTip": {
+   "en": "Name both mechanisms — optimistic concurrency for \"edit forms\" and atomic operators for \"counters\" — and when each fits. That distinction is a senior-level signal.",
+   "bn": "দুইটা পদ্ধতিরই নাম বলো — \"edit form\"-এর জন্য optimistic concurrency আর \"counter\"-এর জন্য atomic operator — আর কোনটা কখন মানানসই। এই পার্থক্যটা senior-level signal।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   },
+   {
+    "title": "MongoDB Manual — Atomicity and Transactions",
+    "url": "https://www.mongodb.com/docs/manual/core/write-operations-atomicity/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you surface a `VersionError` to the user in a REST API?",
+    "bn": "REST API-তে একটা `VersionError` user-কে কীভাবে জানাবে?"
+   }
+  ],
+  "related": [
+   "mongoose-004"
+  ],
+  "options": [
+   {
+    "en": "Mongoose merges both changes and keeps 1,500 because it was saved first",
+    "bn": "Mongoose দুইটা পরিবর্তন merge করে 1,500 রাখে, কারণ সেটা আগে save হয়েছে"
+   },
+   {
+    "en": "B's save throws a `VersionError`, because `__v` is checked on every `save()` by default",
+    "bn": "B-এর save একটা `VersionError` throw করে, কারণ default-ভাবে প্রতিটি `save()`-এ `__v` check হয়"
+   },
+   {
+    "en": "Both saves succeed and the final price is 1,250 — A's change is silently lost, because default versioning only guards certain array changes",
+    "bn": "দুইটা save-ই সফল হয় আর শেষ price হয় 1,250 — A-এর পরিবর্তন চুপচাপ হারিয়ে যায়, কারণ default versioning শুধু কিছু array পরিবর্তন রক্ষা করে"
+   },
+   {
+    "en": "B's `findById` blocked until A saved, because Mongoose locks documents while they are loaded",
+    "bn": "A save না করা পর্যন্ত B-এর `findById` আটকে ছিল, কারণ load থাকা অবস্থায় Mongoose document lock করে"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-031",
+  "subtopic": "Concurrency & Atomic Updates",
+  "difficulty": "extreme",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 18,
+  "tags": [
+   "concurrency",
+   "flash-sale",
+   "overselling",
+   "atomic-updates",
+   "idempotency",
+   "contention"
+  ],
+  "technologyVersion": "Mongoose 9.11, MongoDB 9.0",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "During a flash sale, about 5,000 users try to buy the last 100 units of a phone within a few seconds. The checkout does: `findById` → check `product.stock >= qty` → `product.stock -= qty` → `await product.save()` → create the order. Afterwards there are 340 orders for 100 units. Explain why, and design a correct and scalable solution with Mongoose.",
+   "bn": "একটা flash sale-এ প্রায় 5,000 user কয়েক second-এর মধ্যে একটা phone-এর শেষ 100টা unit কিনতে চেষ্টা করে। Checkout-এর ধাপ: `findById` → `product.stock >= qty` check → `product.stock -= qty` → `await product.save()` → order তৈরি। শেষে দেখা গেল 100টা unit-এর জন্য 340টা order। কেন এমন হলো ব্যাখ্যা করো, আর Mongoose দিয়ে একটা সঠিক ও scalable সমাধান design করো।"
+  },
+  "answer": {
+   "en": "*(Advanced: concurrency under contention.)*\n\n**Why:** it's a classic **read-modify-write race**. Hundreds of requests read `stock: 100` at nearly the same moment, all pass the check in Node.js, and each `save()` sends `$set: { stock: <its own computed value> }`. The writes overwrite each other (last write wins), so the counter never reflects all purchases. Mongoose's default `__v` versioning doesn't protect plain fields, so nothing fails.\n\n**Correctness — let the database decide:**\n1. **Atomic conditional decrement:** `Product.updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })`. MongoDB applies writes to a single document atomically, so exactly 100 units can be sold; the rest get `modifiedCount: 0` → \"sold out\".\n2. **Order + stock together:** either a short transaction (decrement + create order), or decrement first and **compensate** (`$inc: +qty`) if order creation fails, with a reconciliation job for crashes in between.\n3. **Idempotency:** a unique `checkoutId` per attempt so client retries don't create extra orders, and a unique `{ saleId, userId }` index to enforce \"one per customer\".\n\n**Scale — one hot document:** 5,000 concurrent writes on one document serialise on the server; inside transactions they also cause `WriteConflict` retries that multiply load. Options:\n- Keep the hot path a **single-document atomic update without a transaction**, and do the rest asynchronously.\n- **Queue** purchase requests (e.g. Redis-backed queue) and process them at a controlled rate, or put a waiting room in front.\n- Pre-split stock into N buckets (`sku#1..N`) to spread contention, or gate with an atomic Redis `DECR` counter while MongoDB stays the source of truth.\n- Reserve with an expiry: unpaid orders release units after ~10 minutes via a worker.\n\n**Observe:** watch write-conflict counts, p99 latency and connection-pool saturation during the sale, and load-test the checkout before the campaign.",
+   "bn": "*(Advanced: contention-এর মধ্যে concurrency।)*\n\n**কেন:** এটা classic **read-modify-write race**। শত শত request প্রায় একই মুহূর্তে `stock: 100` পড়ে, Node.js-এ সবাই check পার হয়ে যায়, আর প্রতিটি `save()` পাঠায় `$set: { stock: <নিজের হিসাব করা value> }`। Write-গুলো একে অপরকে overwrite করে (last write wins), তাই counter কখনো সব কেনাকাটা প্রতিফলিত করে না। Mongoose-এর default `__v` versioning সাধারণ field রক্ষা করে না, তাই কিছুই fail করে না।\n\n**সঠিকতা — সিদ্ধান্ত database-কে নিতে দাও:**\n1. **Atomic conditional decrement:** `Product.updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })`। MongoDB একটা document-এ write atomically apply করে, তাই ঠিক 100টা unit-ই বিক্রি হতে পারে; বাকিরা `modifiedCount: 0` পায় → \"sold out\"।\n2. **Order আর stock একসাথে:** হয় একটা ছোট transaction (decrement + order তৈরি), নয়তো আগে decrement করে order তৈরি fail করলে **compensate** (`$inc: +qty`), আর মাঝখানে crash হলে একটা reconciliation job।\n3. **Idempotency:** প্রতিটি চেষ্টার জন্য unique `checkoutId`, যাতে client retry করলে বাড়তি order না হয়; আর \"প্রতি customer একটা\" enforce করতে unique `{ saleId, userId }` index।\n\n**Scale — একটা hot document:** একটা document-এ 5,000 concurrent write server-এ একটার পর একটা হয়; transaction-এর ভেতরে হলে `WriteConflict` retry-ও হয়, যা load বহুগুণ বাড়ায়। উপায়:\n- Hot path-কে **transaction ছাড়া single-document atomic update** রাখো, বাকিটা asynchronously করো।\n- Purchase request **queue** করো (যেমন Redis-backed queue) আর নিয়ন্ত্রিত হারে process করো, অথবা সামনে একটা waiting room রাখো।\n- Contention ছড়াতে stock আগে থেকেই Nটা bucket-এ ভাগ করো (`sku#1..N`), অথবা atomic Redis `DECR` counter দিয়ে gate করো, আর MongoDB-ই থাকুক source of truth।\n- Expiry সহ reserve করো: pay না করা order ~10 minute পর একটা worker দিয়ে unit ছেড়ে দেয়।\n\n**পর্যবেক্ষণ:** sale চলাকালীন write-conflict সংখ্যা, p99 latency আর connection-pool saturation দেখো, আর campaign-এর আগে checkout load-test করো।"
+  },
+  "explanation": {
+   "en": "- **Why not `optimisticConcurrency` here?** It would turn lost updates into `VersionError`s, but under 5,000 concurrent buyers almost every save fails and retries — a retry storm. Version checks suit low-contention edit forms; hot counters need atomic operators.\n- **Transaction or compensation?** Transactions give clean atomicity and are fine at normal traffic. At flash-sale contention, a single-document conditional `$inc` plus compensation is cheaper; the price is a reconciliation job to repair rare crashes between the two steps.\n- **Fairness:** first-come-first-served at the database isn't the same as fair for users on slow mobile networks; a queue or lottery may be a product decision.\n- **Don't forget the read side:** product pages showing \"only 3 left\" should be cached and allowed to be slightly stale — they shouldn't hammer the same hot document.\n- **Payment timeouts:** with bKash/card redirects taking minutes, reserved-but-unpaid units must return to stock reliably, or the sale \"sells out\" with unpaid orders.",
+   "bn": "- **এখানে `optimisticConcurrency` কেন না?** এটা lost update-কে `VersionError`-এ পরিণত করত, কিন্তু 5,000 concurrent buyer-এর মধ্যে প্রায় প্রতিটি save fail করে retry করবে — একটা retry storm। Version check কম contention-এর edit form-এর জন্য মানানসই; hot counter-এর জন্য atomic operator লাগে।\n- **Transaction নাকি compensation?** Transaction পরিষ্কার atomicity দেয় আর স্বাভাবিক traffic-এ ঠিক আছে। Flash-sale-এর contention-এ single-document conditional `$inc` আর compensation সস্তা; বিনিময়ে দুই ধাপের মাঝে বিরল crash ঠিক করতে একটা reconciliation job লাগে।\n- **ন্যায্যতা:** database-এ first-come-first-served মানেই ধীর mobile network-এর user-দের জন্য ন্যায্য না; queue বা lottery একটা product সিদ্ধান্তও হতে পারে।\n- **Read দিকটাও ভুলো না:** \"মাত্র 3টা বাকি\" দেখানো product page cache করা উচিত এবং একটু পুরনো হলেও চলে — এগুলো যেন একই hot document-এ চাপ না দেয়।\n- **Payment timeout:** bKash/card redirect-এ কয়েক মিনিট লাগলে, reserve করা কিন্তু pay না করা unit নির্ভরযোগ্যভাবে stock-এ ফিরতে হবে, নইলে unpaid order দিয়েই sale \"sold out\" হয়ে যাবে।"
+  },
+  "interviewTip": {
+   "en": "Separate correctness (atomic conditional update, idempotency) from scalability (contention, queueing). Explaining why `optimisticConcurrency` is the wrong tool here shows real depth.",
+   "bn": "Correctness (atomic conditional update, idempotency) আর scalability (contention, queueing) আলাদা করে বলো। এখানে `optimisticConcurrency` কেন ভুল tool — সেটা ব্যাখ্যা করতে পারলে আসল গভীরতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Atomicity and Transactions",
+    "url": "https://www.mongodb.com/docs/manual/core/write-operations-atomicity/"
+   },
+   {
+    "title": "Mongoose — Transactions",
+    "url": "https://mongoosejs.com/docs/transactions.html"
+   },
+   {
+    "title": "Mongoose — Schemas guide",
+    "url": "https://mongoosejs.com/docs/guide.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you release units for orders that are never paid?",
+    "bn": "যে order কখনো pay হয় না, সেগুলোর unit কীভাবে ছেড়ে দেবে?"
+   },
+   {
+    "en": "Your load test shows p99 checkout latency of 4 seconds at 2,000 RPS. Where do you look first?",
+    "bn": "Load test-এ 2,000 RPS-এ checkout-এর p99 latency 4 second দেখাচ্ছে। প্রথমে কোথায় খুঁজবে?"
+   }
+  ],
+  "related": [
+   "mongoose-025",
+   "mongoose-023",
+   "mongoose-030"
+  ],
+  "commonMistakes": {
+   "en": "Adding a mutex in Node.js (doesn't work across multiple instances); checking stock with `findOne` before `updateOne`; wrapping everything in a long transaction that calls the payment gateway.",
+   "bn": "Node.js-এ একটা mutex যোগ করা (একাধিক instance-এ কাজ করে না); `updateOne`-এর আগে `findOne` দিয়ে stock check করা; payment gateway call সহ সবকিছু একটা লম্বা transaction-এ মুড়ে দেওয়া।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "// 1) Hot path: one atomic, conditional decrement (no read-modify-write)\nasync function reserveUnits(productId, qty) {\n  const res = await Product.updateOne(\n    { _id: productId, stock: { $gte: qty } },\n    { $inc: { stock: -qty } }\n  );\n  return res.modifiedCount === 1;          // false → sold out\n}\n\n// 2) Create the order; give the units back if that fails (incl. duplicate retries)\nasync function checkout({ saleId, userId, productId, qty, checkoutId }) {\n  if (!(await reserveUnits(productId, qty))) throw new SoldOutError(productId);\n  try {\n    return await Order.create({ saleId, checkoutId, userId, productId, qty, status: \"awaiting_payment\" });\n  } catch (err) {\n    await Product.updateOne({ _id: productId }, { $inc: { stock: qty } });   // compensate\n    throw err;                              // E11000 → \"already ordered\" for the client\n  }\n}\n\n// 3) Database-enforced rules\norderSchema.index({ checkoutId: 1 }, { unique: true });          // idempotent retries\norderSchema.index({ saleId: 1, userId: 1 }, { unique: true });   // one per customer per sale"
+  },
+  "technology": "mongoose"
+ }
+]

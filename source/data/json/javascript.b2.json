@@ -1,0 +1,558 @@
+[
+ {
+  "id": "js-008",
+  "subtopic": "Coding: Strings & Frequency Counting",
+  "difficulty": "easy",
+  "type": "coding",
+  "market": "bangladesh",
+  "priority": "high",
+  "estimatedMinutes": 6,
+  "tags": [
+   "strings",
+   "hash-map",
+   "frequency-count",
+   "coding-test"
+  ],
+  "technologyVersion": "Version-independent (ES2015+ Map, for...of; ES2020 ??)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Write `firstNonRepeatingChar(str)` that returns the first character that appears **exactly once** in the string, or `null` if there is none. It should be case-sensitive.\n\n- `firstNonRepeatingChar('swiss')` → `'w'`\n- `firstNonRepeatingChar('aabbcc')` → `null`\n- `firstNonRepeatingChar('Dhaka')` → `'D'`\n- `firstNonRepeatingChar('')` → `null`\n\nState the time and space complexity.",
+   "bn": "`firstNonRepeatingChar(str)` নামে একটা function লেখো, যেটা string-এর প্রথম সেই character return করবে যেটা **ঠিক একবার** আছে; এমন কিছু না থাকলে `null`। Function-টা case-sensitive হবে।\n\n- `firstNonRepeatingChar('swiss')` → `'w'`\n- `firstNonRepeatingChar('aabbcc')` → `null`\n- `firstNonRepeatingChar('Dhaka')` → `'D'`\n- `firstNonRepeatingChar('')` → `null`\n\nTime ও space complexity বলো।"
+  },
+  "answer": {
+   "en": "I use **frequency counting** with a `Map` in two passes. The first pass counts every character; the second pass walks the string again in order and returns the first character whose count is `1`. Both passes are linear, so time is **O(n)** and extra space is **O(k)**, where `k` is the number of distinct characters (bounded by the alphabet size).\n\nI iterate with `for...of` rather than an index loop because `for...of` walks Unicode code points, so an emoji like 😀 is treated as one character instead of two UTF-16 halves.",
+   "bn": "আমি `Map` দিয়ে দুই pass-এ **frequency counting** করি। প্রথম pass-এ প্রতিটি character গুনি; দ্বিতীয় pass-এ string-টা আবার ক্রমানুসারে ঘুরে প্রথম যে character-এর count `1`, সেটাই return করি। দুটো pass-ই linear, তাই time **O(n)**, আর extra space **O(k)** — যেখানে `k` হলো distinct character-এর সংখ্যা (alphabet size দিয়ে সীমাবদ্ধ)।\n\nIndex loop-এর বদলে `for...of` ব্যবহার করি, কারণ `for...of` Unicode code point ধরে চলে — ফলে 😀-এর মতো emoji দুটো UTF-16 অংশ না হয়ে একটা character হিসেবে গণ্য হয়।"
+  },
+  "explanation": {
+   "en": "- **Why not `indexOf === lastIndexOf`?** Calling `str.indexOf(ch) === str.lastIndexOf(ch)` inside a loop is O(n²) — fine for 10 characters, slow for 100k. Interviewers usually want you to spot this.\n- **Map vs object:** a `Map` keeps insertion order and has no inherited keys. An optimisation: because the `Map` keeps the order in which characters first appeared, the second pass can loop over the map entries (O(k)) instead of the whole string.\n- **Edge cases:** empty string → `null`; all characters repeated → `null`; case sensitivity (`'D'` vs `'d'`). For a case-insensitive version, count `ch.toLowerCase()` but return the original character.\n- **Unicode:** `for...of` handles surrogate pairs, but not grapheme clusters (e.g. a flag emoji or `e` + combining accent). For those, split with `Intl.Segmenter`.\n- The same counting idea solves other common written-test problems: anagram check (see the extra block), most frequent character, and \"two-sum\" with a `Map` of seen values.",
+   "bn": "- **`indexOf === lastIndexOf` কেন নয়?** Loop-এর ভেতরে `str.indexOf(ch) === str.lastIndexOf(ch)` ব্যবহার করলে complexity O(n²) — ১০টা character-এ সমস্যা নেই, কিন্তু ১ লাখ character-এ ধীর। Interviewer সাধারণত এটা ধরতে পারো কিনা দেখতে চান।\n- **Map বনাম object:** `Map` insertion order রাখে আর এতে কোনো inherited key থাকে না। একটা optimisation: `Map` যেহেতু character-গুলো প্রথম যে ক্রমে এসেছে সেটা মনে রাখে, দ্বিতীয় pass-এ পুরো string-এর বদলে map-এর entry-গুলো (O(k)) ঘুরলেই চলে।\n- **Edge case:** খালি string → `null`; সব character repeat হলে → `null`; case sensitivity (`'D'` বনাম `'d'`)। Case-insensitive চাইলে `ch.toLowerCase()` দিয়ে count করো, কিন্তু return করো original character।\n- **Unicode:** `for...of` surrogate pair ঠিকভাবে handle করে, কিন্তু grapheme cluster (যেমন flag emoji বা `e` + combining accent) নয়। সেগুলোর জন্য `Intl.Segmenter` দিয়ে ভাগ করতে হয়।\n- একই counting কৌশলে written test-এর আরও কিছু common সমস্যা সমাধান হয়: anagram check (extra block দেখো), সবচেয়ে বেশি আসা character, আর আগের value-গুলোর `Map` রেখে \"two-sum\"।"
+  },
+  "interviewTip": {
+   "en": "Say the brute-force idea and its O(n²) cost first, then improve it to O(n) with a Map. Walk through `'swiss'` out loud and mention the empty-string and Unicode edge cases before the interviewer asks.",
+   "bn": "আগে brute-force পদ্ধতি আর তার O(n²) খরচের কথা বলো, তারপর Map দিয়ে O(n)-এ উন্নত করো। `'swiss'` দিয়ে জোরে জোরে dry run করো, আর interviewer জিজ্ঞেস করার আগেই খালি string ও Unicode edge case-এর কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Map",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map"
+   },
+   {
+    "title": "MDN — for...of",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you make it case-insensitive but still return the original character?",
+    "bn": "Case-insensitive করেও original character return করবে কীভাবে?"
+   },
+   {
+    "en": "What if the input is a stream of characters that never ends?",
+    "bn": "Input যদি কখনো শেষ না হওয়া character-এর stream হয়, তাহলে কী করবে?"
+   }
+  ],
+  "related": [
+   "js-012"
+  ],
+  "commonMistakes": {
+   "en": "Returning the first character with count 1 by iterating over a plain object (key order differs for integer-like keys such as `'1'`), or using `str[i]` and breaking emoji into two halves.",
+   "bn": "Plain object-এর key ঘুরে count 1 পাওয়া প্রথম character return করা (`'1'`-এর মতো integer-like key-এর order আলাদা হয়), অথবা `str[i]` ব্যবহার করে emoji-কে দুই টুকরো করে ফেলা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function firstNonRepeatingChar(str) {\n  const counts = new Map();\n\n  for (const ch of str) {\n    counts.set(ch, (counts.get(ch) ?? 0) + 1);\n  }\n\n  for (const ch of str) {\n    if (counts.get(ch) === 1) return ch;\n  }\n\n  return null;\n}\n\nconsole.log(firstNonRepeatingChar('swiss'));  // 'w'\nconsole.log(firstNonRepeatingChar('aabbcc')); // null\nconsole.log(firstNonRepeatingChar('Dhaka'));  // 'D' (case-sensitive: 'a' repeats)\nconsole.log(firstNonRepeatingChar(''));       // null\nconsole.log(firstNonRepeatingChar('😀ab😀a')); // 'b'"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "function isAnagram(a, b) {\n  const clean = (s) => s.toLowerCase().replace(/[^\\p{L}\\p{N}]/gu, '');\n  const x = clean(a);\n  const y = clean(b);\n  if (x.length !== y.length) return false;\n\n  const counts = new Map();\n  for (const ch of x) counts.set(ch, (counts.get(ch) ?? 0) + 1);\n  for (const ch of y) {\n    const n = counts.get(ch);\n    if (!n) return false;\n    counts.set(ch, n - 1);\n  }\n  return true;\n}\n\nconsole.log(isAnagram('Listen', 'Silent'));         // true\nconsole.log(isAnagram('Dormitory', 'Dirty room!')); // true\nconsole.log(isAnagram('aab', 'abb'));               // false",
+    "label": {
+     "en": "Same technique: anagram check",
+     "bn": "একই কৌশল: anagram check"
+    }
+   }
+  ],
+  "complexity": {
+   "time": "O(n)",
+   "space": "O(k) — k distinct characters"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-009",
+  "subtopic": "Destructuring & Spread",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "destructuring",
+   "spread",
+   "rest",
+   "default-values",
+   "es2015"
+  ],
+  "technologyVersion": "Version-independent (ES2015+; object spread/rest ES2018)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Explain destructuring, the rest pattern and spread syntax. What is the most common pitfall when copying objects with spread?",
+   "bn": "Destructuring, rest pattern আর spread syntax ব্যাখ্যা করো। Spread দিয়ে object copy করার সময় সবচেয়ে common ভুল কোনটা?"
+  },
+  "answer": {
+   "en": "**Destructuring** unpacks values from arrays (by position) or objects (by property name) into variables. It supports default values, renaming (`address: { city }`, `id: userId`), nesting and skipping array items.\n\n**Rest** (`...rest`) on the left side *collects* the remaining items or properties into a new array/object. **Spread** (`...value`) on the right side *expands* an iterable or object into a new array, object or function arguments.\n\nThe pitfall: spread (like `Object.assign`) makes a **shallow copy**. `{ ...user }` is a new object, but `copy.address` still points to the same nested object, so changing `copy.address.city` also changes the original. For a deep copy I use `structuredClone`, or I copy each level I change (`{ ...user, address: { ...user.address, city: 'Sylhet' } }`).",
+   "bn": "**Destructuring** array (position অনুযায়ী) বা object (property name অনুযায়ী) থেকে value বের করে variable-এ বসায়। এতে default value, নাম বদলানো (`address: { city }`, `id: userId`), nesting আর array item skip করা — সবই করা যায়।\n\nবাম পাশে **rest** (`...rest`) বাকি item বা property-গুলো *জড়ো করে* একটা নতুন array/object বানায়। ডান পাশে **spread** (`...value`) কোনো iterable বা object-কে নতুন array, object বা function argument-এ *ছড়িয়ে দেয়*।\n\nভুলটা হলো: spread (`Object.assign`-এর মতোই) **shallow copy** করে। `{ ...user }` নতুন object ঠিকই, কিন্তু `copy.address` এখনো একই nested object-কে point করে, তাই `copy.address.city` বদলালে original-ও বদলে যায়। Deep copy-র জন্য আমি `structuredClone` ব্যবহার করি, অথবা যে level বদলাচ্ছি সেটা আলাদা করে copy করি (`{ ...user, address: { ...user.address, city: 'Sylhet' } }`)।"
+  },
+  "explanation": {
+   "en": "- **Defaults apply only to `undefined`**, not `null`: `const { role = 'viewer' } = { role: null }` gives `null`.\n- **Destructuring `null`/`undefined` throws** a `TypeError`. For function parameters, add a default: `function createUser({ name, role = 'viewer' } = {})`, otherwise `createUser()` crashes.\n- **Rest must be last** and collects only own enumerable properties; it's handy for omitting a field: `const { password, ...safeUser } = user`.\n- **Spread order matters:** later properties win — `{ ...defaults, ...options }` lets options override defaults.\n- **Spread works on any iterable for arrays** (`[...new Set(arr)]` removes duplicates, `[...'hello']`), but object spread copies own enumerable properties only — no prototype, no getters (it copies their current values).\n- **Swapping:** `[a, b] = [b, a]`.",
+   "bn": "- **Default শুধু `undefined`-এ কাজ করে**, `null`-এ নয়: `const { role = 'viewer' } = { role: null }` দিলে ফল `null`।\n- **`null`/`undefined`-কে destructure করলে** `TypeError` throw হয়। Function parameter-এ default দাও: `function createUser({ name, role = 'viewer' } = {})`, নাহলে `createUser()` crash করবে।\n- **Rest সবসময় শেষে থাকতে হবে**, আর এটা শুধু own enumerable property জড়ো করে; কোনো field বাদ দিতে কাজে লাগে: `const { password, ...safeUser } = user`।\n- **Spread-এ order গুরুত্বপূর্ণ:** পরের property জেতে — `{ ...defaults, ...options }` লিখলে options দিয়ে defaults override হয়।\n- **Array spread যেকোনো iterable-এ কাজ করে** (`[...new Set(arr)]` দিয়ে duplicate বাদ, `[...'hello']`), কিন্তু object spread শুধু own enumerable property copy করে — prototype বা getter নয় (getter-এর current value copy হয়)।\n- **Swap করা:** `[a, b] = [b, a]`।"
+  },
+  "interviewTip": {
+   "en": "Show one object example and one array example, then volunteer the shallow-copy pitfall with a nested `address` object. Mentioning \"defaults only for undefined\" is a nice precise detail.",
+   "bn": "একটা object আর একটা array-র উদাহরণ দেখাও, তারপর নিজে থেকেই nested `address` object দিয়ে shallow copy-র ফাঁদটা বলো। \"Default শুধু undefined-এর জন্য\" — এই সূক্ষ্ম কথাটা বললে ভালো impression হয়।"
+  },
+  "references": [
+   {
+    "title": "MDN — Destructuring",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring"
+   },
+   {
+    "title": "MDN — Spread syntax (...)",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you deep-copy an object that contains a `Date` and a `Map`?",
+    "bn": "যে object-এ `Date` আর `Map` আছে, সেটা কীভাবে deep copy করবে?"
+   },
+   {
+    "en": "How do you remove a property from an object without mutating it?",
+    "bn": "Object mutate না করে তার একটা property কীভাবে বাদ দেবে?"
+   }
+  ],
+  "related": [
+   "js-036",
+   "js-014"
+  ],
+  "commonMistakes": {
+   "en": "Believing `{ ...obj }` is a deep copy, or expecting a default value to replace `null`.",
+   "bn": "ভাবা যে `{ ...obj }` deep copy করে, অথবা আশা করা যে default value `null`-কেও replace করবে।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const user = { id: 7, name: 'Nusrat', address: { city: 'Dhaka' }, role: undefined };\n\n// Object destructuring: rename via nesting, default, rest\nconst { name, role = 'viewer', address: { city }, ...rest } = user;\nconsole.log(name, role, city, rest); // Nusrat viewer Dhaka { id: 7 }\n\n// Array destructuring: skip, default, rest\nconst [first, , third = 0, ...others] = [10, 20, undefined, 40, 50];\nconsole.log(first, third, others); // 10 0 [40, 50]\n\n// Spread = shallow copy\nconst copy = { ...user, name: 'Nusrat J.' };\ncopy.address.city = 'Sylhet';\nconsole.log(user.address.city); // 'Sylhet' — nested object is shared!\n\n// Safe parameter destructuring\nfunction createUser({ name, role = 'viewer' } = {}) {\n  return { name, role };\n}\nconsole.log(createUser()); // { name: undefined, role: 'viewer' }"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-010",
+  "subtopic": "Event Delegation & DOM Events",
+  "difficulty": "easy",
+  "type": "conceptual",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "dom",
+   "events",
+   "bubbling",
+   "capturing",
+   "event-delegation"
+  ],
+  "technologyVersion": "DOM Living Standard (version-independent)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Explain event bubbling and capturing. What is event delegation and why is it useful?",
+   "bn": "Event bubbling আর capturing ব্যাখ্যা করো। Event delegation কী, আর এটা কেন কাজে লাগে?"
+  },
+  "answer": {
+   "en": "When you click an element, the event travels in three phases: **capturing** (from `window` down to the target), **target**, and **bubbling** (from the target back up to `window`). By default `addEventListener` listens in the bubbling phase; passing `{ capture: true }` listens on the way down.\n\n**Event delegation** uses bubbling: instead of attaching a listener to every child, I attach one listener to a common parent and check `event.target` (usually with `closest()`) to find which child was clicked. It means fewer listeners and less memory, and it automatically works for elements added later — perfect for lists, tables and dynamic content.",
+   "bn": "কোনো element-এ click করলে event তিনটা phase-এ চলে: **capturing** (`window` থেকে নিচে target পর্যন্ত), **target**, আর **bubbling** (target থেকে আবার উপরে `window` পর্যন্ত)। Default-ভাবে `addEventListener` bubbling phase-এ শোনে; `{ capture: true }` দিলে নিচে নামার পথে শোনে।\n\n**Event delegation** bubbling-কে কাজে লাগায়: প্রতিটি child-এ listener না বসিয়ে আমি একটা common parent-এ একটা listener বসাই, তারপর `event.target` (সাধারণত `closest()` দিয়ে) check করে বুঝি কোন child-এ click হয়েছে। এতে listener কম লাগে, memory কম খরচ হয়, আর পরে যোগ হওয়া element-এর জন্যও এটা আপনা-আপনি কাজ করে — list, table বা dynamic content-এর জন্য একদম উপযুক্ত।"
+  },
+  "explanation": {
+   "en": "- **`event.target` vs `event.currentTarget`:** `target` is the deepest element that was actually clicked (maybe a `<span>` inside your button); `currentTarget` is the element the listener is attached to. That's why `closest('button[data-action]')` is used — it walks up from the target.\n- **Check the match is inside the container:** `closest()` can match an ancestor *outside* the delegating parent, so guard with `list.contains(button)` in nested layouts.\n- **Events that don't bubble:** `focus`/`blur` (use `focusin`/`focusout`), `mouseenter`/`mouseleave` (use `mouseover`/`mouseout`), and some media events.\n- **`stopPropagation()`** stops further travel and can silently break delegated handlers higher up — avoid it unless you really need it. **`preventDefault()`** is different: it cancels the browser's default action (link navigation, form submit) but the event still bubbles.\n- Frameworks use the same idea: React attaches its listeners at the root container and dispatches internally.",
+   "bn": "- **`event.target` বনাম `event.currentTarget`:** `target` হলো আসলে যে সবচেয়ে ভেতরের element-এ click হয়েছে (হয়তো button-এর ভেতরের একটা `<span>`); `currentTarget` হলো যে element-এ listener বসানো। এজন্যই `closest('button[data-action]')` ব্যবহার করা হয় — এটা target থেকে উপরের দিকে খোঁজে।\n- **Match-টা container-এর ভেতরে কিনা দেখো:** `closest()` delegating parent-এর *বাইরের* কোনো ancestor-কেও match করতে পারে, তাই nested layout-এ `list.contains(button)` দিয়ে guard দাও।\n- **যেসব event bubble করে না:** `focus`/`blur` (এর বদলে `focusin`/`focusout`), `mouseenter`/`mouseleave` (এর বদলে `mouseover`/`mouseout`), আর কিছু media event।\n- **`stopPropagation()`** event-এর যাত্রা থামিয়ে দেয়, ফলে উপরের delegated handler চুপচাপ ভেঙে যেতে পারে — খুব দরকার না হলে এড়িয়ে চলো। **`preventDefault()`** আলাদা জিনিস: এটা browser-এর default action (link navigation, form submit) বাতিল করে, কিন্তু event তবুও bubble করে।\n- Framework-গুলোও একই ধারণা ব্যবহার করে: React তার listener root container-এ বসিয়ে ভেতরে ভেতরে dispatch করে।"
+  },
+  "interviewTip": {
+   "en": "Draw the three phases quickly (down, target, up), then show a 6-line delegation example with `closest()`. Mentioning `target` vs `currentTarget` and non-bubbling events shows real DOM experience.",
+   "bn": "তিনটা phase (নিচে, target, উপরে) দ্রুত এঁকে বা বলে দাও, তারপর `closest()` দিয়ে ৬ লাইনের একটা delegation উদাহরণ দেখাও। `target` বনাম `currentTarget` আর যেসব event bubble করে না সেগুলো বললে বোঝা যায় তোমার বাস্তব DOM অভিজ্ঞতা আছে।"
+  },
+  "references": [
+   {
+    "title": "MDN — Event bubbling",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Event_bubbling"
+   },
+   {
+    "title": "MDN — EventTarget.addEventListener()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener"
+   },
+   {
+    "title": "MDN — Element.closest()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Element/closest"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you delegate `focus` events?",
+    "bn": "`focus` event কীভাবে delegate করবে?"
+   },
+   {
+    "en": "What is the difference between `stopPropagation` and `stopImmediatePropagation`?",
+    "bn": "`stopPropagation` আর `stopImmediatePropagation`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "js-039"
+  ],
+  "commonMistakes": {
+   "en": "Comparing `event.target` directly to the button (fails when the click lands on an icon inside it), or confusing `stopPropagation()` with `preventDefault()`.",
+   "bn": "`event.target`-কে সরাসরি button-এর সাথে compare করা (button-এর ভেতরের icon-এ click পড়লে fail করে), অথবা `stopPropagation()` আর `preventDefault()` গুলিয়ে ফেলা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const list = document.querySelector('#todo-list');\n\n// One listener handles every current and future <li>\nlist.addEventListener('click', (event) => {\n  const button = event.target.closest('button[data-action]');\n  if (!button || !list.contains(button)) return;\n\n  const item = button.closest('li');\n  if (button.dataset.action === 'delete') item.remove();\n  if (button.dataset.action === 'done') item.classList.toggle('done');\n});\n\n// Capturing-phase listener runs before any bubbling listener\ndocument.addEventListener('click', () => console.log('capture'), { capture: true });"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-011",
+  "subtopic": "Promises",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "promises",
+   "promise-any",
+   "promise-race",
+   "combinators"
+  ],
+  "technologyVersion": "ES2021+ (`Promise.any`); Baseline widely available",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "You request the same config file from three CDN mirrors and want the **first successful** response. A fast mirror that *fails* should be ignored unless every mirror fails. Which combinator fits best?",
+   "bn": "তুমি একই config file তিনটা CDN mirror থেকে request করছ, আর **প্রথম সফল** response-টা চাও। দ্রুত কোনো mirror *fail* করলে সেটা উপেক্ষা করতে হবে, যদি না সব mirror-ই fail করে। কোন combinator সবচেয়ে উপযুক্ত?"
+  },
+  "answer": {
+   "en": "`Promise.any`. It fulfils with the **first fulfilled** promise and ignores rejections. It rejects only if **all** inputs reject, and then it rejects with an `AggregateError` whose `errors` array holds every reason.",
+   "bn": "`Promise.any`। এটা **প্রথম fulfilled** promise-এর value দিয়ে fulfil হয় এবং rejection-গুলো উপেক্ষা করে। **সব** input reject করলেই শুধু এটা reject করে — তখন একটা `AggregateError` দেয়, যার `errors` array-তে প্রতিটি কারণ থাকে।"
+  },
+  "explanation": {
+   "en": "The four combinators:\n\n- `Promise.all` — waits for all to fulfil; rejects as soon as **one** rejects (fail-fast). Use when you need every result.\n- `Promise.race` — settles like the **first promise to settle**, fulfilled *or rejected*. This is the tempting wrong answer: if the fastest mirror fails in 20 ms, `race` rejects even though the other mirrors would succeed. `race` is good for timeouts.\n- `Promise.any` — first **fulfilment** wins; `AggregateError` only if all fail.\n- `Promise.allSettled` — waits for everything and never rejects; returns `{ status, value | reason }` objects. Use for \"run all, report partial failures\".\n\nNone of them cancels the losing requests. With `fetch`, give each request its own `AbortController` and abort the others after the winner arrives (see the example).",
+   "bn": "চারটা combinator:\n\n- `Promise.all` — সবগুলো fulfil হওয়া পর্যন্ত অপেক্ষা করে; **একটা** reject করলেই সাথে সাথে reject (fail-fast)। প্রতিটি result দরকার হলে ব্যবহার করো।\n- `Promise.race` — **প্রথম যে promise settle হয়**, fulfilled *বা rejected*, সেটার মতোই settle হয়। এটাই লোভনীয় ভুল উত্তর: সবচেয়ে দ্রুত mirror যদি 20 ms-এ fail করে, বাকি mirror সফল হলেও `race` reject করবে। Timeout বানাতে `race` ভালো।\n- `Promise.any` — প্রথম **fulfilment** জেতে; সব fail করলেই শুধু `AggregateError`।\n- `Promise.allSettled` — সবকিছুর জন্য অপেক্ষা করে, কখনো reject করে না; `{ status, value | reason }` object-এর array দেয়। \"সব চালাও, আংশিক failure report করো\" — এমন ক্ষেত্রে ব্যবহার করো।\n\nএদের কোনোটাই হেরে যাওয়া request cancel করে না। `fetch`-এর ক্ষেত্রে প্রতিটি request-কে আলাদা `AbortController` দাও, আর winner পাওয়ার পর বাকিগুলো abort করো (উদাহরণ দেখো)।"
+  },
+  "interviewTip": {
+   "en": "Answer with the one-line behaviour of all four combinators — interviewers often follow up with \"and when would you use race?\". Mentioning `AggregateError` and cancellation shows production thinking.",
+   "bn": "চারটা combinator-এর আচরণ এক লাইনে করে বলো — interviewer প্রায়ই পরের প্রশ্নে জিজ্ঞেস করেন \"তাহলে race কখন ব্যবহার করবে?\"। `AggregateError` আর cancellation-এর কথা বললে বোঝা যায় তুমি production-এর দৃষ্টিতে ভাবো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Promise.any()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/any"
+   },
+   {
+    "title": "MDN — Promise.race()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race"
+   },
+   {
+    "title": "MDN — Promise.allSettled()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you implement a timeout for a fetch call?",
+    "bn": "একটা fetch call-এ timeout কীভাবে implement করবে?"
+   }
+  ],
+  "related": [
+   "js-021",
+   "js-019"
+  ],
+  "commonMistakes": {
+   "en": "Using `Promise.race` for \"first success\", or assuming the slower promises are cancelled automatically.",
+   "bn": "\"প্রথম সফল\" পাওয়ার জন্য `Promise.race` ব্যবহার করা, অথবা ধরে নেওয়া যে ধীর promise-গুলো আপনা-আপনি cancel হয়ে যায়।"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "const mirrors = ['https://cdn1.example.com', 'https://cdn2.example.com', 'https://cdn3.example.com'];\nconst controllers = mirrors.map(() => new AbortController());\n\ntry {\n  const winner = await Promise.any(\n    mirrors.map(async (base, i) => {\n      const res = await fetch(`${base}/config.json`, { signal: controllers[i].signal });\n      if (!res.ok) throw new Error(`${base}: HTTP ${res.status}`);\n      return { i, config: await res.json() };\n    }),\n  );\n  controllers.forEach((c, i) => i !== winner.i && c.abort()); // stop the slower requests\n  console.log(winner.config);\n} catch (err) {\n  console.error('All mirrors failed', err.errors); // AggregateError\n}",
+    "label": {
+     "en": "First successful mirror, then cancel the rest",
+     "bn": "প্রথম সফল mirror, তারপর বাকিগুলো cancel"
+    }
+   }
+  ],
+  "options": [
+   {
+    "en": "`Promise.all`",
+    "bn": "`Promise.all`"
+   },
+   {
+    "en": "`Promise.race`",
+    "bn": "`Promise.race`"
+   },
+   {
+    "en": "`Promise.any`",
+    "bn": "`Promise.any`"
+   },
+   {
+    "en": "`Promise.allSettled`",
+    "bn": "`Promise.allSettled`"
+   }
+  ],
+  "correctIndex": 2,
+  "technology": "javascript"
+ },
+ {
+  "id": "js-012",
+  "subtopic": "Objects & Arrays",
+  "difficulty": "easy",
+  "type": "coding",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "group-by",
+   "reduce",
+   "object-groupby",
+   "map",
+   "es2024"
+  ],
+  "technologyVersion": "ES2024 (`Object.groupBy`, `Map.groupBy`; Baseline widely available); manual version ES2021+",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Implement `groupBy(items, getKey)` that groups an array into an object of arrays, keyed by whatever `getKey(item)` returns.\n\nExample: grouping orders by `status` should give `{ paid: [order1, order3], pending: [order2] }`.\n\nThen explain how you would do the same with built-in methods in modern JavaScript.",
+   "bn": "`groupBy(items, getKey)` implement করো, যেটা একটা array-কে `getKey(item)` যা return করে সেই key অনুযায়ী array-র object-এ group করবে।\n\nউদাহরণ: order-গুলোকে `status` অনুযায়ী group করলে পাওয়া উচিত `{ paid: [order1, order3], pending: [order2] }`।\n\nএরপর বলো, modern JavaScript-এর built-in method দিয়ে একই কাজ কীভাবে করবে।"
+  },
+  "answer": {
+   "en": "I loop once with `reduce`, compute the key for each item and push the item into that key's array, creating the array the first time with `??=`. I start from `Object.create(null)` so the result has no inherited properties — keys like `'toString'` or `'__proto__'` can't clash with `Object.prototype`. It's **O(n)** time and **O(n)** space.\n\nIn modern code I'd use the built-ins (ES2024, Baseline widely available, Node 21+): `Object.groupBy(items, fn)` returns a null-prototype object, and `Map.groupBy(items, fn)` returns a `Map` — better when keys aren't strings (objects, numbers you don't want stringified) or when you want map methods like `.get()` and `.size`.",
+   "bn": "আমি `reduce` দিয়ে একবার loop করি, প্রতিটি item-এর key বের করি আর সেই key-র array-তে item push করি; প্রথমবার array তৈরি করি `??=` দিয়ে। শুরু করি `Object.create(null)` থেকে, যাতে result-এ কোনো inherited property না থাকে — `'toString'` বা `'__proto__'`-এর মতো key `Object.prototype`-এর সাথে সংঘর্ষ না করে। Time **O(n)**, space **O(n)**।\n\nModern code-এ আমি built-in ব্যবহার করব (ES2024, Baseline widely available, Node 21+): `Object.groupBy(items, fn)` একটা null-prototype object দেয়, আর `Map.groupBy(items, fn)` দেয় একটা `Map` — key যখন string নয় (object, বা এমন number যা string-এ বদলাতে চাও না) অথবা `.get()`, `.size`-এর মতো map method দরকার, তখন এটা ভালো।"
+  },
+  "explanation": {
+   "en": "- **Why not `{}` as the accumulator?** With a plain object, `groups['constructor']` already exists (inherited), so `(groups[key] ??= [])` would try to push into a function. A null-prototype object avoids this.\n- **Keys are strings** in `Object.groupBy`: `getKey` returning `1` and `'1'` end up in the same group. `Map.groupBy` keeps them separate.\n- **Callback args:** both built-ins pass `(item, index)`, like most array methods — my version does too.\n- **Edge cases:** empty array → empty object; `getKey` returning `undefined` → an `'undefined'` group (decide whether that's acceptable).\n- **Before ES2024** people used lodash's `_.groupBy`. Note the old proposal name `Array.prototype.group` was dropped because of web-compatibility issues — that's why it became a static method.",
+   "bn": "- **Accumulator হিসেবে `{}` কেন নয়?** Plain object-এ `groups['constructor']` আগে থেকেই আছে (inherited), তাই `(groups[key] ??= [])` একটা function-এ push করার চেষ্টা করবে। Null-prototype object এই সমস্যা এড়ায়।\n- `Object.groupBy`-এ **key সবসময় string**: `getKey` যদি `1` আর `'1'` return করে, দুটো একই group-এ পড়বে। `Map.groupBy` এগুলো আলাদা রাখে।\n- **Callback argument:** বেশিরভাগ array method-এর মতো দুটো built-in-ই `(item, index)` pass করে — আমার version-ও তাই করে।\n- **Edge case:** খালি array → খালি object; `getKey` `undefined` return করলে → `'undefined'` নামে group (এটা মেনে নেওয়া যায় কিনা ঠিক করো)।\n- **ES2024-এর আগে** মানুষ lodash-এর `_.groupBy` ব্যবহার করত। পুরনো proposal-এর নাম `Array.prototype.group` web-compatibility সমস্যার কারণে বাদ পড়েছিল — এজন্যই এটা static method হয়েছে।"
+  },
+  "interviewTip": {
+   "en": "Write the 6-line `reduce` version first, then say \"in production I'd use `Object.groupBy` or `Map.groupBy`\" and explain when you'd choose the Map. Knowing the null-prototype detail stands out.",
+   "bn": "আগে ৬ লাইনের `reduce` version লেখো, তারপর বলো \"production-এ আমি `Object.groupBy` বা `Map.groupBy` ব্যবহার করব\", আর কখন Map বেছে নেবে সেটা ব্যাখ্যা করো। Null-prototype-এর খুঁটিনাটি জানা থাকলে তুমি আলাদা হয়ে উঠবে।"
+  },
+  "references": [
+   {
+    "title": "MDN — Object.groupBy()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/groupBy"
+   },
+   {
+    "title": "MDN — Map.groupBy()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/groupBy"
+   },
+   {
+    "title": "MDN — Array.prototype.reduce()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you count items per group instead of collecting them?",
+    "bn": "Item জমানোর বদলে প্রতিটি group-এ কতগুলো item আছে, সেটা কীভাবে গুনবে?"
+   },
+   {
+    "en": "Why is `Object.groupBy` a static method instead of `Array.prototype.groupBy`?",
+    "bn": "`Object.groupBy` কেন `Array.prototype.groupBy` না হয়ে static method হলো?"
+   }
+  ],
+  "related": [
+   "js-008",
+   "js-013"
+  ],
+  "commonMistakes": {
+   "en": "Forgetting to `return groups` from the reducer (the accumulator becomes `undefined` after the first item), or calling `items.groupBy(...)` — it's a static method, not an array method.",
+   "bn": "Reducer থেকে `return groups` করতে ভুলে যাওয়া (প্রথম item-এর পর accumulator `undefined` হয়ে যায়), অথবা `items.groupBy(...)` call করা — এটা static method, array method নয়।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "function groupBy(items, getKey) {\n  return items.reduce((groups, item, index) => {\n    const key = getKey(item, index);\n    (groups[key] ??= []).push(item);\n    return groups;\n  }, Object.create(null));\n}\n\nconst orders = [\n  { id: 1, status: 'paid', amount: 500 },\n  { id: 2, status: 'pending', amount: 1200 },\n  { id: 3, status: 'paid', amount: 300 },\n];\n\nconst byStatus = groupBy(orders, (order) => order.status);\nconsole.log(Object.keys(byStatus));                // ['paid', 'pending']\nconsole.log(byStatus.paid.map((order) => order.id)); // [1, 3]\n\n// Built-ins (ES2024)\nconst native = Object.groupBy(orders, (order) => order.status);\nconsole.log(native.pending.length); // 1\n\nconst bySize = Map.groupBy(orders, (order) => (order.amount >= 1000 ? 'large' : 'small'));\nconsole.log(bySize.get('small').length); // 2"
+  },
+  "complexity": {
+   "time": "O(n)",
+   "space": "O(n)"
+  },
+  "technology": "javascript"
+ },
+ {
+  "id": "js-013",
+  "subtopic": "Array Methods",
+  "difficulty": "easy",
+  "type": "debugging",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 4,
+  "tags": [
+   "reduce",
+   "arrow-functions",
+   "debugging",
+   "arrays"
+  ],
+  "technologyVersion": "Version-independent concept (ECMAScript 2026)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "This code should print the cart total, `3800`, but it prints `undefined`. Find the bugs and fix them.",
+   "bn": "এই code-এর cart total `3800` print করার কথা, কিন্তু print করছে `undefined`। Bug-গুলো খুঁজে বের করে ঠিক করো।"
+  },
+  "answer": {
+   "en": "There are two bugs:\n\n1. **Missing `return`.** The arrow function has a block body `{ ... }`, so the expression is calculated and thrown away — the callback returns `undefined`. Either add `return` or use a concise body without braces.\n2. **No initial value.** Without the second argument, `reduce` uses the **first item object** as the starting `sum` and starts looping from index 1. So even with `return`, the result would be `'[object Object]800'` (object + number → string). It also throws a `TypeError` for an empty cart.\n\nFix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)` → `3800`.",
+   "bn": "এখানে দুটো bug:\n\n1. **`return` নেই।** Arrow function-এর body block `{ ... }` আকারে, তাই expression-টা হিসাব হয়ে ফেলে দেওয়া হয় — callback `undefined` return করে। হয় `return` যোগ করো, নয়তো brace ছাড়া concise body ব্যবহার করো।\n2. **Initial value নেই।** দ্বিতীয় argument না দিলে `reduce` **প্রথম item object**-টাকেই শুরুর `sum` ধরে এবং index 1 থেকে loop শুরু করে। তাই `return` দিলেও ফল হতো `'[object Object]800'` (object + number → string)। আর cart খালি হলে `TypeError` throw হয়।\n\nFix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)` → `3800`।"
+  },
+  "explanation": {
+   "en": "Tracing the buggy version: no initial value → `sum = cart[0]` (the Keyboard object), loop starts at the Mouse. The callback runs once and returns `undefined`, so `total` is `undefined`.\n\nEdge cases worth mentioning:\n- Empty array without an initial value → `TypeError: Reduce of empty array with no initial value`.\n- Single-item array without an initial value → the callback **never runs** and `reduce` returns that item object as-is.\n- Always pass the initial value matching the result type (`0` for sums, `{}`/`Object.create(null)` for lookups, `[]` for arrays).\n\nReal-world note: for money, store amounts as integers in the smallest unit (paisa/cents) to avoid floating-point errors like `0.1 + 0.2`.",
+   "bn": "Buggy version trace করলে: initial value নেই → `sum = cart[0]` (Keyboard object), loop শুরু হয় Mouse থেকে। Callback একবার চলে আর `undefined` return করে, তাই `total` হয় `undefined`।\n\nযে edge case-গুলো বলা ভালো:\n- Initial value ছাড়া খালি array → `TypeError: Reduce of empty array with no initial value`।\n- Initial value ছাড়া এক item-এর array → callback **একবারও চলে না**, `reduce` ওই item object-টাই সরাসরি return করে।\n- সবসময় result-এর type অনুযায়ী initial value দাও (sum-এর জন্য `0`, lookup-এর জন্য `{}`/`Object.create(null)`, array-র জন্য `[]`)।\n\nবাস্তব পরামর্শ: টাকার হিসাবে amount-কে সবচেয়ে ছোট unit-এ (পয়সা/cents) integer হিসেবে রাখো, যাতে `0.1 + 0.2`-এর মতো floating-point ভুল না হয়।"
+  },
+  "interviewTip": {
+   "en": "Point out *both* bugs even though fixing the first one seems enough — explaining what would happen with only the `return` fix (`'[object Object]800'`) shows you really understand `reduce`.",
+   "bn": "প্রথম bug ঠিক করলেই যথেষ্ট মনে হলেও *দুটো* bug-ই দেখাও — শুধু `return` ঠিক করলে কী হতো (`'[object Object]800'`) সেটা ব্যাখ্যা করলে বোঝা যায় তুমি `reduce` সত্যিই বোঝো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Array.prototype.reduce()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce"
+   },
+   {
+    "title": "MDN — Arrow function expressions",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you prefer a plain `for...of` loop over `reduce`?",
+    "bn": "কখন `reduce`-এর বদলে সাধারণ `for...of` loop পছন্দ করবে?"
+   },
+   {
+    "en": "Why should money be stored as integers?",
+    "bn": "টাকার পরিমাণ কেন integer হিসেবে রাখা উচিত?"
+   }
+  ],
+  "related": [
+   "js-007",
+   "js-012",
+   "js-006"
+  ],
+  "commonMistakes": {
+   "en": "Adding `return` but still omitting the initial value, or \"fixing\" it with `map` + `forEach` and an outer mutable variable.",
+   "bn": "`return` যোগ করেও initial value না দেওয়া, অথবা `map` + `forEach` আর বাইরের একটা mutable variable দিয়ে \"fix\" করা।"
+  },
+  "code": {
+   "language": "javascript",
+   "source": "const cart = [\n  { name: 'Keyboard', price: 1500, qty: 2 },\n  { name: 'Mouse', price: 800, qty: 1 },\n];\n\nconst total = cart.reduce((sum, item) => {\n  sum + item.price * item.qty;\n});\n\nconsole.log(total);",
+   "output": "undefined"
+  },
+  "extraCode": [
+   {
+    "language": "javascript",
+    "source": "const cart = [\n  { name: 'Keyboard', price: 1500, qty: 2 },\n  { name: 'Mouse', price: 800, qty: 1 },\n];\n\nconst total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);\nconsole.log(total); // 3800\n\nconsole.log([].reduce((sum, item) => sum + item.price * item.qty, 0)); // 0 — no crash",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "technology": "javascript"
+ },
+ {
+  "id": "js-014",
+  "subtopic": "Immutability",
+  "difficulty": "easy",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "immutability",
+   "object-freeze",
+   "shallow",
+   "strict-mode"
+  ],
+  "technologyVersion": "Version-independent concept (ES5+)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A settings object is frozen and then one of its nested values is changed. What is logged?",
+   "bn": "একটা settings object freeze করার পর তার একটা nested value বদলানো হলো। কী log হবে?"
+  },
+  "answer": {
+   "en": "`true 5`. `Object.freeze` is **shallow**: the outer object is frozen (so `isFrozen` is `true`), but the nested `api` object is a separate, unfrozen object, so changing `settings.api.retries` works.",
+   "bn": "`true 5`। `Object.freeze` **shallow**: বাইরের object freeze হয় (তাই `isFrozen` হলো `true`), কিন্তু ভেতরের `api` একটা আলাদা, freeze না করা object — তাই `settings.api.retries` বদলানো যায়।"
+  },
+  "explanation": {
+   "en": "- Option A assumes freeze is deep — the most common misconception.\n- Option D is tempting if you know frozen writes throw in strict mode. That's true, but only for the frozen object's **own** properties: `settings.theme = 'light'` throws a `TypeError` in strict mode (ES modules, classes) and is silently ignored in sloppy scripts. Here we write to the unfrozen nested object, so nothing throws in either mode.\n- `const` is different again: it prevents **reassigning the variable**, not mutating the object.\n- For deep immutability, freeze recursively (a small `deepFreeze` helper) or, more commonly, follow an immutable-update discipline: never mutate, create new objects with spread (`{ ...s, api: { ...s.api, retries: 5 } }`), `toSorted`/`with` for arrays, or use a library like Immer.\n- Freezing has a cost on large objects; many teams freeze only in development to catch accidental mutation.",
+   "bn": "- Option A ধরে নেয় freeze deep — এটাই সবচেয়ে common ভুল ধারণা।\n- Option D লোভনীয় মনে হতে পারে যদি জানো যে strict mode-এ frozen object-এ লিখলে error হয়। কথাটা ঠিক, কিন্তু শুধু frozen object-এর **নিজস্ব** property-র জন্য: `settings.theme = 'light'` strict mode-এ (ES module, class) `TypeError` throw করে, আর sloppy script-এ চুপচাপ উপেক্ষিত হয়। এখানে আমরা freeze না করা nested object-এ লিখছি, তাই কোনো mode-এই error হয় না।\n- `const` আবার আলাদা জিনিস: এটা **variable reassign** আটকায়, object mutate করা নয়।\n- Deep immutability-র জন্য recursively freeze করো (ছোট একটা `deepFreeze` helper), অথবা বেশি প্রচলিত উপায়ে immutable update-এর নিয়ম মেনে চলো: কখনো mutate নয়, spread দিয়ে নতুন object (`{ ...s, api: { ...s.api, retries: 5 } }`), array-র জন্য `toSorted`/`with`, বা Immer-এর মতো library।\n- বড় object freeze করার একটা খরচ আছে; অনেক team শুধু development-এ freeze করে, যাতে ভুল করে mutate করলে ধরা পড়ে।"
+  },
+  "interviewTip": {
+   "en": "Say \"shallow\" in your first sentence, then distinguish `const` vs `freeze` vs strict-mode behaviour. Offer the immutable-update pattern as the practical alternative.",
+   "bn": "প্রথম বাক্যেই \"shallow\" শব্দটা বলো, তারপর `const`, `freeze` আর strict-mode-এর আচরণ আলাদা করে বোঝাও। বাস্তব বিকল্প হিসেবে immutable update pattern-এর কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "MDN — Object.freeze()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze"
+   },
+   {
+    "title": "MDN — Object.isFrozen()",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isFrozen"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Write a `deepFreeze` function.",
+    "bn": "একটা `deepFreeze` function লেখো।"
+   },
+   {
+    "en": "What is the difference between `Object.freeze`, `Object.seal` and `Object.preventExtensions`?",
+    "bn": "`Object.freeze`, `Object.seal` আর `Object.preventExtensions`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "js-009",
+   "js-007"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const settings = Object.freeze({\n  theme: 'dark',\n  api: { retries: 3 },\n});\n\nsettings.api.retries = 5;\nconsole.log(Object.isFrozen(settings), settings.api.retries);",
+   "output": "true 5"
+  },
+  "options": [
+   {
+    "en": "`true 3`",
+    "bn": "`true 3`"
+   },
+   {
+    "en": "`true 5`",
+    "bn": "`true 5`"
+   },
+   {
+    "en": "`false 5`",
+    "bn": "`false 5`"
+   },
+   {
+    "en": "A `TypeError` is thrown",
+    "bn": "একটা `TypeError` throw হবে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "javascript"
+ }
+]
