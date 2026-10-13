@@ -4,8 +4,26 @@
     {
       "name": "static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5173", "--directory", "/Users/webappick/Documents/SHOJOL/interview-prep-bd"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5173",
+        "--directory",
+        "/Users/webappick/Documents/SHOJOL/interview-prep-bd"
+      ],
       "port": 5173
+    },
+    {
+      "name": "prod-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5174",
+        "--directory",
+        "/private/tmp/claude-501/-Users-webappick-Documents-SHOJOL-interview-prep-bd/40336f8a-0ca1-4f91-a0c2-5121c70cb924/scratchpad/prod"
+      ],
+      "port": 5174
     }
   ]
 }

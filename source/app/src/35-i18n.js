@@ -22,6 +22,7 @@
     nav_history: { en: 'Study History', bn: 'পড়ার ইতিহাস' },
     nav_planner: { en: 'Study Planner', bn: 'স্টাডি প্ল্যানার' },
     nav_settings: { en: 'Settings', bn: 'সেটিংস' },
+    nav_blog: { en: 'Blog', bn: 'ব্লগ' },
     nav_sources: { en: 'Versions & Sources', bn: 'ভার্সন ও সূত্র' },
     skipToContent: { en: 'Skip to main content', bn: 'মূল কনটেন্টে যাও' },
     collapseSidebar: { en: 'Collapse sidebar', bn: 'সাইডবার ছোট করো' },

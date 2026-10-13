@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How to predict JavaScript output with promises, timers and async/await</title>
+<meta name="description" content="A step-by-step method for &quot;what does this code log?&quot; questions: the call stack, the microtask queue, task queues, and where await actually pauses.">
+<meta name="robots" content="noindex, follow">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0B1020">
+<link rel="icon" href="../../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../blog/blog.css">
+<script>try{var t=JSON.parse(localStorage.getItem('ipbd:state')).preferences.theme;if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script src="../../blog/blog.js" defer></script>
+</head>
+<body class="blog">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-head"><div class="site-head__in"><a class="site-brand" href="../../"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" class="mark-tile"/><g transform="translate(0 -.6)" class="mark-ink"><path d="M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="24.6" r="1.85"/><rect x="18" y="23.2" width="7.4" height="2.9" rx=".7"/></g></svg><span>Interview Prep BD</span></a><nav aria-label="Site"><ul class="site-nav"><li><a href="../../blog/">Blog</a></li><li><a href="../../#/technologies">Technologies</a></li><li><a class="site-nav__cta" href="../../#/practice">Start practising</a></li></ul></nav></div></header>
+<main id="main" tabindex="-1">
+<div class="article-wrap"><nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">Home</a></li><li><a href="../../blog/">Blog</a></li><li><span aria-current="page">How to predict JavaScript output with promises, timers and async/await</span></li></ol></nav><article class="post" lang="en"><header class="post-head"><p class="post-meta"><span class="post-cat">JavaScript</span></p><h1>How to predict JavaScript output with promises, timers and async/await</h1><p class="post-lead">A step-by-step method for &quot;what does this code log?&quot; questions: the call stack, the microtask queue, task queues, and where await actually pauses.</p><p class="post-meta">By Interview Prep BD · <time datetime="2026-10-13">13 October 2026</time> · 7 min read</p></header><nav class="toc" aria-labelledby="toc-h"><h2 id="toc-h" class="toc__title">On this page</h2><ol><li><a href="#the-model-one-stack-one-microtask-queue-task-queues">The model: one stack, one microtask queue, task queues</a></li><li><a href="#a-first-example">A first example</a></li><li><a href="#where-await-actually-pauses">Where await actually pauses</a></li><li><a href="#microtasks-queued-by-microtasks">Microtasks queued by microtasks</a></li><li><a href="#microtasks-run-between-tasks-too">Microtasks run between tasks too</a></li><li><a href="#node-js-process-nexttick-and-module-type">Node.js: process.nextTick and module type</a></li><li><a href="#sequential-versus-parallel-await">Sequential versus parallel await</a></li><li><a href="#mistakes-that-lose-marks">Mistakes that lose marks</a></li><li><a href="#practise-the-procedure">Practise the procedure</a></li></ol></nav><div class="prose post-body"><p>Output-prediction questions give you a few lines of code that mix <code>console.log</code>, <code>setTimeout</code>, promises and <code>async</code> functions, and ask for the exact order of the logs. They are short, but they test whether you have an accurate model of how JavaScript schedules work. This article gives you that model as a procedure you can apply line by line, then works through the cases that catch people out.</p>
+<p>It is written for developers who already use promises and <code>async/await</code> day to day but tend to guess when the order matters. Every output shown here was run on Node.js, and the browser behaves the same way for these examples unless a section says otherwise.</p>
+<h2 id="the-model-one-stack-one-microtask-queue-task-queues">The model: one stack, one microtask queue, task queues</h2>
+<p>JavaScript runs your code on a single thread with a <strong>call stack</strong>. Asynchronous work does not interrupt the stack. Instead, callbacks wait in queues until the stack is empty:</p>
+<ul><li><strong>Microtasks</strong> come from promise reactions (<code>.then</code>, <code>.catch</code>, <code>.finally</code>), the continuation after an <code>await</code>, and <code>queueMicrotask()</code>.</li><li><strong>Tasks</strong> (also called macrotasks) come from timers (<code>setTimeout</code>, <code>setInterval</code>), I/O, UI events and similar sources.</li></ul>
+<p>The rule that answers most questions is this: <strong>when the call stack empties, the engine runs every queued microtask, including microtasks queued by other microtasks, before it takes the next task.</strong> One task, then all microtasks, then the next task, and so on.</p>
+<p>So the procedure is:</p>
+<ol><li>Run the synchronous code top to bottom. Log anything it logs immediately.</li><li>While doing that, note where each callback is queued: the microtask queue or a task queue.</li><li>When the synchronous code finishes, drain the microtask queue in order. New microtasks join the end of the same queue and run in this same drain.</li><li>Take the oldest ready task (for timers with the same delay, that is the order they were scheduled), run it, then drain microtasks again.</li></ol>
+<h2 id="a-first-example">A first example</h2>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code>console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;A&#x27;</span>);
+<span class="tok-fn">setTimeout</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;B&#x27;</span>), <span class="tok-num">0</span>);
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;C&#x27;</span>));
+<span class="tok-fn">queueMicrotask</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;D&#x27;</span>));
+console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;E&#x27;</span>);</code></pre></figure>
+<p>Apply the procedure. The synchronous pass logs <code>A</code> and <code>E</code>. Along the way it queues a timer task (<code>B</code>) and two microtasks (<code>C</code>, then <code>D</code>). When the stack empties, the microtasks run in order, and only then the timer:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">text</span></figcaption><pre tabindex="0"><code>A
+E
+C
+D
+B</code></pre></figure>
+<p>A delay of <code>0</code> does not mean &quot;now&quot;. It means &quot;as a task, no earlier than 0 ms from now&quot;, which always puts it behind every microtask that is already queued.</p>
+<h2 id="where-await-actually-pauses">Where <code>await</code> actually pauses</h2>
+<p>An <code>async</code> function runs <strong>synchronously until its first <code>await</code></strong>. Everything after the <code>await</code> becomes a microtask continuation. People often get this wrong in both directions: they assume the whole function is deferred, or they assume nothing is.</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code><span class="tok-kw">async</span> <span class="tok-kw">function</span> <span class="tok-fn">load</span>() {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;1: load starts&#x27;</span>);
+  <span class="tok-kw">await</span> <span class="tok-kw">null</span>;
+  console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;4: after await&#x27;</span>);
+}
+console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;0: script start&#x27;</span>);
+<span class="tok-fn">load</span>();
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;5: then callback&#x27;</span>));
+console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;2: script continues&#x27;</span>);
+<span class="tok-fn">setTimeout</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;6: timeout&#x27;</span>), <span class="tok-num">0</span>);
+console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;3: script end&#x27;</span>);</code></pre></figure>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">text</span></figcaption><pre tabindex="0"><code>0: script start
+1: load starts
+2: script continues
+3: script end
+4: after await
+5: then callback
+6: timeout</code></pre></figure>
+<p><code>load()</code> logs line 1 immediately, because no <code>await</code> has happened yet. The <code>await null</code> queues the rest of <code>load</code> as a microtask <em>before</em> the <code>.then</code> callback is queued, so line 4 comes before line 5. The timeout is a task, so it is last.</p>
+<p>Awaiting a value that is not a promise still yields. <code>await null</code> and <code>await 42</code> both suspend the function and resume it from the microtask queue.</p>
+<h2 id="microtasks-queued-by-microtasks">Microtasks queued by microtasks</h2>
+<p>Because the queue is drained completely, a microtask that schedules another microtask still runs before any timer, but it joins the <em>end</em> of the queue:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code><span class="tok-fn">setTimeout</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;timeout 1&#x27;</span>), <span class="tok-num">0</span>);
+<span class="tok-fn">setTimeout</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;timeout 2&#x27;</span>), <span class="tok-num">0</span>);
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;micro 1&#x27;</span>);
+  Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;micro 1.1&#x27;</span>));
+});
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;micro 2&#x27;</span>));</code></pre></figure>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">text</span></figcaption><pre tabindex="0"><code>micro 1
+micro 2
+micro 1.1
+timeout 1
+timeout 2</code></pre></figure>
+<p><code>micro 1.1</code> is queued while <code>micro 1</code> runs, so it waits behind <code>micro 2</code>, which was already queued. Both timers wait until the queue is empty.</p>
+<p>This is also why a loop that keeps queueing microtasks can freeze a page: the browser never gets back to tasks such as rendering or input, because the microtask queue never empties. Splitting long work into tasks (or using a worker) is the fix, and it comes up in <a href="../../#/q/js-034">question js-034</a>.</p>
+<h2 id="microtasks-run-between-tasks-too">Microtasks run between tasks too</h2>
+<p>The drain does not only happen after the main script. It happens after <strong>every</strong> task:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code><span class="tok-fn">setTimeout</span>(() =&gt; {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;timeout 1&#x27;</span>);
+  Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;micro inside timeout 1&#x27;</span>));
+}, <span class="tok-num">0</span>);
+<span class="tok-fn">setTimeout</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;timeout 2&#x27;</span>), <span class="tok-num">0</span>);</code></pre></figure>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">text</span></figcaption><pre tabindex="0"><code>timeout 1
+micro inside timeout 1
+timeout 2</code></pre></figure>
+<p>The promise callback queued inside the first timer runs before the second timer, even though both timers were ready at the same moment.</p>
+<h2 id="node-js-process-nexttick-and-module-type">Node.js: <code>process.nextTick</code> and module type</h2>
+<p>Node adds <code>process.nextTick()</code>, which has its own queue. In a CommonJS script, the next-tick queue is processed before promise microtasks:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code>Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;promise&#x27;</span>));
+process.<span class="tok-fn">nextTick</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;nextTick&#x27;</span>));
+console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;sync&#x27;</span>);</code></pre></figure>
+<p>Run as a CommonJS file (<code>.cjs</code>), this prints <code>sync</code>, <code>nextTick</code>, <code>promise</code>. Run the same lines as an ES module (<code>.mjs</code>) and it prints <code>sync</code>, <code>promise</code>, <code>nextTick</code>, because an ES module&#x27;s top-level code is itself evaluated asynchronously and the promise queue is drained first. If an interview question uses <code>nextTick</code>, it is worth saying which module system you are assuming. The Node.js guide to <a href="https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick" rel="noopener">the event loop, timers and nextTick</a> describes the phases in detail.</p>
+<h2 id="sequential-versus-parallel-await">Sequential versus parallel <code>await</code></h2>
+<p>Ordering questions often turn into performance questions. These two functions wait for the same two 100 ms timers:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">js</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">wait</span>(ms) { <span class="tok-kw">return</span> <span class="tok-kw">new</span> <span class="tok-fn">Promise</span>((r) =&gt; <span class="tok-fn">setTimeout</span>(r, ms)); }
+
+<span class="tok-kw">async</span> <span class="tok-kw">function</span> <span class="tok-fn">sequential</span>() {
+  <span class="tok-kw">await</span> <span class="tok-fn">wait</span>(<span class="tok-num">100</span>);
+  <span class="tok-kw">await</span> <span class="tok-fn">wait</span>(<span class="tok-num">100</span>); <span class="tok-com">// starts only after the first finishes: about 200 ms in total</span>
+}
+
+<span class="tok-kw">async</span> <span class="tok-kw">function</span> <span class="tok-fn">parallel</span>() {
+  <span class="tok-kw">await</span> Promise.<span class="tok-fn">all</span>([<span class="tok-fn">wait</span>(<span class="tok-num">100</span>), <span class="tok-fn">wait</span>(<span class="tok-num">100</span>)]); <span class="tok-com">// both timers run together: about 100 ms</span>
+}</code></pre></figure>
+<p><code>sequential</code> takes about 200 ms because the second timer is not even created until the first <code>await</code> resumes. <code>parallel</code> starts both before awaiting, so it takes about 100 ms. When the operations are independent, start them first and await them together. When one needs the result of the other, sequential is correct and the extra time is the cost of the dependency.</p>
+<h2 id="mistakes-that-lose-marks">Mistakes that lose marks</h2>
+<ul><li><strong>Treating <code>setTimeout(fn, 0)</code> as immediate.</strong> It is a task, so every microtask queued before it runs first.</li><li><strong>Assuming an <code>async</code> function is deferred as a whole.</strong> The code before the first <code>await</code> runs synchronously, inside the caller&#x27;s turn.</li><li><strong>Forgetting that new microtasks go to the end of the queue.</strong> They run in the same drain, but after microtasks that were already waiting.</li><li><strong>Explaining with &quot;promises are faster than timers&quot;.</strong> The real answer is about queues: microtasks are drained before the next task is taken. Interviewers usually want the mechanism, not a rule of thumb.</li><li><strong>Mixing up <code>try/catch</code> and un-awaited promises.</strong> A <code>try</code> block only catches a rejection if the promise is awaited inside it. <a href="../../#/q/js-023">Question js-023</a> is a compact example.</li></ul>
+<h2 id="practise-the-procedure">Practise the procedure</h2>
+<p>The fastest way to make this automatic is to write the order down before you run anything, then check. The practice bank has graded versions of exactly these patterns:</p>
+<ul><li><a href="../../#/q/js-016">js-016</a>: the call stack, microtask queue and task queue in one small program.</li><li><a href="../../#/q/js-017">js-017</a>: log order with <code>async</code> functions and <code>await</code>.</li><li><a href="../../#/q/js-029">js-029</a>: a harder mix of timers, promise chains and nested microtasks.</li><li><a href="../../#/q/js-024">js-024</a>: a debugging question where <code>forEach</code> with an <code>async</code> callback does not wait.</li></ul>
+<p>For the specification-level view, MDN&#x27;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide" rel="noopener">guide to microtasks</a> and the HTML Standard&#x27;s <a href="https://html.spec.whatwg.org/multipage/webappapis.html#event-loops" rel="noopener">event loop processing model</a> are the primary references.</p></div><footer class="post-foot"><h2 class="sr-only">Tags</h2><ul class="post-tags"><li>event loop</li><li>promises</li><li>async/await</li><li>microtasks</li><li>output prediction</li></ul></footer></article><aside class="practice" aria-labelledby="practice-h"><h2 id="practice-h">Practise this topic</h2><p>Answer real interview questions in English and Bangla, then check yourself against the reference answers. Progress stays in your browser.</p><ul class="tech-links"><li><a href="../../#/questions?tech=javascript"><svg class="tech-mark" viewBox="0 0 24 24" width="18.0" height="18" aria-hidden="true" focusable="false" style="--mark-d:#F7DF1E;--mark-l:#A19114;"><path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" fill="currentColor"/></svg><span>JavaScript</span></a></li><li><a href="../../#/questions?tech=nodejs"><svg class="tech-mark" viewBox="0 0 24 24" width="18.0" height="18" aria-hidden="true" focusable="false" style="--mark-d:#5FA04E;--mark-l:#5FA04E;"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z" fill="currentColor"/></svg><span>Node.js</span></a></li></ul></aside><section class="related" aria-labelledby="related-h"><h2 id="related-h">Related articles</h2><ul class="post-list"><li class="post-item"><p class="post-meta"><span class="post-cat">Backend Development</span> · <time datetime="2026-10-13">13 October 2026</time> · 6 min read</p><h3 class="post-item__title"><a href="../../blog/express-5-error-handling/">Error handling in Express 5: async routes, error middleware and 404s</a></h3><p class="post-item__desc">How Express 5 forwards errors from async route handlers, how to write one error handler for a REST API, and the gaps Express still cannot catch for you.</p></li></ul></section><p class="back"><a href="../../blog/">← All articles</a></p></div>
+</main>
+<footer class="site-foot"><div class="site-foot__in"><a class="site-brand" href="../../"><svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" class="mark-tile"/><g transform="translate(0 -.6)" class="mark-ink"><path d="M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="24.6" r="1.85"/><rect x="18" y="23.2" width="7.4" height="2.9" rx=".7"/></g></svg><span>Interview Prep BD</span></a><p>Bilingual technical interview practice for developers in Bangladesh and beyond. Free, offline, no account.</p><ul class="site-foot__links"><li><a href="../../blog/">Blog</a></li><li><a href="../../#/questions">All questions</a></li><li><a href="../../#/sources">Versions &amp; sources</a></li></ul></div></footer>
+</body>
+</html>

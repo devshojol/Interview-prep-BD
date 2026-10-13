@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>React useEffect explained: dependencies, stale closures and cleanup</title>
+<meta name="description" content="Why effects run when they do, why an interval keeps reading an old value, why StrictMode runs effects twice, and when you should not use an effect at all.">
+<meta name="robots" content="noindex, follow">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0B1020">
+<link rel="icon" href="../../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../blog/blog.css">
+<script>try{var t=JSON.parse(localStorage.getItem('ipbd:state')).preferences.theme;if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script src="../../blog/blog.js" defer></script>
+</head>
+<body class="blog">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-head"><div class="site-head__in"><a class="site-brand" href="../../"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" class="mark-tile"/><g transform="translate(0 -.6)" class="mark-ink"><path d="M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="24.6" r="1.85"/><rect x="18" y="23.2" width="7.4" height="2.9" rx=".7"/></g></svg><span>Interview Prep BD</span></a><nav aria-label="Site"><ul class="site-nav"><li><a href="../../blog/">Blog</a></li><li><a href="../../#/technologies">Technologies</a></li><li><a class="site-nav__cta" href="../../#/practice">Start practising</a></li></ul></nav></div></header>
+<main id="main" tabindex="-1">
+<div class="article-wrap"><nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">Home</a></li><li><a href="../../blog/">Blog</a></li><li><span aria-current="page">React useEffect explained: dependencies, stale closures and cleanup</span></li></ol></nav><article class="post" lang="en"><header class="post-head"><p class="post-meta"><span class="post-cat">React</span></p><h1>React useEffect explained: dependencies, stale closures and cleanup</h1><p class="post-lead">Why effects run when they do, why an interval keeps reading an old value, why StrictMode runs effects twice, and when you should not use an effect at all.</p><p class="post-meta">By Interview Prep BD · <time datetime="2026-10-13">13 October 2026</time> · 8 min read</p></header><nav class="toc" aria-labelledby="toc-h"><h2 id="toc-h" class="toc__title">On this page</h2><ol><li><a href="#an-effect-belongs-to-a-render">An effect belongs to a render</a></li><li><a href="#the-stale-closure">The stale closure</a></li><li><a href="#infinite-loops-from-object-dependencies">Infinite loops from object dependencies</a></li><li><a href="#cleanup-and-race-conditions">Cleanup and race conditions</a></li><li><a href="#why-effects-run-twice-in-development">Why effects run twice in development</a></li><li><a href="#reading-the-latest-value-without-re-running-useeffectevent">Reading the latest value without re-running: useEffectEvent</a></li><li><a href="#when-you-do-not-need-an-effect">When you do not need an effect</a></li><li><a href="#what-to-say-in-an-interview">What to say in an interview</a></li></ol></nav><div class="prose post-body"><p><code>useEffect</code> questions show up in React interviews in a few predictable shapes: &quot;what does this timer log?&quot;, &quot;why does this component fetch in an infinite loop?&quot;, &quot;why does my effect run twice in development?&quot;. All of them come from the same three ideas: an effect is a function created during a render, the dependency array decides when React re-runs it, and cleanup undoes the previous run.</p>
+<p>This article explains those ideas and walks through the common bugs. It assumes you have used hooks before. Every example was run on React 19.3, and the logs and screen values shown are the real output.</p>
+<h2 id="an-effect-belongs-to-a-render">An effect belongs to a render</h2>
+<p>Each render of a component is a separate call of your function, with its own props, state and local variables. An effect created during a render <strong>captures that render&#x27;s values</strong>, exactly like any other closure in JavaScript.</p>
+<p>React runs the effect after the render has been committed to the screen. On later renders, it compares each value in the dependency array with its value from the previous render using <code>Object.is</code>. If any value changed, React runs the previous effect&#x27;s cleanup and then the new effect. If none changed, it keeps the old effect, including the old values that effect captured.</p>
+<ul><li>No array: the effect runs after every render.</li><li><code>[]</code>: the effect runs after the first render only, and its cleanup runs on unmount.</li><li><code>[a, b]</code>: the effect runs after the first render and whenever <code>a</code> or <code>b</code> changes.</li></ul>
+<p>The dependency array is not a list of &quot;when to run&quot; triggers you pick freely. It should list every reactive value the effect reads. The React lint rule <code>react-hooks/exhaustive-deps</code> checks this, and the rest of this article shows what happens when the array lies.</p>
+<h2 id="the-stale-closure">The stale closure</h2>
+<p>This timer is meant to count up once per second (100 ms here, to make it quick to test):</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">Timer</span>() {
+  <span class="tok-kw">const</span> [count, setCount] = <span class="tok-fn">useState</span>(<span class="tok-num">0</span>);
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-kw">const</span> id = <span class="tok-fn">setInterval</span>(() =&gt; {
+      console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;tick&#x27;</span>, count);
+      <span class="tok-fn">setCount</span>(count + <span class="tok-num">1</span>);
+    }, <span class="tok-num">100</span>);
+    <span class="tok-kw">return</span> () =&gt; <span class="tok-fn">clearInterval</span>(id);
+  }, []);
+
+  <span class="tok-kw">return</span> &lt;p&gt;{count}&lt;/p&gt;;
+}</code></pre></figure>
+<p>After 350 ms it has logged <code>tick 0</code> three times, and the screen shows <strong>1</strong> and never changes.</p>
+<p>The empty array means the effect runs once, after the first render, where <code>count</code> is <code>0</code>. The interval callback closes over that <code>count</code>, so every tick computes <code>0 + 1</code> and sets <code>1</code> again. The component does re-render with <code>count</code> equal to <code>1</code>, but that render&#x27;s values never reach the interval, because the effect was not re-run.</p>
+<p>There are two honest fixes:</p>
+<ul><li><strong>Do not read the state at all.</strong> A functional update receives the current value from React: <code>setCount((c) =&gt; c + 1)</code>. With that change, the same component shows <code>3</code> after 350 ms, and the empty dependency array is now truthful because the effect no longer reads <code>count</code>.</li><li><strong>Declare the dependency.</strong> <code>[count]</code> makes React clear and recreate the interval on every change. It is correct but does more work, and for timers it can drift.</li></ul>
+<p>Adding <code>count</code> to the array while silencing the lint warning, or keeping <code>[]</code> and reading <code>count</code>, are the two ways of getting this wrong. <a href="../../#/q/react-012">Question react-012</a> is this exact bug.</p>
+<h2 id="infinite-loops-from-object-dependencies">Infinite loops from object dependencies</h2>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">Products</span>({ category }) {
+  <span class="tok-kw">const</span> [products, setProducts] = <span class="tok-fn">useState</span>([]);
+  <span class="tok-kw">const</span> filters = { category, sort: <span class="tok-str">&#x27;newest&#x27;</span> };
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-fn">fetchProducts</span>(filters).<span class="tok-fn">then</span>(setProducts);
+  }, [filters]);
+  <span class="tok-com">// ...</span>
+}</code></pre></figure>
+<p><code>filters</code> is a <strong>new object on every render</strong>, and <code>Object.is</code> compares objects by identity, so the dependency always &quot;changes&quot;. The effect runs after every render. Each fetch calls <code>setProducts</code> with a new array, which causes another render, which creates another <code>filters</code> object, and the cycle continues. In testing, an effect depending on an inline object ran on every one of three renders even though nothing meaningful changed.</p>
+<p>Depend on the primitive values instead, and build the object inside the effect:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-fn">useEffect</span>(() =&gt; {
+  <span class="tok-fn">fetchProducts</span>({ category, sort: <span class="tok-str">&#x27;newest&#x27;</span> }).<span class="tok-fn">then</span>(setProducts);
+}, [category]);</code></pre></figure>
+<p>If an object or function genuinely has to be shared, <code>useMemo</code> or <code>useCallback</code> can keep its identity stable. Moving it inside the effect is usually simpler. <a href="../../#/q/react-018">Question react-018</a> shows the production symptoms of this bug: hundreds of requests per second and a sluggish tab.</p>
+<h2 id="cleanup-and-race-conditions">Cleanup and race conditions</h2>
+<p>Cleanup runs before the effect re-runs and when the component unmounts. Its job is to undo whatever the effect started: clear timers, remove listeners, close connections, and ignore responses that are no longer wanted.</p>
+<p>Data fetching needs that last one. If the user types <code>re</code> and then <code>react</code>, two requests are in flight, and the slower one can arrive last:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">Search</span>({ query }) {
+  <span class="tok-kw">const</span> [results, setResults] = <span class="tok-fn">useState</span>(<span class="tok-kw">null</span>);
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-kw">let</span> ignore = <span class="tok-kw">false</span>;
+    <span class="tok-fn">searchApi</span>(query).<span class="tok-fn">then</span>((data) =&gt; {
+      <span class="tok-kw">if</span> (!ignore) <span class="tok-fn">setResults</span>(data);
+    });
+    <span class="tok-kw">return</span> () =&gt; {
+      ignore = <span class="tok-kw">true</span>;
+    };
+  }, [query]);
+  <span class="tok-com">// ...</span>
+}</code></pre></figure>
+<p>When <code>query</code> changes, the cleanup of the previous run sets its <code>ignore</code> flag, so a late response for <code>re</code> is dropped. In a test where the <code>re</code> request took 200 ms and the <code>react</code> request 50 ms, the screen correctly ended on the results for <code>react</code>. Passing an <code>AbortController</code> signal to <code>fetch</code> and calling <code>abort()</code> in the cleanup also cancels the network request itself.</p>
+<p>In real applications, a data-fetching library or your framework&#x27;s data APIs usually handle caching and races for you. Knowing this pattern still matters, because it is what those tools do underneath.</p>
+<h2 id="why-effects-run-twice-in-development">Why effects run twice in development</h2>
+<p>With <code>&lt;StrictMode&gt;</code>, React runs an extra <strong>setup, cleanup, setup</strong> cycle when a component first mounts in development. For this component:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">ChatRoom</span>({ roomId }) {
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;connect&#x27;</span>, roomId);
+    <span class="tok-kw">return</span> () =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">&#x27;disconnect&#x27;</span>, roomId);
+  }, [roomId]);
+  <span class="tok-kw">return</span> <span class="tok-kw">null</span>;
+}</code></pre></figure>
+<p>the first mount logs <code>connect general</code>, <code>disconnect general</code>, <code>connect general</code>. Changing the room afterwards logs only <code>disconnect general</code>, <code>connect jobs</code>. In a production build, the first mount logs <code>connect general</code> once.</p>
+<p>This is deliberate. It simulates the component being unmounted and remounted, so an effect with a missing or broken cleanup shows its bug immediately instead of in production. The fix is never to &quot;prevent&quot; the second run with a ref. It is to make the cleanup undo the setup, so that running setup, cleanup, setup behaves like setup once. <a href="../../#/q/react-013">Question react-013</a> asks for these exact logs.</p>
+<h2 id="reading-the-latest-value-without-re-running-useeffectevent">Reading the latest value without re-running: useEffectEvent</h2>
+<p>Sometimes an effect needs a value it should <strong>not</strong> react to. For example, you want to reconnect when the room changes, but showing a notification in the current theme should not cause a reconnect when the theme changes. React 19.2 added <code>useEffectEvent</code> for this:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-kw">function</span> <span class="tok-fn">ChatRoom</span>({ roomId, theme }) {
+  <span class="tok-kw">const</span> onConnected = <span class="tok-fn">useEffectEvent</span>(() =&gt; {
+    <span class="tok-fn">showNotification</span>(<span class="tok-str">`Connected to ${roomId}`</span>, theme);
+  });
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-kw">const</span> connection = <span class="tok-fn">connect</span>(roomId);
+    connection.<span class="tok-fn">on</span>(<span class="tok-str">&#x27;connected&#x27;</span>, () =&gt; <span class="tok-fn">onConnected</span>());
+    <span class="tok-kw">return</span> () =&gt; connection.<span class="tok-fn">disconnect</span>();
+  }, [roomId]);
+  <span class="tok-com">// ...</span>
+}</code></pre></figure>
+<p>The function returned by <code>useEffectEvent</code> always sees the latest props and state, and it is not a dependency. In testing, changing only <code>theme</code> did not re-run the effect, and the next time the room changed, the event read the new theme. Effect Events are meant to be called from inside effects only. They are not a general way to silence the dependency linter. <a href="../../#/q/react-027">Question react-027</a> covers <code>useEffectEvent</code> together with <code>&lt;Activity&gt;</code>.</p>
+<h2 id="when-you-do-not-need-an-effect">When you do not need an effect</h2>
+<p>Many effects in interview code should not exist. An effect synchronises a component with something <strong>outside React</strong>: a network request, a subscription, a timer, a browser API. If you are only computing a value from props or state, compute it during render:</p>
+<figure class="code"><figcaption class="code__bar"><span class="code__lang">jsx</span></figcaption><pre tabindex="0"><code><span class="tok-com">// Unnecessary: an extra render, and a moment where fullName is stale</span>
+<span class="tok-kw">const</span> [fullName, setFullName] = <span class="tok-fn">useState</span>(<span class="tok-str">&#x27;&#x27;</span>);
+<span class="tok-fn">useEffect</span>(() =&gt; {
+  <span class="tok-fn">setFullName</span>(<span class="tok-str">`${firstName} ${lastName}`</span>);
+}, [firstName, lastName]);
+
+<span class="tok-com">// Better: derived during render</span>
+<span class="tok-kw">const</span> fullName = <span class="tok-str">`${firstName} ${lastName}`</span>;</code></pre></figure>
+<p>Likewise, code that responds to a specific user action (submitting a form, clicking &quot;buy&quot;) belongs in the event handler, not in an effect that watches state. React&#x27;s guide <a href="https://react.dev/learn/you-might-not-need-an-effect" rel="noopener">You Might Not Need an Effect</a> has many more cases.</p>
+<h2 id="what-to-say-in-an-interview">What to say in an interview</h2>
+<p>When you are asked to explain or fix an effect, these points cover most questions:</p>
+<ol><li>Each render has its own values, and an effect captures the values of the render that created it.</li><li>The dependency array must list every reactive value the effect reads. React compares them with <code>Object.is</code>.</li><li>Stale values come from dependencies that are missing. The fix is a functional update, a correct dependency, or <code>useEffectEvent</code>, not a disabled lint rule.</li><li>New objects and functions created during render change on every render, so depending on them re-runs the effect every time.</li><li>Cleanup undoes the setup. StrictMode&#x27;s extra mount cycle in development exists to prove that it does.</li><li>If nothing outside React is involved, you probably do not need an effect.</li></ol>
+<p>The React reference for <a href="https://react.dev/reference/react/useEffect" rel="noopener">useEffect</a> and the guides on <a href="https://react.dev/learn/synchronizing-with-effects" rel="noopener">synchronizing with effects</a> and <a href="https://react.dev/learn/separating-events-from-effects" rel="noopener">separating events from effects</a> go deeper. To practise, the <a href="../../#/questions?tech=react">React question set</a> includes graded output, debugging and design questions on hooks, and the <a href="../../#/questions?tech=nextjs">Next.js set</a> covers how these rules interact with Server and Client Components.</p></div><footer class="post-foot"><h2 class="sr-only">Tags</h2><ul class="post-tags"><li>react</li><li>useEffect</li><li>hooks</li><li>stale closures</li><li>useEffectEvent</li></ul></footer></article><aside class="practice" aria-labelledby="practice-h"><h2 id="practice-h">Practise this topic</h2><p>Answer real interview questions in English and Bangla, then check yourself against the reference answers. Progress stays in your browser.</p><ul class="tech-links"><li><a href="../../#/questions?tech=react"><svg class="tech-mark" viewBox="0 0 24 24" width="18.0" height="18" aria-hidden="true" focusable="false" style="--mark-d:#61DAFB;--mark-l:#4499B0;"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z" fill="currentColor"/></svg><span>React</span></a></li><li><a href="../../#/questions?tech=nextjs"><svg class="tech-mark" viewBox="0 0 24 24" width="18.0" height="18" aria-hidden="true" focusable="false"><path d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z" fill="currentColor"/></svg><span>Next.js</span></a></li></ul></aside><section class="related" aria-labelledby="related-h"><h2 id="related-h">Related articles</h2><ul class="post-list"><li class="post-item"><p class="post-meta"><span class="post-cat">Databases and SQL</span> · <time datetime="2026-10-13">13 October 2026</time> · 7 min read</p><h3 class="post-item__title"><a href="../../blog/sql-joins-where-having-null/">SQL JOIN and GROUP BY traps: WHERE vs HAVING, LEFT JOIN filters and NULL</a></h3><p class="post-item__desc">Four SQL mistakes that quietly return wrong numbers, shown on one small dataset with the exact result of each query and the fix.</p></li><li class="post-item"><p class="post-meta"><span class="post-cat">Technical Interview Preparation</span> · <time datetime="2026-10-13">13 October 2026</time> · 7 min read</p><h3 class="post-item__title"><a href="../../blog/practise-technical-interview-answers/">How to practise technical interview questions: answer aloud, grade honestly, review on a schedule</a></h3><p class="post-item__desc">A practice routine for technical interviews that builds recall rather than recognition, with a rubric for grading your own answers and a simple spaced-review schedule.</p></li></ul></section><p class="back"><a href="../../blog/">← All articles</a></p></div>
+</main>
+<footer class="site-foot"><div class="site-foot__in"><a class="site-brand" href="../../"><svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" class="mark-tile"/><g transform="translate(0 -.6)" class="mark-ink"><path d="M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="24.6" r="1.85"/><rect x="18" y="23.2" width="7.4" height="2.9" rx=".7"/></g></svg><span>Interview Prep BD</span></a><p>Bilingual technical interview practice for developers in Bangladesh and beyond. Free, offline, no account.</p><ul class="site-foot__links"><li><a href="../../blog/">Blog</a></li><li><a href="../../#/questions">All questions</a></li><li><a href="../../#/sources">Versions &amp; sources</a></li></ul></div></footer>
+</body>
+</html>

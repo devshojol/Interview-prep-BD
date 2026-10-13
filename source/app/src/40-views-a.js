@@ -24,7 +24,7 @@
     { group: 'navLearn', items: [['dashboard', 'dashboard', 'nav_dashboard'], ['technologies', 'layers', 'nav_technologies'], ['questions', 'list', 'nav_questions'], ['flashcards', 'cards', 'nav_flashcards'], ['daily', 'zap', 'nav_daily']] },
     { group: 'navPractice', items: [['practice', 'play', 'nav_practice'], ['interview', 'mic', 'nav_interview']] },
     { group: 'navProgress', items: [['bookmarks', 'bookmark', 'nav_bookmarks'], ['incorrect', 'xcircle', 'nav_incorrect'], ['review', 'rotate', 'nav_review'], ['history', 'clock', 'nav_history'], ['planner', 'calendar', 'nav_planner']] },
-    { group: 'navMore', items: [['sources', 'book', 'nav_sources'], ['settings', 'settings', 'nav_settings']] },
+    { group: 'navMore', items: [['blog', 'article', 'nav_blog'], ['sources', 'book', 'nav_sources'], ['settings', 'settings', 'nav_settings']] },
   ];
   function activeNav(route) {
     if (route.name === 'q') return 'questions';
@@ -47,7 +47,9 @@
       nav.append(h('div', { class: 'nav-group-label' }, t(g.group)));
       for (const [key, ic, label] of g.items) {
         const n = navBadge(key);
-        nav.append(h('a', { class: 'nav-link', href: '#/' + key, 'aria-current': cur === key ? 'page' : null, title: tLang(label, 'en') },
+        // The blog is static HTML beside the app, not a hash route; file:// has no directory index.
+        const href = key === 'blog' ? (location.protocol === 'file:' ? 'blog/index.html' : 'blog/') : '#/' + key;
+        nav.append(h('a', { class: 'nav-link', href, 'aria-current': cur === key ? 'page' : null, 'data-tip': t(label) + (n ? ' · ' + n : ''), 'data-tip-side': 'right', 'data-tip-collapsed': '' },
           icon(ic, 18),
           h('span', { class: 'nav-label' },
             h('span', { lang: L === 'bn' ? 'bn' : 'en', class: L === 'bn' ? 'bn' : null }, t(label)),
@@ -62,7 +64,7 @@
     for (const tc of TECHS) {
       const list = BY_TECH.get(tc.id);
       const st = statsFor(list);
-      techWrap.append(h('a', { class: 'tech-link', href: '#/questions?tech=' + tc.id, 'aria-current': curTech === tc.id ? 'page' : null, title: tc.name + ' — ' + list.length + ' ' + t('questionsWord') },
+      techWrap.append(h('a', { class: 'tech-link', href: '#/questions?tech=' + tc.id, 'aria-current': curTech === tc.id ? 'page' : null, 'data-tip': tc.name + ' · ' + list.length + ' ' + t('questionsWord') + ' · ' + Math.round(st.completion * 100) + '%', 'data-tip-side': 'right', 'data-tip-collapsed': '' },
         techLogo(tc, 'sm'),
         h('span', { class: 'tech-name' }, tc.name),
         h('span', { class: 'mini-progress', 'aria-hidden': 'true' }, h('i', { style: { width: Math.round(st.completion * 100) + '%' } }))));
@@ -79,13 +81,13 @@
     const act = $('#topbarActions');
     clear(act);
     act.append(
-      h('a', { class: 'icon-btn hide-sm', href: '#/questions', 'aria-label': t('searchQuestions'), title: t('searchQuestions') + ' (/)' }, icon('search', 18)),
+      h('a', { class: 'icon-btn hide-sm', href: '#/questions', 'aria-label': t('searchQuestions'), 'aria-keyshortcuts': '/', 'data-tip': t('searchQuestions'), 'data-tip-key': '/' }, icon('search', 18)),
       seg([
         { value: 'en', label: 'EN', lang: 'en' },
         { value: 'bn', label: 'বাংলা', lang: 'bn' },
         { value: 'both', label: lang() === 'bn' ? 'দুটোই' : 'Both' },
       ], lang(), setLang, t('language')),
-      h('button', { class: 'icon-btn', type: 'button', 'aria-label': state.preferences.theme === 'dark' ? t('lightTheme') : t('darkTheme'), title: state.preferences.theme === 'dark' ? t('lightTheme') : t('darkTheme'), onclick: () => setTheme(state.preferences.theme === 'dark' ? 'light' : 'dark') },
+      h('button', { class: 'icon-btn', type: 'button', 'aria-label': state.preferences.theme === 'dark' ? t('lightTheme') : t('darkTheme'), 'data-tip': state.preferences.theme === 'dark' ? t('lightTheme') : t('darkTheme'), onclick: () => setTheme(state.preferences.theme === 'dark' ? 'light' : 'dark') },
         icon(state.preferences.theme === 'dark' ? 'sun' : 'moon', 18)));
   }
 
@@ -100,7 +102,12 @@
     if (meta) meta.setAttribute('content', p.theme === 'dark' ? '#0B1020' : '#F5F6FB');
     $('#app').classList.toggle('is-collapsed', p.sidebarCollapsed && window.innerWidth > 860);
     const cb = $('#collapseBtn');
-    if (cb) { cb.setAttribute('aria-expanded', String(!p.sidebarCollapsed)); cb.setAttribute('aria-label', p.sidebarCollapsed ? t('expandSidebar') : t('collapseSidebar')); }
+    if (cb) {
+      const label = p.sidebarCollapsed ? t('expandSidebar') : t('collapseSidebar');
+      cb.setAttribute('aria-expanded', String(!p.sidebarCollapsed));
+      cb.setAttribute('aria-label', label);
+      cb.setAttribute('data-tip', label);
+    }
     const skip = $('.skip-link');
     if (skip) skip.textContent = t('skipToContent');
   }

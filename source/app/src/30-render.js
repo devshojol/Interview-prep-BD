@@ -274,7 +274,7 @@
   function techBadge(id) {
     const tc = TECH_MAP.get(id);
     if (!tc) return null;
-    return h('span', { class: 'badge' }, h('span', { 'aria-hidden': 'true', style: { width: '8px', height: '8px', borderRadius: '50%', background: tc.color, display: 'inline-block' } }), tc.name);
+    return h('span', { class: 'badge' }, techMark(tc.id, 12), tc.name);
   }
   function resultBadge(r) {
     if (!r) return h('span', { class: 'badge' }, t('res_none'));
@@ -286,9 +286,31 @@
     if (!s || s === 'stable') return h('span', { class: 'badge badge--ok' }, t('st_stable'));
     return h('span', { class: 'badge badge--warn' }, icon('alert', 12), I18N['st_' + s] ? t('st_' + s) : s);
   }
-  function techLogo(tc, size) {
-    return h('span', { class: size === 'sm' ? 'tech-dot' : 'tech-card__logo', style: { background: tc.color }, 'aria-hidden': 'true' }, tc.short);
+  /** Technology brand mark (decorative: callers always print the technology name next to it). */
+  function techMark(id, size) {
+    const ic = TECH_ICONS[id];
+    if (!ic) return null;
+    const vb = ic.viewBox.split(' ').map(Number);
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', ic.viewBox);
+    svg.setAttribute('height', size);
+    svg.setAttribute('width', Math.round(size * Math.min(vb[2] / vb[3], 1.8) * 10) / 10);
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    svg.setAttribute('class', 'tech-mark');
+    if (ic.dark) svg.style.setProperty('--mark-d', ic.dark);
+    if (ic.light) svg.style.setProperty('--mark-l', ic.light);
+    const p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', ic.d);
+    if (ic.stroke) { p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'currentColor'); p.setAttribute('stroke-width', '2'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); }
+    else p.setAttribute('fill', 'currentColor');
+    svg.appendChild(p);
+    return svg;
   }
+  function techLogo(tc, size) {
+    return h('span', { class: size === 'sm' ? 'tech-dot' : 'tech-card__logo', 'aria-hidden': 'true' }, techMark(tc.id, size === 'sm' ? 16 : 28));
+  }
+
   function progressBar(fraction, opts) {
     const o = opts || {};
     const v = clamp(fraction || 0, 0, 1);

@@ -40,7 +40,10 @@ const bank = (page) => page.evaluate(() => window.QBANK.map((q) => ({ id: q.id, 
   const answered = await page.locator('.stat', { hasText: 'Answered' }).first().locator('.stat__value').textContent();
   check('New user starts at zero progress', answered.trim() === '0');
   check('Getting-started state shown for new user', await page.locator('text=Getting started').isVisible());
-  const navHrefs = await page.$$eval('#nav a', (as) => as.map((a) => a.getAttribute('href')));
+  // In-app routes only; the Blog link leaves the app for the static blog (blog/index.html under file://).
+  const blogHref = await page.$$eval('#nav a', (as) => (as.find((a) => !a.getAttribute('href').startsWith('#/')) || {}).getAttribute?.('href'));
+  check('Sidebar Blog link points at the static blog', blogHref === 'blog/index.html', blogHref);
+  const navHrefs = await page.$$eval('#nav a', (as) => as.map((a) => a.getAttribute('href')).filter((h) => h.startsWith('#/')));
   let navOk = 0;
   for (const href of navHrefs) {
     await page.click(`#nav a[href="${href}"]`);

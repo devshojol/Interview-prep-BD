@@ -6,8 +6,15 @@
   <title>Interview Prep BD — Bilingual Tech Interview Platform</title>
   <meta name="description" content="Bilingual (English + বাংলা) technical interview preparation for developers in Bangladesh and international roles: 18 technologies, practice sessions, MCQs, scoring and progress tracking.">
   <meta name="color-scheme" content="dark light">
+  <!-- seo:start -->
+  <meta property="og:site_name" content="Interview Prep BD">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Interview Prep BD: bilingual technical interview practice">
+  <meta property="og:description" content="Bilingual (English + বাংলা) technical interview preparation for developers in Bangladesh and international roles: 18 technologies, practice sessions, MCQs, scoring and progress tracking.">
+  <!-- seo:end -->
   <meta name="theme-color" content="#0B1020">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238B7CFF'/%3E%3Cpath d='M20 22l-8 10 8 10M44 22l8 10-8 10M36 18l-8 28' stroke='%230B1020' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%238B7CFF'/%3E%3Cg transform='translate%280 -.6%29'%3E%3Cpath d='M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6' fill='none' stroke='%230B1020' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='12.2' cy='24.6' r='1.85' fill='%230B1020'/%3E%3Crect x='18' y='23.2' width='7.4' height='2.9' rx='.7' fill='%230B1020'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -19,23 +26,24 @@
   <div class="app" id="app">
     <aside class="sidebar" id="sidebar" aria-label="Primary">
       <div class="sidebar__brand">
-        <a href="#/dashboard" class="brand" aria-label="Interview Prep BD — dashboard">
+        <a href="#/dashboard" class="brand" aria-label="Interview Prep BD — dashboard" data-tip="Interview Prep BD" data-tip-side="right" data-tip-collapsed>
           <span class="brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 32 32" width="34" height="34"><g transform="translate(0 -.6)"><path d="M7.6 11.4a4.6 4.6 0 1 1 6.8 4c-1.4.8-2.2 1.6-2.2 3v.6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="24.6" r="1.85" fill="currentColor"/><rect x="18" y="23.2" width="7.4" height="2.9" rx=".7" fill="currentColor"/></g></svg>
           </span>
           <span class="brand__text">
             <strong>Interview Prep BD</strong>
             <small>EN · বাংলা</small>
           </span>
         </a>
-        <button class="icon-btn sidebar__collapse" id="collapseBtn" type="button" aria-label="Collapse sidebar" aria-expanded="true">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
       </div>
       <nav class="sidebar__nav" id="nav"></nav>
       <div class="sidebar__techs" id="sidebarTechs"></div>
       <div class="sidebar__foot" id="sidebarFoot"></div>
     </aside>
+    <!-- Edge handle: revealed on sidebar hover/focus (always on touch); shortcut [ -->
+    <button class="sidebar-toggle" id="collapseBtn" type="button" aria-controls="sidebar" aria-label="Collapse sidebar" aria-expanded="true" aria-keyshortcuts="[" data-tip="Collapse sidebar" data-tip-key="[" data-tip-side="right">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
     <div class="scrim" id="scrim" hidden></div>
 
     <div class="main-wrap">
