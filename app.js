@@ -224,6 +224,8 @@
     star: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
     database: 'M12 8c4.97 0 9-1.34 9-3s-4.03-3-9-3-9 1.34-9 3 4.03 3 9 3z M21 12c0 1.66-4 3-9 3s-9-1.34-9-3 M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5',
     stop: 'M6 6h12v12H6z',
+    speaker: 'M11 5 6 9H2v6h4l5 4V5z M15.54 8.46a5 5 0 0 1 0 7.07 M19.07 4.93a10 10 0 0 1 0 14.14',
+    speakerOff: 'M11 5 6 9H2v6h4l5 4V5z M22 9l-6 6 M16 9l6 6',
     article: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M7 8h10 M7 12h10 M7 16h6',
     keyboard: 'M20 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z M6 9h.01 M10 9h.01 M14 9h.01 M18 9h.01 M7 15h10',
   };
@@ -466,7 +468,7 @@
     return {
       version: STORAGE_VERSION,
       createdAt: Date.now(),
-      preferences: { lang: 'en', theme: 'dark', mode: 'learning', motion: 'system', fontScale: 1, sidebarCollapsed: false },
+      preferences: { lang: 'en', theme: 'dark', mode: 'learning', motion: 'system', fontScale: 1, sidebarCollapsed: false, voice: defaultVoicePrefs() },
       bookmarks: [],
       learnedQuestions: [],
       reviewQuestions: [],
@@ -486,6 +488,20 @@
 
   const strArr = (v) => (Array.isArray(v) ? Array.from(new Set(v.filter((x) => isStr(x) && x.length < 120))) : []);
 
+  function defaultVoicePrefs() {
+    return { rate: 1, en: '', auto: { interview: true, daily: true, practice: false, flashcards: false } };
+  }
+  function sanitizeVoicePrefs(v) {
+    const d = defaultVoicePrefs();
+    if (!isObj(v)) return d;
+    const a = isObj(v.auto) ? v.auto : {};
+    return {
+      rate: [0.85, 1, 1.15].includes(v.rate) ? v.rate : d.rate,
+      en: isStr(v.en) && v.en.length < 200 ? v.en : '',
+      auto: { interview: typeof a.interview === 'boolean' ? a.interview : d.auto.interview, daily: typeof a.daily === 'boolean' ? a.daily : d.auto.daily,
+        practice: a.practice === true, flashcards: a.flashcards === true },
+    };
+  }
   function sanitizePreferences(p) {
     const d = defaultState().preferences;
     if (!isObj(p)) return d;
@@ -496,6 +512,7 @@
       motion: ['system', 'reduce', 'full'].includes(p.motion) ? p.motion : d.motion,
       fontScale: [0.9, 1, 1.1, 1.2].includes(p.fontScale) ? p.fontScale : d.fontScale,
       sidebarCollapsed: p.sidebarCollapsed === true,
+      voice: sanitizeVoicePrefs(p.voice),
     };
   }
   function sanitizeProgressEntry(p) {
@@ -1288,6 +1305,241 @@
   }
 
   /* ======================================================================
+     Voice: an English "interviewer" reads questions aloud with the
+     browser's speech synthesis (Web Speech API). Voices come from the
+     operating system or browser. Bangla is not read aloud: the built-in
+     Bangla voices sound too robotic, so Bangla mode reads the English text.
+     ====================================================================== */
+  const VOICE_OK = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+  // Novelty and effect voices that ship with macOS; never offered or auto-picked.
+  const NOVELTY_VOICES = /^(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|pipe organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy)\b/i;
+  const voice = { list: [], speaking: false, key: null, listeners: new Set(), blocked: false };
+
+  function loadVoices() {
+    if (!VOICE_OK) return [];
+    voice.list = window.speechSynthesis.getVoices()
+      .filter((v) => !NOVELTY_VOICES.test(v.name) && (v.lang || '').toLowerCase().replace('_', '-').startsWith('en'))
+      .sort((a, b) => voiceScore(b) - voiceScore(a) || a.name.localeCompare(b.name));
+    return voice.list;
+  }
+  if (VOICE_OK) {
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      const before = voice.list.length;
+      loadVoices();
+      voiceNotify();
+      // The settings card lists voices; redraw it once the browser has loaded them.
+      if (before !== voice.list.length && currentRoute && currentRoute.name === 'settings') rerender();
+    });
+  }
+  // Rank voices so the most natural-sounding one is the default.
+  function voiceScore(v) {
+    const n = v.name.toLowerCase();
+    const l = (v.lang || '').toLowerCase();
+    let s = 0;
+    if (/natural|neural|online|premium|enhanced|siri/.test(n)) s += 50;
+    if (/google/.test(n)) s += 30;
+    if (/^(samantha|daniel|karen|moira|rishi|tessa|ava|zoe|evan|nathan|serena|aria|jenny|guy|sonia|ryan|libby|emma|andrew|brian)\b/.test(n)) s += 20;
+    if (/^(eddy|flo|reed|rocko|sandy|shelley|grandma|grandpa)\b/.test(n)) s -= 15; // older formant voices sound robotic
+    if (/en-(us|gb|in)/.test(l)) s += 5;
+    if (l === 'en-us') s += 1;
+    if (v.localService) s += 2;
+    return s;
+  }
+  function chosenVoice() {
+    const list = voice.list.length ? voice.list : loadVoices();
+    return list.find((v) => v.name === state.preferences.voice.en) || list[0] || null;
+  }
+
+  /* Turn markdown-ish question text into something that sounds right when read aloud. */
+  function cleanForSpeech(s) {
+    return String(s || '')
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/https?:\/\/\S+/g, ' ')
+      .replace(/<\/?([a-z][a-z0-9-]*)[^<>]*>/gi, ' $1 ') // `<header>` -> header
+      .replace(/\s*(→|->)\s*/g, ' to ').replace(/≥/g, ' at least ').replace(/≤/g, ' at most ')
+      .replace(/!==/g, ' not strictly equal ').replace(/===/g, ' strictly equals ').replace(/!=/g, ' not equal ').replace(/==/g, ' equals ')
+      .replace(/=>/g, ' arrow ').replace(/&&/g, ' and ').replace(/\|\|/g, ' or ')
+      .replace(/\(\)/g, '')
+      .replace(/[`*_#>]/g, '')
+      .replace(/^\s*[-•]\s+/gm, '')
+      .replace(/^\s*\d+\.\s+/gm, '')
+      .replace(/\s*\n+\s*/g, '. ')
+      .replace(/\.\s*\./g, '.')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([,.;:!?])/g, '$1')
+      .trim();
+  }
+  // Split long text into sentence-sized chunks: some browsers stop speaking long utterances.
+  function speechChunks(text) {
+    const parts = text.match(/[^.!?।]+[.!?।]*\s*/g) || [text];
+    const out = [];
+    let cur = '';
+    parts.forEach((p) => {
+      if ((cur + p).length > 220 && cur) { out.push(cur.trim()); cur = ''; }
+      cur += p;
+    });
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+
+  /* What the "interviewer" says for a question (always the English text). */
+  function questionSpeech(q, opts) {
+    const o = opts || {};
+    const parts = [];
+    if (o.intro) parts.push(o.intro);
+    parts.push(cleanForSpeech(q.question.en));
+    if ((q.code && q.code.source && (q.type === 'output' || q.type === 'debugging' || q.type === 'mcq')) || (q.setup && q.setup.source)) {
+      parts.push('Take a look at the code on your screen.');
+    }
+    if (q.isMCQ && o.options !== false) {
+      parts.push('Your options are:');
+      q.options.forEach((op, i) => parts.push('ABCD'[i] + '. ' + cleanForSpeech(op.en) + '.'));
+    }
+    return parts.join(' ');
+  }
+  function answerSpeech(q) {
+    const src = q.quickAnswer || q.answer;
+    let txt = cleanForSpeech(src.en);
+    if (!q.quickAnswer && txt.length > 600) txt = txt.slice(0, 600).replace(/[^.!?]*$/, '');
+    return txt;
+  }
+
+  /* Speak text with the chosen English voice. key identifies what is being read. */
+  function speak(text, key) {
+    if (!VOICE_OK || !text) return false;
+    const v = chosenVoice();
+    if (!v) return false;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const chunks = speechChunks(text);
+    voice.key = key || null;
+    voice.speaking = true;
+    voice.blocked = false;
+    voiceNotify();
+    const rate = state.preferences.voice.rate;
+    chunks.forEach((chunk, i) => {
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.voice = v;
+      u.lang = v.lang;
+      u.rate = rate;
+      u.pitch = 1;
+      if (i === chunks.length - 1) u.onend = () => { if (voice.key === (key || null)) { voice.speaking = false; voice.key = null; voiceNotify(); } };
+      u.onerror = (e) => {
+        if (e && e.error === 'not-allowed') voice.blocked = true; // autoplay policy: needs a click first
+        if (e && (e.error === 'interrupted' || e.error === 'canceled')) return;
+        voice.speaking = false; voice.key = null; voiceNotify();
+      };
+      synth.speak(u);
+    });
+    // Chrome can leave the queue paused after a tab switch; resume defensively.
+    if (synth.paused) synth.resume();
+    return true;
+  }
+  function stopSpeaking() {
+    if (!VOICE_OK) return;
+    window.speechSynthesis.cancel();
+    if (voice.speaking) { voice.speaking = false; voice.key = null; voiceNotify(); }
+  }
+  function speakQuestion(q, key, opts) { return speak(questionSpeech(q, opts), key); }
+  function speakAnswer(q, key) { return speak(answerSpeech(q), key); }
+  function toggleSpeak(key, start) {
+    if (voice.speaking && voice.key === key) { stopSpeaking(); return; }
+    start();
+  }
+  function voiceNotify() { voice.listeners.forEach((fn) => { try { fn(); } catch (e) { /* detached */ } }); }
+  function autoReadOn(where) { return VOICE_OK && !!state.preferences.voice.auto[where]; }
+
+  /* "Listen" pill: speaker icon, label, and animated bars while speaking. Updates itself. */
+  function speakButton(key, start, opts) {
+    const o = opts || {};
+    if (!VOICE_OK) return null;
+    const label = h('span', { class: 'speak-btn__label' });
+    const b = h('button', { type: 'button', class: 'speak-btn' + (o.compact ? ' speak-btn--compact' : ''), 'aria-keyshortcuts': o.shortcut === false ? null : 'V',
+      onclick: (e) => { e.stopPropagation(); toggleSpeak(key, start); } },
+    h('span', { class: 'speak-btn__icon', 'aria-hidden': 'true' }, icon('speaker', 16), h('span', { class: 'eq' }, h('i'), h('i'), h('i'), h('i'))),
+    label);
+    const sync = () => {
+      if (!b.isConnected && b._mounted) { voice.listeners.delete(sync); return; }
+      b._mounted = b._mounted || b.isConnected;
+      const on = voice.speaking && voice.key === key;
+      b.classList.toggle('is-speaking', on);
+      b.classList.toggle('is-blocked', voice.blocked && !on);
+      b.setAttribute('aria-pressed', String(on));
+      const txt = on ? t('voiceStop') : (o.label || t('voiceListen'));
+      label.textContent = o.compact ? '' : txt;
+      b.setAttribute('aria-label', txt + (o.shortcut === false ? '' : ' (V)'));
+      b.title = txt + (o.shortcut === false ? '' : ' (V)');
+    };
+    voice.listeners.add(sync);
+    sync();
+    return b;
+  }
+
+  /* Interviewer bar used in interview simulation and the daily challenge. */
+  function interviewerBar(key, start, autoKey) {
+    if (!VOICE_OK) return null;
+    const status = h('span', { class: 'interviewer__status' });
+    const wave = h('span', { class: 'wave', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i'), h('i'));
+    const autoBtn = h('button', { type: 'button', class: 'interviewer__auto', 'aria-pressed': String(autoReadOn(autoKey)),
+      onclick: () => {
+        state.preferences.voice.auto[autoKey] = !state.preferences.voice.auto[autoKey];
+        saveState();
+        if (!state.preferences.voice.auto[autoKey]) stopSpeaking();
+        sync();
+      } });
+    const replay = speakButton(key, start, { label: t('voiceReplay') });
+    const bar = h('div', { class: 'interviewer', role: 'group', 'aria-label': t('voiceInterviewer') },
+      h('span', { class: 'interviewer__avatar', 'aria-hidden': 'true' }, icon('mic', 18)),
+      h('div', { class: 'interviewer__text' }, h('strong', null, t('voiceInterviewer')), h('span', { class: 'row', style: { gap: '8px' } }, wave, status)),
+      h('div', { class: 'interviewer__actions' }, autoBtn, replay));
+    const sync = () => {
+      if (!bar.isConnected && bar._mounted) { voice.listeners.delete(sync); return; }
+      bar._mounted = bar._mounted || bar.isConnected;
+      const on = voice.speaking && voice.key === key;
+      bar.classList.toggle('is-speaking', on);
+      status.textContent = on ? t('voiceAsking') : voice.blocked ? t('voiceTapToHear') : t('voiceYourTurn');
+      const auto = autoReadOn(autoKey);
+      autoBtn.setAttribute('aria-pressed', String(auto));
+      clear(autoBtn);
+      autoBtn.append(icon(auto ? 'speaker' : 'speakerOff', 15), h('span', null, auto ? t('voiceAutoOn') : t('voiceAutoOff')));
+      autoBtn.title = t('voiceAutoHint');
+    };
+    voice.listeners.add(sync);
+    sync();
+    return bar;
+  }
+
+  function speakTest() { return speak(tLang('voiceTestText', 'en'), 'voice:test'); }
+
+  /* Settings card: English voice, speed and where questions are read automatically. */
+  function voiceSettingsCard() {
+    const v = state.preferences.voice;
+    const set = (fn) => { fn(v); saveState(); rerender(); };
+    const head = h('div', { class: 'row row--between' }, h('h2', { class: 'row', style: { margin: 0, gap: '8px' } }, icon('speaker', 20), tb('voiceSettings', null, { inline: true })),
+      VOICE_OK && voice.list.length ? speakButton('voice:test', speakTest, { label: t('voiceTest'), shortcut: false }) : null);
+    if (!VOICE_OK) return h('section', { class: 'card stack stack--sm voice-card' }, head, h('p', { class: 'small muted' }, tb('voiceUnsupported')));
+    const list = voice.list.length ? voice.list : loadVoices();
+    const places = [['interview', 'nav_interview'], ['daily', 'nav_daily'], ['practice', 'nav_practice'], ['flashcards', 'nav_flashcards']];
+    return h('section', { class: 'card stack stack--sm voice-card' },
+      head,
+      h('p', { class: 'small muted mb-0' }, tb('voiceLead')),
+      list.length ? h('div', { class: 'field' }, h('label', { for: 'voice-en' }, t('voiceEnglish')),
+        h('select', { class: 'select', id: 'voice-en', onchange: (e) => set((p) => { p.en = e.target.value; }) },
+          h('option', { value: '', selected: !v.en }, t('voiceBest') + ': ' + list[0].name),
+          list.map((x) => h('option', { value: x.name, selected: v.en === x.name }, x.name + ' · ' + x.lang + (x.localService ? '' : ' · online')))))
+        : h('p', { class: 'voice-note' }, icon('alert', 13), ' ', tb('voiceNone')),
+      h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('voiceSpeed')),
+        seg([{ value: 0.85, label: t('voiceSlow') }, { value: 1, label: t('voiceNormal') }, { value: 1.15, label: t('voiceFast') }], v.rate, (x) => set((p) => { p.rate = x; }), t('voiceSpeed'))),
+      h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('voiceAutoRead')),
+        h('div', { class: 'chip-group' }, places.map(([k, label]) => chip(t(label), v.auto[k], () => set((p) => { p.auto[k] = !p.auto[k]; })))),
+        h('p', { class: 'voice-note' }, tb('voiceAutoReadHint'))),
+      h('p', { class: 'voice-note' }, icon('info', 13), ' ', tb('voiceEnglishOnly')),
+      h('p', { class: 'voice-note' }, icon('info', 13), ' ', tb('voicePrivacy')));
+  }
+
+  /* ======================================================================
      UI dictionary (English / বাংলা). Code, API and product names are never translated.
      ====================================================================== */
   const I18N = {
@@ -1344,6 +1596,7 @@
     statAnswered: { en: 'Answered', bn: 'উত্তর দিয়েছ' },
     ofTotal: { en: 'of {n}', bn: '{n}টির মধ্যে' },
     technologiesWord: { en: 'technologies', bn: 'টেকনোলজি' },
+    categoriesWord: { en: 'categories', bn: 'category' },
     accuracy: { en: 'Accuracy', bn: 'নির্ভুলতা' },
     accuracyHint: { en: 'Correct ÷ answered (skips excluded)', bn: 'সঠিক ÷ উত্তর দেওয়া (skip বাদে)' },
     weightedScore: { en: 'Weighted score', bn: 'Weighted স্কোর' },
@@ -1465,6 +1718,37 @@
     answerSection: { en: 'Reference answer', bn: 'রেফারেন্স উত্তর' },
     referenceAnswer: { en: 'Answer', bn: 'উত্তর' },
     quickAnswer: { en: 'Quick answer', bn: 'সংক্ষেপে উত্তর' },
+    voiceListen: { en: 'Listen', bn: 'শোনো' },
+    voiceStop: { en: 'Stop', bn: 'থামাও' },
+    voiceReplay: { en: 'Replay', bn: 'আবার শোনো' },
+    voiceListenAnswer: { en: 'Listen to the answer', bn: 'উত্তর শোনো' },
+    voiceInterviewer: { en: 'Interviewer', bn: 'ইন্টারভিউয়ার' },
+    voiceAsking: { en: 'Asking the question…', bn: 'প্রশ্ন করছে…' },
+    voiceYourTurn: { en: 'Your turn: answer out loud', bn: 'এবার তোমার পালা: জোরে উত্তর দাও' },
+    voiceTapToHear: { en: 'Tap Replay to hear the question', bn: 'প্রশ্ন শুনতে “আবার শোনো” চাপো' },
+    voiceAutoOn: { en: 'Voice on', bn: 'ভয়েস চালু' },
+    voiceAutoOff: { en: 'Voice off', bn: 'ভয়েস বন্ধ' },
+    voiceAutoHint: { en: 'Read each new question aloud automatically', bn: 'প্রতিটা নতুন প্রশ্ন নিজে থেকে পড়ে শোনাবে' },
+    voiceAutoFlash: { en: 'Read cards aloud', bn: 'কার্ড পড়ে শোনাও' },
+    voiceIntroN: { en: 'Question {n}.', bn: '{n} নম্বর প্রশ্ন।' },
+    voiceIntroLast: { en: 'Last question.', bn: 'শেষ প্রশ্ন।' },
+    voiceSettings: { en: 'Voice', bn: 'ভয়েস' },
+    voiceLead: { en: 'Hear questions read aloud, like a real interviewer. Voices come from your device and browser, so the choice differs between phones and computers.', bn: 'আসল interviewer-এর মতো প্রশ্ন জোরে পড়ে শোনো। Voice আসে তোমার device আর browser থেকে, তাই phone আর computer-এ অপশন আলাদা হয়।' },
+    voiceEnglishOnly: { en: 'The interviewer speaks English. In বাংলা mode you still hear the English version of each question, just like an English-language interview.', bn: 'Interviewer English-এ কথা বলে। বাংলা মোডেও প্রতিটা প্রশ্নের English version শুনবে, ঠিক English interview-এর মতো।' },
+    voicePrivacy: { en: 'On-device voices work offline. Voices marked “Online”, “Natural” or “Google” may send the text to the browser’s speech service.', bn: 'Device-এর নিজস্ব voice offline-এ কাজ করে। “Online”, “Natural” বা “Google” লেখা voice লেখাটা browser-এর speech service-এ পাঠাতে পারে।' },
+    voiceEnglish: { en: 'English voice', bn: 'English voice' },
+    voiceBest: { en: 'Auto', bn: 'অটো' },
+    voiceSpeed: { en: 'Speed', bn: 'গতি' },
+    voiceSlow: { en: 'Slower', bn: 'ধীরে' },
+    voiceNormal: { en: 'Normal', bn: 'স্বাভাবিক' },
+    voiceFast: { en: 'Faster', bn: 'দ্রুত' },
+    voiceAutoRead: { en: 'Read new questions automatically', bn: 'নতুন প্রশ্ন নিজে থেকে পড়বে' },
+    voiceAutoReadHint: { en: 'You can always press Listen or V instead.', bn: 'চাইলে সবসময় “শোনো” বা V চাপতে পারো।' },
+    voiceTest: { en: 'Test voice', bn: 'Voice পরীক্ষা করো' },
+    voiceTestText: { en: 'Hi, I’m your interviewer today. Let’s start with an easy one: what is a closure in JavaScript?', bn: 'হ্যালো, আজ আমি তোমার interviewer। একটা সহজ প্রশ্ন দিয়ে শুরু করি: JavaScript-এ closure কী?' },
+    voiceNone: { en: 'No English voice was found on this device.', bn: 'এই device-এ কোনো English voice পাওয়া যায়নি।' },
+    voiceUnsupported: { en: 'This browser can’t read text aloud. Try a recent Chrome, Edge, Safari or Firefox.', bn: 'এই browser লেখা পড়ে শোনাতে পারে না। নতুন Chrome, Edge, Safari বা Firefox ব্যবহার করে দেখো।' },
+    voiceInterviewOpt: { en: 'Interviewer reads each question aloud', bn: 'Interviewer প্রতিটা প্রশ্ন জোরে পড়ে শোনাবে' },
     fullAnswer: { en: 'Full answer', bn: 'বিস্তারিত উত্তর' },
     howToAnswer: { en: 'How to answer', bn: 'কীভাবে উত্তর দেবে' },
     sampleAnswer: { en: 'Sample answer', bn: 'নমুনা উত্তর' },
@@ -1616,7 +1900,7 @@
     timeElapsed: { en: 'Time elapsed', bn: 'অতিবাহিত সময়' },
     thinkTime: { en: 'Time on this question', bn: 'এই প্রশ্নে সময়' },
     timeUp: { en: 'Time is up — your session has been submitted.', bn: 'সময় শেষ — তোমার সেশন জমা হয়েছে।' },
-    shortcutsHint: { en: 'Shortcuts: Space reveal · 1 correct · 2 partial · 3 incorrect · S skip · ←/→ navigate · B bookmark · F flag', bn: 'শর্টকাট: Space উত্তর দেখো · 1 সঠিক · 2 আংশিক · 3 ভুল · S বাদ · ←/→ নেভিগেট · B বুকমার্ক · F চিহ্ন' },
+    shortcutsHint: { en: 'Shortcuts: Space reveal · 1 correct · 2 partial · 3 incorrect · S skip · ←/→ navigate · B bookmark · F flag · V listen', bn: 'শর্টকাট: Space উত্তর দেখো · 1 সঠিক · 2 আংশিক · 3 ভুল · S বাদ · ←/→ নেভিগেট · B বুকমার্ক · F চিহ্ন · V শোনো' },
 
     // Results
     results: { en: 'Results', bn: 'ফলাফল' },
@@ -1686,7 +1970,7 @@
     tapToFlip: { en: 'Click or press Space to flip', bn: 'উল্টাতে ক্লিক করো বা Space চাপো' },
     flipCard: { en: 'Flip card', bn: 'কার্ড উল্টাও' },
     flip: { en: 'Flip', bn: 'উল্টাও' },
-    flashKeys: { en: 'Space: flip · ←/→: previous / next', bn: 'Space: উল্টাও · ←/→: আগের / পরের' },
+    flashKeys: { en: 'Space: flip · ←/→: previous / next · V: listen', bn: 'Space: উল্টাও · ←/→: আগের / পরের · V: শোনো' },
 
     // Bookmarks / incorrect / review
     bookmarksLead: { en: 'Questions you saved for later.', bn: 'পরে পড়ার জন্য সেভ করা প্রশ্ন।' },
@@ -1850,6 +2134,8 @@
     incorrectTab: 'incorrect',
     timers: [],
     keyHandler: null,
+    lastPath: null,
+    voiceRead: null, // last thing auto-read, so re-renders don't repeat it
   };
   function stopTimers() { ui.timers.forEach((id) => clearInterval(id)); ui.timers = []; ui.keyHandler = null; }
 
@@ -1988,6 +2274,9 @@
     currentRoute = route;
     if (o.focus) ui.nonce++;
     stopTimers();
+    const pathKey = route.name + '/' + route.params.join('/');
+    if (ui.lastPath && ui.lastPath !== pathKey) stopSpeaking();
+    ui.lastPath = pathKey;
     const VIEWS = {
       dashboard: viewDashboard, technologies: viewTechnologies, questions: viewQuestions, q: viewQuestion,
       practice: viewPractice, session: viewSession, results: viewResults, interview: viewInterview,
@@ -2082,7 +2371,7 @@
       h('p', { class: 'small muted mt-2 mb-0' }, tb('localOnlyLong'))) : null;
 
     const stats = h('section', { class: 'grid grid--stats mt-3', 'aria-label': t('yourStats') },
-      stat(t('statTotal'), String(QUESTIONS.length), { hint: TECHS.length + ' ' + t('technologiesWord') }),
+      stat(t('statTotal'), String(QUESTIONS.length), { hint: TECHS.filter((x) => x.group !== 'career').length + ' ' + t('technologiesWord') }),
       stat(t('statAnswered'), String(all.answered), { hint: t('ofTotal', { n: QUESTIONS.length }) }),
       stat(t('res_correct'), String(all.correct), { tone: 'ok' }),
       stat(t('res_partial'), String(all.partial), { tone: 'partial' }),
@@ -2194,7 +2483,7 @@
       else if (f.sort === 'progressDesc') list.sort((a, b) => b.st.completion - a.st.completion);
       else if (f.sort === 'progressAsc') list.sort((a, b) => a.st.completion - b.st.completion);
       clear(countEl);
-      countEl.append(h('strong', null, String(list.length)), ' ', t('technologiesWord'));
+      countEl.append(h('strong', null, String(list.length)), ' ', t('categoriesWord'));
       if (!list.length) { grid.append(emptyState('search', 'noTechMatch', 'tryDifferent')); return; }
       for (const { tc, list: qs, st } of list) {
         const dc = countBy(qs, 'difficulty');
@@ -2391,7 +2680,8 @@
   function answerPanel(q) {
     const parts = [];
     if (q.quickAnswer && (q.quickAnswer.en || q.quickAnswer.bn)) {
-      parts.push(h('div', { class: 'callout callout--quick' }, h('div', { class: 'callout__title' }, icon('zap', 16), tb('quickAnswer', null, { inline: true })), biText(q.quickAnswer)));
+      parts.push(h('div', { class: 'callout callout--quick' }, h('div', { class: 'callout__title' }, icon('zap', 16), tb('quickAnswer', null, { inline: true }),
+        h('span', { style: { marginLeft: 'auto' } }, speakButton('answer:' + q.id, () => speakAnswer(q, 'answer:' + q.id), { label: t('voiceListenAnswer'), shortcut: false }))), biText(q.quickAnswer)));
       parts.push(section('checkCircle', 'fullAnswer', biText(q.answer)));
     } else parts.push(section('checkCircle', q.type === 'behavioral' ? 'howToAnswer' : 'referenceAnswer', biText(q.answer)));
     if (q.complexity && (q.complexity.time || q.complexity.space)) {
@@ -2484,10 +2774,13 @@
       state.preferences.mode = m; saveState(); ui.revealed.delete(q.id); ui.hidden.delete(q.id); rerender();
     }, t('studyMode'));
 
+    const voiceKey = 'q:' + q.id;
+    const speakThis = () => speakQuestion(q, voiceKey);
+    ui.keyHandler = (e) => { if (e.key === 'v' || e.key === 'V') { toggleSpeak(voiceKey, speakThis); return true; } return false; };
     const headCard = h('section', { class: 'card card--pad-lg' },
       h('div', { class: 'row row--between mb-2' },
         h('a', { href: '#/questions?tech=' + q.technology, class: 'row small', style: { gap: '8px' } }, techLogo(tc, 'sm'), tc.name),
-        modeSeg),
+        h('div', { class: 'row', style: { gap: '8px' } }, speakButton(voiceKey, speakThis), modeSeg)),
       metaBadges(q, false),
       questionBody(q));
 
@@ -2797,11 +3090,20 @@
       return h('button', { type: 'button', class: 'dot-btn' + (r ? ' r-' + r : ''), 'aria-current': i === s.index ? 'step' : null, 'aria-label': t('questionN', { n: i + 1 }) + (r ? ' — ' + t('res_' + r) : ''), onclick: () => goIndex(i) }, String(i + 1));
     }));
 
+    // Voice: the interviewer reads the question (auto-read per session kind, or on demand with V)
+    const voiceKey = 'session:' + s.id + ':' + id;
+    const autoKey = s.kind === 'interview' ? 'interview' : s.kind === 'daily' ? 'daily' : 'practice';
+    const introFor = isInterview ? tLang(isLast && total > 1 ? 'voiceIntroLast' : 'voiceIntroN', 'en', { n: s.index + 1 }) : null;
+    const speakThis = () => speakQuestion(q, voiceKey, { intro: introFor });
+    const voiceBar = autoKey !== 'practice' ? interviewerBar(voiceKey, speakThis, autoKey) : null;
+
     const tools = h('div', { class: 'row' },
+      autoKey === 'practice' ? speakButton(voiceKey, speakThis, { compact: true }) : null,
       h('button', { type: 'button', class: 'icon-btn', 'aria-pressed': String(isBookmarked(q.id)), 'aria-label': t('bookmark') + ' (B)', title: t('bookmark') + ' (B)', onclick: () => { toggleIn('bookmarks', q.id); rerender(); } }, icon('bookmark', 18)),
       h('button', { type: 'button', class: 'icon-btn', 'aria-pressed': String(isFlagged(q.id)), 'aria-label': t('flagReview') + ' (F)', title: t('flagReview') + ' (F)', onclick: () => { toggleIn('reviewQuestions', q.id); rerender(); } }, icon('flag', 18)));
 
     const qCard = h('section', { class: 'card card--pad-lg' },
+      voiceBar,
       h('div', { class: 'row row--between mb-1' }, h('div', { class: 'row' }, techBadge(q.technology), h('span', { class: 'small muted' }, t('questionN', { n: s.index + 1 }))), tools),
       metaBadges(q, false),
       questionBody(q),
@@ -2856,6 +3158,7 @@
       if (k === 'ArrowRight') { if (!isLast) goIndex(s.index + 1); return true; }
       if (k === 'b' || k === 'B') { toggleIn('bookmarks', q.id); rerender(); return true; }
       if (k === 'f' || k === 'F') { toggleIn('reviewQuestions', q.id); rerender(); return true; }
+      if (k === 'v' || k === 'V') { toggleSpeak(voiceKey, speakThis); return true; }
       if (q.isMCQ) {
         if (a.mcqChoice != null) { if (k === 'Enter' && !isLast) { advance(); return true; } return false; }
         if (['1', '2', '3', '4'].includes(k)) { mcqRef._select(parseInt(k, 10) - 1); return true; }
@@ -2878,7 +3181,10 @@
     const node = h('div', null, top, dots, h('div', { class: 'stack' }, qCard, answerArea, footer));
     return {
       title: tb('kind_' + s.kind, null, { inline: true }), titleText: tLang('kind_' + s.kind, 'en'), node, narrow: true,
-      after: () => { tick(); ui.timers.push(setInterval(tick, 1000)); },
+      after: () => {
+        tick(); ui.timers.push(setInterval(tick, 1000));
+        if (autoReadOn(autoKey) && !a.result && ui.voiceRead !== voiceKey) { ui.voiceRead = voiceKey; speakThis(); }
+      },
     };
   }
 
@@ -2991,6 +3297,9 @@
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('difficulty')), multi('diffs', DIFFS, (d) => t('diff_' + d))),
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('market')), seg([{ value: 'all', label: t('allMarkets') }, { value: 'bangladesh', label: t('market_bangladesh') }, { value: 'international', label: t('market_international') }], cfg.market, (v) => { cfg.market = v; rerender(); }, t('market')))),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: cfg.includeMcq, onchange: (e) => { cfg.includeMcq = e.target.checked; refresh(); } }), t('includeMcq')),
+      VOICE_OK ? h('div', { class: 'row row--between', style: { gap: '12px' } },
+        h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: autoReadOn('interview'), onchange: (e) => { state.preferences.voice.auto.interview = e.target.checked; saveState(); } }), icon('speaker', 15), t('voiceInterviewOpt')),
+        speakButton('voice:test', () => speakTest(), { label: t('voiceTest'), shortcut: false })) : null,
       h('div', { class: 'row row--between' }, countEl,
         btn(t('startInterview'), async () => {
           const pool = matchingPool(cfg);
@@ -3111,7 +3420,14 @@
       return { title: tb('nav_flashcards', null, { inline: true }), node: frag(pageHead('nav_flashcards', 'flashLead'), controls, h('div', { class: 'mt-3' }, emptyState('cards', 'emptyDeck', 'emptyDeckText'))) };
     }
     const q = QMAP.get(deck[flash.index]);
-    const flip = () => { flash.flipped = !flash.flipped; card.classList.toggle('is-flipped', flash.flipped); card.setAttribute('aria-pressed', String(flash.flipped)); };
+    const faceKey = () => 'flash:' + q.id + (flash.flipped ? ':back' : ':front');
+    const speakFace = () => (flash.flipped ? speakAnswer(q, faceKey()) : speakQuestion(q, faceKey(), { options: true }));
+    const flip = () => {
+      flash.flipped = !flash.flipped; card.classList.toggle('is-flipped', flash.flipped); card.setAttribute('aria-pressed', String(flash.flipped));
+      if (autoReadOn('flashcards')) speakFace(); else stopSpeaking();
+      listenSlot.replaceChildren(speakButton(faceKey(), speakFace) || '');
+    };
+    const listenSlot = h('span', { class: 'row' });
     const nav = (d) => { flash.index = clamp(flash.index + d, 0, deck.length - 1); flash.flipped = false; rerender(); };
     const front = h('div', { class: 'flashcard__face flashcard__face--front', 'aria-hidden': String(flash.flipped) },
       h('div', { class: 'row' }, techBadge(q.technology), diffBadge(q.difficulty), typeBadge(q.type)),
@@ -3130,8 +3446,13 @@
       if (e.key === ' ' || e.key === 'Enter') { if (document.activeElement === card) return false; flip(); return true; }
       if (e.key === 'ArrowRight') { nav(1); return true; }
       if (e.key === 'ArrowLeft') { nav(-1); return true; }
+      if (e.key === 'v' || e.key === 'V') { toggleSpeak(faceKey(), speakFace); return true; }
       return false;
     };
+    listenSlot.append(speakButton(faceKey(), speakFace) || '');
+    const autoFlash = VOICE_OK ? h('button', { type: 'button', class: 'interviewer__auto', 'aria-pressed': String(autoReadOn('flashcards')),
+      onclick: () => { state.preferences.voice.auto.flashcards = !state.preferences.voice.auto.flashcards; saveState(); if (state.preferences.voice.auto.flashcards) speakFace(); else stopSpeaking(); rerender(); } },
+    icon(autoReadOn('flashcards') ? 'speaker' : 'speakerOff', 15), t('voiceAutoFlash')) : null;
     const node = frag(
       pageHead('nav_flashcards', 'flashLead'),
       controls,
@@ -3144,12 +3465,15 @@
         btn(t('previous'), () => nav(-1), 'btn--ghost', 'arrowL', { disabled: flash.index === 0 }),
         btn(t('flip'), flip, 'btn--secondary', 'rotate'),
         h('button', { type: 'button', class: 'btn btn--ghost', disabled: flash.index >= deck.length - 1, onclick: () => nav(1) }, t('next'), icon('arrowR', 16))),
+      VOICE_OK ? h('div', { class: 'btn-row mt-1', style: { justifyContent: 'center' } }, listenSlot, autoFlash) : null,
       h('div', { class: 'btn-row mt-1', style: { justifyContent: 'center' } },
         toggleBtnInline(isLearned(q.id), 'grad', t('learned'), t('markLearned'), () => { toggleIn('learnedQuestions', q.id); rerender(); }),
         toggleBtnInline(isFlagged(q.id), 'flag', t('flagged'), t('needsReviewBtn'), () => { toggleIn('reviewQuestions', q.id); rerender(); }),
         toggleBtnInline(isBookmarked(q.id), 'bookmark', t('bookmarked'), t('bookmark'), () => { toggleIn('bookmarks', q.id); rerender(); })),
       h('p', { class: 'flash-hint' }, icon('keyboard', 12), ' ', t('flashKeys')));
-    return { title: tb('nav_flashcards', null, { inline: true }), titleText: 'Flashcards', node, narrow: false };
+    const readKey = 'flash:' + q.id + ':' + flash.index;
+    return { title: tb('nav_flashcards', null, { inline: true }), titleText: 'Flashcards', node, narrow: false,
+      after: () => { if (autoReadOn('flashcards') && ui.voiceRead !== readKey) { ui.voiceRead = readKey; speakFace(); } } };
   }
   function toggleBtnInline(pressed, ic, onLabel, offLabel, onClick) {
     return h('button', { type: 'button', class: 'btn btn--sm ' + (pressed ? 'btn--secondary' : 'btn--ghost'), 'aria-pressed': String(pressed), onclick: onClick }, icon(ic, 15), pressed ? onLabel : offLabel);
@@ -3353,7 +3677,7 @@
     const node = frag(
       pageHead('nav_settings', 'settingsLead'),
       h('div', { class: 'grid grid--2' },
-        h('section', { class: 'card' },
+        h('div', { class: 'stack' }, h('section', { class: 'card' },
           h('h2', null, tb('preferences')),
           row('language', 'languageHint', seg([{ value: 'en', label: 'English' }, { value: 'bn', label: 'বাংলা', lang: 'bn' }, { value: 'both', label: t('both') }], p.lang, setLang, t('language'))),
           row('theme', null, seg([{ value: 'dark', label: t('dark') }, { value: 'light', label: t('light') }], p.theme, (v2) => setPref('theme', v2), t('theme'))),
@@ -3361,6 +3685,7 @@
           row('motion', 'motionHint', seg([{ value: 'system', label: t('motionSystem') }, { value: 'reduce', label: t('motionReduce') }, { value: 'full', label: t('motionFull') }], p.motion, (v2) => setPref('motion', v2), t('motion'))),
           row('textSize', null, seg([0.9, 1, 1.1, 1.2].map((x) => ({ value: x, label: Math.round(x * 100) + '%' })), p.fontScale, (v2) => setPref('fontScale', v2), t('textSize'))),
           row('sidebar', null, seg([{ value: false, label: t('expanded') }, { value: true, label: t('collapsed') }], p.sidebarCollapsed, (v2) => setPref('sidebarCollapsed', v2), t('sidebar')))),
+          voiceSettingsCard()),
         h('div', { class: 'stack' },
           h('section', { class: 'card stack stack--sm' },
             h('h2', null, tb('dataBackup')),

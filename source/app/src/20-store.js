@@ -6,7 +6,7 @@
     return {
       version: STORAGE_VERSION,
       createdAt: Date.now(),
-      preferences: { lang: 'en', theme: 'dark', mode: 'learning', motion: 'system', fontScale: 1, sidebarCollapsed: false },
+      preferences: { lang: 'en', theme: 'dark', mode: 'learning', motion: 'system', fontScale: 1, sidebarCollapsed: false, voice: defaultVoicePrefs() },
       bookmarks: [],
       learnedQuestions: [],
       reviewQuestions: [],
@@ -26,6 +26,20 @@
 
   const strArr = (v) => (Array.isArray(v) ? Array.from(new Set(v.filter((x) => isStr(x) && x.length < 120))) : []);
 
+  function defaultVoicePrefs() {
+    return { rate: 1, en: '', auto: { interview: true, daily: true, practice: false, flashcards: false } };
+  }
+  function sanitizeVoicePrefs(v) {
+    const d = defaultVoicePrefs();
+    if (!isObj(v)) return d;
+    const a = isObj(v.auto) ? v.auto : {};
+    return {
+      rate: [0.85, 1, 1.15].includes(v.rate) ? v.rate : d.rate,
+      en: isStr(v.en) && v.en.length < 200 ? v.en : '',
+      auto: { interview: typeof a.interview === 'boolean' ? a.interview : d.auto.interview, daily: typeof a.daily === 'boolean' ? a.daily : d.auto.daily,
+        practice: a.practice === true, flashcards: a.flashcards === true },
+    };
+  }
   function sanitizePreferences(p) {
     const d = defaultState().preferences;
     if (!isObj(p)) return d;
@@ -36,6 +50,7 @@
       motion: ['system', 'reduce', 'full'].includes(p.motion) ? p.motion : d.motion,
       fontScale: [0.9, 1, 1.1, 1.2].includes(p.fontScale) ? p.fontScale : d.fontScale,
       sidebarCollapsed: p.sidebarCollapsed === true,
+      voice: sanitizeVoicePrefs(p.voice),
     };
   }
   function sanitizeProgressEntry(p) {

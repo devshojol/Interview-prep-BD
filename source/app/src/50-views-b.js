@@ -238,11 +238,20 @@
       return h('button', { type: 'button', class: 'dot-btn' + (r ? ' r-' + r : ''), 'aria-current': i === s.index ? 'step' : null, 'aria-label': t('questionN', { n: i + 1 }) + (r ? ' — ' + t('res_' + r) : ''), onclick: () => goIndex(i) }, String(i + 1));
     }));
 
+    // Voice: the interviewer reads the question (auto-read per session kind, or on demand with V)
+    const voiceKey = 'session:' + s.id + ':' + id;
+    const autoKey = s.kind === 'interview' ? 'interview' : s.kind === 'daily' ? 'daily' : 'practice';
+    const introFor = isInterview ? tLang(isLast && total > 1 ? 'voiceIntroLast' : 'voiceIntroN', 'en', { n: s.index + 1 }) : null;
+    const speakThis = () => speakQuestion(q, voiceKey, { intro: introFor });
+    const voiceBar = autoKey !== 'practice' ? interviewerBar(voiceKey, speakThis, autoKey) : null;
+
     const tools = h('div', { class: 'row' },
+      autoKey === 'practice' ? speakButton(voiceKey, speakThis, { compact: true }) : null,
       h('button', { type: 'button', class: 'icon-btn', 'aria-pressed': String(isBookmarked(q.id)), 'aria-label': t('bookmark') + ' (B)', title: t('bookmark') + ' (B)', onclick: () => { toggleIn('bookmarks', q.id); rerender(); } }, icon('bookmark', 18)),
       h('button', { type: 'button', class: 'icon-btn', 'aria-pressed': String(isFlagged(q.id)), 'aria-label': t('flagReview') + ' (F)', title: t('flagReview') + ' (F)', onclick: () => { toggleIn('reviewQuestions', q.id); rerender(); } }, icon('flag', 18)));
 
     const qCard = h('section', { class: 'card card--pad-lg' },
+      voiceBar,
       h('div', { class: 'row row--between mb-1' }, h('div', { class: 'row' }, techBadge(q.technology), h('span', { class: 'small muted' }, t('questionN', { n: s.index + 1 }))), tools),
       metaBadges(q, false),
       questionBody(q),
@@ -297,6 +306,7 @@
       if (k === 'ArrowRight') { if (!isLast) goIndex(s.index + 1); return true; }
       if (k === 'b' || k === 'B') { toggleIn('bookmarks', q.id); rerender(); return true; }
       if (k === 'f' || k === 'F') { toggleIn('reviewQuestions', q.id); rerender(); return true; }
+      if (k === 'v' || k === 'V') { toggleSpeak(voiceKey, speakThis); return true; }
       if (q.isMCQ) {
         if (a.mcqChoice != null) { if (k === 'Enter' && !isLast) { advance(); return true; } return false; }
         if (['1', '2', '3', '4'].includes(k)) { mcqRef._select(parseInt(k, 10) - 1); return true; }
@@ -319,7 +329,10 @@
     const node = h('div', null, top, dots, h('div', { class: 'stack' }, qCard, answerArea, footer));
     return {
       title: tb('kind_' + s.kind, null, { inline: true }), titleText: tLang('kind_' + s.kind, 'en'), node, narrow: true,
-      after: () => { tick(); ui.timers.push(setInterval(tick, 1000)); },
+      after: () => {
+        tick(); ui.timers.push(setInterval(tick, 1000));
+        if (autoReadOn(autoKey) && !a.result && ui.voiceRead !== voiceKey) { ui.voiceRead = voiceKey; speakThis(); }
+      },
     };
   }
 
@@ -432,6 +445,9 @@
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('difficulty')), multi('diffs', DIFFS, (d) => t('diff_' + d))),
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('market')), seg([{ value: 'all', label: t('allMarkets') }, { value: 'bangladesh', label: t('market_bangladesh') }, { value: 'international', label: t('market_international') }], cfg.market, (v) => { cfg.market = v; rerender(); }, t('market')))),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: cfg.includeMcq, onchange: (e) => { cfg.includeMcq = e.target.checked; refresh(); } }), t('includeMcq')),
+      VOICE_OK ? h('div', { class: 'row row--between', style: { gap: '12px' } },
+        h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: autoReadOn('interview'), onchange: (e) => { state.preferences.voice.auto.interview = e.target.checked; saveState(); } }), icon('speaker', 15), t('voiceInterviewOpt')),
+        speakButton('voice:test', () => speakTest(), { label: t('voiceTest'), shortcut: false })) : null,
       h('div', { class: 'row row--between' }, countEl,
         btn(t('startInterview'), async () => {
           const pool = matchingPool(cfg);
@@ -552,7 +568,14 @@
       return { title: tb('nav_flashcards', null, { inline: true }), node: frag(pageHead('nav_flashcards', 'flashLead'), controls, h('div', { class: 'mt-3' }, emptyState('cards', 'emptyDeck', 'emptyDeckText'))) };
     }
     const q = QMAP.get(deck[flash.index]);
-    const flip = () => { flash.flipped = !flash.flipped; card.classList.toggle('is-flipped', flash.flipped); card.setAttribute('aria-pressed', String(flash.flipped)); };
+    const faceKey = () => 'flash:' + q.id + (flash.flipped ? ':back' : ':front');
+    const speakFace = () => (flash.flipped ? speakAnswer(q, faceKey()) : speakQuestion(q, faceKey(), { options: true }));
+    const flip = () => {
+      flash.flipped = !flash.flipped; card.classList.toggle('is-flipped', flash.flipped); card.setAttribute('aria-pressed', String(flash.flipped));
+      if (autoReadOn('flashcards')) speakFace(); else stopSpeaking();
+      listenSlot.replaceChildren(speakButton(faceKey(), speakFace) || '');
+    };
+    const listenSlot = h('span', { class: 'row' });
     const nav = (d) => { flash.index = clamp(flash.index + d, 0, deck.length - 1); flash.flipped = false; rerender(); };
     const front = h('div', { class: 'flashcard__face flashcard__face--front', 'aria-hidden': String(flash.flipped) },
       h('div', { class: 'row' }, techBadge(q.technology), diffBadge(q.difficulty), typeBadge(q.type)),
@@ -571,8 +594,13 @@
       if (e.key === ' ' || e.key === 'Enter') { if (document.activeElement === card) return false; flip(); return true; }
       if (e.key === 'ArrowRight') { nav(1); return true; }
       if (e.key === 'ArrowLeft') { nav(-1); return true; }
+      if (e.key === 'v' || e.key === 'V') { toggleSpeak(faceKey(), speakFace); return true; }
       return false;
     };
+    listenSlot.append(speakButton(faceKey(), speakFace) || '');
+    const autoFlash = VOICE_OK ? h('button', { type: 'button', class: 'interviewer__auto', 'aria-pressed': String(autoReadOn('flashcards')),
+      onclick: () => { state.preferences.voice.auto.flashcards = !state.preferences.voice.auto.flashcards; saveState(); if (state.preferences.voice.auto.flashcards) speakFace(); else stopSpeaking(); rerender(); } },
+    icon(autoReadOn('flashcards') ? 'speaker' : 'speakerOff', 15), t('voiceAutoFlash')) : null;
     const node = frag(
       pageHead('nav_flashcards', 'flashLead'),
       controls,
@@ -585,12 +613,15 @@
         btn(t('previous'), () => nav(-1), 'btn--ghost', 'arrowL', { disabled: flash.index === 0 }),
         btn(t('flip'), flip, 'btn--secondary', 'rotate'),
         h('button', { type: 'button', class: 'btn btn--ghost', disabled: flash.index >= deck.length - 1, onclick: () => nav(1) }, t('next'), icon('arrowR', 16))),
+      VOICE_OK ? h('div', { class: 'btn-row mt-1', style: { justifyContent: 'center' } }, listenSlot, autoFlash) : null,
       h('div', { class: 'btn-row mt-1', style: { justifyContent: 'center' } },
         toggleBtnInline(isLearned(q.id), 'grad', t('learned'), t('markLearned'), () => { toggleIn('learnedQuestions', q.id); rerender(); }),
         toggleBtnInline(isFlagged(q.id), 'flag', t('flagged'), t('needsReviewBtn'), () => { toggleIn('reviewQuestions', q.id); rerender(); }),
         toggleBtnInline(isBookmarked(q.id), 'bookmark', t('bookmarked'), t('bookmark'), () => { toggleIn('bookmarks', q.id); rerender(); })),
       h('p', { class: 'flash-hint' }, icon('keyboard', 12), ' ', t('flashKeys')));
-    return { title: tb('nav_flashcards', null, { inline: true }), titleText: 'Flashcards', node, narrow: false };
+    const readKey = 'flash:' + q.id + ':' + flash.index;
+    return { title: tb('nav_flashcards', null, { inline: true }), titleText: 'Flashcards', node, narrow: false,
+      after: () => { if (autoReadOn('flashcards') && ui.voiceRead !== readKey) { ui.voiceRead = readKey; speakFace(); } } };
   }
   function toggleBtnInline(pressed, ic, onLabel, offLabel, onClick) {
     return h('button', { type: 'button', class: 'btn btn--sm ' + (pressed ? 'btn--secondary' : 'btn--ghost'), 'aria-pressed': String(pressed), onclick: onClick }, icon(ic, 15), pressed ? onLabel : offLabel);

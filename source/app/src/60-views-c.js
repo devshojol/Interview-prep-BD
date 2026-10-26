@@ -197,7 +197,7 @@
     const node = frag(
       pageHead('nav_settings', 'settingsLead'),
       h('div', { class: 'grid grid--2' },
-        h('section', { class: 'card' },
+        h('div', { class: 'stack' }, h('section', { class: 'card' },
           h('h2', null, tb('preferences')),
           row('language', 'languageHint', seg([{ value: 'en', label: 'English' }, { value: 'bn', label: 'বাংলা', lang: 'bn' }, { value: 'both', label: t('both') }], p.lang, setLang, t('language'))),
           row('theme', null, seg([{ value: 'dark', label: t('dark') }, { value: 'light', label: t('light') }], p.theme, (v2) => setPref('theme', v2), t('theme'))),
@@ -205,6 +205,7 @@
           row('motion', 'motionHint', seg([{ value: 'system', label: t('motionSystem') }, { value: 'reduce', label: t('motionReduce') }, { value: 'full', label: t('motionFull') }], p.motion, (v2) => setPref('motion', v2), t('motion'))),
           row('textSize', null, seg([0.9, 1, 1.1, 1.2].map((x) => ({ value: x, label: Math.round(x * 100) + '%' })), p.fontScale, (v2) => setPref('fontScale', v2), t('textSize'))),
           row('sidebar', null, seg([{ value: false, label: t('expanded') }, { value: true, label: t('collapsed') }], p.sidebarCollapsed, (v2) => setPref('sidebarCollapsed', v2), t('sidebar')))),
+          voiceSettingsCard()),
         h('div', { class: 'stack' },
           h('section', { class: 'card stack stack--sm' },
             h('h2', null, tb('dataBackup')),

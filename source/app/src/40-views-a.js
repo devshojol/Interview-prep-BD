@@ -14,6 +14,8 @@
     incorrectTab: 'incorrect',
     timers: [],
     keyHandler: null,
+    lastPath: null,
+    voiceRead: null, // last thing auto-read, so re-renders don't repeat it
   };
   function stopTimers() { ui.timers.forEach((id) => clearInterval(id)); ui.timers = []; ui.keyHandler = null; }
 
@@ -152,6 +154,9 @@
     currentRoute = route;
     if (o.focus) ui.nonce++;
     stopTimers();
+    const pathKey = route.name + '/' + route.params.join('/');
+    if (ui.lastPath && ui.lastPath !== pathKey) stopSpeaking();
+    ui.lastPath = pathKey;
     const VIEWS = {
       dashboard: viewDashboard, technologies: viewTechnologies, questions: viewQuestions, q: viewQuestion,
       practice: viewPractice, session: viewSession, results: viewResults, interview: viewInterview,
@@ -246,7 +251,7 @@
       h('p', { class: 'small muted mt-2 mb-0' }, tb('localOnlyLong'))) : null;
 
     const stats = h('section', { class: 'grid grid--stats mt-3', 'aria-label': t('yourStats') },
-      stat(t('statTotal'), String(QUESTIONS.length), { hint: TECHS.length + ' ' + t('technologiesWord') }),
+      stat(t('statTotal'), String(QUESTIONS.length), { hint: TECHS.filter((x) => x.group !== 'career').length + ' ' + t('technologiesWord') }),
       stat(t('statAnswered'), String(all.answered), { hint: t('ofTotal', { n: QUESTIONS.length }) }),
       stat(t('res_correct'), String(all.correct), { tone: 'ok' }),
       stat(t('res_partial'), String(all.partial), { tone: 'partial' }),
@@ -358,7 +363,7 @@
       else if (f.sort === 'progressDesc') list.sort((a, b) => b.st.completion - a.st.completion);
       else if (f.sort === 'progressAsc') list.sort((a, b) => a.st.completion - b.st.completion);
       clear(countEl);
-      countEl.append(h('strong', null, String(list.length)), ' ', t('technologiesWord'));
+      countEl.append(h('strong', null, String(list.length)), ' ', t('categoriesWord'));
       if (!list.length) { grid.append(emptyState('search', 'noTechMatch', 'tryDifferent')); return; }
       for (const { tc, list: qs, st } of list) {
         const dc = countBy(qs, 'difficulty');
@@ -555,7 +560,8 @@
   function answerPanel(q) {
     const parts = [];
     if (q.quickAnswer && (q.quickAnswer.en || q.quickAnswer.bn)) {
-      parts.push(h('div', { class: 'callout callout--quick' }, h('div', { class: 'callout__title' }, icon('zap', 16), tb('quickAnswer', null, { inline: true })), biText(q.quickAnswer)));
+      parts.push(h('div', { class: 'callout callout--quick' }, h('div', { class: 'callout__title' }, icon('zap', 16), tb('quickAnswer', null, { inline: true }),
+        h('span', { style: { marginLeft: 'auto' } }, speakButton('answer:' + q.id, () => speakAnswer(q, 'answer:' + q.id), { label: t('voiceListenAnswer'), shortcut: false }))), biText(q.quickAnswer)));
       parts.push(section('checkCircle', 'fullAnswer', biText(q.answer)));
     } else parts.push(section('checkCircle', q.type === 'behavioral' ? 'howToAnswer' : 'referenceAnswer', biText(q.answer)));
     if (q.complexity && (q.complexity.time || q.complexity.space)) {
@@ -648,10 +654,13 @@
       state.preferences.mode = m; saveState(); ui.revealed.delete(q.id); ui.hidden.delete(q.id); rerender();
     }, t('studyMode'));
 
+    const voiceKey = 'q:' + q.id;
+    const speakThis = () => speakQuestion(q, voiceKey);
+    ui.keyHandler = (e) => { if (e.key === 'v' || e.key === 'V') { toggleSpeak(voiceKey, speakThis); return true; } return false; };
     const headCard = h('section', { class: 'card card--pad-lg' },
       h('div', { class: 'row row--between mb-2' },
         h('a', { href: '#/questions?tech=' + q.technology, class: 'row small', style: { gap: '8px' } }, techLogo(tc, 'sm'), tc.name),
-        modeSeg),
+        h('div', { class: 'row', style: { gap: '8px' } }, speakButton(voiceKey, speakThis), modeSeg)),
       metaBadges(q, false),
       questionBody(q));
 

@@ -65,6 +65,7 @@ Fonts (Inter, Hind Siliguri, JetBrains Mono) load from Google Fonts when you're 
 
 - **Practice sessions:** presets (Quick 10, Focus 20, Deep 30) or custom filters, random or priority order, a question pool (all, unanswered, answered or mistakes) and an optional timer. Sessions survive reloads and language switches.
 - **Interview simulation:** timed, answers hidden, questions ordered from easy to hard, auto-submits when time runs out.
+- **Voice interviewer:** an English voice reads each question aloud in the interview simulation and daily challenge (and on demand everywhere else: question pages, practice and flashcards; press <kbd>V</kbd>). It uses the browser's built-in speech voices, so there's nothing to install, and you can pick the voice, speed and where questions are read automatically in Settings.
 - **MCQs:** graded automatically with an explanation, and locked once scored.
 - **Daily challenge:** three questions chosen from your local date: one MCQ, one medium and one hard.
 - **Flashcards:** bilingual flip cards that show the quick answer, with decks (all, quick recall, not learned, bookmarked, due, mistakes), shuffle and keyboard control.

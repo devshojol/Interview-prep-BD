@@ -436,6 +436,7 @@ input, textarea { caret-color: var(--primary); }
   padding: 2px 9px; border-radius: 999px; font-size: .74rem; font-weight: 600; line-height: 1.6;
   border: 1px solid var(--border); background: var(--card-2); color: var(--text-2); white-space: nowrap;
 }
+.q-head .badge { max-width: 100%; white-space: normal; }
 .badge svg { width: 12px; height: 12px; }
 .badge--easy { background: var(--easy-soft); color: var(--easy); border-color: color-mix(in srgb, var(--easy) 35%, transparent); }
 .badge--medium { background: var(--medium-soft); color: var(--medium); border-color: color-mix(in srgb, var(--medium) 35%, transparent); }
@@ -889,6 +890,72 @@ details.acc > .acc__body { padding: 0 14px 14px; }
 @media (max-width: 380px) {
   .grid--stats { grid-template-columns: minmax(0, 1fr); }
   .filters { grid-template-columns: 1fr; }
+}
+
+/* ---------- Voice (read aloud) ---------- */
+.speak-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 5px 13px 5px 6px;
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: color-mix(in srgb, var(--primary-soft) 70%, transparent); color: var(--text);
+  font: 600 .82rem/1.2 var(--font-sans); cursor: pointer; white-space: nowrap;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.speak-btn:hover { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 60%, transparent); }
+.speak-btn__icon {
+  position: relative; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--primary); color: var(--primary-ink);
+}
+.speak-btn__icon svg { width: 14px; height: 14px; }
+.speak-btn--compact { padding: 4px; }
+.speak-btn .eq { display: none; }
+.speak-btn.is-speaking { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
+.speak-btn.is-speaking .speak-btn__icon svg { display: none; }
+.speak-btn.is-speaking .eq { display: inline-flex; }
+.speak-btn.is-blocked { animation: speakNudge 1.6s var(--ease) 2; }
+.eq, .wave { display: inline-flex; align-items: center; gap: 2px; height: 14px; }
+.eq i, .wave i { display: block; width: 3px; border-radius: 2px; background: currentColor; height: 30%; }
+.eq i { animation: eqBar .9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay: -.6s; } .eq i:nth-child(3) { animation-delay: -.3s; } .eq i:nth-child(4) { animation-delay: -.45s; }
+@keyframes eqBar { 0%, 100% { height: 25%; } 50% { height: 100%; } }
+@keyframes speakNudge { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent); } }
+
+.interviewer {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 14px;
+  border-radius: 14px; border: 1px solid var(--border); background: var(--card-2);
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.interviewer.is-speaking { border-color: color-mix(in srgb, var(--primary) 55%, transparent); background: color-mix(in srgb, var(--primary-soft) 60%, var(--card-2)); }
+.interviewer__avatar {
+  position: relative; flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: var(--primary-ink);
+}
+.interviewer.is-speaking .interviewer__avatar::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--primary) 60%, transparent); animation: ring 1.4s var(--ease) infinite;
+}
+@keyframes ring { 0% { transform: scale(.92); opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+.interviewer__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.interviewer__text strong { font-size: .86rem; }
+.interviewer__status { font-size: .8rem; color: var(--muted); }
+.interviewer .wave { color: var(--primary-2); }
+.interviewer:not(.is-speaking) .wave { display: none; }
+.interviewer.is-speaking .wave i { animation: eqBar 1s ease-in-out infinite; }
+.interviewer .wave i:nth-child(2) { animation-delay: -.7s; } .interviewer .wave i:nth-child(3) { animation-delay: -.2s; }
+.interviewer .wave i:nth-child(4) { animation-delay: -.5s; } .interviewer .wave i:nth-child(5) { animation-delay: -.35s; }
+.interviewer__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.interviewer__auto {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--border); background: transparent; color: var(--text-2); font: 600 .78rem/1.2 var(--font-sans); cursor: pointer;
+}
+.interviewer__auto[aria-pressed="true"] { color: var(--text); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
+.interviewer__auto[aria-pressed="true"] svg { color: var(--primary-2); }
+.q-voice { display: flex; justify-content: flex-end; margin-top: 4px; }
+.voice-card .field { margin-top: 2px; }
+.voice-card select.select { max-width: 100%; }
+.voice-card .voice-note { font-size: .8rem; color: var(--muted); margin: 0; }
+@media (max-width: 560px) {
+  .interviewer { flex-wrap: wrap; }
+  .interviewer__actions { width: 100%; justify-content: flex-start; }
 }
 
 /* ---------- Motion preferences ---------- */

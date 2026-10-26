@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Medium post draft</title>
+<style>
+:root{color-scheme:light} body{font:19px/1.6 Georgia,serif;color:#242424;background:#fff;max-width:720px;margin:0 auto;padding:24px 16px 80px}
+.howto{font:15px/1.5 system-ui,sans-serif;background:#F3F1FF;border:1px solid #CFC7FF;border-radius:10px;padding:14px 18px;margin-bottom:28px}
+.howto ol{margin:6px 0 0 18px;padding:0} .meta{font:15px/1.5 system-ui,sans-serif;color:#555;border-left:3px solid #ccc;padding-left:12px;margin-bottom:24px}
+h1{font:700 40px/1.2 system-ui,sans-serif;margin:0 0 8px} h2{font:700 26px/1.3 system-ui,sans-serif;margin:40px 0 8px}
+code{font:15px/1.4 Menlo,monospace;background:#f2f2f2;padding:2px 5px;border-radius:4px} .cap{text-align:center;color:#6b6b6b;font-size:15px;margin-top:-6px}
+figure.ph{margin:24px 0} .ph-box{font:600 14px/1.4 system-ui,sans-serif;background:#FFF6D6;border:2px dashed #E0B400;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+figure.ph img{width:100%;border-radius:6px;border:1px solid #eee} a{color:#1a8917}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:-24px 0 20px;background:#fff;border-bottom:1px solid #eee;font:14px/1.4 system-ui,sans-serif}
+.toolbar button{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:8px 14px;border-radius:999px;border:1px solid #d0d0d0;background:#fff;color:#242424;font:600 14px/1 system-ui,sans-serif;cursor:pointer}
+.toolbar button:hover{border-color:#999}
+.toolbar button.primary{background:#1a8917;border-color:#1a8917;color:#fff}
+.toolbar button.primary:hover{background:#156d12}
+.toolbar button:focus-visible{outline:3px solid #9ad097;outline-offset:2px}
+.toolbar .status{color:#1a8917;font-weight:600;min-height:1.2em}
+.toolbar .status.err{color:#b3261e}
+</style></head><body>
+<div class="toolbar" role="toolbar" aria-label="Copy tools">
+<button type="button" class="primary" id="copyPost">📋 Copy post</button>
+<button type="button" id="copySubtitle">Copy subtitle</button>
+<button type="button" id="copyTags">Copy tags</button>
+<span class="status" id="copyStatus" role="status" aria-live="polite"></span>
+</div>
+<div class="howto"><b>How to post this on Medium</b>
+<ol><li>Click <b>📋 Copy post</b>, open a new Medium story, click into the title line and paste (Cmd/Ctrl + V). The title, headings, bold text, lists, code and links come along.</li>
+<li>Each <code>[Image: …]</code> line marks where a picture goes. Click on that line, delete the text, then use Medium's ⊕ → Image button to add the named file from the <code>images</code> folder. Put <code>01-cover.png</code> first so it becomes the preview image.</li>
+<li>When you click Publish, use <b>Copy subtitle</b> and <b>Copy tags</b> to fill in the story preview and topics.</li></ol></div>
+<div class="meta"><p><strong>Subtitle:</strong> 834 questions across 19 technologies, with a quick answer for revision, a deep answer for the follow-ups, and spaced review for what you got wrong. Free, no account.</p><p><strong>Tags (Medium allows 5):</strong> Interview Preparation · JavaScript · React Native · Web Development · Bangladesh</p></div>
+<h1>I Built a Free Interview Prep App for Developers in Bangladesh, in English and বাংলা</h1>
+<figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>01-cover.png</b></div><img src="images/01-cover.png" alt=""></figure><p>A few weeks before an interview, most of us do the same thing. We open a folder of PDFs someone shared in a Facebook group ("Top 50 React Interview Questions", "JS notes"), read the answers, nod, and feel ready.</p><p>Then the interviewer asks a follow-up.</p><p><em>"Okay, <code>useEffect</code> runs after render. Why did your effect run twice?"</em><br><em>"You said <code>WHERE</code> filters rows. So why can't you use <code>COUNT(*)</code> in it?"</em></p><p>A one-line answer you memorised doesn't survive that second question. And if you think through technical ideas half in Bangla and half in English, like most developers here do, an English-only explanation is one more thing to translate in your head under pressure.</p><p>So I built <strong>Interview Prep BD</strong>: a free, bilingual practice app that helps you <em>say</em> the answer, not just read it.</p><p>👉 <strong>Try it:</strong> <a href="https://devshojol.github.io/Interview-prep-BD/">devshojol.github.io/Interview-prep-BD</a><br>👉 <strong>Source code:</strong> <a href="https://github.com/devshojol/Interview-prep-BD">github.com/devshojol/Interview-prep-BD</a></p><h2>What's inside</h2><ul><li><strong>834 questions across 19 technologies:</strong> HTML, CSS, JavaScript, React, Next.js, <strong>React Native (with Expo and SQLite)</strong>, Node.js, Express, NestJS, MongoDB, Mongoose, PostgreSQL, SQL, Drizzle ORM, Redis, Vector Databases, Docker, NGINX and AWS.</li><li><strong>A behavioural &amp; projects section:</strong> "Tell me about yourself", "Walk me through your project", "What's the hardest bug you've fixed?", and more.</li><li><strong>Every question in English, বাংলা, or both side by side.</strong></li><li><strong>Four levels:</strong> Easy, Medium, Hard and Extreme, from viva-style fundamentals to senior system design.</li><li><strong>A voice interviewer</strong> that reads questions aloud in English, so practice sounds like the real thing.</li></ul><h2>1. A quick answer first, the deep answer below</h2><p>Every question has two layers.</p><p>The <strong>quick answer</strong> is 1–3 plain sentences: the thing you'd say first in an interview. It's perfect for revising the night before.</p><p>The <strong>full answer</strong> below it explains <em>why</em> it works, with code, common mistakes, an interview tip and the follow-up questions an interviewer is likely to ask next. That's the part that gets you through the second and third question.</p><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>02-quick-and-full-answer-bilingual.png</b></div><img src="images/02-quick-and-full-answer-bilingual.png" alt=""></figure><p class="cap"><em>The quick answer on top, the full answer below, here in English and Bangla side by side.</em></p><h2>2. Real Bangla, not machine translation</h2><p>The Bangla is written the way developers here actually talk. Technical terms stay in English (<code>closure</code>, <code>event loop</code>, <code>index</code>), and the explanation around them is natural Bangla. You can switch between English, বাংলা and Both at any time, on desktop or phone.</p><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>03-bangla-on-mobile.png</b></div><img src="images/03-bangla-on-mobile.png" alt=""></figure><p class="cap"><em>A quick-recall SQL question in Bangla on a phone.</em></p><h2>3. Quick recall for written tests and viva rounds</h2><p>Many interviews here start with an MCQ test or a "viva", rapid fundamental questions. For that, each technology has <strong>10 quick-recall questions</strong> with short, plain answers and a tiny code example:</p><ul><li>What is hoisting, and how do <code>var</code>, <code>let</code> and <code>const</code> differ?</li><li><code>call</code> vs <code>apply</code> vs <code>bind</code>?</li><li><code>WHERE</code> vs <code>HAVING</code>?</li><li><code>app.use()</code> vs <code>app.get()</code> in Express?</li><li><code>find()</code> vs <code>findOne()</code> vs <code>findById()</code> in Mongoose?</li><li>What is Metro, and what is Hermes, in React Native?</li></ul><p>There's a dedicated flashcard deck for them too. Shuffle and flip through 190 cards on the bus.</p><h2>4. Practise like it's the real interview</h2><p>Reading answers feels productive, but it isn't practice. The app is built around one habit: <strong>answer out loud first, then check.</strong></p><ul><li><strong>Interview mode</strong> hides the answer until you reveal it.</li><li>You <strong>grade yourself honestly</strong>: correct, partially correct or incorrect.</li><li><strong>MCQs are graded automatically.</strong></li><li><strong>Practice sessions</strong> (10, 20 or 30 questions) and a <strong>timed interview simulation</strong> that goes from easy to hard.</li><li>A <strong>daily challenge</strong> of three questions.</li></ul><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>04-dashboard.png</b></div><img src="images/04-dashboard.png" alt=""></figure><p class="cap"><em>The dashboard shows your accuracy, weighted score, streak and what's due for review.</em></p><h2>5. An interviewer that actually speaks</h2><p>Reading a question on a screen is not the same as hearing it from a person across the table. In the <strong>Interview Simulation</strong> and the <strong>Daily Challenge</strong>, an English voice now reads each question aloud ("Question 3…"), then hands over to you: <em>"Your turn: answer out loud."</em></p><ul><li>Replay a question any time, or press <strong>V</strong>.</li><li><strong>Listen</strong> buttons on every question page, in practice sessions and on flashcards. Flashcards can read the question, then the quick answer when you flip.</li><li>Pick the voice and speed in Settings, and choose where questions are read automatically.</li><li>It uses your browser's built-in voices, so there's nothing to install. Chrome and Edge usually have the most natural-sounding ones.</li></ul><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>08-voice-interviewer.png</b></div><img src="images/08-voice-interviewer.png" alt=""></figure><p class="cap"><em>The interviewer reads the question aloud, then it's your turn to answer out loud.</em></p><h2>6. Your mistakes come back on a schedule</h2><p>Anything you get wrong or only half right comes back for review after 1 day, then 3, 7, 14 and 30 days. The app also spots <strong>weak topics</strong> (for example, React "Effects and Cleanup") so you know what to study next. No more re-reading things you already know.</p><h2>7. Behavioural and project questions</h2><p>Technical rounds get the attention, but the first and last questions are often non-technical. The behavioural section tells you <strong>what the interviewer is checking</strong>, gives you a <strong>structure</strong> (like STAR), and a <strong>sample answer</strong> with blanks you fill in with your own story. No fake statistics, no copy-paste scripts.</p><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>05-behavioural-question.png</b></div><img src="images/05-behavioural-question.png" alt=""></figure><p class="cap"><em>"Walk me through a project you built": how to answer, a sample answer, common mistakes and likely follow-ups.</em></p><h2>8. React Native, including Expo and SQLite</h2><p>As a React Native developer myself, I wanted this section to cover what you actually do at work, not just "what is a component". It includes:</p><ul><li>Core components, Flexbox, safe areas and the keyboard</li><li>FlatList and FlashList performance</li><li>Expo Router navigation and deep links</li><li>Choosing between AsyncStorage, SecureStore, MMKV and <strong>expo-sqlite</strong></li><li>SQLite migrations with <code>SQLiteProvider</code>, transactions, prepared statements and SQL injection</li><li>Offline-first sync</li><li>EAS Build and OTA updates (including what happens when an OTA update breaks native compatibility)</li><li>The New Architecture</li></ul><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>07-react-native-storage.png</b></div><img src="images/07-react-native-storage.png" alt=""></figure><p class="cap"><em>"Where should each piece of data go?": AsyncStorage vs SecureStore vs MMKV vs SQLite.</em></p><h2>Up to date, and checked</h2><p>Interview answers go stale fast. A 2022 answer about Next.js caching is simply wrong today. The content targets current versions (React 19.3, Next.js 16, Node.js 26 LTS, Express 5, React Native 0.88 with Expo SDK 58), labels legacy APIs as legacy, and links to the official docs for every answer.</p><p>Wherever it was possible, the code examples were actually <strong>run</strong>: JavaScript and Node.js snippets in Node, SQL queries in SQLite. The question bank also went through a full review pass for technical accuracy. There's a <strong>Versions &amp; Sources</strong> page in the app that lists what each answer is based on.</p><p>If you spot a mistake, please open an issue on GitHub. That's the whole point of making it open source.</p><figure class="ph"><div class="ph-box">🖼️ Insert image here: <b>06-technologies.png</b></div><img src="images/06-technologies.png" alt=""></figure><p class="cap"><em>Pick a technology, or filter by area: frontend, mobile, backend, databases, DevOps &amp; cloud, AI &amp; search, career skills.</em></p><h2>A simple two-week plan</h2><p>If you have an interview coming up, here's how I'd use it:</p><ol><li><strong>Days 1–3:</strong> Flip through the quick-recall flashcards for your stack. Mark anything you can't explain.</li><li><strong>Days 4–10:</strong> One 20-question practice session a day in Interview mode. Answer out loud, then grade yourself honestly. Turn on the voice so you <em>hear</em> each question first.</li><li><strong>Every day:</strong> Clear your review queue first. Those are your weak spots.</li><li><strong>Days 11–13:</strong> Run the timed interview simulation, and practise the behavioural questions out loud.</li><li><strong>Day 14:</strong> Read only the quick answers for your weak topics. Sleep.</li></ol><h2>Free, private, no account</h2><p>It's a plain HTML, CSS and JavaScript app with no backend and no login. Your progress stays in your browser, and you can export it as a backup. Want it offline? Download the repo and open <code>index.html</code>; it runs straight from your computer.</p><hr><p>I'd love to hear what you think: which topics are missing, which answers helped, and what tripped you up in your last interview. Leave a comment, star the repo, or open an issue.</p><p><strong>Good luck with your next interview. শুভকামনা!</strong> 🚀</p><p>👉 <a href="https://devshojol.github.io/Interview-prep-BD/">devshojol.github.io/Interview-prep-BD</a></p>
+<script>
+(function () {
+  function status(msg, err) { var el = document.getElementById('copyStatus'); el.textContent = msg; el.className = 'status' + (err ? ' err' : ''); clearTimeout(status.t); status.t = setTimeout(function () { el.textContent = ''; }, 4000); }
+  // Build a clean copy of the article: title onwards, images swapped for placeholder lines.
+  function articleClone() {
+    var wrap = document.createElement('div');
+    var start = document.querySelector('h1');
+    for (var n = start; n; n = n.nextSibling) {
+      if (n.nodeType !== 1) continue;
+      if (n.matches('figure.ph')) {
+        var name = n.querySelector('.ph-box b').textContent;
+        var p = document.createElement('p'); p.textContent = '[Image: ' + name + ']'; wrap.appendChild(p);
+      } else if (n.tagName !== 'SCRIPT') wrap.appendChild(n.cloneNode(true));
+    }
+    return wrap;
+  }
+  function plainText(node) {
+    var out = [];
+    node.childNodes.forEach(function (el) {
+      if (el.nodeType !== 1) return;
+      if (el.tagName === 'UL' || el.tagName === 'OL') {
+        Array.prototype.forEach.call(el.children, function (li, i) { out.push((el.tagName === 'OL' ? (i + 1) + '. ' : '- ') + li.textContent.trim()); });
+      } else if (el.tagName === 'HR') out.push('---');
+      else { var c = el.cloneNode(true); c.querySelectorAll('br').forEach(function (br) { br.replaceWith('\n'); }); out.push(c.textContent.trim()); }
+      out.push('');
+    });
+    return out.join('\n').trim() + '\n';
+  }
+  function fallbackCopy(html, text) {
+    var box = document.createElement('div');
+    box.setAttribute('contenteditable', 'true');
+    box.style.cssText = 'position:fixed;left:-9999px;top:0;width:700px;';
+    box.innerHTML = html;
+    document.body.appendChild(box);
+    var range = document.createRange(); range.selectNodeContents(box);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    sel.removeAllRanges(); box.remove();
+    if (!ok && text) { var ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { ok = false; } ta.remove(); }
+    return ok;
+  }
+  function copyRich(html, text, done) {
+    if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
+      navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })])
+        .then(function () { done(true); }, function () { done(fallbackCopy(html, text)); });
+    } else done(fallbackCopy(html, text));
+  }
+  function copyText(text, done) {
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text.replace(/&/g, '&amp;').replace(/</g, '&lt;'), text)); });
+    else done(fallbackCopy(text.replace(/&/g, '&amp;').replace(/</g, '&lt;'), text));
+  }
+  function metaValue(label) {
+    var p = Array.prototype.find.call(document.querySelectorAll('.meta p'), function (x) { return x.textContent.indexOf(label) === 0; });
+    return p ? p.textContent.slice(p.textContent.indexOf(':') + 1).trim() : '';
+  }
+  document.getElementById('copyPost').addEventListener('click', function () {
+    var a = articleClone();
+    copyRich(a.innerHTML, plainText(a), function (ok) { status(ok ? 'Post copied. Paste it into a new Medium story.' : 'Copy failed. Select the article and press Cmd/Ctrl + C.', !ok); });
+  });
+  document.getElementById('copySubtitle').addEventListener('click', function () {
+    copyText(metaValue('Subtitle'), function (ok) { status(ok ? 'Subtitle copied.' : 'Copy failed.', !ok); });
+  });
+  document.getElementById('copyTags').addEventListener('click', function () {
+    var tags = metaValue('Tags').split('·').map(function (x) { return x.trim(); }).filter(Boolean).join(', ');
+    copyText(tags, function (ok) { status(ok ? 'Tags copied: ' + tags : 'Copy failed.', !ok); });
+  });
+})();
+</script>
+</body></html>
