@@ -51,6 +51,8 @@ QUESTIONS = [
 
             Load balancer-এ sticky session দিলে symptom লুকানো যায়, কিন্তু restart আর অসম load-এ সেটা ভেঙে পড়ে; তাই shared store-ই সঠিক সমাধান। বাস্তবে Redis store package সহ `express-session` এই কাজটা করে দেয়; ভেতরের logic একই।
         """,
+        quick_en=r"""In-memory sessions exist only in one instance's RAM, so when the load balancer sends the next request to another instance the user looks logged out (restarts wipe them too). Store sessions in shared Redis with a TTL, keep only the session id in the cookie, and `DEL` the key on logout.""",
+        quick_bn=r"""In-memory session শুধু একটা instance-এর RAM-এ থাকে, তাই load balancer পরের request অন্য instance-এ পাঠালে user logged out দেখায় (restart-এও মুছে যায়)। Session রাখো shared Redis-এ TTL-সহ, cookie-তে রাখো শুধু session id, আর logout-এ key-টা `DEL` করো।""",
         ex_en=r"""
             - **Security basics:** the session id must be long and random (e.g. 32 bytes from `crypto.randomBytes`); the cookie should be `HttpOnly`, `Secure` and `SameSite`; regenerate the id after login to prevent session fixation.
             - **What to store:** keep sessions small — user id, role, CSRF token. Don't cache the whole user profile there.
@@ -122,6 +124,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""They are lost. Redis Pub/Sub is fire-and-forget with at-most-once delivery: a message goes only to clients subscribed at that instant and is never stored.""",
         a_bn=r"""এগুলো হারিয়ে যায়। Redis Pub/Sub fire-and-forget, at-most-once delivery: message শুধু ওই মুহূর্তে subscribe করা client-দের কাছে যায়, কখনো store হয় না।""",
+        quick_en=r"""They are lost: Pub/Sub delivers only to clients subscribed at the moment of publishing and never stores messages (at-most-once). If consumers must catch up after downtime, use Streams with consumer groups.""",
+        quick_bn=r"""Message-গুলো হারিয়ে যায়: Pub/Sub শুধু publish-এর মুহূর্তে subscribe করা client-দের কাছে পাঠায়, কিছুই store করে না (at-most-once)। Downtime-এর পরে consumer-কে catch up করতে হলে consumer group-সহ Streams ব্যবহার করো।""",
         ex_en=r"""
             Option A is what people *expect* from a message broker, but Pub/Sub has no queue or history. `PUBLISH` doesn't fail when nobody is listening — it simply returns the number of clients that received the message (here `0`). Persistence settings (option D) are irrelevant because messages never enter the keyspace.
 
@@ -158,6 +162,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Set `maxmemory-policy allkeys-lru` (or `allkeys-lfu`). The default policy is `noeviction`, which rejects writes at the limit; an `allkeys-*` policy lets Redis evict any key, which is exactly what a pure cache wants.""",
         a_bn=r"""`maxmemory-policy allkeys-lru` (বা `allkeys-lfu`) set করো। Default policy হলো `noeviction`, যেটা limit-এ পৌঁছালে write reject করে; `allkeys-*` policy Redis-কে যেকোনো key evict করতে দেয় — pure cache-এর ঠিক এটাই দরকার।""",
+        quick_en=r"""Set `maxmemory-policy allkeys-lru` (or `allkeys-lfu`). The default `noeviction` rejects writes at the limit, and `volatile-*` policies only evict keys that have a TTL, which most of these keys don't.""",
+        quick_bn=r"""`maxmemory-policy allkeys-lru` (বা `allkeys-lfu`) set করো। Default `noeviction` limit-এ পৌঁছালে write reject করে, আর `volatile-*` policy শুধু TTL-ওয়ালা key evict করে, অথচ এখানে বেশিরভাগ key-এর TTL নেই।""",
         ex_en=r"""
             Option A is the trap: `volatile-*` policies only evict keys that **have a TTL**. With most keys lacking one, Redis finds little or nothing to evict and behaves like `noeviction`. Option C risks the OS swapping or the OOM killer terminating Redis. Option D confuses persistence with memory — AOF is a durability log, not overflow storage.
 
@@ -204,6 +210,8 @@ QUESTIONS = [
 
             Hash-এ **per-field expiry**-র জন্য (Redis 7.4+) `HEXPIRE`/`HPEXPIRE` ব্যবহার করো, `HTTL` দিয়ে দেখো, `HPERSIST` দিয়ে সরাও। Redis 8.0 যোগ করেছে `HSETEX` (এক command-এ TTL সহ field set) আর `HGETEX` (field পড়া আর তার TTL set/clear করা)। আগে আলাদা TTL পাওয়ার জন্যই মানুষ এই data আলাদা আলাদা key-তে ভাগ করত।
         """,
+        quick_en=r"""Redis expires keys lazily when they're touched and with a background cycle that samples keys with TTLs, so unread expired keys can linger briefly, and freed memory isn't always returned to the OS. For per-field expiry in a hash, use `HEXPIRE`/`HTTL` (7.4+) or `HSETEX`/`HGETEX` (8.0+).""",
+        quick_bn=r"""Redis key expire করে দুইভাবে: key touch করার সময় lazy check, আর একটা background cycle যেটা TTL-ওয়ালা key sample করে মুছে। তাই কেউ না পড়লে expired key কিছুক্ষণ থেকে যেতে পারে, আর free হওয়া memory সবসময় OS-এ ফেরত যায় না। Hash-এর field-ভিত্তিক expiry-র জন্য `HEXPIRE`/`HTTL` (7.4+) বা `HSETEX`/`HGETEX` (8.0+)।""",
         ex_en=r"""
             - **Replicas:** replicas don't expire keys on their own; they wait for the primary to send a `DEL`. They do, however, report logically expired keys as missing on reads, so clients stay consistent.
             - **Mass expiry and latency:** if a huge number of keys share the same expiry second, the active cycle can spend noticeable time deleting them — another reason to add jitter to TTLs.
@@ -245,7 +253,7 @@ QUESTIONS = [
         id="redis-019", sub="Node.js Integration", diff="medium", type="conceptual",
         prio="high", market="both", mins=7,
         tags=["node-redis", "ioredis", "nodejs", "connections", "resp3"],
-        ver="node-redis 6.3; ioredis 6.0; Node.js 24 LTS", vs=True, status="stable",
+        ver="node-redis 6.3; ioredis 6.0; Node.js 26 LTS", vs=True, status="stable",
         q_en=r"""How do you integrate Redis into a production Node.js service? Compare node-redis and ioredis, and explain how you handle connections, errors and shutdown.""",
         q_bn=r"""Production Node.js service-এ Redis কীভাবে integrate করো? node-redis আর ioredis তুলনা করো, আর connection, error ও shutdown কীভাবে সামলাও ব্যাখ্যা করো।""",
         a_en=r"""
@@ -274,6 +282,8 @@ QUESTIONS = [
             - `SUBSCRIBE` আর blocking command (`BLMOVE`, `XREADGROUP BLOCK`)-এর জন্য **আলাদা connection** ব্যবহার করো, কারণ এগুলো connection আটকে রাখে।
             - Shutdown-এ (`SIGTERM`) নতুন কাজ নেওয়া বন্ধ করে `client.close()` call করো, যাতে চলমান command-গুলো শেষ হয়।
         """,
+        quick_en=r"""Create one long-lived client per process (node-redis is what Redis recommends; ioredis is also common), always attach an `'error'` listener, configure reconnects and timeouts, use separate connections for subscribe and blocking commands, and close the client on `SIGTERM`.""",
+        quick_bn=r"""প্রতি process-এ একটা long-lived client রাখো (Redis node-redis recommend করে; ioredis-ও বেশ প্রচলিত), সবসময় `'error'` listener লাগাও, reconnect আর timeout ঠিক করো, subscribe আর blocking command-এর জন্য আলাদা connection নাও, আর `SIGTERM`-এ client close করো।""",
         ex_en=r"""
             - **Offline queue:** by default node-redis queues commands while disconnected and sends them after reconnecting. For a cache that's often wrong — requests hang instead of falling back to the DB. `disableOfflineQueue: true` makes commands fail fast.
             - **RESP3 default (v6):** some reply shapes changed compared with v5; pin `RESP: 2` (node-redis) or `protocol: 2` (ioredis) if you're mid-migration.
@@ -370,6 +380,8 @@ QUESTIONS = [
             - `maxmemory`-র ~75–80%-এ আর `evicted_keys`-এ alert দাও; RDB/AOF rewrite-এর সময় fork-এর copy-on-write-এর জন্য জায়গা রাখো।
             - Campaign peak-এর জন্য capacity plan করো।
         """,
+        quick_en=r"""Stabilise first: check `INFO memory` and the policy (likely `noeviction`); switch a pure cache to `allkeys-lru`, otherwise raise `maxmemory` or free safe keys. Then find what grew (keys without TTL, big keys, client buffers) and fix it for good: TTLs, capped collections, separate cache and durable instances, alerts.""",
+        quick_bn=r"""আগে পরিস্থিতি সামলাও: `INFO memory` আর policy দেখো (সম্ভবত `noeviction`); pure cache হলে `allkeys-lru`-তে নাও, নইলে `maxmemory` বাড়াও বা নিরাপদ key মুছো। তারপর খোঁজো কী বেড়েছে (TTL ছাড়া key, big key, client buffer) আর স্থায়ী fix দাও: TTL, সীমিত collection, cache আর durable instance আলাদা, alert।""",
         ex_en=r"""
             - **Why `UNLINK`, not `DEL`, for big keys:** `DEL` frees memory synchronously on the main thread — deleting a key with millions of elements can block Redis. `UNLINK` removes the key immediately and reclaims memory in a background thread.
             - **Fragmentation:** if `used_memory` is moderate but RSS is much higher (ratio well above ~1.5), the allocator is holding freed memory; active defragmentation (`activedefrag`) can help.
@@ -441,6 +453,8 @@ QUESTIONS = [
             - **(b) Session store:** `everysec` সহ AOF, backup-এর জন্য RDB, আর একটা replica। এক সেকেন্ডের login হারানো চলে; সব session হারানো চলে না।
             - **(c) Stream job queue:** AOF `everysec` (job হারানো ব্যয়বহুল হলে `always`) সাথে RDB backup আর replication; consumer-কে idempotent রাখো, কারণ crash হলে শেষ মুহূর্তের কিছু হারাতে বা replay হতে পারে।
         """,
+        quick_en=r"""RDB saves compact point-in-time snapshots (fast restarts, but you lose writes since the last one); AOF logs every write and with `everysec` loses about a second. Use no persistence or RDB only for a pure cache, AOF `everysec` plus RDB backups and a replica for sessions, and AOF plus idempotent consumers for a Stream queue.""",
+        quick_bn=r"""RDB ছোট point-in-time snapshot নেয় (দ্রুত restart, কিন্তু শেষ snapshot-এর পরের write হারায়); AOF প্রতিটা write log করে, `everysec`-এ মোটামুটি এক second-এর write হারাতে পারে। Pure cache-এ persistence বন্ধ বা শুধু RDB, session store-এ AOF `everysec` + RDB backup + replica, আর Stream queue-তে AOF + idempotent consumer।""",
         ex_en=r"""
             - **Defaults:** in the stock `redis.conf`, AOF is off (`appendonly no`); RDB snapshots run on the default save schedule unless disabled. Managed services have their own defaults — check them.
             - **Both enabled:** on restart Redis loads the AOF, since it's the most complete. The Redis docs suggest using both if you want durability comparable to a traditional database.
@@ -521,6 +535,8 @@ QUESTIONS = [
 
             **Failure mode:** Redis failover-এ শেষ মুহূর্তের decrement হারাতে পারে (async replication) — reserve করার পর `WAIT` দিয়ে window কমাও আর DB constraint-এর ওপর ভরসা রাখো। Redis down হলে কেনার জন্য **fail closed** ("আবার চেষ্টা করুন"), আর product page কঠোর concurrency limit সহ CDN/DB থেকে serve করো।
         """,
+        quick_en=r"""Pre-warm the product and absorb the hot key with a tiny in-process cache and a CDN. For buying, add admission control, then reserve stock atomically in one Lua script (check, decrement, record the buyer, append to a Stream) so overselling is impossible, and let workers create orders in PostgreSQL idempotently.""",
+        quick_bn=r"""Product আগে থেকে warm করো, আর hot key-এর চাপ ছোট in-process cache ও CDN দিয়ে সামলাও। কেনার path-এ আগে admission control, তারপর একটা Lua script-এ atomically stock reserve করো (check, decrement, buyer record, Stream-এ append), তাই oversell হতে পারে না; worker-রা idempotent-ভাবে PostgreSQL-এ order বানাবে।""",
         ex_en=r"""
             - **Why not decrement stock in PostgreSQL directly?** 200k users hitting one row means massive lock contention on a single hot row. Redis serialises the decrements in memory at very high throughput, and the DB receives only successful reservations.
             - **Cluster note:** all keys used by one script must share a hash slot — `stock:{sku42}`, `buyers:{sku42}`, `reservations:{sku42}`, `orders:pending:{sku42}`. That deliberately puts this SKU on one shard; if a single key becomes too hot, split stock into N buckets (`stock:{sku42:0}`…) and pick one at random.

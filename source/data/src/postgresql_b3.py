@@ -86,6 +86,8 @@ QUESTIONS = [
             - **Window function**-গুলো `DISTINCT ON` row বাদ দেওয়ার *আগেই* customer-এর সব joined row-এর উপর চলে, তাই `count(o.id)` আর `sum(o.amount)` প্রতিটা order দেখতে পায়। `count(*)` না দিয়ে `count(o.id)` দেওয়ায় Sumi-র জন্য 0 আসে, কারণ NULL গোনা হয় না; `coalesce` তার NULL sum-কে 0 বানায়।
             - `DISTINCT ON (c.id)` প্রতিটা `c.id` group-এর `ORDER BY` অনুযায়ী **প্রথম** row রাখে। এর expression-গুলো `ORDER BY`-এর বাম দিকের item-এর সাথে মিলতে হয়, আর `ORDER BY`-এর বাকি অংশ ঠিক করে কোন row জিতবে: সবচেয়ে নতুন date, তারপর সবচেয়ে বড় id — এজন্যই Nadia-র সর্বশেষ order 106, 105 নয়।
         """,
+        quick_en=r"""`LEFT JOIN` customers to orders so customers without orders stay, compute `count(o.id)` and `sum(o.amount)` as window functions over each customer, then `DISTINCT ON (c.id)` with `ORDER BY c.id, o.ordered_at DESC, o.id DESC` keeps the latest order per customer.""",
+        quick_bn=r"""Customer-কে order-এর সাথে `LEFT JOIN` করো যাতে order ছাড়া customer-ও থাকে, প্রতিটা customer-এর ওপর window function দিয়ে `count(o.id)` আর `sum(o.amount)` হিসাব করো, তারপর `ORDER BY c.id, o.ordered_at DESC, o.id DESC`-সহ `DISTINCT ON (c.id)` প্রতিটা customer-এর সর্বশেষ order রাখে।""",
         ex_en=r"""
             - **Portable version:** `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY ordered_at DESC, id DESC)` in a subquery, then filter `rn = 1`. `DISTINCT ON` is PostgreSQL-only, but shorter and usually fast.
             - **Top-N per customer (e.g. last 3 orders)** on big tables: `LEFT JOIN LATERAL (SELECT ... FROM orders WHERE customer_id = c.id ORDER BY ordered_at DESC LIMIT 3) o ON true` with an index on `(customer_id, ordered_at DESC)` — one short index scan per customer instead of sorting all orders.
@@ -139,6 +141,8 @@ QUESTIONS = [
             - `password_encryption = scram-sha-256` (PG14 থেকে default), পুরনো password reset করো যাতে SCRAM হিসেবে জমা হয়, আর `pg_hba.conf`-এ `hostssl ... scram-sha-256` ব্যবহার করো।
             - Role অনুযায়ী limit: `CONNECTION LIMIT`, `statement_timeout`।
         """,
+        quick_en=r"""A superuser bypasses every permission check and RLS, so one SQL injection becomes a full server compromise, and MD5 password auth is deprecated in PostgreSQL 18. Use a `NOLOGIN` owner role, a least-privilege app role, a read-only role, and SCRAM-SHA-256 over `hostssl`.""",
+        quick_bn=r"""Superuser সব permission check আর RLS এড়িয়ে যায়, তাই একটা SQL injection-ই পুরো server দখলে নিয়ে যায়, আর PostgreSQL 18-এ MD5 password auth deprecated। একটা `NOLOGIN` owner role, কম privilege-এর app role, একটা read-only role আর `hostssl`-এর ওপর SCRAM-SHA-256 ব্যবহার করো।""",
         ex_en=r"""
             - Identity columns don't need extra grants; `serial` columns also need `USAGE` on their sequences, a common "permission denied for sequence" error.
             - Since PostgreSQL 15, ordinary users can no longer `CREATE` in the `public` schema by default — keep it that way.
@@ -272,6 +276,8 @@ QUESTIONS = [
 
             সমাধান: check আর write-কে **একটা atomic statement** বানাও — `UPDATE ... SET balance = balance - $1 WHERE user_id = $2 AND balance >= $1`। `UPDATE` row lock নেয়; concurrent withdrawal অপেক্ষা করে, তারপর PostgreSQL নতুন commit হওয়া row-এর উপর `WHERE` আবার যাচাই করে। দ্বিতীয়টা 100 দেখে, 0 row match করে, আর পরিষ্কারভাবে fail করে। Ledger insert-সহ পুরোটা একটা client-এ transaction-এর ভেতরে রাখো।
         """,
+        quick_en=r"""It's a lost update: two requests read the same balance, both pass the check, and one write overwrites the other. Fix it with one atomic statement, `UPDATE ... SET balance = balance - $1 WHERE user_id = $2 AND balance >= $1`, inside a transaction on a single client.""",
+        quick_bn=r"""এটা lost update: দুটো request একই balance পড়ে, দুটোই check পাস করে, আর একটার write অন্যটাকে overwrite করে দেয়। একটা atomic statement দিয়ে ঠিক করো, `UPDATE ... SET balance = balance - $1 WHERE user_id = $2 AND balance >= $1`, একই client-এ একটা transaction-এর ভেতরে।""",
         ex_en=r"""
             - **Other valid fixes:** `SELECT ... FOR UPDATE` inside a transaction (when the decision logic must live in the app), or Repeatable Read/Serializable with automatic retries on serialization failures (`40001`).
             - Add `CHECK (balance >= 0)` on the table as a last line of defence — a bug elsewhere then fails loudly instead of creating money.
@@ -330,6 +336,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`FOR UPDATE SKIP LOCKED`. Each worker locks the row it picks, and other workers simply **skip** rows that are already locked and take the next one, so there's no waiting and no double processing.""",
         a_bn=r"""`FOR UPDATE SKIP LOCKED`। প্রতিটা worker যে row বাছে সেটা lock করে, আর অন্য worker-রা already-locked row-গুলো শুধু **এড়িয়ে** পরেরটা নেয় — ফলে কোনো অপেক্ষা নেই, একই job দুবার process-ও হয় না।""",
+        quick_en=r"""`FOR UPDATE SKIP LOCKED`: each worker locks the job it picks, and other workers skip rows that are already locked and take the next one, so nobody waits and no job is processed twice.""",
+        quick_bn=r"""`FOR UPDATE SKIP LOCKED`: প্রতিটা worker যে job নেয় সেটা lock করে, আর অন্য worker-রা আগে থেকে lock করা row বাদ দিয়ে পরেরটা নেয়, তাই কেউ অপেক্ষা করে না আর একই job দুবার চলে না।""",
         ex_en=r"""
             - `NOWAIT` is the tempting wrong answer: it doesn't skip — it raises an error immediately if the row is locked, so workers would keep failing on the same first job.
             - `FOR SHARE` lets several workers share-lock the same row; they'd all pick the same job and then block each other on the `UPDATE`.
@@ -379,6 +387,8 @@ QUESTIONS = [
             3. সামনে **PgBouncer** (বা RDS Proxy-র মতো managed proxy) বসাও **transaction pooling mode**-এ: হাজারো client connection একটা ছোট server pool (ধরো 40–60) ভাগাভাগি করে।
             4. দরকার হলে ভারী read traffic read replica-তে সরাও।
         """,
+        quick_en=r"""30 pods × 20 connections = 600, but `max_connections` defaults to 100, and raising it hurts because each connection is a process. Shrink the app pools, release clients, set `idle_in_transaction_session_timeout`, and put PgBouncer in transaction mode in front.""",
+        quick_bn=r"""30 pod × 20 connection = 600, কিন্তু `max_connections`-এর default 100, আর এটা বাড়ানো ক্ষতিকর কারণ প্রতিটা connection একটা আলাদা process। App pool ছোট করো, client release নিশ্চিত করো, `idle_in_transaction_session_timeout` দাও, আর সামনে transaction mode-এ PgBouncer বসাও।""",
         ex_en=r"""
             **Transaction-mode caveats** — a client gets a server connection only for the duration of a transaction, so session state doesn't survive between transactions:
             - `SET` (use `SET LOCAL` inside a transaction instead), session-level advisory locks, `LISTEN/NOTIFY`, temporary tables, and `WITH HOLD` cursors don't work reliably.
@@ -492,6 +502,8 @@ QUESTIONS = [
             - `RETURNING` দ্বিতীয় query ছাড়াই চূড়ান্ত value ফেরত পাঠায়।
             - পুরোটা **atomic আর race-safe**: application code-এ "আগে SELECT, তারপর INSERT বা UPDATE"-এর মতো নয় — দুটো concurrent feed একই নতুন SKU দুবার insert করতে পারে না।
         """,
+        quick_en=r"""Use one `INSERT ... VALUES ... ON CONFLICT (sku) DO UPDATE SET qty = inventory.qty + EXCLUDED.qty RETURNING sku, qty`. `EXCLUDED` is the proposed row, and the statement is atomic and race-safe, unlike "SELECT, then INSERT or UPDATE" in app code.""",
+        quick_bn=r"""একটাই statement: `INSERT ... VALUES ... ON CONFLICT (sku) DO UPDATE SET qty = inventory.qty + EXCLUDED.qty RETURNING sku, qty`। `EXCLUDED` হলো insert করতে চাওয়া row, আর app code-এ "আগে SELECT, তারপর INSERT বা UPDATE"-এর মতো নয়, এটা atomic আর race-safe।""",
         ex_en=r"""
             - If the same SKU appears twice in one batch, PostgreSQL raises `ON CONFLICT DO UPDATE command cannot affect row a second time` — aggregate the batch first (`GROUP BY sku`).
             - `ON CONFLICT DO NOTHING` is the "insert if absent" variant (e.g. idempotent event ingestion).
@@ -547,6 +559,8 @@ QUESTIONS = [
 
             **Hot merchant row:** প্রতিটা credit একটা row lock-এর পেছনে লাইনে দাঁড়ায়। উপায়: lock-এর সময় খুব ছোট রাখো (সবশেষে lock করো, দ্রুত commit করো); **credit**-এর জন্য balance সাথে সাথে update না করে শুধু ledger entry append করো আর নিয়মিত roll up করো (balance = snapshot + সাম্প্রতিক entry); অথবা merchant balance-কে N-টা **bucket row**-তে ভাগ করে random bucket-এ credit করো (balance = bucket-গুলোর যোগফল)। Debit-এ এখনো real-time check লাগে, তবে merchant-রা debit অনেক কম করে।
         """,
+        quick_en=r"""Use a double-entry ledger with Read Committed plus `SELECT ... FOR UPDATE` on both accounts, locked in a consistent order (lowest id first) to avoid deadlocks, and Serializable only for multi-row invariants. For a hot merchant row, append credits and roll them up, or split the balance into bucket rows.""",
+        quick_bn=r"""Double-entry ledger রাখো, Read Committed-এর সাথে দুটো account-এ `SELECT ... FOR UPDATE`, deadlock এড়াতে সবসময় একই ক্রমে lock করো (ছোট id আগে), আর Serializable শুধু multi-row invariant-এর জন্য। Hot merchant row-এর জন্য credit append করে পরে roll up করো, অথবা balance-কে কয়েকটা bucket row-এ ভাগ করো।""",
         ex_en=r"""
             - **Anomalies by level (PostgreSQL):** no dirty reads at any level. Read Committed allows non-repeatable reads and lost updates if you do read-modify-write in the app. Repeatable Read gives one snapshot per transaction and raises `40001` if you try to update a row someone else changed after your snapshot — but still allows **write skew** (two transactions read overlapping data and write different rows). Serializable prevents write skew too.
             - Classic write-skew example: two on-call doctors each check "is someone else still on call?" and both go off call. Each updated a different row, so row locks never conflicted.
@@ -668,6 +682,8 @@ QUESTIONS = [
 
             **প্রতিরোধ:** bulk-load/backfill job শেষে `ANALYZE` চালাবে; বড় আর ব্যস্ত table-এর জন্য `autovacuum_analyze_scale_factor` কমাও; `n_mod_since_analyze` আর ধীর query-র plan নজরে রাখো (`auto_explain`, `pg_stat_statements`)।
         """,
+        quick_en=r"""Stale statistics: the planner estimated 1 row for `under_review` but got 200,000, so it chose a nested loop that ran the inner index scan 200,000 times. Run `ANALYZE payments;`, and make backfill jobs run `ANALYZE` when they finish.""",
+        quick_bn=r"""Statistics পুরোনো হয়ে গেছে: planner `under_review`-এর জন্য 1টা row ধরেছিল কিন্তু পেয়েছে 200,000, তাই এমন nested loop বেছেছে যেটা ভেতরের index scan 200,000 বার চালিয়েছে। `ANALYZE payments;` চালাও, আর backfill job শেষে যেন `ANALYZE` চালায় সেটা নিশ্চিত করো।""",
         ex_en=r"""
             - **How to read it:** in each node, `cost=...rows=N` is the estimate and `actual ... rows=N loops=L` is reality (PG18 prints actual rows with decimals; total rows = rows × loops). A mismatch of 10× or more is the first thing to look for. In PG18, `BUFFERS` is included automatically with `ANALYZE`, and `Index Searches` shows how many index descents happened.
             - Auto-analyze triggers after roughly `autovacuum_analyze_threshold + autovacuum_analyze_scale_factor × rows` changes (defaults 50 + 10%). On a 100M-row table that's 10M changes — far too late for a new hot value.

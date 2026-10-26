@@ -55,6 +55,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Docker captures the main process's stdout and stderr through a logging driver, and you read them with `docker logs -f` (or `docker compose logs -f api`). So the app should write structured JSON logs to stdout/stderr, not to files inside the container, and leave shipping and storage to the platform.",
+   "bn": "Docker main process-এর stdout আর stderr একটা logging driver দিয়ে ধরে রাখে, আর `docker logs -f` (বা `docker compose logs -f api`) দিয়ে পড়া যায়। তাই app-এর উচিত container-এর ভেতরে file-এ না লিখে stdout/stderr-এ structured JSON log লেখা; log পাঠানো আর জমা রাখার কাজ platform-এর।"
+  },
   "commonMistakes": {
    "en": "Writing logs to `/app/logs/*.log` inside the container, running `tail -f` through `docker exec`, and leaving the default driver unrotated on servers.",
    "bn": "Container-এর ভেতরে `/app/logs/*.log`-এ log লেখা, `docker exec` দিয়ে `tail -f` চালানো, আর server-এ default driver rotation ছাড়া ফেলে রাখা।"
@@ -128,6 +132,10 @@
    "docker-006",
    "docker-017"
   ],
+  "quickAnswer": {
+   "en": "Docker's root daemon created the missing `./uploads` as `root:root`, and a bind mount keeps host ownership, so UID 1000 can't write to it. In production use a named volume with the directory owned by `node` in the image (or S3); locally match the UID or use Compose Watch, never `chmod 777`.",
+   "bn": "`./uploads` না থাকায় root হিসেবে চলা Docker daemon সেটা `root:root` হিসেবে বানিয়েছে, আর bind mount host-এর ownership-ই দেখায়, তাই UID 1000 লিখতে পারে না। Production-এ named volume ব্যবহার করো, image-এ directory-টা `node`-এর owner করে রাখো (বা S3-তে রাখো); local-এ UID মিলাও বা Compose Watch ব্যবহার করো, কখনো `chmod 777` না।"
+  },
   "commonMistakes": {
    "en": "`chmod -R 777`, switching the image back to root, or `chown`ing by user name without checking that the numeric UIDs match.",
    "bn": "`chmod -R 777` করা, image আবার root-এ ফিরিয়ে নেওয়া, অথবা numeric UID মিলছে কি না না দেখে user name দিয়ে `chown` করা।"
@@ -213,6 +221,10 @@
    "docker-016",
    "docker-008"
   ],
+  "quickAnswer": {
+   "en": "It's `undefined`: the project `.env` only feeds `${…}` interpolation in `compose.yaml` and isn't injected into containers by itself. Pass the value with `environment: { JWT_SECRET: ${JWT_SECRET} }` or `env_file: .env`.",
+   "bn": "এটা `undefined`: project-এর `.env` শুধু `compose.yaml`-এর `${…}` interpolation-এ কাজে লাগে, container-এ নিজে থেকে inject হয় না। Container-এ value দিতে `environment: { JWT_SECRET: ${JWT_SECRET} }` বা `env_file: .env` ব্যবহার করো।"
+  },
   "code": {
    "language": "yaml",
    "source": "# .env  (project directory, next to compose.yaml)\n#   API_PORT=8080\n#   JWT_SECRET=dev-secret\n\n# compose.yaml\nservices:\n  api:\n    build: .\n    ports:\n      - \"127.0.0.1:${API_PORT}:3000\""
@@ -253,7 +265,7 @@
    "musl",
    "image-size"
   ],
-  "technologyVersion": "Node.js 24 LTS images, distroless nodejs24-debian13",
+  "technologyVersion": "Node.js 24 (Maintenance LTS) images, distroless nodejs24-debian13",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -301,6 +313,10 @@
    "docker-015",
    "docker-017"
   ],
+  "quickAnswer": {
+   "en": "`node:24` is huge and best only as a build stage, while `-slim` (glibc) is the safe default with the best native-module compatibility. Alpine is smallest but uses musl, which some native modules handle badly, and distroless has no shell or package manager: more hardened, but harder to debug.",
+   "bn": "`node:24` অনেক বড়, শুধু build stage-এর জন্যই ভালো; আর `-slim` (glibc) নিরাপদ default, native module-এর সাথে compatibility সবচেয়ে ভালো। Alpine সবচেয়ে ছোট কিন্তু musl ব্যবহার করে, কিছু native module-এ সমস্যা হয়; আর distroless-এ shell বা package manager নেই: বেশি hardened, কিন্তু debug করা কঠিন।"
+  },
   "commonMistakes": {
    "en": "Shipping the full `node:24` image to production, copying `node_modules` built on glibc into an Alpine runtime (or vice versa), and using `CMD [\"node\", \"server.js\"]` with distroless (it becomes `node node server.js`).",
    "bn": "Production-এ পুরো `node:24` image পাঠানো, glibc-তে build করা `node_modules` Alpine runtime-এ copy করা (বা উল্টোটা), আর distroless-এ `CMD [\"node\", \"server.js\"]` দেওয়া (এতে হয়ে যায় `node node server.js`)।"
@@ -370,6 +386,10 @@
    "docker-030",
    "docker-022"
   ],
+  "quickAnswer": {
+   "en": "The image was built as `linux/arm64` on Apple silicon, so the amd64 server can't execute its binaries (`exec format error`). Build release images in CI as multi-platform images with `docker buildx build --platform linux/amd64,linux/arm64 --push`, never from laptops.",
+   "bn": "Apple silicon-এ image `linux/arm64` হিসেবে build হয়েছে, তাই amd64 server তার binary চালাতে পারে না (`exec format error`)। Release image CI-তে `docker buildx build --platform linux/amd64,linux/arm64 --push` দিয়ে multi-platform হিসেবে build করো, laptop থেকে কখনো না।"
+  },
   "commonMistakes": {
    "en": "Reinstalling Docker on the server, adding `--platform linux/amd64` to `docker run` (that just picks a variant that doesn't exist), or cross-compiling native modules on `$BUILDPLATFORM` and copying them into the target image.",
    "bn": "Server-এ Docker নতুন করে install করা, `docker run`-এ `--platform linux/amd64` যোগ করা (এতে শুধু এমন একটা variant বাছাই হয় যেটার অস্তিত্বই নেই), অথবা `$BUILDPLATFORM`-এ native module compile করে target image-এ copy করা।"
@@ -462,6 +482,10 @@
    "docker-024",
    "docker-011"
   ],
+  "quickAnswer": {
+   "en": "Deploy immutable images by digest, add `restart: unless-stopped`, healthchecks and a graceful stop, and set memory, CPU and PID limits. Rotate logs (the default `json-file` driver doesn't), harden containers (non-root, read-only, `cap_drop`), publish only the reverse proxy, and back up named volumes.",
+   "bn": "Digest দিয়ে immutable image deploy করো, `restart: unless-stopped`, healthcheck আর graceful stop দাও, আর memory, CPU, PID limit set করো। Log rotate করো (default `json-file` driver নিজে করে না), container harden করো (non-root, read-only, `cap_drop`), শুধু reverse proxy publish করো, আর named volume-এর backup রাখো।"
+  },
   "commonMistakes": {
    "en": "Running `docker compose up --build` on the production server, leaving log rotation at defaults, publishing Redis/Postgres ports, and having no backups because \"the volume is on the server\".",
    "bn": "Production server-এ `docker compose up --build` চালানো, log rotation default-এ ফেলে রাখা, Redis/Postgres-এর port publish করা, আর \"volume তো server-এই আছে\" ভেবে কোনো backup না রাখা।"
@@ -545,6 +569,10 @@
    "docker-031",
    "docker-018"
   ],
+  "quickAnswer": {
+   "en": "Docker builds and runs containers on one host; Kubernetes is a cluster orchestrator that keeps declared state across many nodes (scheduling, self-healing, rolling updates, autoscaling). Compose on a VM suits a small team with a few services; Kubernetes pays off with many services, multi-node HA and a team to run it.",
+   "bn": "Docker একটা host-এ image build আর container চালায়; Kubernetes হলো cluster orchestrator, যেটা অনেক node জুড়ে declare করা state বজায় রাখে (scheduling, self-healing, rolling update, autoscaling)। ছোট team আর অল্প কয়েকটা service হলে VM-এ Compose-ই যথেষ্ট; অনেক service, multi-node HA আর চালানোর মতো team থাকলে Kubernetes লাভজনক।"
+  },
   "commonMistakes": {
    "en": "Saying \"Kubernetes replaced Docker\" (images are still built with Docker/BuildKit), or assuming Compose gives self-healing across hosts.",
    "bn": "\"Kubernetes Docker-কে replace করেছে\" বলা (image এখনো Docker/BuildKit দিয়েই build হয়), অথবা ধরে নেওয়া যে Compose একাধিক host জুড়ে self-healing দেয়।"
@@ -618,6 +646,10 @@
    "docker-017",
    "docker-023"
   ],
+  "quickAnswer": {
+   "en": "Both hand out root on the host: anyone reaching `docker.sock` or the unauthenticated TCP 2375 API can start a privileged container that mounts `/`. Instead, build in CI without the host daemon, deploy by pull (or Docker over SSH, or mTLS on 2376), and front any tool that needs the API with a filtering socket proxy.",
+   "bn": "দুটো প্রস্তাবই host-এর root দিয়ে দেয়: `docker.sock` বা authentication-ছাড়া TCP 2375 API-তে যে পৌঁছাতে পারে, সে `/` mount করা privileged container চালাতে পারে। তার বদলে CI-তে host daemon ছাড়া build করো, pull করে deploy করো (বা SSH বা 2376-এ mTLS দিয়ে Docker), আর যে tool-এর API লাগে তার সামনে filtering socket proxy রাখো।"
+  },
   "commonMistakes": {
    "en": "Believing `-v /var/run/docker.sock:/var/run/docker.sock:ro` is read-only access, adding developers to the `docker` group as a \"non-root\" convenience, and opening 2375 behind a \"secret\" port number.",
    "bn": "ভাবা যে `-v /var/run/docker.sock:/var/run/docker.sock:ro` মানে read-only access, \"non-root\" সুবিধার নামে developer-দের `docker` group-এ যোগ করা, আর \"গোপন\" port number-এর আড়ালে 2375 খুলে রাখা।"

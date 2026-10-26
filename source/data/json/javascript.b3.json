@@ -61,6 +61,10 @@
    "js-006",
    "js-020"
   ],
+  "quickAnswer": {
+   "en": "`Rahim`, `undefined`, `undefined`, `Rahim`, `Karim`, `Karim`. A regular function's `this` comes from how it is called (`undefined` for a plain call in strict mode), an arrow uses the `this` of where it was written, and a bound function can't be re-bound with `.call`.",
+   "bn": "`Rahim`, `undefined`, `undefined`, `Rahim`, `Karim`, `Karim`। Regular function-এর `this` ঠিক হয় কীভাবে call করা হলো তা দিয়ে (strict mode-এ plain call হলে `undefined`), arrow function যেখানে লেখা হয়েছে সেখানকার `this` নেয়, আর `bind` করা function-কে `.call` দিয়ে আবার বদলানো যায় না।"
+  },
   "commonMistakes": {
    "en": "Thinking `this` is fixed where the function is defined (true only for arrows), or that an arrow inside an object literal gets the object as `this`.",
    "bn": "ভাবা যে function যেখানে define করা সেখানেই `this` ঠিক হয়ে যায় (এটা শুধু arrow-এর জন্য সত্য), অথবা object literal-এর ভেতরের arrow সেই object-কে `this` হিসেবে পায়।"
@@ -132,6 +136,10 @@
    "js-029",
    "js-034"
   ],
+  "quickAnswer": {
+   "en": "`A E G C D F B`. Synchronous code runs first (the async function runs until its `await`), then every microtask in FIFO order (`C`, `D`, then the `await` continuation `F`), and only then the `setTimeout` task `B`.",
+   "bn": "`A E G C D F B`। আগে synchronous code চলে (async function তার `await` পর্যন্ত চলে), তারপর সব microtask FIFO order-এ (`C`, `D`, তারপর `await`-এর পরের অংশ `F`), আর সবশেষে `setTimeout`-এর task `B`।"
+  },
   "commonMistakes": {
    "en": "Putting `B` before the promise callbacks because \"the timer was registered first\", or treating `E` as asynchronous — the body of an async function runs synchronously until the first `await`.",
    "bn": "\"Timer আগে register হয়েছে\" ভেবে `B`-কে promise callback-গুলোর আগে বসানো, অথবা `E`-কে asynchronous মনে করা — async function-এর body প্রথম `await` পর্যন্ত synchronously চলে।"
@@ -197,6 +205,10 @@
    "js-016",
    "js-023"
   ],
+  "quickAnswer": {
+   "en": "Option A: the sync logs come first (`script start`, `first start`, `second`, `promise executor`, `script end`), then the microtasks `first end`, `then 1`, `then 2`, and finally `timeout`. `await` suspends `first` even though `second()` is already fulfilled, and its continuation is queued before `then 1`.",
+   "bn": "Option A: আগে sync log-গুলো (`script start`, `first start`, `second`, `promise executor`, `script end`), তারপর microtask `first end`, `then 1`, `then 2`, আর শেষে `timeout`। `second()` আগেই fulfil হলেও `await` `first`-কে থামিয়ে দেয়, আর তার পরের অংশ `then 1`-এর আগেই queue-তে ঢোকে।"
+  },
   "code": {
    "language": "javascript",
    "source": "async function first() {\n  console.log('first start');\n  await second();\n  console.log('first end');\n}\n\nasync function second() {\n  console.log('second');\n}\n\nconsole.log('script start');\nsetTimeout(() => console.log('timeout'), 0);\nfirst();\nnew Promise((resolve) => {\n  console.log('promise executor');\n  resolve();\n})\n  .then(() => console.log('then 1'))\n  .then(() => console.log('then 2'));\nconsole.log('script end');",
@@ -281,6 +293,10 @@
    "js-028",
    "js-030"
   ],
+  "quickAnswer": {
+   "en": "`Tommy makes a sound`, `3 4`, `4`, `false true`, `Tommy barks`, `Tommy barks replaced`. Reads check own properties first and then walk the prototype chain live, but replacing `Animal.prototype` affects only new instances, because `dog` keeps the prototype it was created with.",
+   "bn": "`Tommy makes a sound`, `3 4`, `4`, `false true`, `Tommy barks`, `Tommy barks replaced`। Property পড়ার সময় আগে নিজের property, তারপর live prototype chain দেখা হয়; কিন্তু `Animal.prototype` পুরো বদলে দিলে শুধু নতুন instance-এ প্রভাব পড়ে, কারণ `dog` তৈরির সময়ের prototype-ই ধরে রাখে।"
+  },
   "commonMistakes": {
    "en": "Thinking `dog.legs = 3` changes the prototype, or that replacing `Animal.prototype` updates all existing instances.",
    "bn": "ভাবা যে `dog.legs = 3` prototype বদলে দেয়, অথবা `Animal.prototype` replace করলে আগের সব instance update হয়ে যায়।"
@@ -352,6 +368,10 @@
    "js-023",
    "js-033"
   ],
+  "quickAnswer": {
+   "en": "`AggregateError 2 SyntaxError`. Both inputs reject, so `Promise.any` rejects with an `AggregateError` whose `errors` keep input order; `errors[0]` is the wrapper `Error`, and its `cause` is the original `SyntaxError` from `JSON.parse`.",
+   "bn": "`AggregateError 2 SyntaxError`। দুটো input-ই reject করে, তাই `Promise.any` একটা `AggregateError` দেয় যার `errors` input order-এ থাকে; `errors[0]` হলো wrapper `Error`, আর তার `cause` হলো `JSON.parse`-এর আসল `SyntaxError`।"
+  },
   "commonMistakes": {
    "en": "Re-throwing with `throw new Error(err.message)` — the original stack and type are lost. Use `{ cause: err }` instead.",
    "bn": "`throw new Error(err.message)` দিয়ে আবার throw করা — এতে original stack আর type হারিয়ে যায়। এর বদলে `{ cause: err }` ব্যবহার করো।"
@@ -442,6 +462,10 @@
    "js-033",
    "js-039"
   ],
+  "quickAnswer": {
+   "en": "Debounce keeps a timer id in a closure: each call clears the old timer and starts a new one, so `fn` runs once, with the latest arguments and `this`, after calls stop for `wait` ms, and `cancel()` clears the timer. Throttle instead runs `fn` at most once per interval while calls keep coming (scroll, mousemove).",
+   "bn": "Debounce একটা closure-এ timer id রাখে: প্রতিটা call পুরনো timer clear করে নতুন timer শুরু করে, তাই call থামার `wait` ms পরে `fn` একবারই চলে, সর্বশেষ argument আর সঠিক `this` নিয়ে; `cancel()` timer clear করে দেয়। Throttle এর বদলে call চলতে থাকলেও প্রতি interval-এ সর্বোচ্চ একবার `fn` চালায় (scroll, mousemove)।"
+  },
   "commonMistakes": {
    "en": "Creating a new debounced function on every render/keystroke (so the timer is never shared), or swapping the definitions of debounce and throttle.",
    "bn": "প্রতিটি render/keystroke-এ নতুন debounced function তৈরি করা (ফলে timer কখনো share হয় না), অথবা debounce আর throttle-এর সংজ্ঞা উল্টে ফেলা।"
@@ -524,6 +548,10 @@
    "js-011",
    "js-037"
   ],
+  "quickAnswer": {
+   "en": "Return a new Promise, wrap each item in `Promise.resolve`, store each result at its original index, and resolve when a `remaining` counter reaches zero (resolve `[]` right away for empty input). Pass the outer `reject` directly so the first rejection wins; O(n) time and space.",
+   "bn": "একটা নতুন Promise return করি, প্রতিটা item-কে `Promise.resolve` দিয়ে wrap করি, result রাখি তার আসল index-এ, আর `remaining` counter শূন্য হলে resolve করি (empty input-এ সাথে সাথে `[]`)। বাইরের `reject` সরাসরি দিয়ে দিই, তাই প্রথম rejection-ই জেতে; time আর space O(n)।"
+  },
   "commonMistakes": {
    "en": "Using `results.push(value)` (wrong order), forgetting the empty-array case (never resolves), or `await`-ing each promise in a loop — the results are in order, but it isn't fail-fast, and a later rejection can be reported as unhandled while you are still awaiting an earlier promise.",
    "bn": "`results.push(value)` ব্যবহার করা (ক্রম ভুল হয়), খালি array-র case ভুলে যাওয়া (কখনো resolve হয় না), অথবা loop-এ একটা একটা করে `await` করা — result ক্রমমতো আসে ঠিকই, কিন্তু এটা fail-fast নয়, আর আগের promise-এর জন্য অপেক্ষা করার সময় পরের কোনো rejection unhandled হিসেবে report হতে পারে।"

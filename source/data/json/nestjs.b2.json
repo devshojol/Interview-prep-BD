@@ -48,6 +48,10 @@
    "nest-017",
    "nest-026"
   ],
+  "quickAnswer": {
+   "en": "In NestJS 12 the core packages ship as ES modules and need Node.js 20.19+ or 22.12+, the versions where `require(esm)` works by default, so existing CommonJS apps can still load them.",
+   "bn": "NestJS 12-এ core package-গুলো ES module হিসেবে আসে আর Node.js 20.19+ বা 22.12+ লাগে — এই version-গুলোতে `require(esm)` default-এ চলে, তাই পুরোনো CommonJS app-ও এগুলো load করতে পারে।"
+  },
   "options": [
    {
     "en": "Core packages ship as ES modules and require Node.js 20.19+ or 22.12+; existing CommonJS apps can still load them through `require(esm)`",
@@ -114,6 +118,10 @@
    "nest-019",
    "nest-022"
   ],
+  "quickAnswer": {
+   "en": "Bootstrap fails: `ConfigModule.forRoot()` validates `process.env` against the schema while the module initialises, finds the required `DATABASE_URL` missing and throws a config validation error, so the app never starts listening.",
+   "bn": "Bootstrap fail করে: module initialise হওয়ার সময় `ConfigModule.forRoot()` schema দিয়ে `process.env` validate করে, required `DATABASE_URL` না পেয়ে config validation error throw করে, তাই app কখনো listen শুরুই করে না।"
+  },
   "code": {
    "language": "typescript",
    "source": "import { Module } from '@nestjs/common';\nimport { ConfigModule } from '@nestjs/config';\nimport { z } from 'zod';\n\n@Module({\n  imports: [\n    ConfigModule.forRoot({\n      isGlobal: true,\n      validationSchema: z.object({\n        DATABASE_URL: z.url(),\n        PORT: z.coerce.number().default(3000),\n      }),\n    }),\n  ],\n})\nexport class AppModule {}"
@@ -197,6 +205,10 @@
    "nest-001",
    "nest-026"
   ],
+  "quickAnswer": {
+   "en": "Express is a minimal, unopinionated HTTP library; NestJS is an opinionated framework that runs on top of Express (or Fastify) and adds modules, DI, decorators, pipes, guards and testing tools. Pick Express for small services and prototypes, NestJS for large, long-lived codebases and bigger teams.",
+   "bn": "Express একটা minimal, unopinionated HTTP library; NestJS একটা opinionated framework যেটা Express (বা Fastify)-এর উপরেই চলে এবং module, DI, decorator, pipe, guard আর testing tool যোগ করে। ছোট service বা prototype-এর জন্য Express, বড় ও দীর্ঘমেয়াদি codebase আর বড় team-এর জন্য NestJS।"
+  },
   "commonMistakes": {
    "en": "Saying NestJS \"replaces\" Express or is \"faster\"; claiming Express can't scale to large apps (it can, with discipline); ignoring the learning-curve and boilerplate cost.",
    "bn": "বলা যে NestJS, Express-কে \"replace\" করে বা \"দ্রুত\"; দাবি করা যে Express বড় app-এ scale করে না (discipline থাকলে করে); learning curve আর boilerplate-এর খরচ উপেক্ষা করা।"
@@ -253,6 +265,10 @@
    "nest-021",
    "nest-029"
   ],
+  "quickAnswer": {
+   "en": "Middleware → guards → interceptors (before) → pipes → route handler → interceptors (after) → exception filters, and the filters run only when something throws.",
+   "bn": "ক্রমটা হলো: প্রথমে middleware, তারপর guard, তারপর interceptor-এর আগের অংশ, তারপর pipe, তারপর route handler, ফেরার পথে interceptor-এর পরের অংশ; আর কিছু throw হলে শুধু তখনই exception filter চলে।"
+  },
   "options": [
    {
     "en": "Guards → Middleware → Pipes → Interceptors → Handler → Exception filters",
@@ -328,6 +344,10 @@
    "nest-012",
    "nest-029"
   ],
+  "quickAnswer": {
+   "en": "Implement `intercept(context, next)` and use RxJS on `next.handle()`: `tap({ next, error })` logs the duration for successful and failed requests, and `map()` wraps the result in `{ data, meta }` after setting `x-request-id`. Register both with `APP_INTERCEPTOR` so Nest can inject their dependencies.",
+   "bn": "`intercept(context, next)` লিখে `next.handle()`-এর উপর RxJS operator লাগাই: `tap({ next, error })` success আর failed দুই request-এরই duration log করে, আর `map()` `x-request-id` set করে result-কে `{ data, meta }`-এ wrap করে। দুটোকেই `APP_INTERCEPTOR` দিয়ে register করি, যাতে Nest এদের dependency inject করতে পারে।"
+  },
   "commonMistakes": {
    "en": "Using `map` for logging (it changes the value if you forget to return it); catching errors without rethrowing (turns failures into 200 responses); wrapping file streams in JSON; `new`-ing interceptors that need DI.",
    "bn": "Logging-এর জন্য `map` ব্যবহার করা (return করতে ভুলে গেলে value বদলে যায়); error ধরে আবার throw না করা (failure 200 response হয়ে যায়); file stream-কে JSON-এ wrap করা; DI লাগে এমন interceptor `new` করে বানানো।"
@@ -401,6 +421,10 @@
    "nest-015",
    "nest-007"
   ],
+  "quickAnswer": {
+   "en": "`@CurrentUser()` is built with `createParamDecorator`, reading `request.user` (or one field of it) from the `ExecutionContext`. `@Auth(...roles)` uses `applyDecorators` to combine `SetMetadata` for the roles with `@UseGuards(JwtAuthGuard, RolesGuard)`, and the roles guard reads that metadata with `Reflector`.",
+   "bn": "`@CurrentUser()` বানাই `createParamDecorator` দিয়ে, যেটা `ExecutionContext` থেকে `request.user` (বা তার একটা field) পড়ে। `@Auth(...roles)` বানাই `applyDecorators` দিয়ে — role-এর জন্য `SetMetadata` আর `@UseGuards(JwtAuthGuard, RolesGuard)` একসাথে, আর roles guard সেই metadata `Reflector` দিয়ে পড়ে।"
+  },
   "commonMistakes": {
    "en": "Reading metadata only from the handler and ignoring class-level decorators; expecting custom param decorators to be validated automatically; using raw string keys scattered across files instead of exported constants.",
    "bn": "শুধু handler থেকে metadata পড়া আর class-level decorator উপেক্ষা করা; ধরে নেওয়া যে custom param decorator নিজে থেকেই validate হবে; exported constant না রেখে বিভিন্ন file-এ raw string key ছড়িয়ে রাখা।"
@@ -483,6 +507,10 @@
    "nest-014",
    "nest-028"
   ],
+  "quickAnswer": {
+   "en": "Make it secure by default: a global `JwtAuthGuard` (`APP_GUARD`) verifies Bearer tokens with `@nestjs/jwt`, a `@Public()` decorator opens the few public routes, and a global `RolesGuard` reads `@Roles('admin')` via `Reflector` and returns 403. Ownership checks stay in the service because they need data.",
+   "bn": "Secure by default রাখি: global `JwtAuthGuard` (`APP_GUARD`) `@nestjs/jwt` দিয়ে Bearer token verify করে, `@Public()` decorator দিয়ে অল্প কয়েকটা public route খোলা রাখি, আর global `RolesGuard` `Reflector` দিয়ে `@Roles('admin')` পড়ে দরকার হলে 403 দেয়। Ownership check service-এ থাকে, কারণ তার জন্য data লাগে।"
+  },
   "commonMistakes": {
    "en": "Putting auth in middleware (no access to route metadata); storing access tokens in `localStorage` without considering XSS; long-lived access tokens with no revocation; checking roles but not resource ownership.",
    "bn": "Auth middleware-এ রাখা (route metadata পাওয়া যায় না); XSS না ভেবে `localStorage`-এ access token রাখা; revoke করার উপায় ছাড়া দীর্ঘমেয়াদি access token; role check করা কিন্তু resource ownership check না করা।"
@@ -548,6 +576,10 @@
    "nest-006",
    "nest-017"
   ],
+  "quickAnswer": {
+   "en": "The nested items are never validated: `@IsArray()` only checks the array, and without `@ValidateNested({ each: true })` and `@Type(() => OrderItemDto)` the elements stay plain objects, so their decorators and `whitelist` are ignored. Adding those two decorators fixes it.",
+   "bn": "Nested item-গুলো কখনো validate-ই হয় না: `@IsArray()` শুধু array কি না দেখে, আর `@ValidateNested({ each: true })` ও `@Type(() => OrderItemDto)` ছাড়া element-গুলো plain object থেকে যায়, তাই তাদের decorator বা `whitelist` কাজ করে না। ওই দুটো decorator যোগ করলেই ঠিক হয়।"
+  },
   "commonMistakes": {
    "en": "Adding only `@ValidateNested()` (elements still plain objects, so nothing is validated); adding only `@Type()`; assuming `whitelist` protects nested objects automatically.",
    "bn": "শুধু `@ValidateNested()` দেওয়া (element তখনও plain object, তাই কিছুই validate হয় না); শুধু `@Type()` দেওয়া; ধরে নেওয়া যে `whitelist` নিজে থেকেই nested object রক্ষা করে।"

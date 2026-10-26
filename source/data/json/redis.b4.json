@@ -62,6 +62,10 @@
    "redis-001",
    "redis-011"
   ],
+  "quickAnswer": {
+   "en": "In 7.4 Redis moved from BSD to source-available licences, so the Linux Foundation forked Valkey from 7.2.4. Redis 8 added AGPLv3, became \"Redis Open Source\" and bundled JSON, the Query Engine and Vector Sets. Core commands behave the same in both, so only check provider support for newer features.",
+   "bn": "Redis 7.4-এ BSD থেকে source-available licence-এ গেলে Linux Foundation 7.2.4 থেকে Valkey fork করে। Redis 8 AGPLv3 যোগ করে, নাম হয় \"Redis Open Source\", আর JSON, Query Engine, Vector Sets bundle করে। Core command দুটোতেই একইভাবে চলে, তাই শুধু নতুন feature-এর provider support দেখে নাও।"
+  },
   "commonMistakes": {
    "en": "Saying \"Redis is no longer open source\" (Redis 8 offers AGPLv3), or assuming Valkey and Redis 8 support exactly the same newest commands.",
    "bn": "\"Redis আর open source নয়\" বলা (Redis 8 AGPLv3 option দেয়), অথবা ধরে নেওয়া যে Valkey আর Redis 8 হুবহু একই নতুন command support করে।"
@@ -130,6 +134,10 @@
    "redis-001",
    "redis-006"
   ],
+  "quickAnswer": {
+   "en": "Memcached is a simple, multi-threaded cache of opaque strings with no persistence or replication; Redis adds rich data types, persistence, replication, Pub/Sub, Streams and scripting. Pick Memcached only for a huge, plain string cache your team already runs; otherwise use Redis.",
+   "bn": "Memcached হলো persistence বা replication ছাড়া opaque string-এর একটা সহজ multi-threaded cache; Redis-এ আছে rich data type, persistence, replication, Pub/Sub, Streams আর scripting। শুধু বিশাল সাধারণ string cache, যেটা team আগে থেকেই চালায়, সেখানে Memcached; বাকি সব ক্ষেত্রে Redis।"
+  },
   "commonMistakes": {
    "en": "Claiming Memcached is \"obsolete\" or that Redis is \"multi-threaded like Memcached\".",
    "bn": "Memcached-কে \"অচল\" বলা, অথবা দাবি করা যে Redis-ও \"Memcached-এর মতো multi-threaded\"।"
@@ -199,6 +207,10 @@
    "redis-002",
    "redis-004"
   ],
+  "quickAnswer": {
+   "en": "`OK`, `7`, `1`, `(nil)`, `\"7\"`, `OK`, `ERR value is not an integer or out of range`, `0`, `OK`, `1`, `-1`, `-2`. `SET ... NX` skips an existing key, `INCR` fails on text, `EXPIRE` on a missing key returns 0, and `TTL` gives -1 for no expiry and -2 for a missing key.",
+   "bn": "`OK`, `7`, `1`, `(nil)`, `\"7\"`, `OK`, `ERR value is not an integer or out of range`, `0`, `OK`, `1`, `-1`, `-2`। `SET ... NX` existing key বদলায় না, text-এ `INCR` error দেয়, missing key-তে `EXPIRE` 0 দেয়, আর `TTL`-এ -1 মানে expiry নেই, -2 মানে key-ই নেই।"
+  },
   "commonMistakes": {
    "en": "Expecting `SET ... NX` to return an error or `0`, thinking `INCR` on a missing key fails, or mixing up `-1` and `-2` from `TTL`.",
    "bn": "`SET ... NX` থেকে error বা `0` আশা করা, ভাবা যে না-থাকা key-এ `INCR` fail করে, অথবা `TTL`-এর `-1` আর `-2` গুলিয়ে ফেলা।"
@@ -273,6 +285,10 @@
    "redis-015",
    "redis-009"
   ],
+  "quickAnswer": {
+   "en": "Messages the crashed worker received but didn't `XACK` stay in the group's Pending Entries List, so nothing is lost: a restart with the same name re-reads them with ID `0`, or others take them with `XAUTOCLAIM`. Delivery is at-least-once, so make the handler idempotent and `XACK` only after the DB commit.",
+   "bn": "Crash করা worker যে message পেয়েছিল কিন্তু `XACK` করেনি, সেগুলো group-এর Pending Entries List-এ থেকে যায়, হারায় না: একই নামে restart হলে ID `0` দিয়ে আবার পড়ে, নইলে অন্যরা `XAUTOCLAIM` দিয়ে নিয়ে নেয়। Delivery at-least-once, তাই handler idempotent রাখো আর DB commit-এর পরেই `XACK` করো।"
+  },
   "commonMistakes": {
    "en": "Acknowledging the message before doing the work (a crash then loses it), or assuming the message is gone forever when the consumer dies.",
    "bn": "কাজ করার আগেই message acknowledge করা (তখন crash হলে সেটা হারায়), অথবা ধরে নেওয়া যে consumer মরে গেলে message চিরতরে হারিয়ে গেছে।"
@@ -332,6 +348,10 @@
    "redis-028",
    "redis-031"
   ],
+  "quickAnswer": {
+   "en": "Use a hash tag: `user:{42}:profile` and `user:{42}:settings`. Redis Cluster hashes only the part inside `{}`, so both keys land in the same slot and can be used in one transaction.",
+   "bn": "Hash tag ব্যবহার করো: `user:{42}:profile` আর `user:{42}:settings`। Redis Cluster শুধু `{}`-এর ভেতরের অংশ hash করে, তাই দুটো key একই slot-এ পড়ে আর একটা transaction-এ ব্যবহার করা যায়।"
+  },
   "options": [
    {
     "en": "Run `SELECT 1` so both keys live in the same logical database",
@@ -417,6 +437,10 @@
    "redis-027",
    "redis-030"
   ],
+  "quickAnswer": {
+   "en": "Replication copies a primary's writes to replicas asynchronously; Sentinel adds automatic failover and tells clients the current primary, but the data must fit one node. Cluster shards keys over 16,384 slots with built-in failover, at the cost of same-slot rules. Start with Sentinel and move to Cluster when one node isn't enough.",
+   "bn": "Replication primary-র write asynchronously replica-তে পাঠায়; Sentinel automatic failover দেয় আর client-কে বর্তমান primary জানায়, কিন্তু পুরো data একটা node-এ ধরতে হয়। Cluster 16,384 slot-এ key ভাগ করে আর built-in failover দেয়, তবে multi-key কাজ একই slot-এ রাখতে হয়। শুরু Sentinel দিয়ে; একটা node যথেষ্ট না হলে Cluster।"
+  },
   "commonMistakes": {
    "en": "Saying replicas make Redis \"lossless\", running two Sentinels, or moving to Cluster without checking for multi-key commands and Lua scripts that span slots.",
    "bn": "বলা যে replica থাকলে Redis \"lossless\" হয়, দুইটা Sentinel চালানো, অথবা slot জুড়ে থাকা multi-key command আর Lua script check না করেই Cluster-এ চলে যাওয়া।"
@@ -477,6 +501,10 @@
    "redis-002",
    "redis-006"
   ],
+  "quickAnswer": {
+   "en": "`EXEC` returns `1`, a `WRONGTYPE` error and `2`, and `counter` ends up `2`. A command that fails at runtime just returns its error inside the `EXEC` reply; the other commands still run, because Redis transactions have no rollback.",
+   "bn": "`EXEC` দেয় `1`, একটা `WRONGTYPE` error আর `2`, আর `counter` হয় `2`। Runtime-এ fail করা command শুধু `EXEC` reply-র ভেতরে নিজের error দেয়; বাকি command চলতেই থাকে, কারণ Redis transaction-এ rollback নেই।"
+  },
   "code": {
    "language": "text",
    "source": "SET name \"bd\"\nMULTI\nINCR counter\nLPUSH name x\nINCR counter\nEXEC\nGET counter"
@@ -571,6 +599,10 @@
    "redis-007",
    "redis-027"
   ],
+  "quickAnswer": {
+   "en": "Periodic stalls with low CPU mean something blocks the single command thread: check `SLOWLOG` for `KEYS` or big-key commands, `latest_fork_usec` for RDB/AOF fork stalls (worse with transparent huge pages), AOF fsync delays, mass expiry and swapping. Fix the cause: `SCAN`, `UNLINK`, disable THP, snapshot on a replica.",
+   "bn": "CPU কম অথচ মাঝে মাঝে stall মানে কিছু একটা single command thread আটকে দিচ্ছে: `SLOWLOG`-এ `KEYS` বা big-key command, `latest_fork_usec`-এ RDB/AOF fork stall (transparent huge pages থাকলে আরও খারাপ), AOF fsync delay, mass expiry আর swap দেখো। কারণ অনুযায়ী fix: `SCAN`, `UNLINK`, THP বন্ধ, replica-তে snapshot।"
+  },
   "commonMistakes": {
    "en": "Jumping straight to \"add more CPU\" or \"upgrade the instance\", running `KEYS *` or `MONITOR` on the struggling production node, or blaming the network without measuring.",
    "bn": "সরাসরি \"CPU বাড়াও\" বা \"instance upgrade করো\"-তে চলে যাওয়া, চাপে থাকা production node-এ `KEYS *` বা `MONITOR` চালানো, অথবা না মেপেই network-কে দোষ দেওয়া।"

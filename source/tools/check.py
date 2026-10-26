@@ -15,7 +15,7 @@ import sys
 from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from qb import TECHS, DIFFS, TYPES, MARKETS, PRIORITIES, STATUSES, JSON_DIR  # noqa: E402
+from qb import TECHS, DIFFS, TYPES, MARKETS, PRIORITIES, STATUSES, JSON_DIR, SHORT_TYPES  # noqa: E402
 
 BN_RE = re.compile(r"[ঀ-৿]")
 LATIN_RE = re.compile(r"[A-Za-z]")
@@ -23,8 +23,11 @@ INLINE_CODE_RE = re.compile(r"`[^`]*`")
 FENCE_RE = re.compile(r"```.*?```", re.S)
 ID_RE = re.compile(r"^[a-z0-9]+-[a-z0-9-]+$")
 
-TARGET = {"javascript": 40}
+TARGET = {"javascript": 40, "reactnative": 40}
 DEFAULT_TARGET = 32
+QUICK_TARGET = 10          # quick-recall questions per technology
+NON_TECH = {"behavioral"}  # categories without the technical difficulty/type targets
+SENTENCE_RE = re.compile(r"[.!?।](?:\s|$)")
 OFFICIAL_HINTS = [
     "developer.mozilla.org", "html.spec.whatwg.org", "w3.org", "web.dev", "tc39.es", "ecma-international.org",
     "react.dev", "nextjs.org", "nodejs.org", "expressjs.com", "docs.nestjs.com", "nestjs.com",
@@ -35,6 +38,9 @@ OFFICIAL_HINTS = [
     "learn.microsoft.com", "iso.org", "valkey.io", "huggingface.co", "platform.openai.com", "pinecone.io",
     "qdrant.tech", "weaviate.io", "milvus.io", "faiss.ai", "arxiv.org", "martin.kleppmann.com",
     "fastify.dev", "jwt.io", "jestjs.io", "vitest.dev", "zod.dev", "socket.io", "webassembly.org",
+    "reactnative.dev", "expo.dev", "reactnavigation.org", "swmansion.com", "callstack.github.io", "callstack.com",
+    "developer.android.com", "developer.apple.com", "firebase.google.com", "tanstack.com", "maestro.dev",
+    "mobile.dev", "wix.github.io", "shopify.github.io", "zustand.docs.pmnd.rs", "redux-toolkit.js.org",
 ]
 
 
@@ -113,6 +119,34 @@ def check_question(q, errors, warns):
             r2, _ = bn_ratio(en)
             if r2 > 0.05:
                 E(f"{field}.en contains Bangla text")
+    t = q.get("type")
+    qa = q.get("quickAnswer")
+    if t in SHORT_TYPES:
+        if qa:
+            E(f"type '{t}' must not have quickAnswer (its answer is already the short answer)")
+        a_en = (q.get("answer") or {}).get("en") or ""
+        if len(strip_code(a_en)) > 450:
+            W(f"type '{t}' answer.en is long ({len(a_en)} chars); keep it to 1-3 plain sentences")
+        if t == "quick" and q.get("difficulty") not in ("easy", "medium"):
+            E("quick-recall questions must be easy or medium")
+    else:
+        if not qa:
+            E("quickAnswer (quick_en/quick_bn) required")
+        else:
+            qen, qbn = qa.get("en") or "", qa.get("bn") or ""
+            if not qen or not qbn:
+                E("quickAnswer needs en+bn")
+            else:
+                if bn_ratio(qen)[0] > 0.05:
+                    E("quickAnswer.en contains Bangla text")
+                if bn_ratio(qbn)[0] < 0.2:
+                    E("quickAnswer.bn looks untranslated")
+                if "\n" in qen.strip():
+                    E("quickAnswer must be a single paragraph")
+                if len(qen) > 340:
+                    W(f"quickAnswer.en is long ({len(qen)} chars); aim for 1-3 sentences under ~300 chars")
+                if len(SENTENCE_RE.findall(strip_code(qen) + " ")) > 3:
+                    W("quickAnswer.en has more than 3 sentences")
     if q.get("commonMistakes"):
         cm = q["commonMistakes"]
         if not cm.get("en") or not cm.get("bn"):
@@ -126,7 +160,7 @@ def check_question(q, errors, warns):
 
     refs = q.get("references") or []
     if not refs:
-        E("at least one reference required")
+        (W if q.get("technology") in NON_TECH else E)("at least one reference required")
     for r in refs:
         u = r.get("url", "")
         if not u.startswith("https://"):
@@ -142,7 +176,6 @@ def check_question(q, errors, warns):
     if q.get("type") != "mcq" and not q.get("followUps"):
         W("no followUps")
 
-    t = q.get("type")
     if t == "mcq":
         opts = q.get("options")
         if not isinstance(opts, list) or len(opts) != 4:
@@ -217,14 +250,22 @@ def main(argv):
                     if j >= 0.85:
                         warns.append(f"{q.get('id')}: question very similar to {oid} (jaccard {j:.2f})")
             seen.append((q.get("id"), w))
-        d = Counter(q.get("difficulty") for q in qs)
+        main = [q for q in qs if q.get("type") not in SHORT_TYPES]
+        quick = [q for q in qs if q.get("type") == "quick"]
         ty = Counter(q.get("type") for q in qs)
         mk = Counter(q.get("market") for q in qs)
-        n = len(qs)
-        target = TARGET.get(t, DEFAULT_TARGET)
-        print("difficulty:", {k: d.get(k, 0) for k in DIFFS}, f"(target total >= {target})")
         print("types     :", dict(ty))
         print("market    :", dict(mk))
+        if t in NON_TECH:
+            print(f"{len(qs)} questions (no difficulty/type targets for this category)")
+            continue
+        print(f"quick-recall: {len(quick)} (target {QUICK_TARGET})")
+        if len(quick) < QUICK_TARGET:
+            warns.append(f"[{t}] only {len(quick)} quick-recall questions (target {QUICK_TARGET})")
+        d = Counter(q.get("difficulty") for q in main)
+        n = len(main)
+        target = TARGET.get(t, DEFAULT_TARGET)
+        print("difficulty:", {k: d.get(k, 0) for k in DIFFS}, f"(main bank; target total >= {target})")
         subs = Counter(q.get("subtopic") for q in qs)
         print("subtopics :", len(subs), "distinct")
         if n < target:

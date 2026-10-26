@@ -53,6 +53,10 @@
    "drizzle-011",
    "drizzle-020"
   ],
+  "quickAnswer": {
+   "en": "Drizzle is a TypeScript ORM for SQL databases: you define tables in TypeScript and the query API reads like SQL. Unlike TypeORM or Sequelize it infers types without code generation and has no entity manager, change tracking or lazy loading; 0.45.x is the stable line and v1.0 is still a release candidate.",
+   "bn": "Drizzle হলো SQL database-এর জন্য একটা TypeScript ORM: table define করা হয় TypeScript-এ, আর query API দেখতে প্রায় SQL-এর মতো। TypeORM বা Sequelize-এর মতো entity manager, change tracking বা lazy loading নেই, আর code generation ছাড়াই type infer হয়; stable line হলো 0.45.x, v1.0 এখনো release candidate।"
+  },
   "commonMistakes": {
    "en": "Calling Drizzle a \"query builder only\" (it also has a relational API and migrations tooling); claiming it needs a code-generation step like Prisma; saying v1.0 is already stable.",
    "bn": "Drizzle-কে \"শুধু query builder\" বলা (এর relational API আর migration tooling-ও আছে); দাবি করা যে Prisma-র মতো code-generation step লাগে; বলা যে v1.0 আগেই stable।"
@@ -122,6 +126,10 @@
    "drizzle-006",
    "drizzle-012"
   ],
+  "quickAnswer": {
+   "en": "Use `pgTable('users', {...})` with `integer().primaryKey().generatedAlwaysAsIdentity()`, `varchar({ length: 255 }).notNull().unique()`, a `pgEnum` column with `.default('user')` and `timestamp('created_at', { withTimezone: true }).notNull().defaultNow()`. Types come from `$inferSelect` and `$inferInsert`.",
+   "bn": "`pgTable('users', {...})`-এ `integer().primaryKey().generatedAlwaysAsIdentity()`, `varchar({ length: 255 }).notNull().unique()`, `.default('user')`-সহ একটা `pgEnum` column আর `timestamp('created_at', { withTimezone: true }).notNull().defaultNow()` লিখি। Type আসে `$inferSelect` আর `$inferInsert` থেকে।"
+  },
   "commonMistakes": {
    "en": "Using `serial` in new schemas; using `timestamp` without time zone for events; forgetting `.notNull()` (columns are nullable by default); defining the enum but not exporting it, so Drizzle Kit doesn't create the type.",
    "bn": "নতুন schema-য় `serial` ব্যবহার করা; event-এর জন্য time zone ছাড়া `timestamp`; `.notNull()` ভুলে যাওয়া (default-এ column nullable); enum define করে export না করা, ফলে Drizzle Kit type-টা তৈরি করে না।"
@@ -196,6 +204,10 @@
    "drizzle-023",
    "nest-022"
   ],
+  "quickAnswer": {
+   "en": "Drizzle wraps a driver: node-postgres (`drizzle-orm/node-postgres`, optionally with your own `Pool`), postgres.js, or a serverless driver such as Neon HTTP. Create `db` once per process and reuse it, pass `schema` if you want `db.query`, and close the pool on shutdown.",
+   "bn": "Drizzle নিজে connection খোলে না, একটা driver-কে wrap করে: node-postgres (`drizzle-orm/node-postgres`, চাইলে নিজের `Pool` দিয়ে), postgres.js, বা Neon HTTP-র মতো serverless driver। `db` প্রতি process-এ একবার তৈরি করে সব জায়গায় reuse করি, `db.query` চাইলে `schema` pass করি, আর shutdown-এ pool বন্ধ করি।"
+  },
   "commonMistakes": {
    "en": "Creating a new client or pool inside request handlers; forgetting to pass `schema` and then using `db.query`; never closing the pool, which keeps tests and scripts hanging.",
    "bn": "Request handler-এর ভেতরে নতুন client বা pool তৈরি করা; `schema` pass না করে `db.query` ব্যবহার করা; pool কখনো বন্ধ না করা, ফলে test আর script আটকে থাকে।"
@@ -270,6 +282,10 @@
    "drizzle-009",
    "drizzle-022"
   ],
+  "quickAnswer": {
+   "en": "`db.select().from(users).where(eq(users.id, 1))` returns an array; combine `and()` and `ilike()` with a partial `select({ id, email })`; use `insert().values().returning()`, `update().set().where()`, `delete().where().returning()` and `db.$count(users)`. Every builder runs only when awaited.",
+   "bn": "`db.select().from(users).where(eq(users.id, 1))` একটা array দেয়; partial `select({ id, email })`-এর সাথে `and()` আর `ilike()` ব্যবহার করি; তারপর `insert().values().returning()`, `update().set().where()`, `delete().where().returning()` আর `db.$count(users)`। প্রতিটা builder শুধু `await` করলেই চলে।"
+  },
   "commonMistakes": {
    "en": "Expecting `select()` to return a single object; forgetting `await`; update/delete without `where`; using `like` for case-insensitive search in PostgreSQL.",
    "bn": "ভাবা যে `select()` একটা object return করবে; `await` ভুলে যাওয়া; `where` ছাড়া update/delete; PostgreSQL-এ case-insensitive search-এর জন্য `like` ব্যবহার করা।"
@@ -330,6 +346,10 @@
    "drizzle-004",
    "drizzle-028"
   ],
+  "quickAnswer": {
+   "en": "`ilike(users.email, '%@gmail.com')`: it compiles to PostgreSQL's case-insensitive `ILIKE` with the pattern sent as a bound parameter, while `like` is case-sensitive and `eq` does no pattern matching.",
+   "bn": "`ilike(users.email, '%@gmail.com')`: এটা PostgreSQL-এর case-insensitive `ILIKE`-এ compile হয় আর pattern যায় bound parameter হিসেবে; `like` case-sensitive, আর `eq` কোনো pattern matching-ই করে না।"
+  },
   "options": [
    {
     "en": "`like(users.email, '%@gmail.com')`",
@@ -395,6 +415,10 @@
   "related": [
    "drizzle-002"
   ],
+  "quickAnswer": {
+   "en": "Only `name`. In `$inferInsert`, nullable columns and columns with defaults become optional, and an always-generated identity `id` is left out entirely.",
+   "bn": "শুধু `name`। `$inferInsert`-এ nullable column আর default থাকা column optional হয়ে যায়, আর always-generated identity `id` পুরোপুরি বাদ পড়ে।"
+  },
   "code": {
    "language": "typescript",
    "source": "export const users = pgTable('users', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  name: text().notNull(),\n  bio: text(),\n  createdAt: timestamp().defaultNow(),\n});\n\ntype NewUser = typeof users.$inferInsert;"
@@ -468,6 +492,10 @@
    "drizzle-017",
    "drizzle-026"
   ],
+  "quickAnswer": {
+   "en": "`drizzle-kit generate`: it diffs your TypeScript schema against the last snapshot and writes a new SQL migration file to review and commit, without connecting to the database.",
+   "bn": "`drizzle-kit generate`: এটা তোমার TypeScript schema-কে আগের snapshot-এর সাথে তুলনা করে একটা নতুন SQL migration file লেখে, যেটা review করে commit করা যায় — database-এ connect করারও দরকার হয় না।"
+  },
   "options": [
    {
     "en": "`drizzle-kit push`",
@@ -538,6 +566,10 @@
    "drizzle-011",
    "drizzle-028"
   ],
+  "quickAnswer": {
+   "en": "Only D: `sql.raw()` inserts its string into the SQL text verbatim, so a template string built from user input is injectable. Values interpolated into the `sql` tag or passed to the builders become bound parameters.",
+   "bn": "শুধু D: `sql.raw()` তার string হুবহু SQL text-এ বসিয়ে দেয়, তাই user input দিয়ে বানানো template string থাকলে SQL injection হয়। `sql` tag-এ interpolate করা বা builder-এ দেওয়া value bound parameter হিসেবে যায়।"
+  },
   "code": {
    "language": "typescript",
    "source": "const name = String(req.query.name); // untrusted input\n\n// A\nawait db.select().from(users).where(eq(users.name, name));\n// B\nawait db.select().from(users).where(sql`${users.name} = ${name}`);\n// C\nawait db.execute(sql`select * from users where name = ${name}`);\n// D\nawait db.execute(sql.raw(`select * from users where name = '${name}'`));"

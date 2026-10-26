@@ -63,6 +63,10 @@
    "drizzle-026",
    "drizzle-032"
   ],
+  "quickAnswer": {
+   "en": "Configure it with `defineConfig({ dialect, schema, out, dbCredentials })` in `drizzle.config.ts`. `generate` + `migrate` produces reviewed, versioned SQL files and suits CI and production; `push` syncs the schema straight to a database with no files or history, so keep it for local prototyping.",
+   "bn": "`drizzle.config.ts`-এ `defineConfig({ dialect, schema, out, dbCredentials })` দিয়ে configure করি। `generate` + `migrate` review করা, versioned SQL file বানায় — CI আর production-এর জন্য এটাই; `push` কোনো file বা history ছাড়াই schema সরাসরি database-এ বসিয়ে দেয়, তাই এটা শুধু local prototyping-এর জন্য।"
+  },
   "commonMistakes": {
    "en": "Using `push` in production; editing an already-applied migration file instead of adding a new one; running migrations concurrently from several pods; not committing the `meta` folder (snapshots/journal), which breaks the next `generate`.",
    "bn": "Production-এ `push` ব্যবহার করা; apply হয়ে যাওয়া migration file edit করা, নতুন না বানিয়ে; কয়েকটা pod থেকে একসাথে migration চালানো; `meta` folder (snapshot/journal) commit না করা, ফলে পরের `generate` ভেঙে যায়।"
@@ -122,6 +126,10 @@
    "drizzle-019",
    "drizzle-012"
   ],
+  "quickAnswer": {
+   "en": "PostgreSQL rejects it with `42P10` (no unique or exclusion constraint matching the ON CONFLICT specification), wrapped in a `DrizzleQueryError`, because `ON CONFLICT (label)` needs a unique index or constraint on exactly that column.",
+   "bn": "PostgreSQL `42P10` error দিয়ে statement reject করে (ON CONFLICT-এর সাথে মেলে এমন unique বা exclusion constraint নেই), আর Drizzle সেটা `DrizzleQueryError`-এ wrap করে; কারণ `ON CONFLICT (label)`-এর জন্য ঠিক ওই column-এ unique index বা constraint লাগে।"
+  },
   "code": {
    "language": "typescript",
    "source": "export const tags = pgTable('tags', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  label: text().notNull(),\n  usageCount: integer('usage_count').notNull().default(0),\n});\n\nawait db\n  .insert(tags)\n  .values({ label: 'nestjs', usageCount: 1 })\n  .onConflictDoUpdate({\n    target: tags.label,\n    set: { usageCount: sql`${tags.usageCount} + 1` },\n  });"
@@ -205,6 +213,10 @@
    "drizzle-018",
    "nest-025"
   ],
+  "quickAnswer": {
+   "en": "Since Drizzle 0.44, driver errors are wrapped in `DrizzleQueryError`, so `err.code` is undefined and the `23505` check never matches. Unwrap `err.cause` first, then check `code === '23505'` (and the constraint name) in one shared helper.",
+   "bn": "Drizzle 0.44 থেকে driver error `DrizzleQueryError`-এ wrap হয়ে আসে, তাই `err.code` এখন undefined আর `23505` check কখনো মেলে না। আগে `err.cause` unwrap করি, তারপর একটা shared helper-এ `code === '23505'` (আর constraint-এর নাম) check করি।"
+  },
   "commonMistakes": {
    "en": "Matching on the error message text; checking only `err.code`; mapping every 23505 to \"email taken\" without checking the constraint; logging the full error message with user data.",
    "bn": "Error message-এর text দিয়ে match করা; শুধু `err.code` check করা; constraint না দেখে প্রতিটা 23505-কে \"email taken\" বানানো; user data সহ পুরো error message log করা।"
@@ -284,6 +296,10 @@
    "drizzle-001",
    "drizzle-031"
   ],
+  "quickAnswer": {
+   "en": "Prisma has its own schema language, a generated client and a high-level object API with nested writes; Drizzle schemas are plain TypeScript, types are inferred without a generate step, and queries stay close to SQL. Pick Drizzle for SQL control, Prisma for a polished high-level API.",
+   "bn": "Prisma-র নিজস্ব schema language, generate করা client আর nested write-সহ high-level object API আছে; Drizzle-এর schema সাধারণ TypeScript, generate step ছাড়াই type infer হয়, আর query SQL-এর কাছাকাছি থাকে। SQL-এর উপর control চাইলে Drizzle, polished high-level API চাইলে Prisma।"
+  },
   "commonMistakes": {
    "en": "Claiming one is \"always faster\"; repeating outdated claims about engines or bundle size; saying Drizzle has no migrations or Prisma can't run raw SQL.",
    "bn": "দাবি করা যে একটা \"সবসময় দ্রুত\"; engine বা bundle size নিয়ে পুরোনো দাবি আবার বলা; বলা যে Drizzle-এর migration নেই বা Prisma raw SQL চালাতে পারে না।"
@@ -347,6 +363,10 @@
    "drizzle-024",
    "drizzle-009"
   ],
+  "quickAnswer": {
+   "en": "A prepared statement is built once with `sql.placeholder()` and `.prepare()`, then run many times with `.execute({ ... })`. Drizzle skips rebuilding the query, and with node-postgres the server reuses the named statement per connection; it's a performance tool, not a security feature.",
+   "bn": "Prepared statement একবার `sql.placeholder()` আর `.prepare()` দিয়ে বানানো হয়, তারপর `.execute({ ... })` দিয়ে বারবার চালানো হয়। Drizzle-কে প্রতিবার query নতুন করে বানাতে হয় না, আর node-postgres-এ server প্রতিটা connection-এ named statement reuse করে; এটা performance-এর tool, security-র নয়।"
+  },
   "commonMistakes": {
    "en": "Thinking prepared statements are needed to prevent SQL injection in Drizzle; reusing the same name for different queries; using named statements behind a transaction-mode pooler.",
    "bn": "ভাবা যে Drizzle-এ SQL injection আটকাতে prepared statement লাগে; আলাদা query-তে একই নাম আবার ব্যবহার করা; transaction-mode pooler-এর পেছনে named statement ব্যবহার করা।"
@@ -416,6 +436,10 @@
    "drizzle-004",
    "drizzle-028"
   ],
+  "quickAnswer": {
+   "en": "Collect optional `SQL` filters in an array and pass `and(...filters)`, since `undefined` is ignored. Paginate with `WHERE id < cursor ORDER BY id DESC LIMIT limit + 1`, using the extra row to set `nextCursor`, select only the needed fields with an `innerJoin`, and cap `limit` at 100.",
+   "bn": "Optional `SQL` filter-গুলো একটা array-তে জমিয়ে `and(...filters)` দিই, কারণ `undefined` ignore হয়। Pagination করি `WHERE id < cursor ORDER BY id DESC LIMIT limit + 1` দিয়ে — বাড়তি row-টা দেখে `nextCursor` ঠিক করি, `innerJoin`-সহ শুধু দরকারি field select করি, আর `limit` 100-এ আটকে রাখি।"
+  },
   "commonMistakes": {
    "en": "Building different query strings per filter combination; OFFSET pagination on large tables; trusting the client's `limit`; sorting without a unique tie-breaker so pages skip or repeat rows.",
    "bn": "প্রতিটা filter combination-এর জন্য আলাদা query string বানানো; বড় table-এ OFFSET pagination; client-এর `limit` বিশ্বাস করা; unique tie-breaker ছাড়া sort করা, ফলে page-এ row বাদ পড়ে বা repeat হয়।"
@@ -491,6 +515,10 @@
    "drizzle-024",
    "nest-022"
   ],
+  "quickAnswer": {
+   "en": "Every serverless instance opens its own pool, so a spike multiplies connections past PostgreSQL's limit. Create `db` at module scope, cap each pool at 1–2 connections and put a pooler (PgBouncer, RDS Proxy or a pooled endpoint) in front, or use an HTTP driver, which can't run interactive transactions.",
+   "bn": "প্রতিটা serverless instance নিজের pool খোলে, তাই traffic spike-এ connection সংখ্যা PostgreSQL-এর limit ছাড়িয়ে যায়। `db` module scope-এ বানাই, প্রতি pool-এ 1–2 connection রাখি আর সামনে pooler (PgBouncer, RDS Proxy বা pooled endpoint) বসাই, অথবা HTTP driver নিই — যদিও সেটা interactive transaction চালাতে পারে না।"
+  },
   "commonMistakes": {
    "en": "Creating the pool inside the request handler; \"fixing\" it by raising `max_connections` to thousands (each connection costs memory); using session-level features behind a transaction-mode pooler; expecting `db.transaction()` to work on the HTTP driver.",
    "bn": "Request handler-এর ভেতরে pool তৈরি করা; `max_connections` হাজারে তুলে \"সমাধান\" করা (প্রতিটা connection-এ memory খরচ); transaction-mode pooler-এর পেছনে session-level feature ব্যবহার করা; HTTP driver-এ `db.transaction()` কাজ করবে আশা করা।"
@@ -550,6 +578,10 @@
    "drizzle-021",
    "drizzle-023"
   ],
+  "quickAnswer": {
+   "en": "Create the client with `postgres(url, { prepare: false })`. In transaction pooling each transaction can land on a different server connection, but a prepared statement only exists on the connection that created it.",
+   "bn": "Client বানাই `postgres(url, { prepare: false })` দিয়ে। Transaction pooling-এ প্রতিটা transaction আলাদা server connection-এ যেতে পারে, কিন্তু prepared statement থাকে শুধু যে connection তাকে বানিয়েছে সেখানেই।"
+  },
   "options": [
    {
     "en": "Increase the pooler's `default_pool_size` so each client keeps its own server connection",

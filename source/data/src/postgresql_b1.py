@@ -45,6 +45,8 @@ QUESTIONS = [
 
             Product আর tag-এর সম্পর্ক **many-to-many**, তাই আমি একটা `tags` table আর একটা junction table `product_tags(product_id, tag_id)` বানাব — composite primary key আর দুটো foreign key সহ। One-to-many আরও সহজ: "many" দিকের table-এ একটা foreign key column (যেমন `orders.customer_id`)।
         """,
+        quick_en=r"""A comma-separated tags column breaks 1NF: searches like `LIKE '%5g%'` are fragile and can't use a normal index, and nothing checks the values. Products and tags are many-to-many, so use a `tags` table plus a `product_tags(product_id, tag_id)` junction table with a composite primary key and two foreign keys.""",
+        quick_bn=r"""Comma দিয়ে আলাদা করা tags column 1NF ভাঙে: `LIKE '%5g%'`-এর মতো search ভঙ্গুর, সাধারণ index ব্যবহার করতে পারে না, আর value-গুলো কেউ যাচাই করে না। Product আর tag-এর সম্পর্ক many-to-many, তাই একটা `tags` table আর composite primary key ও দুটো foreign key-সহ `product_tags(product_id, tag_id)` junction table বানাও।""",
         ex_en=r"""
             - The junction table's primary key `(product_id, tag_id)` prevents duplicate pairs and already serves lookups by `product_id`. Add a separate index on `tag_id` for "all products with tag X" queries.
             - `ON DELETE CASCADE` on the junction table's foreign keys removes the links automatically when a product or tag is deleted.
@@ -116,6 +118,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The second option is correct. PostgreSQL requires the **referenced** columns to be a primary key or have a unique constraint (which is backed by an index), but it does **not** create an index on the **referencing** column. You normally add `CREATE INDEX ON orders (customer_id);` yourself.""",
         a_bn=r"""দ্বিতীয় option-টা সঠিক। PostgreSQL **referenced** column-কে primary key বা unique constraint হতে বাধ্য করে (যার পেছনে একটা index থাকে), কিন্তু **referencing** column-এ নিজে থেকে index বানায় না। সাধারণত `CREATE INDEX ON orders (customer_id);` নিজেকেই দিতে হয়।""",
+        quick_en=r"""The referenced column (`customers.id`) must be a primary key or unique, so it is already indexed, but PostgreSQL does not index the referencing column `orders.customer_id` for you. You usually add `CREATE INDEX ON orders (customer_id);` yourself.""",
+        quick_bn=r"""Referenced column (`customers.id`) primary key বা unique হতেই হবে, তাই সেটার index আগে থেকেই থাকে; কিন্তু referencing column `orders.customer_id`-এ PostgreSQL নিজে index বানায় না। সাধারণত `CREATE INDEX ON orders (customer_id);` নিজেকেই দিতে হয়।""",
         ex_en=r"""
             Why it matters: when you delete or update a row in `customers`, PostgreSQL must find matching rows in `orders` (to block the delete, or to cascade it). Without an index on `orders.customer_id`, that's a sequential scan of `orders` for every deleted customer — painful on big tables. Joins and "orders of customer X" queries also need that index.
 
@@ -157,6 +161,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`numeric(12,2)` (exact decimal arithmetic). `real` and `double precision` are binary floating-point types that can't represent most decimal fractions exactly, so sums drift — never acceptable for money. Another valid design is storing integer minor units (paisa) in a `bigint`.""",
         a_bn=r"""`numeric(12,2)` (exact decimal arithmetic)। `real` আর `double precision` হলো binary floating-point type — বেশিরভাগ decimal ভগ্নাংশ এগুলো হুবহু রাখতে পারে না, তাই যোগফলে ছোট ছোট ভুল জমে — টাকার হিসাবে এটা কখনোই চলে না। আরেকটা ঠিক design হলো `bigint`-এ integer minor unit (পয়সা) রাখা।""",
+        quick_en=r"""`numeric(12,2)`, because it does exact decimal arithmetic. `real` and `double precision` are binary floating point, so sums of prices drift. Storing integer paisa in a `bigint` is the other valid design.""",
+        quick_bn=r"""`numeric(12,2)`, কারণ এটা exact decimal হিসাব করে। `real` আর `double precision` binary floating point, তাই দামের যোগফলে ভুল জমতে থাকে। আরেকটা ঠিক design হলো integer paisa হিসেবে `bigint`-এ রাখা।""",
         ex_en=r"""
             Try it: `SELECT 0.1::float8 + 0.2::float8;` returns `0.30000000000000004`, while `0.1::numeric + 0.2::numeric` returns `0.3`.
 
@@ -194,6 +200,8 @@ QUESTIONS = [
 
             `UNIQUE`-এ default-ভাবে NULL-গুলোকে **আলাদা (distinct)** ধরা হয়, তাই ওই column-এ NULL দিয়ে অনেকগুলো row insert করা যায়। PostgreSQL 15 থেকে `UNIQUE NULLS NOT DISTINCT` লিখলে NULL-গুলোকে সমান ধরা হয়, ফলে মাত্র একটা NULL রাখা যায়।
         """,
+        quick_en=r"""PostgreSQL has `NOT NULL`, `CHECK`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY` and `EXCLUDE` constraints, enforced for every writer. In a `UNIQUE` column NULLs count as distinct by default, so many NULLs are allowed; since PostgreSQL 15 `UNIQUE NULLS NOT DISTINCT` allows only one.""",
+        quick_bn=r"""PostgreSQL-এ `NOT NULL`, `CHECK`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY` আর `EXCLUDE` constraint আছে, যেগুলো প্রত্যেক writer-কে মানতে হয়। `UNIQUE` column-এ default-ভাবে NULL-গুলো আলাদা ধরা হয়, তাই অনেকগুলো NULL রাখা যায়; PostgreSQL 15 থেকে `UNIQUE NULLS NOT DISTINCT` দিলে মাত্র একটা NULL চলে।""",
         ex_en=r"""
             - `CHECK` can only look at the current row; it can't query other tables (use a foreign key or a trigger for that).
             - `EXCLUDE` generalises uniqueness: "no two rows may overlap". The classic use is room booking with a GiST index on a range. Using `=` on a plain integer inside it needs the `btree_gist` extension. PostgreSQL 18 also adds temporal `PRIMARY KEY`/`UNIQUE ... WITHOUT OVERLAPS`.
@@ -262,6 +270,8 @@ QUESTIONS = [
 
             খরচ: বাড়তি disk space, আর write ধীর হয় — কারণ প্রতিটা `INSERT`, `DELETE` আর indexed column-এর `UPDATE`-এ index-ও update করতে হয়। Query যদি table-এর বড় অংশ match করে, planner index উপেক্ষা করতে পারে — তখন sequential scan সস্তা। আমি সবসময় `EXPLAIN` দিয়ে নিশ্চিত হই।
         """,
+        quick_en=r"""An index (a B-tree by default) maps column values to row locations so PostgreSQL can find rows without scanning the whole table. It speeds up selective filters, joins, `ORDER BY ... LIMIT` and uniqueness, but costs disk space and slows writes; confirm with `EXPLAIN`.""",
+        quick_bn=r"""Index (default-ভাবে B-tree) column-এর value থেকে row-এর location-এ যাওয়ার একটা আলাদা structure, যাতে PostgreSQL পুরো table না পড়েই row খুঁজে পায়। এটা selective filter, join, `ORDER BY ... LIMIT` আর uniqueness দ্রুত করে, কিন্তু disk জায়গা নেয় আর write ধীর করে; `EXPLAIN` দিয়ে যাচাই করো।""",
         ex_en=r"""
             - A B-tree supports `=`, `<`, `>`, `BETWEEN`, `IN`, `IS NULL`, and sorting. `LIKE 'abc%'` can use it only with the `C` collation or a `text_pattern_ops` index; `LIKE '%abc'` can't.
             - Low-selectivity columns (e.g. a boolean where 50% of rows are `true`) rarely benefit; a **partial index** on the rare value is better.
@@ -318,6 +328,8 @@ QUESTIONS = [
 
             `SAVEPOINT` দিয়ে কাজের শুধু একটা অংশ `ROLLBACK TO SAVEPOINT` করে বাতিল করে আবার এগোনো যায়। আরেকটা ব্যাপার: PostgreSQL-এ DDL-ও transactional — `CREATE TABLE` বা `ALTER TABLE` rollback করা যায়, যেখানে MySQL-এ DDL implicitly commit হয়ে যায়।
         """,
+        quick_en=r"""Each statement autocommits unless you open `BEGIN`; between `BEGIN` and `COMMIT` all changes apply together or not at all. After any error the transaction is aborted and every later command fails until `ROLLBACK`, and a `SAVEPOINT` lets you undo just part of the work.""",
+        quick_bn=r"""`BEGIN` না দিলে প্রতিটা statement নিজেই autocommit হয়; `BEGIN` থেকে `COMMIT` পর্যন্ত সব change একসাথে হয়, নয়তো কোনোটাই হয় না। কোনো error হলে transaction aborted হয়ে যায় আর `ROLLBACK` না করা পর্যন্ত পরের সব command fail করে; `SAVEPOINT` দিয়ে কাজের একটা অংশ undo করা যায়।""",
         ex_en=r"""
             - **ACID in PostgreSQL:** Atomicity (all-or-nothing), Consistency (constraints checked), Isolation (MVCC snapshots + isolation levels), Durability (the commit record is flushed to the WAL before `COMMIT` returns, with the default `synchronous_commit = on`).
             - A few commands can't run inside a transaction block: `CREATE INDEX CONCURRENTLY`, `VACUUM`, `CREATE DATABASE`.
@@ -394,6 +406,8 @@ QUESTIONS = [
 
             এর দাম হলো dead row version, যেগুলো `VACUUM` (সাধারণত autovacuum) পরিষ্কার করে।
         """,
+        quick_en=r"""MVCC means PostgreSQL keeps several versions of a row: an `UPDATE` writes a new version instead of overwriting. Each query reads a snapshot of committed versions, so readers and writers don't block each other; two writers on the same row still wait, and `VACUUM` cleans up dead versions.""",
+        quick_bn=r"""MVCC মানে PostgreSQL একটা row-এর কয়েকটা version রাখে: `UPDATE` পুরোনোটা overwrite না করে নতুন version লেখে। প্রতিটা query committed version-এর একটা snapshot পড়ে, তাই reader আর writer একে অপরকে block করে না; তবে একই row-এ দুজন writer অপেক্ষা করে, আর dead version-গুলো `VACUUM` পরিষ্কার করে।""",
         ex_en=r"""
             - Under **Read Committed** (the default) each statement takes a fresh snapshot; under **Repeatable Read** the whole transaction uses one snapshot — see the example: session A keeps seeing 500.
             - Because an `UPDATE` is effectively "insert new version + expire old", heavy update traffic creates dead tuples → table and index **bloat** if vacuum can't keep up.
@@ -450,6 +464,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""**Read Committed.** Each statement sees a snapshot of data committed before that statement started, so two `SELECT`s in the same transaction can see different results if another transaction commits in between. You can check it with `SHOW default_transaction_isolation;`.""",
         a_bn=r"""**Read Committed।** প্রতিটা statement সেই statement শুরু হওয়ার আগে commit হওয়া data-র snapshot দেখে, তাই একই transaction-এর দুটো `SELECT`-এর মাঝে অন্য কেউ commit করলে দুই রকম ফল আসতে পারে। `SHOW default_transaction_isolation;` দিয়ে check করতে পারো।""",
+        quick_en=r"""Read Committed. Each statement sees data committed before that statement started, so two `SELECT`s in one transaction can return different results if someone commits in between.""",
+        quick_bn=r"""Read Committed। প্রতিটা statement নিজে শুরু হওয়ার আগে যা commit হয়েছে সেটাই দেখে, তাই মাঝখানে কেউ commit করলে একই transaction-এর দুটো `SELECT` আলাদা result দিতে পারে।""",
         ex_en=r"""
             The most tempting wrong answer is **Repeatable Read**, because that's the default in MySQL's InnoDB. Some people also pick Serializable because the SQL standard names it as the default.
 

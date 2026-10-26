@@ -63,6 +63,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`100, 180, 180, 200`. With `ORDER BY` and no explicit frame, the default frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`. `RANGE` includes all **peers** — rows with the same `paid_on` — so both 2026-10-02 rows get 100 + 50 + 30 = 180.""",
         a_bn=r"""`100, 180, 180, 200`। `ORDER BY` থাকলে আর frame স্পষ্ট করে না দিলে default frame হয় `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`। `RANGE` সব **peer**-কে ধরে — যেসব row-এর `paid_on` একই — তাই 2026-10-02-এর দুটো row-ই পায় 100 + 50 + 30 = 180।""",
+        quick_en=r"""`100, 180, 180, 200`. With `ORDER BY` and no frame, the default is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, which includes all peer rows with the same `paid_on`, so both 2026-10-02 rows get 180.""",
+        quick_bn=r"""`100, 180, 180, 200`। `ORDER BY` আছে কিন্তু frame নেই, তাই default হলো `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, যেটা একই `paid_on`-এর সব peer row ধরে, তাই 2026-10-02-এর দুটো row-ই 180 পায়।""",
         ex_en=r"""
             - The tempting answer `100, 150, 180, 200` is what you get with `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` **plus** a unique ordering such as `ORDER BY paid_on, id`. `ROWS` counts physical rows one by one.
             - With `ROWS` but *without* a unique order key, the order of the two peers is arbitrary, so the intermediate value (150 or 130) can change between runs — always add a tie-breaker.
@@ -150,6 +152,8 @@ QUESTIONS = [
 
             **কেন OFFSET-এর চেয়ে ভালো:** `OFFSET 100000` দিলে database ৩টা row দেওয়ার আগে ১,০০,০০০ row তৈরি করে ফেলে দেয়, তাই যত গভীর page তত ধীর। Keyset query সরাসরি `(created_at, id)` index-এ seek করে মাত্র ৩টা row পড়ে — যেকোনো গভীরতায় একই সময়। এটা stable-ও: user scroll করার সময় নতুন post এলে OFFSET সব সরিয়ে দেয়, ফলে duplicate দেখায় বা row বাদ পড়ে; keyset cursor-এ তা হয় না।
         """,
+        quick_en=r"""`WHERE (created_at, id) < ('2026-10-10 09:00:00', 5) ORDER BY created_at DESC, id DESC LIMIT 3`. It seeks straight into the `(created_at, id)` index and reads 3 rows at any depth, while `OFFSET` reads and discards every skipped row and shifts when new rows arrive.""",
+        quick_bn=r"""`WHERE (created_at, id) < ('2026-10-10 09:00:00', 5) ORDER BY created_at DESC, id DESC LIMIT 3`। এটা সরাসরি `(created_at, id)` index-এ গিয়ে যেকোনো page-এ মাত্র 3টা row পড়ে, আর `OFFSET` বাদ দেওয়া প্রতিটা row পড়ে ফেলে দেয়, নতুন row এলে page-ও সরে যায়।""",
         ex_en=r"""
             - **Index:** `(created_at, id)` serves both directions — a B-tree can be scanned backwards for `DESC, DESC`. The `ORDER BY` must match the index and the cursor columns exactly.
             - **API design:** return an opaque cursor (e.g. base64 of `created_at|id`) instead of page numbers. Trade-off: no "jump to page 57" — fine for infinite scroll and APIs, less so for admin tables (where OFFSET on small, filtered sets is acceptable).
@@ -199,6 +203,8 @@ QUESTIONS = [
 
             **হালনাগাদ রাখা (PostgreSQL):** `REFRESH MATERIALIZED VIEW` পুরোটা আবার হিসাব করে। সাধারণ refresh চলার সময় reader-দের আটকে রাখে; `REFRESH MATERIALIZED VIEW CONCURRENTLY` read চলতে দেয়, কিন্তু view-তে একটা unique index লাগে আর এটা ধীর। Data কতটা হালনাগাদ লাগবে সেই অনুযায়ী refresh schedule করো (cron/pg_cron/একটা job)।
         """,
+        quick_en=r"""A view is a saved query that stores no data, so it is always current; a materialized view stores the result, so reads are fast and indexable but stale until refreshed. In PostgreSQL, `REFRESH MATERIALIZED VIEW CONCURRENTLY` keeps reads working but needs a unique index.""",
+        quick_bn=r"""View হলো একটা saved query, কোনো data রাখে না, তাই সবসময় হালনাগাদ; materialized view result জমা রাখে, তাই read দ্রুত আর index দেওয়া যায়, কিন্তু refresh না করা পর্যন্ত পুরোনো থাকে। PostgreSQL-এ `REFRESH MATERIALIZED VIEW CONCURRENTLY` চলাকালীন read চালু রাখে, তবে একটা unique index লাগে।""",
         ex_en=r"""
             - **Views aren't a performance feature by themselves** — the optimizer usually inlines them. Stacking views on views can hide very expensive queries.
             - **Updatable views:** simple single-table views can accept `INSERT/UPDATE/DELETE`; add `WITH CHECK OPTION` so writes can't create rows the view wouldn't show.
@@ -293,6 +299,8 @@ QUESTIONS = [
             - Data-ভারী batch কাজের জন্য procedure/function (archiving, backfill, ETL), আর মাঝে মাঝে performance-critical set operation।
             - Business workflow — pricing rule, email, payment, external API call — application-এই থাকে, যেখানে এগুলো test আর observe করা যায়।
         """,
+        quick_en=r"""Keep declarative constraints in the database always, use triggers only for small data rules every writer must obey (audit rows, `updated_at`), and procedures for heavy set-based batch work. Business workflows like pricing, payments and emails stay in the app, where they are testable and observable.""",
+        quick_bn=r"""Declarative constraint সবসময় database-এ রাখো, trigger শুধু ছোট data rule-এর জন্য যেটা সব writer-কে মানতে হবে (audit row, `updated_at`), আর procedure ভারী set-based batch কাজের জন্য। Pricing, payment, email-এর মতো business workflow app-এ থাকে, যেখানে test আর observe করা সহজ।""",
         ex_en=r"""
             - **Function vs procedure in PostgreSQL:** a `FUNCTION` returns a value and runs inside the caller's transaction; a `PROCEDURE` (PG11+) is invoked with `CALL` and can `COMMIT` inside, which suits batch jobs like the archiving loop in the example.
             - **Testing:** if you do put logic in the database, keep it in migrations under version control and test it (e.g. pgTAP, or integration tests against a real database in CI).
@@ -411,6 +419,8 @@ QUESTIONS = [
 
             **বাছাই:** বেশিরভাগ OLTP কাজে Read Committed + explicit row lock বা atomic conditional update যথেষ্ট। একাধিক query-র consistent report-এর জন্য Repeatable Read, আর correctness যখন একাধিক row জুড়ে থাকা invariant-এর উপর নির্ভর করে তখন Serializable — serialization failure হলে automatic retry-সহ।
         """,
+        quick_en=r"""Read Uncommitted allows dirty reads, Read Committed blocks them, Repeatable Read also blocks non-repeatable reads (the standard still allows phantoms), and Serializable behaves like some serial order. PostgreSQL, Oracle and SQL Server default to Read Committed; MySQL InnoDB to Repeatable Read.""",
+        quick_bn=r"""Read Uncommitted dirty read হতে দেয়, Read Committed সেটা আটকায়, Repeatable Read non-repeatable read-ও আটকায় (standard তবুও phantom হতে দেয়), আর Serializable কোনো একটা serial ক্রমের মতো আচরণ করে। PostgreSQL, Oracle আর SQL Server-এর default Read Committed; MySQL InnoDB-র Repeatable Read।""",
         ex_en=r"""
             - **The standard defines minimums; implementations differ.** PostgreSQL's Repeatable Read is snapshot-based and also prevents phantoms, and PostgreSQL never allows dirty reads (Read Uncommitted behaves like Read Committed). MySQL InnoDB's Repeatable Read uses a consistent snapshot for plain `SELECT`s, but locking reads and `UPDATE`s see the latest committed rows and use gap/next-key locks.
             - **SQL Server's** Read Committed is lock-based by default (writers block readers, and readers' shared locks can block writers) unless `READ_COMMITTED_SNAPSHOT` is enabled (it is on by default in Azure SQL Database). It also offers a separate `SNAPSHOT` level.
@@ -544,6 +554,8 @@ QUESTIONS = [
 
             ফলাফল: user 1-এর সেরা streak Oct 1–3 (৩ দিন), user 2-এর Oct 4–7 (৪ দিন), user 3-এর একটাই দিন।
         """,
+        quick_en=r"""Gaps and islands: remove duplicate days, then within each user `login_date − ROW_NUMBER()` stays constant across consecutive days, so group by it to get each streak's start, end and length. Finally pick the longest streak per user with `ROW_NUMBER()`, earliest first on ties.""",
+        quick_bn=r"""Gaps and islands: আগে একই দিনের duplicate বাদ দাও, তারপর প্রতিটা user-এর ভেতরে টানা দিনগুলোতে `login_date − ROW_NUMBER()` একই থাকে, তাই সেটা দিয়ে group করে প্রতিটা streak-এর শুরু, শেষ আর দৈর্ঘ্য বের করো। শেষে `ROW_NUMBER()` দিয়ে প্রতিটা user-এর দীর্ঘতম streak নাও, tie হলে আগেরটা।""",
         ex_en=r"""
             - **Date arithmetic is dialect-specific:** PostgreSQL `date - integer` returns a date (used here). MySQL: `DATE_SUB(login_date, INTERVAL rn DAY)`; SQL Server: `DATEADD(day, -rn, login_date)`; SQLite: `date(login_date, '-' || rn || ' days')`. The window-function logic is identical everywhere.
             - **Alternative (LAG-based):** flag a new island when `login_date <> LAG(login_date) + 1 day`, then build island ids with a running `SUM(flag) OVER (...)`. It's longer but adapts to rules like "a gap of up to 1 day doesn't break the streak".
@@ -607,6 +619,8 @@ QUESTIONS = [
 
             **6. আরও বড় scale-এ:** pruning আর সস্তা archiving-এর জন্য `orders`/`order_items` মাস ধরে partition করো, আর ad-hoc analytics-এর জন্য পরিবর্তনগুলো (CDC) একটা OLAP/columnar warehouse-এ stream করো (BigQuery, ClickHouse, Redshift)।
         """,
+        quick_en=r"""Isolate the dashboard from checkout first: send it to a read replica with a `statement_timeout` and cache the response. Then measure with `EXPLAIN (ANALYZE, BUFFERS)`, make the date filter sargable, and serve the dashboard from a pre-aggregated daily summary table instead of recomputing history.""",
+        quick_bn=r"""আগে dashboard-কে checkout থেকে আলাদা করো: read replica-তে পাঠাও, `statement_timeout` দাও, আর response cache করো। তারপর `EXPLAIN (ANALYZE, BUFFERS)` দিয়ে মাপো, date filter sargable করো, আর প্রতিবার history আবার হিসাব না করে আগে থেকে aggregate করা daily summary table থেকে dashboard দেখাও।""",
         ex_en=r"""
             - **Why a summary table beats a materialized view here:** a full `REFRESH` recomputes 90+ days every time; the incremental job only touches recent days. Delete-and-reinsert the window in one transaction so categories whose sales dropped to zero don't keep stale rows.
             - **Correctness details:** compute the date in the business time zone (Asia/Dhaka), decide which order statuses count as revenue, and keep the logic in one place so the dashboard and finance reports agree.
@@ -710,6 +724,8 @@ QUESTIONS = [
 
             **Flash sale-এ overselling:** order transaction-এর ভেতরে একটা atomic conditional statement দিয়ে stock কমাও — `UPDATE product_variants SET stock = stock - :qty WHERE id = :id AND stock >= :qty`। ০টা row বদলালে item শেষ; `CHECK (stock >= 0)` হলো safety net। খুব hot SKU-র জন্য সামনে একটা দ্রুত gate বসাও (Redis counter বা ক্রমানুসারে buyer ঢোকানো একটা queue), আর database-কে source of truth রাখো — payment সম্পূর্ণ না হলে মেয়াদ শেষ হয়ে যায় এমন ছোট reservation-সহ।
         """,
+        quick_en=r"""Start in 3NF with surrogate keys, `UNIQUE` on natural keys, FKs and `CHECK`s, copying `unit_price` and address into orders as historical facts. Prevent overselling with one atomic `UPDATE ... SET stock = stock - :qty WHERE id = :id AND stock >= :qty`, backed by `CHECK (stock >= 0)`.""",
+        quick_bn=r"""Surrogate key, natural key-এ `UNIQUE`, FK আর `CHECK`-সহ 3NF দিয়ে শুরু করো, আর `unit_price` ও ঠিকানা ঐতিহাসিক তথ্য হিসেবে order-এ copy করো। Overselling ঠেকাও একটা atomic `UPDATE ... SET stock = stock - :qty WHERE id = :id AND stock >= :qty` দিয়ে, পেছনে safety net হিসেবে `CHECK (stock >= 0)`।""",
         ex_en=r"""
             - **Why variants hold stock and price:** "Panjabi, size M, white" and "size L, blue" are different SKUs with different stock; putting stock on `products` can't represent that.
             - **Why `vendor_id` on `order_items`:** it's derivable through variant → product → vendor, but storing it makes vendor payouts, vendor dashboards, and per-vendor shipments simple and keeps the historical seller even if a product changes hands. Enforce consistency in the insert path.

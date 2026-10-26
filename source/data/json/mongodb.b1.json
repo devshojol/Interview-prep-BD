@@ -54,6 +54,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "A document is one record: field-value pairs stored as BSON, which can nest objects and arrays. A collection is a group of documents, roughly like a table, but no schema is enforced by default and related data is often embedded instead of joined. Every document has a unique, immutable `_id`.",
+   "bn": "Document হলো একটা record: BSON-এ রাখা field-value pair, যার ভেতরে nested object আর array থাকতে পারে। Collection হলো document-এর group, মোটামুটি table-এর মতো, কিন্তু default-ভাবে কোনো schema enforce হয় না, আর related data অনেক সময় join না করে embed করা হয়। প্রতিটি document-এর একটা unique, immutable `_id` থাকে।"
+  },
   "commonMistakes": {
    "en": "Saying MongoDB is \"schemaless\" so you never need to think about schema, or assuming `_id` must always be an ObjectId.",
    "bn": "MongoDB \"schemaless\", তাই schema নিয়ে ভাবতে হয় না — এমন বলা; অথবা ধরে নেওয়া যে `_id` সবসময় ObjectId-ই হতে হবে।"
@@ -122,6 +126,10 @@
   "related": [
    "mongo-001"
   ],
+  "quickAnswer": {
+   "en": "BSON is the binary format MongoDB uses to store and send documents. It has more types than JSON (`ObjectId`, `Date`, 32/64-bit integers, `Decimal128`) and a 16 MB document limit. Types matter because queries, sorts and indexes compare by type: store dates as `Date` and money as `Decimal128` or integer poisha.",
+   "bn": "BSON হলো সেই binary format, যেটা দিয়ে MongoDB document store করে আর network-এ পাঠায়। JSON-এর চেয়ে এতে type বেশি (`ObjectId`, `Date`, 32/64-bit integer, `Decimal128`), আর একটা document সর্বোচ্চ 16 MB। Query, sort আর index type অনুযায়ী compare করে, তাই date রাখো `Date` হিসেবে আর টাকা রাখো `Decimal128` বা integer পয়সায়।"
+  },
   "commonMistakes": {
    "en": "Saying BSON is \"just compressed JSON\", or storing dates and prices as strings because \"MongoDB is flexible\".",
    "bn": "BSON-কে \"শুধু compressed JSON\" বলা, অথবা \"MongoDB তো flexible\" ভেবে date আর price string হিসেবে store করা।"
@@ -184,6 +192,10 @@
   "related": [
    "mongo-002"
   ],
+  "quickAnswer": {
+   "en": "It's a 12-byte value whose first 4 bytes are a timestamp (then 5 random bytes and a 3-byte counter), so ObjectIds sort roughly by creation time and `getTimestamp()` can read it back. It is not an auto-increment number; the driver usually generates it on the client.",
+   "bn": "এটা 12-byte-এর value, যার প্রথম 4 byte timestamp (তারপর 5 byte random value আর 3 byte counter), তাই ObjectId মোটামুটি তৈরির সময় অনুযায়ী sort হয় আর `getTimestamp()` দিয়ে সময়টা পড়া যায়। এটা auto-increment number না; সাধারণত client-এ driver-ই এটা generate করে।"
+  },
   "options": [
    {
     "en": "It is a 12-byte value whose first 4 bytes are a timestamp, so it roughly reflects creation time",
@@ -264,6 +276,10 @@
   "related": [
    "mongo-001"
   ],
+  "quickAnswer": {
+   "en": "Use one `updateOne` with `$set` (dot notation `\"address.city\"` so the rest of `address` survives, plus `verified: true`), `$inc: { points: 5 }`, `$push` for the tag and `$addToSet` for the badge. Afterwards `points` is 15, `tags` is `['new', 'premium']` and `badges: ['early-bird']` is created, all in one atomic update.",
+   "bn": "একটা `updateOne`-এ কয়েকটা operator দাও: `$set` (dot notation `\"address.city\"`, যাতে `address`-এর বাকি অংশ মুছে না যায়, সাথে `verified: true`), `$inc: { points: 5 }`, tag-এর জন্য `$push` আর badge-এর জন্য `$addToSet`। এরপর `points` হয় 15, `tags` হয় `['new', 'premium']`, আর নতুন `badges: ['early-bird']` তৈরি হয়; পুরো update-টা atomic।"
+  },
   "commonMistakes": {
    "en": "Reading the document, changing it in JavaScript and writing it back (lost updates under concurrency) instead of using `$inc`/`$push`; or using `$set` on the whole nested object.",
    "bn": "`$inc`/`$push` ব্যবহার না করে document read করে JavaScript-এ বদলে আবার write করা (concurrency-তে lost update হয়); অথবা পুরো nested object-এ `$set` ব্যবহার করা।"
@@ -328,6 +344,10 @@
   "related": [
    "mongo-004"
   ],
+  "quickAnswer": {
+   "en": "`insertMany` is ordered by default, so it stops at the first error: `a@x.com` and `b@x.com` are inserted, the duplicate fails with E11000, and `c@x.com` is never tried. The earlier inserts are not rolled back.",
+   "bn": "`insertMany` default-ভাবে ordered, তাই প্রথম error-এই থেমে যায়: `a@x.com` আর `b@x.com` insert হয়, duplicate-টা E11000 error দেয়, আর `c@x.com` চেষ্টাই করা হয় না। আগের insert-গুলো rollback হয় না।"
+  },
   "code": {
    "language": "javascript",
    "source": "db.users.insertMany([\n  { email: \"a@x.com\" },\n  { email: \"b@x.com\" },\n  { email: \"a@x.com\" },\n  { email: \"c@x.com\" }\n])"
@@ -411,6 +431,10 @@
   "related": [
    "mongo-004"
   ],
+  "quickAnswer": {
+   "en": "`$match` delivered orders first (index-friendly), compute each order's total with `$map`/`$multiply` inside `$sum`, `$group` by customer to sum totals and count with `{ $sum: 1 }`, then `$sort` by revenue descending. Result: Sumi 580, Rahim 450, Karim 340 from 2 orders.",
+   "bn": "প্রথমে `$match` দিয়ে delivered order রাখো (index ব্যবহার করতে পারে), `$sum`-এর ভেতরে `$map`/`$multiply` দিয়ে প্রতিটি order-এর total বের করো, তারপর `$group` দিয়ে customer অনুযায়ী total যোগ করো আর `{ $sum: 1 }` দিয়ে order গোনো, শেষে revenue অনুযায়ী উল্টো ক্রমে `$sort`। Result: Sumi 580, Rahim 450, Karim 340 (2টা order)।"
+  },
   "commonMistakes": {
    "en": "Using `$unwind` and then `{ $sum: 1 }` (counts items, not orders); forgetting `$sort` after `$group`; putting `$match` after `$group` so it can't use an index.",
    "bn": "`$unwind`-এর পর `{ $sum: 1 }` ব্যবহার করা (এতে item গোনা হয়, order না); `$group`-এর পর `$sort` ভুলে যাওয়া; `$match`-কে `$group`-এর পরে রাখা, ফলে index ব্যবহার হয় না।"
@@ -485,6 +509,10 @@
   "related": [
    "mongo-012"
   ],
+  "quickAnswer": {
+   "en": "The query wraps `createdAt` in `$year`/`$month` inside `$expr`, so the index can't be used and MongoDB scans all 5 million documents (`COLLSCAN`). Rewrite it as a half-open range on the raw field (`$gte` month start, `$lt` next month start) using Dhaka (UTC+6) boundaries, which also fixes the hidden UTC bug.",
+   "bn": "Query-টা `$expr`-এর ভেতরে `createdAt`-কে `$year`/`$month` দিয়ে মুড়ে দিয়েছে, তাই index ব্যবহার হয় না আর MongoDB 5 million document-ই scan করে (`COLLSCAN`)। Raw field-এর ওপর half-open range লেখো (`$gte` মাসের শুরু, `$lt` পরের মাসের শুরু), ঢাকার (UTC+6) সীমা ধরে; এতে লুকানো UTC bug-টাও ঠিক হয়।"
+  },
   "commonMistakes": {
    "en": "Adding `.hint({ createdAt: 1 })` (it would scan the whole index and still evaluate the expression per document), or creating more indexes without changing the query shape.",
    "bn": "`.hint({ createdAt: 1 })` যোগ করা (তাতে পুরো index scan হবে আর প্রতিটি document-এ expression তবুও evaluate হবে), অথবা query-র shape না বদলে শুধু আরও index বানানো।"
@@ -574,6 +602,10 @@
    "mongo-003",
    "mongo-023"
   ],
+  "quickAnswer": {
+   "en": "One document per message plus an `inbox` document per (user, conversation) for unread counts, with `{ conversationId: 1, _id: -1 }` for keyset pagination. Shard messages on `{ conversationId: \"hashed\", _id: 1 }` so writes spread but each chat's reads hit one shard, and reuse one `_id` per send so retries are safe.",
+   "bn": "প্রতিটি message-এর জন্য একটা document, আর unread count-এর জন্য প্রতি (user, conversation)-এ একটা `inbox` document; keyset pagination-এর জন্য `{ conversationId: 1, _id: -1 }` index। Message shard করো `{ conversationId: \"hashed\", _id: 1 }` দিয়ে, যাতে write ছড়িয়ে যায় কিন্তু একটা chat-এর read একটাই shard-এ যায়; আর প্রতি send-এ একটা `_id` বারবার ব্যবহার করলে retry নিরাপদ থাকে।"
+  },
   "commonMistakes": {
    "en": "Embedding messages in the conversation document; offset pagination with `skip()`; sharding on `createdAt`/`_id` ranges; updating thousands of inbox documents synchronously inside a transaction for every message.",
    "bn": "Conversation document-এর ভেতরে message embed করা; `skip()` দিয়ে offset pagination; `createdAt`/`_id`-এর range দিয়ে shard করা; প্রতিটি message-এর জন্য একটা transaction-এর ভেতরে হাজার হাজার inbox document synchronously update করা।"

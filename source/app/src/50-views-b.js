@@ -529,6 +529,7 @@
     else if (flash.source === 'due') { const due = new Set(dueIds()); list = list.filter((q) => due.has(q.id) || isFlagged(q.id)); }
     else if (flash.source === 'incorrect') list = list.filter((q) => { const s = statusOf(q.id); return s === 'incorrect' || s === 'partial'; });
     else if (flash.source === 'unlearned') list = list.filter((q) => !isLearned(q.id));
+    else if (flash.source === 'quick') list = list.filter((q) => q.type === 'quick');
     flash.ids = list.map((q) => q.id);
     flash.sig = sig;
     flash.index = 0;
@@ -545,7 +546,7 @@
     const controls = h('section', { class: 'card card--flat' }, h('div', { class: 'filters filters--4' },
       h('div', { class: 'field' }, h('label', { for: 'fc-tech' }, t('technology')), h('select', { class: 'select', id: 'fc-tech', onchange: (e) => setF('tech', e.target.value) }, [['', t('allTechs')]].concat(TECHS.map((x) => [x.id, x.name])).map(([v, l]) => h('option', { value: v, selected: flash.tech === v }, l)))),
       h('div', { class: 'field' }, h('label', { for: 'fc-diff' }, t('difficulty')), h('select', { class: 'select', id: 'fc-diff', onchange: (e) => setF('diff', e.target.value) }, [['', t('allLevels')]].concat(DIFFS.map((d) => [d, t('diff_' + d)])).map(([v, l]) => h('option', { value: v, selected: flash.diff === v }, l)))),
-      h('div', { class: 'field' }, h('label', { for: 'fc-src' }, t('deck')), h('select', { class: 'select', id: 'fc-src', onchange: (e) => setF('source', e.target.value) }, [['all', 'deckAll'], ['unlearned', 'deckUnlearned'], ['bookmarked', 'nav_bookmarks'], ['due', 'deckDue'], ['incorrect', 'deckMistakes']].map(([v, k]) => h('option', { value: v, selected: flash.source === v }, t(k))))),
+      h('div', { class: 'field' }, h('label', { for: 'fc-src' }, t('deck')), h('select', { class: 'select', id: 'fc-src', onchange: (e) => setF('source', e.target.value) }, [['all', 'deckAll'], ['quick', 'deckQuick'], ['unlearned', 'deckUnlearned'], ['bookmarked', 'nav_bookmarks'], ['due', 'deckDue'], ['incorrect', 'deckMistakes']].map(([v, k]) => h('option', { value: v, selected: flash.source === v }, t(k))))),
       h('div', { class: 'field' }, h('span', { class: 'field-label', 'aria-hidden': 'true' }, ' '), btn(t('shuffle'), () => { flash.ids = shuffle(deck); flash.index = 0; flash.flipped = false; rerender(); }, '', 'shuffle', { disabled: deck.length < 2 }))));
     if (!deck.length) {
       return { title: tb('nav_flashcards', null, { inline: true }), node: frag(pageHead('nav_flashcards', 'flashLead'), controls, h('div', { class: 'mt-3' }, emptyState('cards', 'emptyDeck', 'emptyDeckText'))) };
@@ -561,9 +562,9 @@
       q.isMCQ ? h('ol', { type: 'A', class: 'prose' }, q.options.map((o) => h('li', null, pick(o)))) : null,
       h('p', { class: 'flash-hint' }, t('tapToFlip')));
     const back = h('div', { class: 'flashcard__face flashcard__face--back', 'aria-hidden': String(!flash.flipped) },
-      h('div', { class: 'meta-line' }, t('referenceAnswer')),
+      h('div', { class: 'meta-line' }, t(q.quickAnswer ? 'quickAnswer' : 'referenceAnswer')),
       q.isMCQ ? h('p', null, h('strong', null, t('correctAnswer') + ': ' + 'ABCD'[q.correctIndex] + ' — '), pick(q.options[q.correctIndex])) : null,
-      biText(q.answer),
+      biText(q.quickAnswer || q.answer),
       q.code && q.code.output ? h('div', null, h('div', { class: 'small muted' }, t('expectedOutput')), h('pre', { class: 'mono small' }, q.code.output)) : null);
     const card = h('button', { type: 'button', class: 'flashcard' + (flash.flipped ? ' is-flipped' : ''), 'aria-pressed': String(flash.flipped), 'aria-label': t('flipCard'), onclick: flip }, front, back);
     ui.keyHandler = (e) => {

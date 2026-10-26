@@ -48,6 +48,8 @@ QUESTIONS = [
 
             User টাইপ করার সময়ই UI-কে প্রতিক্রিয়া দেখাতে হলে আমি controlled input ব্যবহার করি। সাধারণ form-এর জন্য uncontrolled পছন্দ করি, বিশেষ করে React 19-এর form Action (`<form action={fn}>`)-এর সাথে, যেটা function-এ `FormData` পাঠায় আর প্রতিটা keystroke-এ re-render এড়ায়। File input সবসময় uncontrolled।
         """,
+        quick_en=r"""A controlled input takes its value from React state (`value` + `onChange`), so React is the source of truth and you can validate on every keystroke. An uncontrolled input keeps its value in the DOM (`defaultValue`) and you read it on submit, often via `FormData`.""",
+        quick_bn=r"""Controlled input-এর value আসে React state থেকে (`value` + `onChange`), তাই React-ই source of truth, আর প্রতি keystroke-এ validate করা যায়। Uncontrolled input-এর value DOM-এ থাকে (`defaultValue`), submit-এর সময় সেটা পড়া হয়, সাধারণত `FormData` দিয়ে।""",
         ex_en=r"""
             - **Don't switch modes:** if `value` starts as `undefined` and later becomes a string, React warns that an uncontrolled input became controlled. Initialise with `''`, not `undefined`.
             - **`value` without `onChange`** makes the field read-only (React warns). Use `defaultValue` or `readOnly` if that's intended.
@@ -116,6 +118,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The value changes immediately and persists across renders, but React does not re-render. A ref is a plain mutable object (`{ current }`) that React keeps for the lifetime of the component; it isn't part of the render output.""",
         a_bn=r"""Value সাথে সাথে বদলায় আর render-এর পর render টিকে থাকে, কিন্তু React re-render করে না। Ref হলো একটা সাধারণ mutable object (`{ current }`), যেটা React component-এর পুরো জীবনকাল ধরে রেখে দেয়; এটা render output-এর অংশ না।""",
+        quick_en=r"""The value changes immediately and survives re-renders, but no re-render is triggered. A ref is a plain mutable `{ current }` object React keeps for the component's lifetime; it isn't part of the render output.""",
+        quick_bn=r"""Value সাথে সাথে বদলে যায় আর re-render-এর পরেও থাকে, কিন্তু কোনো re-render হয় না। Ref হলো একটা সাধারণ mutable `{ current }` object, যেটা React component-এর পুরো জীবনকাল ধরে রাখে; এটা render output-এর অংশ না।""",
         ex_en=r"""
             The tempting answer is "it re-renders", because refs feel like state. They're not: changing `ref.current` is invisible to React. If the value must appear on screen, it belongs in state. A ref also doesn't reset — `useRef(0)` only uses `0` on the first render.
 
@@ -162,6 +166,8 @@ QUESTIONS = [
 
             Legacy class component-এর সাথে মিল: `componentDidMount` ≈ `[]`-সহ effect, `componentDidUpdate` ≈ dependency-সহ effect, `componentWillUnmount` ≈ cleanup। তবে আমি lifecycle event হিসেবে না, "sync শুরু করো / sync বন্ধ করো" — এভাবে চিন্তা করি।
         """,
+        quick_en=r"""`useEffect` syncs a component with something outside React (timers, subscriptions, sockets) after the render is committed. The dependency array decides when it re-runs and the returned cleanup runs before the next run and on unmount, roughly covering legacy mount, update and unmount.""",
+        quick_bn=r"""`useEffect` render commit হওয়ার পর component-কে React-এর বাইরের কিছুর (timer, subscription, socket) সাথে sync রাখে। Dependency array ঠিক করে কখন আবার চলবে, আর return করা cleanup পরের run-এর আগে ও unmount-এ চলে; এটা মোটামুটি legacy mount, update আর unmount-এর কাজ করে।""",
         ex_en=r"""
             - **Many things don't need an effect:** derived values (compute during render), reacting to a button click (do it in the event handler), resetting state when a prop changes (use a `key`).
             - **Dependencies must be honest:** every reactive value used inside (props, state, functions declared in the component) belongs in the array. The `react-hooks/exhaustive-deps` lint rule enforces this.
@@ -230,6 +236,8 @@ QUESTIONS = [
 
             **React Compiler 1.0** build time-এ component আর value নিজে থেকেই memoize করে, বেশিরভাগ মানুষের হাতে লেখার চেয়েও নিখুঁতভাবে। Compiled code-এ আমি default-ভাবে manual memoization যোগ করি না। তবে escape hatch হিসেবে `useMemo`/`useCallback` এখনো ব্যবহার করি — যেমন কোনো value effect-এর dependency হলে আর নিখুঁত নিয়ন্ত্রণ দরকার হলে — আর compiler যে code skip করে সেখানে। পুরনো code-এ বিদ্যমান memoization রেখে দিই, যদি না সরিয়ে test করে দেখি, কারণ সরালে compiled output বদলে যেতে পারে।
         """,
+        quick_en=r"""`useMemo` caches a computed value, `useCallback` caches a function reference, and `React.memo` skips a child's re-render when its props are shallowly equal. With React Compiler 1.0 I don't add them by default, but keep them as escape hatches and don't remove existing ones untested.""",
+        quick_bn=r"""`useMemo` একটা হিসাব করা value cache করে, `useCallback` function reference cache করে, আর props shallowly equal হলে `React.memo` child-এর re-render বাদ দেয়। React Compiler 1.0 থাকলে আমি এগুলো default-এ লিখি না, তবে escape hatch হিসেবে রাখি, আর test না করে পুরনোগুলো সরাই না।""",
         ex_en=r"""
             - **Memoization isn't free:** it costs memory and a dependency comparison each render. For cheap calculations it can be slower than recomputing.
             - **Shallow comparison pitfalls:** passing `style={{...}}`, inline arrow functions or JSX `children` creates new references every render, so `memo` never skips.
@@ -318,6 +326,8 @@ QUESTIONS = [
 
             আমি result-টা যে `url`-এর, সেটাসহ store করি আর `loading` **derive** করি `result.url !== url` দিয়ে। এতে effect-এর ভেতরে synchronously `setState` call করতে হয় না, আর নিশ্চিত হয় যে অন্য URL-এর data কখনো return হবে না। `AbortError` ignore করি, কারণ cancel করাটা ইচ্ছাকৃত; HTTP error হাতে throw করি, কারণ `fetch` শুধু network failure-এ reject করে।
         """,
+        quick_en=r"""Fetch inside a `useEffect` that depends on `url`, create an `AbortController` and abort it in the cleanup, so a stale request is cancelled when the URL changes or the component unmounts. Throw on `!res.ok` and ignore `AbortError`.""",
+        quick_bn=r"""`url`-এর উপর নির্ভরশীল একটা `useEffect`-এর ভেতরে fetch করো, একটা `AbortController` বানিয়ে cleanup-এ abort করো, যাতে URL বদলালে বা unmount হলে পুরনো request বাতিল হয়। `!res.ok` হলে error throw করো আর `AbortError` উপেক্ষা করো।""",
         ex_en=r"""
             **Why this works for the race:** request 1 is aborted the moment `url` becomes `/api/users/2`. Even if its response were already parsed and its `setResult` ran late, it would be stored under `url: '/api/users/1'`, so `loading` stays `true` for user 2 until the right data arrives.
 
@@ -416,6 +426,8 @@ QUESTIONS = [
 
             Next.js-এর মতো framework-এ একই pattern Server Function (`'use server'`) দিয়েও কাজ করে।
         """,
+        quick_en=r"""An Action is an async function React runs in a transition; `<form action={fn}>` calls it with `FormData`. `useActionState` returns state, the wrapped action and `isPending`, `useFormStatus` reads the parent form's status, and `useOptimistic` shows a temporary value until it finishes.""",
+        quick_bn=r"""Action হলো একটা async function যেটা React transition-এর ভেতরে চালায়; `<form action={fn}>` সেটাকে `FormData` দিয়ে call করে আর pending state track করে। `useActionState` দেয় state, wrapped action আর `isPending`; `useFormStatus` parent form-এর status পড়ে; আর `useOptimistic` কাজ শেষ হওয়া পর্যন্ত একটা অস্থায়ী value দেখায়।""",
         ex_en=r"""
             - **The `useFormStatus` trap:** calling it in the same component that renders the `<form>` always returns `pending: false`, because it reads the status of a form *above* it.
             - **Optimistic + real data:** the parent must eventually pass the updated `comments` (from server revalidation or parent state). If it doesn't, the optimistic comment vanishes when the Action ends.
@@ -518,6 +530,8 @@ QUESTIONS = [
 
             Concurrency ৫,০০০ row render করাকে সস্তা করে না — শুধু ভালোভাবে schedule করে। প্রতিটা render এখনো ধীর হলে list virtualise-ও করি। আর টাইপ করলে network request গেলে সেগুলো debounce করি; defer করলে request কমে না।
         """,
+        quick_en=r"""Both mark rendering as non-urgent: `useTransition` wraps a state update you own, while `useDeferredValue` gives a lagging copy of a value. For the search box, keep `setQuery` urgent and render the memoized list from `useDeferredValue(query)`; virtualise it if renders are still slow.""",
+        quick_bn=r"""দুটোই rendering-কে non-urgent করে: `useTransition` তোমার নিজের state update wrap করে, আর `useDeferredValue` একটা value-র পিছিয়ে থাকা copy দেয়। Search box-এ `setQuery` urgent রাখো, আর memoized list `useDeferredValue(query)` দিয়ে render করো; তবুও ধীর হলে list virtualise করো।""",
         ex_en=r"""
             **Why `memo` matters:** with a deferred value, every keystroke causes an urgent render where the list receives the *same* old `deferredQuery`. If the list isn't memoized, it re-renders anyway and you gain nothing.
 
@@ -631,6 +645,8 @@ QUESTIONS = [
 
             এরপরই কেবল feature ধরে ধরে নতুন API (Action, `use`, prop হিসেবে `ref`) গ্রহণ করব।
         """,
+        quick_en=r"""Do it in small reversible steps: move off CRA to Vite first, then React 18.3 with `createRoot` to surface deprecation warnings, run the codemods and check dependencies, upgrade to 19 behind a canary rollout, and enable React Compiler last, incrementally.""",
+        quick_bn=r"""ছোট ছোট, ফেরত আনা যায় এমন ধাপে করো: আগে CRA ছেড়ে Vite-এ যাও, তারপর `createRoot`-সহ React 18.3-তে গিয়ে deprecation warning দেখো, codemod চালাও আর dependency দেখো, canary rollout দিয়ে 19-এ upgrade করো, আর সবশেষে ধীরে ধীরে React Compiler চালু করো।""",
         ex_en=r"""
             **Why this order**
             - Changing the bundler, the React major and the compiler at once makes failures impossible to attribute. Each step should be releasable and revertible.

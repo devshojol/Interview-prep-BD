@@ -40,6 +40,8 @@ QUESTIONS = [
 
             Search-এ এটা কাজের কারণ এতে শব্দ নয়, অর্থ তুলনা করা যায়: "cheap phone" আর "budget smartphone"-এ কোনো শব্দ মেলে না, কিন্তু তাদের embedding কাছাকাছি, তাই vector search একটা দিয়ে অন্যটা খুঁজে পায়। মূল নিয়ম: document আর query দুটোই **একই model** দিয়ে embed করতে হবে।
         """,
+        quick_en=r"""An embedding is a list of numbers (a vector) that a model produces from text or an image, trained so that similar meanings get nearby vectors. That lets search match meaning instead of words ("cheap phone" finds "budget smartphone"), as long as documents and queries use the same model.""",
+        quick_bn=r"""Embedding হলো একটা model-এর বানানো সংখ্যার list (vector), text বা image থেকে তৈরি, যাতে একই রকম অর্থের জিনিসের vector কাছাকাছি থাকে। তাই search শব্দের বদলে অর্থ মেলাতে পারে ("cheap phone" দিয়ে "budget smartphone" পাওয়া যায়), শর্ত একটাই: document আর query একই model দিয়ে embed করতে হবে।""",
         ex_en=r"""
             - **Numbers aren't human-readable:** dimension 17 doesn't mean "price" or "colour"; meaning is spread across all dimensions.
             - **Language and domain matter:** an English-only model handles Bangla poorly. For Bangla + English content, pick a multilingual model and test it on your own queries; public benchmarks such as MTEB are a starting point, not the final word.
@@ -94,6 +96,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""The insert fails. A `vector(768)` column only accepts 768-dimensional vectors, so pgvector raises `expected 768 dimensions, not 1536`.""",
         a_bn=r"""Insert fail করে। `vector(768)` column শুধু 768-dimensional vector নেয়, তাই pgvector `expected 768 dimensions, not 1536` error দেয়।""",
+        quick_en=r"""The insert fails: a `vector(768)` column only accepts 768-dimensional vectors, so pgvector raises `expected 768 dimensions, not 1536`. Nothing is truncated and the column isn't resized.""",
+        quick_bn=r"""Insert fail করে: `vector(768)` column শুধু 768-dimension-এর vector নেয়, তাই pgvector `expected 768 dimensions, not 1536` error দেয়। কিছু কেটে রাখা হয় না, column-ও নিজে থেকে বদলায় না।""",
         ex_en=r"""
             Dimensions are part of the schema, and similarity only makes sense between vectors of the same length — pgvector even refuses to compare them (`different vector dimensions 768 and 1536`). Options A and B describe the scarier failure people imagine; in practice the database protects you, which is good.
 
@@ -143,6 +147,8 @@ QUESTIONS = [
 
             সবচেয়ে কাছের k-টা vector খোঁজাকে বলে **k-nearest-neighbour (k-NN)** search। Exact k-NN query-কে প্রতিটা vector-এর সাথে তুলনা করে; বড় scale-এ আমরা **approximate** nearest neighbour (ANN) index ব্যবহার করি, যেটা অনেক দ্রুত কিন্তু recall সামান্য কম।
         """,
+        quick_en=r"""Offline, embed each item, store the vector with its id and metadata, and build an ANN index such as HNSW. At query time, embed the query with the same model, fetch the top-k nearest vectors (usually by cosine distance, optionally filtered by metadata) and return them with scores.""",
+        quick_bn=r"""Offline-এ প্রতিটা item embed করো, vector-টা id আর metadata-সহ রাখো, আর HNSW-এর মতো ANN index বানাও। Query-র সময় একই model দিয়ে query embed করো, সবচেয়ে কাছের top-k vector আনো (সাধারণত cosine distance দিয়ে, দরকারে metadata filter-সহ), আর score-সহ ফেরত দাও।""",
         ex_en=r"""
             - **Similarity ≠ relevance:** the nearest vector isn't always a good answer — there's always *some* nearest neighbour, even for nonsense queries. Thresholds and reranking help.
             - **Scores are model-specific:** a cosine similarity of 0.8 can be excellent for one model and mediocre for another; calibrate thresholds on your own data.
@@ -211,6 +217,8 @@ QUESTIONS = [
 
             Vector database সাধারণত **cosine distance = 1 − cosine similarity** দিয়ে sort করে, তাই যত ছোট তত কাছে। pgvector-এ `<=>` cosine distance দেয়, আর `1 - (a <=> b)` দিয়ে আবার similarity পাওয়া যায়।
         """,
+        quick_en=r"""Cosine similarity measures the angle between two vectors and ignores their length: 1 means same direction, 0 unrelated, −1 opposite. Vector databases usually sort by cosine distance = 1 − similarity, so smaller is closer; in pgvector, `<=>` returns that distance.""",
+        quick_bn=r"""Cosine similarity দুটো vector-এর মাঝের angle মাপে, length গোনে না: 1 মানে একই দিক, 0 মানে সম্পর্কহীন, −1 মানে উল্টো দিক। Vector database সাধারণত cosine distance = 1 − similarity দিয়ে sort করে, তাই ছোট মানেই কাছে; pgvector-এ `<=>` এই distance দেয়।""",
         ex_en=r"""
             - **Why ignore length?** For text embeddings, direction carries the meaning; length can vary with things like text length. Cosine compares meaning only.
             - **Normalised vectors:** if every vector has length 1, cosine similarity equals the plain dot product — cheaper to compute. Many embedding models (or `normalize_embeddings=True`) give unit vectors.
@@ -271,6 +279,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Cosine ranks A first (same direction as q, similarity 1.0 vs 0.707 for B), but L2 ranks B first (distance 1.0 vs ≈4.24 for A). After normalising every vector to unit length, cosine, dot product and L2 all produce the same ranking.""",
         a_bn=r"""Cosine A-কে প্রথমে রাখে (q-এর একই দিকে, similarity 1.0, যেখানে B-এর 0.707), কিন্তু L2 B-কে প্রথমে রাখে (distance 1.0, যেখানে A-এর ≈4.24)। প্রতিটা vector unit length-এ normalise করলে cosine, dot product আর L2 — তিনটাই একই ranking দেয়।""",
+        quick_en=r"""Cosine ranks A first (same direction: 1.0 vs 0.707), but L2 ranks B first (distance 1 vs ≈4.24). Once every vector is normalised to length 1, cosine, dot product and L2 all give the same ranking.""",
+        quick_bn=r"""Cosine A-কে আগে রাখে (একই দিক: 1.0 বনাম 0.707), কিন্তু L2 B-কে আগে রাখে (distance 1 বনাম ≈4.24)। সব vector length 1-এ normalise করলে cosine, dot product আর L2 একই ranking দেয়।""",
         ex_en=r"""
             - **Cosine:** `cos(q, A) = 8 / (√2 × √32) = 1.0`; `cos(q, B) = 1 / √2 ≈ 0.707` → A wins (direction only).
             - **L2:** `|q − A| = √(9 + 9) ≈ 4.24`; `|q − B| = √(0 + 1) = 1` → B wins (A is far away because it's long).
@@ -336,6 +346,8 @@ QUESTIONS = [
 
             Index-এর জন্য দুইটা বিষয় জরুরি: `ORDER BY`-এ index-এর operator class-এর সাথে মেলে এমন operator ব্যবহার করতে হবে (`<=>` ↔ `vector_cosine_ops`), আর সেটা `LIMIT` সহ ascending distance হতে হবে — similarity expression দিয়ে `DESC` sort করলে পুরো table scan করে sort করতে বাধ্য হবে।
         """,
+        quick_en=r"""Filter `WHERE in_stock`, `ORDER BY embedding <=> '[1,0,0]'` ascending with `LIMIT 3`, and compute similarity separately as `1 - distance`, rounded. Result: products 1, 2 and 5. The `<=>` operator must match the index's `vector_cosine_ops`; ordering by the similarity `DESC` would force a full scan.""",
+        quick_bn=r"""`WHERE in_stock` দিয়ে filter করো, `LIMIT 3`-সহ `ORDER BY embedding <=> '[1,0,0]'` ascending দাও, আর similarity আলাদা করে `1 - distance` হিসেবে round করে দেখাও। Result: product 1, 2 আর 5। `<=>` operator-কে index-এর `vector_cosine_ops`-এর সাথে মিলতে হবে; similarity দিয়ে `DESC` sort করলে full scan হবে।""",
         ex_en=r"""
             - **Arithmetic:** with `q = [1, 0, 0]`, cosine similarity is just `x / |v|`. Product 1: 0.9/√0.82 ≈ 0.994; product 2: 0.8/√0.69 ≈ 0.963; product 5: 0.6/√0.61 ≈ 0.768.
             - **`round()` needs numeric:** `<=>` returns `double precision`, and PostgreSQL's two-argument `round` works on `numeric`, hence the cast.
@@ -423,6 +435,8 @@ QUESTIONS = [
 
             **Evaluation ও operations:** দুই ভাষাতেই আসল প্রশ্নের একটা golden set, প্রত্যাশিত source সহ; retrieval-এর জন্য recall@k/MRR আর answer-এর জন্য faithfulness track করো; query, retrieve হওয়া id, latency আর cost log করো; user feedback সংগ্রহ করো।
         """,
+        quick_en=r"""Ingest asynchronously: extract text, chunk by structure, attach metadata (ACL groups, model version) and upsert embeddings idempotently. Retrieve with hybrid search filtered by the user's permissions inside the query, rerank, let the LLM answer only from cited context, and track recall and faithfulness on a golden set.""",
+        quick_bn=r"""Ingestion async রাখো: text বের করো, structure অনুযায়ী chunk করো, metadata (ACL group, model version) যোগ করো, আর idempotent-ভাবে embedding upsert করো। Query-র ভেতরেই user-এর permission দিয়ে filter করা hybrid search চালাও, rerank করো, LLM যেন শুধু cite করা context থেকে উত্তর দেয়, আর golden set দিয়ে recall ও faithfulness মাপো।""",
         ex_en=r"""
             - **Failure scenarios:** stale answers (doc updated, chunks not re-synced) → event-driven re-ingest plus a nightly reconciliation; ACL changes → sync permissions frequently and store them on chunks; embedding API down → fall back to keyword-only search; LLM hallucination → require citations and test faithfulness.
             - **Security:** filtering by permissions at retrieval time is the only reliable control — an LLM told "don't reveal HR docs" can be talked out of it. Log access for audits.
@@ -505,6 +519,8 @@ QUESTIONS = [
 
             **6. Evaluation ও safety net:** তিন ধরনের লেখাতেই labelled query দিয়ে offline NDCG@10; click-through, add-to-cart আর zero-result rate-এর ওপর online A/B test। Embedding service fail করলে শুধু lexical search-এ fallback; নতুন index blue/green পদ্ধতিতে তৈরি করো।
         """,
+        quick_en=r"""Run BM25 and multilingual vector search in parallel, fuse them with Reciprocal Rank Fusion and rerank with business signals. Keep price and stock as filterable metadata instead of baking them into embeddings, plan RAM (5M × 768 floats ≈ 15 GB raw), and fall back to keyword-only search if embedding fails.""",
+        quick_bn=r"""BM25 আর multilingual vector search একসাথে চালাও, Reciprocal Rank Fusion দিয়ে মেলাও, আর business signal দিয়ে rerank করো। Price আর stock embedding-এ না ঢুকিয়ে filter করা যায় এমন metadata হিসেবে রাখো, RAM হিসাব করো (5M × 768 float ≈ 15 GB raw), আর embedding fail করলে শুধু keyword search-এ fallback করো।""",
         ex_en=r"""
             - **Why not vectors alone?** Pure semantic search returns "similar" phones when the user typed an exact model; it also struggles with numbers and rare brand names. Hybrid covers both.
             - **Why rerank?** Retrieval optimises recall cheaply; the reranker optimises precision on a small set and is where business rules belong.

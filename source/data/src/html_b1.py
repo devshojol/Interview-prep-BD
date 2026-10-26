@@ -56,6 +56,8 @@ QUESTIONS = [
 
             Screen reader user-রা landmark আর heading ধরে ধরে page-এ ঘোরাফেরা করে, তাই এই structure-টাই তাদের কাছে সূচিপত্রের মতো কাজ করে। শুধু `<div>` দিয়ে বানানো page ("div soup") তাদের navigate করার কিছুই দেয় না।
         """,
+        quick_en=r"""Semantic HTML means choosing elements for their meaning, not their look, so browsers, screen readers and search engines understand the page. For structure I use `<header>`, `<nav>`, `<main>` (one per page), `<aside>`, `<footer>`, plus `<article>` and `<section>` with their own headings.""",
+        quick_bn=r"""Semantic HTML মানে চেহারা নয়, অর্থ দেখে element বেছে নেওয়া, যাতে browser, screen reader আর search engine page-টা বুঝতে পারে। Structure-এর জন্য আমি `<header>`, `<nav>`, `<main>` (page-এ একটাই), `<aside>`, `<footer>` আর নিজস্ব heading-সহ `<article>`/`<section>` ব্যবহার করি।""",
         ex_en=r"""
             - **Accessibility:** landmarks map to ARIA roles automatically (`<nav>` → `navigation`, `<main>` → `main`). `<header>`/`<footer>` only become `banner`/`contentinfo` when they are not nested inside `<article>`, `<aside>`, `<main>`, `<nav>` or `<section>`.
             - **`<section>` is not a generic wrapper.** It's exposed as a `region` landmark only when it has an accessible name (for example `aria-labelledby` pointing to its heading). For pure styling hooks, `<div>` is still the right element.
@@ -131,6 +133,8 @@ QUESTIONS = [
             - `<meta name="viewport" content="width=device-width, initial-scale=1">` mobile browser-কে বলে, desktop মাপের virtual viewport (সাধারণত প্রায় 980px) নয়, বরং device-এর width-কেই layout width হিসেবে ধরতে। এটা না দিলে phone-এ media query ঠিকমতো কাজ করে না।
             - `<title>` বাধ্যতামূলক — tab, bookmark, search result-এ এটাই দেখায়, আর screen reader সবার আগে এটাই পড়ে শোনায়।
         """,
+        quick_en=r"""`<!DOCTYPE html>` turns on standards mode, `lang` tells screen readers and translation tools the language, `<meta charset="utf-8">` (first in `<head>`) stops text like Bangla turning into garbage, and the viewport meta makes phones lay out at device width so media queries work.""",
+        quick_bn=r"""`<!DOCTYPE html>` standards mode চালু করে, `lang` screen reader আর translation tool-কে ভাষা জানায়, `<head>`-এর শুরুতে `<meta charset="utf-8">` থাকলে Bangla text ভেঙে যায় না, আর viewport meta phone-কে device width ধরে layout করতে বলে, তাই media query ঠিকমতো কাজ করে।""",
         ex_en=r"""
             - **Encoding precedence:** a byte-order mark beats the HTTP `Content-Type: text/html; charset=utf-8` header, which beats `<meta charset>`. Ideally send the header *and* keep the meta tag (useful when the file is saved or opened locally).
             - **Quirks mode** affects things like percentage heights and some table/inline layout details, so CSS that "works" in quirks mode can break later. Any doctype other than `<!DOCTYPE html>` (or a missing one) is a red flag.
@@ -195,6 +199,8 @@ QUESTIONS = [
         a_bn=r"""
             `<button type="button">`। সহজ নিয়ম: যদি এটা কোনো URL-এ **navigate** করে, তাহলে `<a href>`; আর যদি বর্তমান page-এ কোনো **action** করে, তাহলে `<button>`। URL না বদলে "Load more" করা একটা action।
         """,
+        quick_en=r"""`<button type="button">` with a click listener. Loading more products without changing the URL is an action, and actions use `<button>`; `<a href>` is for navigating to a URL.""",
+        quick_bn=r"""Click listener-সহ `<button type="button">`। URL না বদলে আরও product load করা একটা action, আর action-এর জন্য `<button>`; `<a href>` শুধু কোনো URL-এ navigate করার জন্য।""",
         ex_en=r"""
             A native `<button>` is focusable, activates with both Enter and Space, is announced as "button" by screen readers, supports `disabled`, and `type="button"` stops it from accidentally submitting a surrounding form.
 
@@ -237,6 +243,8 @@ QUESTIONS = [
 
             তাই: নিজের code-এর জন্য `defer` বা module, আর `async` শুধু সেই script-এর জন্য যেটা কারও উপর নির্ভর করে না এবং কেউ যার উপর নির্ভর করে না।
         """,
+        quick_en=r"""A plain script blocks parsing; `defer` downloads in parallel and runs after parsing in document order; `async` runs as soon as it arrives, in any order; modules are deferred by default. I use `defer` or modules for app code and `async` only for independent scripts like analytics.""",
+        quick_bn=r"""সাধারণ script parsing থামিয়ে দেয়; `defer` parallel-এ download হয়ে parsing শেষে document order-এ চলে; `async` এলেই চলে, order-এর গ্যারান্টি নেই; আর module default-ভাবেই deferred। App code-এর জন্য আমি `defer` বা module, আর analytics-এর মতো স্বাধীন script-এ শুধু `async` ব্যবহার করি।""",
         ex_en=r"""
             - `defer` and `async` are **ignored on inline classic scripts** (no `src`). Inline *module* scripts, however, are deferred, and `async` works on them.
             - `defer` has no effect on module scripts — they're already deferred.
@@ -318,6 +326,8 @@ QUESTIONS = [
 
             `novalidate` না থাকলে browser `submit` event পাঠানোর আগেই validation চালায়: কিছু invalid থাকলে প্রথম error দেখায় এবং `submit` event আর fire-ই হয় না। তাই `submit` handler-এর ভেতরে আমি নিশ্চিত যে form valid; শুধু `preventDefault()` করে `new FormData(form)` `fetch` দিয়ে পাঠাই। আর `:user-invalid` দিয়ে field style করি, যাতে user interact করার পরেই শুধু error দেখা যায়।
         """,
+        quick_en=r"""HTML attributes handle the built-in rules (`type="email"`, `required`, `minlength="8"`), and `setCustomValidity()` handles the password match, re-checked on `input` of both fields. The browser won't fire `submit` while invalid, so the handler just calls `preventDefault()` and sends `FormData` with `fetch`.""",
+        quick_bn=r"""Built-in rule-এর জন্য HTML attribute (`type="email"`, `required`, `minlength="8"`), আর password মেলানোর জন্য `setCustomValidity()`, যেটা দুই password field-এর `input`-এই আবার check করি। Form invalid থাকলে browser `submit` event-ই fire করে না, তাই handler-এ শুধু `preventDefault()` করে `fetch` দিয়ে `FormData` পাঠাই।""",
         ex_en=r"""
             - **Key APIs:** `element.validity` (a `ValidityState` with flags like `valueMissing`, `typeMismatch`, `tooShort`, `customError`, `valid`), `element.validationMessage`, `setCustomValidity()`, `form.checkValidity()` (returns a boolean and fires `invalid` events) and `form.reportValidity()` (same, but also shows the messages).
             - **`minlength` quirk:** `tooShort` only applies to values the user typed. If a script sets the value, it won't be flagged — another reason to validate on the server.
@@ -425,6 +435,8 @@ QUESTIONS = [
             4. বন্ধ হলে focus যে button দিয়ে খোলা হয়েছিল সেখানে ফেরত যাওয়া উচিত — modal dialog-এর ক্ষেত্রে browser এটা করে, তবুও আমি test করি, বিশেষ করে trigger যদি re-render হয়।
             5. চাইলে `body:has(dialog[open]) { overflow: hidden; }` দিয়ে পেছনের scroll বন্ধ করি, আর animation reduced-motion-বান্ধব রাখি।
         """,
+        quick_en=r"""Use a native `<dialog>` opened with `showModal()` (or `command="show-modal"`): you get the top layer, an inert page behind it, Esc to close and the dialog role for free. Then name it with `aria-labelledby`, autofocus Cancel, and test that focus returns to the trigger.""",
+        quick_bn=r"""Native `<dialog>` `showModal()` (বা `command="show-modal"`) দিয়ে খুলি: top layer, পেছনের page inert হওয়া, Esc-এ বন্ধ হওয়া আর dialog role সব ফ্রি পাওয়া যায়। তারপর `aria-labelledby` দিয়ে নাম দিই, Cancel-এ autofocus রাখি, আর trigger-এ focus ফেরে কিনা test করি।""",
         ex_en=r"""
             - **`show()` vs `showModal()`:** `show()` or the `open` attribute creates a *non-modal* dialog — no inert background, no top layer, Esc doesn't close it. For confirmations you almost always want `showModal()`.
             - **Stale `returnValue` trap:** Esc (or `close()` without an argument) does **not** reset `returnValue`. If the user clicked "Delete" last time and presses Esc this time, the old `"delete"` is still there. Reset it after reading, as in the example.
@@ -502,6 +514,8 @@ QUESTIONS = [
 
             বাস্তব শিক্ষা: preload scanner যা দেখতে পায় না — CSS background image, CSS থেকে refer করা font, `@import` করা stylesheet, JavaScript দিয়ে inject করা script — সেগুলো দেরিতে খুঁজে পাওয়া যায়। তাই আমি গুরুত্বপূর্ণ resource HTML markup-এ রাখি, অথবা `preload` দিয়ে hint দিই।
         """,
+        quick_en=r"""HTML is parsed incrementally into the DOM and CSS into the CSSOM, then come style, layout, paint and compositing. Classic scripts block the parser, stylesheets block rendering, and the preload scanner reads ahead to fetch resources early, so anything referenced only from CSS or JS is found late.""",
+        quick_bn=r"""HTML ধাপে ধাপে parse হয়ে DOM, আর CSS থেকে CSSOM তৈরি হয়; তারপর style, layout, paint আর compositing। Classic script parser আটকায়, stylesheet render আটকায়, আর preload scanner আগেভাগে HTML পড়ে resource fetch শুরু করে, তাই যা শুধু CSS বা JS-এ আছে সেটা দেরিতে খুঁজে পাওয়া যায়।""",
         ex_en=r"""
             - **Why scripts block:** the parser can't know whether a script will inject markup, so it has to wait. `defer`, `async` and `type="module"` are promises that the script won't use `document.write()`, which lets parsing continue.
             - **Non-render-blocking CSS:** a stylesheet whose `media` doesn't match (for example `media="print"`) is still downloaded but at low priority and without blocking render.
@@ -588,6 +602,8 @@ QUESTIONS = [
 
             **8. পাহারা বসাও।** CI-তে performance budget (যেমন Lighthouse CI), আর RUM alert — যাতে নতুন কোনো marketing script চুপচাপ সব কাজ নষ্ট করে দিতে না পারে।
         """,
+        quick_en=r"""Measure field LCP and split it into TTFB, load delay, load time and render delay, then fix each part: CDN-cached server-rendered HTML, small inline critical CSS with deferred scripts, a real hero `<img>` with `fetchpriority="high"` (never lazy), subset Bangla fonts, and budgets in CI.""",
+        quick_bn=r"""আগে field data থেকে LCP মেপে TTFB, load delay, load time আর render delay-এ ভাগ করি, তারপর একে একে ঠিক করি: CDN-এ cache করা server-rendered HTML, ছোট inline critical CSS আর `defer` করা script, `fetchpriority="high"`-সহ আসল hero `<img>` (কখনো lazy নয়), subset করা Bangla font, আর CI-তে performance budget।""",
         ex_en=r"""
             **Trade-offs to discuss:**
             - Inlined CSS isn't cached separately, so it's re-downloaded on every page view; keep it small and page-type specific.

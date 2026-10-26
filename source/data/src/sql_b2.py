@@ -39,6 +39,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The second option. `DELETE` is DML: it can filter with `WHERE`, removes rows individually, and fires row-level triggers. `TRUNCATE` removes **all** rows at once by deallocating the table's storage (no `WHERE`, no per-row work). `DROP TABLE` deletes the table definition, its data, indexes, and constraints.""",
         a_bn=r"""দ্বিতীয় option। `DELETE` হলো DML: `WHERE` দিয়ে filter করা যায়, row আলাদা আলাদাভাবে মোছে, আর row-level trigger চালায়। `TRUNCATE` table-এর storage ছেড়ে দিয়ে একবারে **সব** row মোছে (`WHERE` নেই, প্রতি row-এর কাজ নেই)। `DROP TABLE` table definition, data, index আর constraint সব মুছে ফেলে।""",
+        quick_en=r"""`DELETE` removes rows one by one, can use `WHERE`, and fires row-level triggers; `TRUNCATE` empties the whole table at once without scanning rows; `DROP TABLE` removes the table itself, with its data, indexes and constraints.""",
+        quick_bn=r"""`DELETE` row ধরে ধরে মোছে, `WHERE` নিতে পারে আর row-level trigger চালায়; `TRUNCATE` row scan না করে পুরো table একবারে খালি করে; `DROP TABLE` table-টাই মুছে দেয়, তার data, index আর constraint-সহ।""",
         ex_en=r"""
             Option D is the tempting trap, and it's backwards *and* database-dependent:
             - `DELETE` inside a transaction can always be rolled back.
@@ -90,6 +92,8 @@ QUESTIONS = [
             - **Isolation:** অন্য transaction অর্ধেক-হওয়া অবস্থা দেখে না (A থেকে কাটা হয়েছে, B-তে এখনো জমা হয়নি)।
             - **Durability:** `COMMIT` return করার পর crash বা বিদ্যুৎ চলে গেলেও transfer টিকে থাকে, কারণ log আগে disk-এ flush হয়।
         """,
+        quick_en=r"""Put the debit, the credit and the transfer record in one transaction. If the server crashes before `COMMIT`, recovery treats it as aborted, so account A keeps its money; once `COMMIT` returns, the change survives a crash. That is atomicity and durability, with consistency and isolation around it.""",
+        quick_bn=r"""Debit, credit আর transfer record একটাই transaction-এ রাখো। `COMMIT`-এর আগে server crash করলে recovery সেটাকে aborted ধরে, তাই account A-র টাকা থেকে যায়; আর `COMMIT` return করার পরে change crash-এও টিকে থাকে। এটাই atomicity আর durability, সাথে consistency আর isolation।""",
         ex_en=r"""
             - Most databases run in **autocommit** mode by default: each statement commits on its own. Without an explicit transaction, the debit would be committed alone — exactly the bug in this scenario.
             - The guard `AND balance >= 500` plus checking the affected-row count prevents overdrafts even with concurrent transfers (the `UPDATE` locks the row).
@@ -161,6 +165,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""**2NF.** The key is composite `(order_id, product_id)`, and `product_name` depends on only *part* of it (`product_id`) — a **partial dependency**. Fix: move `product_name` into a `products(product_id, product_name, ...)` table and keep only `product_id` in `order_items`.""",
         a_bn=r"""**2NF।** Key-টা composite `(order_id, product_id)`, আর `product_name` এর শুধু *একটা অংশের* (`product_id`) উপর নির্ভর করে — এটা **partial dependency**। সমাধান: `product_name`-কে একটা `products(product_id, product_name, ...)` table-এ সরাও, আর `order_items`-এ শুধু `product_id` রাখো।""",
+        quick_en=r"""2NF. The key is `(order_id, product_id)`, and `product_name` depends on only part of it (`product_id`), which is a partial dependency. Move `product_name` into a `products` table.""",
+        quick_bn=r"""2NF। Key হলো `(order_id, product_id)`, আর `product_name` তার শুধু একটা অংশের (`product_id`) ওপর নির্ভর করে, এটাই partial dependency। `product_name`-কে একটা `products` table-এ সরিয়ে নাও।""",
         ex_en=r"""
             The normal forms in one line each:
             - **1NF:** atomic values, no repeating groups (no comma-separated lists, no `phone1, phone2, phone3`). This table is fine there.
@@ -269,6 +275,8 @@ QUESTIONS = [
 
             N-তম সর্বোচ্চ বেতনের জন্য শুধু `2`-কে `N` করে দাও।
         """,
+        quick_en=r"""Use `DENSE_RANK() OVER (ORDER BY salary DESC)` in a CTE and filter `= 2`, which returns everyone at the second salary level. `ROW_NUMBER()` and `LIMIT 1 OFFSET 1` break with ties, and `RANK()` leaves a gap after ties.""",
+        quick_bn=r"""একটা CTE-তে `DENSE_RANK() OVER (ORDER BY salary DESC)` হিসাব করে `= 2` দিয়ে filter করো, তাহলে দ্বিতীয় salary level-এর সবাই আসবে। Tie থাকলে `ROW_NUMBER()` আর `LIMIT 1 OFFSET 1` ভুল করে, আর `RANK()` tie-এর পরে একটা নম্বর বাদ দেয়।""",
         ex_en=r"""
             - **Edge case:** if everyone has the same salary, the `DENSE_RANK` query returns no rows, while the `MAX(...) WHERE salary < MAX(...)` version returns a single NULL. Clarify which behaviour the caller expects.
             - The `MAX` subquery version only returns the *value*; to get names you'd need `WHERE salary = (that subquery)`.
@@ -373,6 +381,8 @@ QUESTIONS = [
             - Sales-এ Esha আর Farhan দুজনেই 61,000 পায়; বর্ণানুক্রমিক tie-breaker-এ Esha 1 আর Farhan 2, আর Dipu (55,000) বাদ পড়ে।
             - Filter-টা outer query-তে দেওয়া হয়েছে, কারণ window function `WHERE`-এর পরে evaluate হয়।
         """,
+        quick_en=r"""Number rows with `ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, name)` in a subquery or CTE, then keep `rn <= 2` in the outer query. The name breaks ties, and the filter sits outside because window functions run after `WHERE`.""",
+        quick_bn=r"""Subquery বা CTE-তে `ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, name)` দিয়ে নম্বর দাও, তারপর outer query-তে `rn <= 2` রাখো। Tie ভাঙে name দিয়ে, আর filter বাইরে রাখতে হয় কারণ window function `WHERE`-এর পরে চলে।""",
         ex_en=r"""
             - **Clarify the requirement:** "top 2 per department" can mean two *people* (`ROW_NUMBER`), or everyone in the top two *salary levels* (`DENSE_RANK`, see the extra output — Sales returns three people), or the top two with ties at the boundary included (`RANK`).
             - Without a deterministic tie-breaker, `ROW_NUMBER` may pick a different person between runs.
@@ -453,6 +463,8 @@ QUESTIONS = [
             - `ORDER BY sale_date` প্রতিটা region-এর ভেতরের ক্রম ঠিক করে।
             - `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` হলো **frame**: partition-এর প্রথম row থেকে current row পর্যন্ত যোগফল। Dhaka-র জন্য: 500 → 500 + 300 = 800 → 800 + 700 = 1500।
         """,
+        quick_en=r"""Use `SUM(amount) OVER (PARTITION BY region ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`. Unlike `GROUP BY`, a window function keeps every row and adds the cumulative sum, restarting for each region.""",
+        quick_bn=r"""`SUM(amount) OVER (PARTITION BY region ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` ব্যবহার করো। `GROUP BY`-এর মতো নয়, window function প্রতিটা row রেখে cumulative যোগফল যোগ করে, আর প্রতিটা region-এর জন্য আবার শুরু করে।""",
         ex_en=r"""
             - **Why spell out the frame?** With `ORDER BY` but no frame, the default is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, which treats rows with the same `sale_date` as **peers** and gives them all the same (combined) total. With one row per day it makes no difference, but with several sales on the same day it surprises people. `ROWS` counts physical rows.
             - Other useful frames: a 7-day moving average with `AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` (7 rows, assuming one row per day).
@@ -552,6 +564,8 @@ QUESTIONS = [
 
             Window-function version প্রতিটা department-এর গড় একবারই হিসাব করে `AVG(salary) OVER (PARTITION BY dept)` দিয়ে, আর প্রতিটা row-এর পাশে সেটা দেখাতেও পারে।
         """,
+        quick_en=r"""Use a correlated subquery: `WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept = e.dept)`, evaluated per outer row. `>` is strict, so someone earning exactly the average is excluded; `AVG(...) OVER (PARTITION BY dept)` is the window alternative.""",
+        quick_bn=r"""Correlated subquery ব্যবহার করো: `WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept = e.dept)`, যেটা outer query-র প্রতিটা row-এর জন্য হিসাব হয়। `>` strict, তাই ঠিক average-এর সমান বেতনের কেউ বাদ যায়; window বিকল্প হলো `AVG(...) OVER (PARTITION BY dept)`।""",
         ex_en=r"""
             - **Correlated vs non-correlated:** a non-correlated subquery (e.g. `WHERE salary > (SELECT AVG(salary) FROM employees)`) runs once and compares against the company-wide average — a different question.
             - **Performance:** "re-evaluated per row" is the logical model. Modern optimizers often decorrelate it into a join with a grouped derived table, but not always — check `EXPLAIN` on big tables. An index on `(dept, salary)` helps the subquery.
@@ -654,6 +668,8 @@ QUESTIONS = [
 
             তাই anti-join-এর জন্য আমি default হিসেবে `NOT EXISTS` (বা `LEFT JOIN ... IS NULL`) ব্যবহার করি।
         """,
+        quick_en=r"""Use `NOT EXISTS` (or `LEFT JOIN ... IS NULL`), which returns Karim and Sumi. `NOT IN` returns nothing because the guest order's NULL makes `id <> NULL` UNKNOWN, so the whole condition is never TRUE.""",
+        quick_bn=r"""`NOT EXISTS` (বা `LEFT JOIN ... IS NULL`) ব্যবহার করো, তাতে Karim আর Sumi আসে। `NOT IN` কিছুই দেয় না, কারণ guest order-এর NULL-এর জন্য `id <> NULL` UNKNOWN হয়, ফলে পুরো condition কখনো TRUE হয় না।""",
         ex_en=r"""
             - **`LEFT JOIN ... WHERE o.id IS NULL`:** check a column that can't be NULL in a real match (the primary key), not a nullable column.
             - **Performance:** PostgreSQL, SQL Server, and Oracle plan `NOT EXISTS` as an efficient anti-join. `NOT IN` can't always be turned into an anti-join precisely *because* of the NULL semantics, so it may be slower too.

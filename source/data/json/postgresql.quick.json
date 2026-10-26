@@ -1,0 +1,558 @@
+[
+ {
+  "id": "pg-q01",
+  "subtopic": "Data Types & Keys",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "serial",
+   "identity",
+   "primary-key",
+   "sequence"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `SERIAL` and an identity column in PostgreSQL?",
+   "bn": "PostgreSQL-এ `SERIAL` আর identity column-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`SERIAL` isn't a real type: it's shorthand for an `integer` column with a sequence and a `DEFAULT nextval(...)`, and it's the legacy approach. `GENERATED ... AS IDENTITY` is the SQL-standard replacement with the sequence tied to the column; `ALWAYS` even rejects manually supplied ids.",
+   "bn": "`SERIAL` আসল কোনো type নয়: এটা একটা sequence আর `DEFAULT nextval(...)`-সহ `integer` column-এর সংক্ষিপ্ত রূপ, আর এটা legacy পদ্ধতি। `GENERATED ... AS IDENTITY` হলো SQL-standard বিকল্প, যেখানে sequence column-এর সাথে বাঁধা; `ALWAYS` দিলে হাতে দেওয়া id-ও প্রত্যাখ্যান করে।"
+  },
+  "explanation": {
+   "en": "With `serial` or `BY DEFAULT`, a manually inserted id doesn't move the sequence, so a later insert can hit a duplicate-key error. `serial` is also 4-byte `integer`; use `bigint` for big tables.",
+   "bn": "`serial` বা `BY DEFAULT`-এ হাতে insert করা id sequence-কে এগিয়ে দেয় না, তাই পরে কোনো insert duplicate-key error খেতে পারে। তাছাড়া `serial` 4-byte `integer`; বড় table-এর জন্য `bigint` নাও।"
+  },
+  "interviewTip": {
+   "en": "Say \"identity is the modern standard, `serial` is legacy\" and give the `ALWAYS` vs `BY DEFAULT` difference.",
+   "bn": "বলো \"identity হলো আধুনিক standard, `serial` legacy\", তারপর `ALWAYS` আর `BY DEFAULT`-এর পার্থক্যটা বলো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — CREATE TABLE (identity columns)",
+    "url": "https://www.postgresql.org/docs/current/sql-createtable.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use a UUID instead of an identity column?",
+    "bn": "কখন identity column-এর বদলে UUID ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "pg-012",
+   "pg-q02"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE old_style (id serial PRIMARY KEY);   -- legacy: int + sequence + default\nCREATE TABLE users (\n  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  email text NOT NULL\n);\nINSERT INTO users (email) VALUES ('rahim@example.com');  -- id = 1\nINSERT INTO users (id, email) VALUES (5, 'x@example.com'); -- error: id is GENERATED ALWAYS"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q02",
+  "subtopic": "Sequences",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "sequence",
+   "nextval",
+   "currval"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a sequence in PostgreSQL, and why can ids have gaps?",
+   "bn": "PostgreSQL-এ sequence কী, আর id-তে কেন ফাঁক (gap) থাকতে পারে?"
+  },
+  "answer": {
+   "en": "A sequence is a database object that hands out increasing numbers with `nextval()`; identity and `serial` columns use one behind the scenes. `nextval()` is never rolled back, so a failed or rolled-back insert still uses up its number, which is why ids can have gaps.",
+   "bn": "Sequence হলো একটা database object, যেটা `nextval()` দিয়ে ক্রমবর্ধমান সংখ্যা দেয়; identity আর `serial` column পেছনে এটাই ব্যবহার করে। `nextval()` কখনো rollback হয় না, তাই fail বা rollback হওয়া insert-ও তার সংখ্যাটা খরচ করে ফেলে; এজন্যই id-তে gap থাকতে পারে।"
+  },
+  "explanation": {
+   "en": "Never rely on ids being gap-free; if the business needs consecutive invoice numbers, generate them separately under a lock. `currval()` is per session and errors if `nextval()` wasn't called in that session.",
+   "bn": "Id-তে gap থাকবে না, এমন ধরে নিয়ো না; business-এর যদি টানা invoice নম্বর লাগে, সেটা lock নিয়ে আলাদাভাবে বানাও। `currval()` session অনুযায়ী কাজ করে, আর ওই session-এ `nextval()` না ডাকলে error দেয়।"
+  },
+  "interviewTip": {
+   "en": "Mention the gap behaviour; it's the follow-up most interviewers are waiting for.",
+   "bn": "Gap-এর আচরণটা উল্লেখ করো; বেশিরভাগ interviewer এই follow-up-এর জন্যই অপেক্ষা করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Sequence Manipulation Functions",
+    "url": "https://www.postgresql.org/docs/current/functions-sequence.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you reset a sequence after a bulk import?",
+    "bn": "Bulk import-এর পরে sequence কীভাবে reset করবে?"
+   }
+  ],
+  "related": [
+   "pg-q01",
+   "pg-012"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE SEQUENCE invoice_no START 1000;\nSELECT nextval('invoice_no');   -- → 1000\nSELECT nextval('invoice_no');   -- → 1001\nSELECT currval('invoice_no');   -- → 1001 (last value in this session)"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q03",
+  "subtopic": "Data Types",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "text",
+   "varchar",
+   "char",
+   "data-types"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In PostgreSQL, what is the difference between `text`, `varchar(n)` and `char(n)`?",
+   "bn": "PostgreSQL-এ `text`, `varchar(n)` আর `char(n)`-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "All three store strings with the same performance. `varchar(n)` only adds a length check and errors on longer values, `char(n)` pads with spaces to exactly n, and `text` has no limit. Most teams use `text`, or `varchar(n)` when a real maximum length is a business rule.",
+   "bn": "তিনটাই string রাখে, performance একই। `varchar(n)` শুধু একটা length check যোগ করে আর বেশি লম্বা value-তে error দেয়, `char(n)` space দিয়ে ঠিক n পর্যন্ত ভরে দেয়, আর `text`-এর কোনো সীমা নেই। বেশিরভাগ team `text` ব্যবহার করে, অথবা সর্বোচ্চ দৈর্ঘ্য সত্যিই business rule হলে `varchar(n)`।"
+  },
+  "explanation": {
+   "en": "This differs from some other databases, where `char` can be faster; in PostgreSQL `char(n)` is usually the slowest because of the padding. A `CHECK` constraint is another way to limit length.",
+   "bn": "এটা অন্য কিছু database থেকে আলাদা, যেখানে `char` দ্রুত হতে পারে; PostgreSQL-এ padding-এর কারণে `char(n)` সাধারণত সবচেয়ে ধীর। দৈর্ঘ্য সীমিত করার আরেক উপায় হলো `CHECK` constraint।"
+  },
+  "interviewTip": {
+   "en": "Say \"no performance difference in PostgreSQL\" first; that's the point that separates a PostgreSQL answer from a generic one.",
+   "bn": "শুরুতেই বলো \"PostgreSQL-এ performance-এর কোনো পার্থক্য নেই\"; এই কথাটাই PostgreSQL-এর উত্তরকে সাধারণ উত্তর থেকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Character Types",
+    "url": "https://www.postgresql.org/docs/current/datatype-character.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which type would you use for money?",
+    "bn": "টাকার পরিমাণের জন্য কোন type নেবে?"
+   }
+  ],
+  "related": [
+   "pg-003",
+   "pg-012"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE people (code char(5), name varchar(10), bio text);\nINSERT INTO people VALUES ('ab', 'Muhammad Rahim', '...');\n-- ERROR: value too long for type character varying(10)"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q04",
+  "subtopic": "Data Types",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "timestamptz",
+   "timestamp",
+   "time-zones"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `timestamp` and `timestamptz`, and which should you use?",
+   "bn": "`timestamp` আর `timestamptz`-এর মধ্যে পার্থক্য কী, আর কোনটা ব্যবহার করা উচিত?"
+  },
+  "answer": {
+   "en": "`timestamptz` stores an exact moment: input is converted to UTC and shown in the session's `TimeZone`. `timestamp` (without time zone) stores just a date and clock time and silently ignores any offset you give. Use `timestamptz` for events like `created_at`.",
+   "bn": "`timestamptz` একটা নির্দিষ্ট মুহূর্ত রাখে: input UTC-তে রূপান্তর হয়, আর session-এর `TimeZone` অনুযায়ী দেখানো হয়। `timestamp` (without time zone) শুধু তারিখ আর ঘড়ির সময় রাখে, আর দেওয়া offset চুপচাপ উপেক্ষা করে। `created_at`-এর মতো event-এর জন্য `timestamptz` নাও।"
+  },
+  "explanation": {
+   "en": "Despite the name, `timestamptz` doesn't store the zone itself, only the UTC instant. If you need the user's original zone, store it in a separate column.",
+   "bn": "নামে time zone থাকলেও `timestamptz` zone-টা নিজে রাখে না, শুধু UTC মুহূর্তটা রাখে। ব্যবহারকারীর আসল zone দরকার হলে সেটা আলাদা column-এ রাখো।"
+  },
+  "interviewTip": {
+   "en": "Use the Dhaka example: the same instant prints as 16:00+06 in Dhaka, which shows you understand conversion on output.",
+   "bn": "Dhaka-র উদাহরণ দাও: একই মুহূর্ত Dhaka-তে 16:00+06 হিসেবে দেখায়; এতে বোঝা যায় output-এর সময় conversion হয় সেটা তুমি জানো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Date/Time Types",
+    "url": "https://www.postgresql.org/docs/current/datatype-datetime.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `timestamptz` store the original time zone?",
+    "bn": "`timestamptz` কি আসল time zone-টা জমা রাখে?"
+   }
+  ],
+  "related": [
+   "pg-012",
+   "pg-003"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "SET TimeZone = 'Asia/Dhaka';\nSELECT '2026-10-26 10:00:00+00'::timestamptz;  -- → 2026-10-26 16:00:00+06\nSELECT '2026-10-26 10:00:00+00'::timestamp;    -- → 2026-10-26 10:00:00 (offset ignored)"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q05",
+  "subtopic": "JSONB",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "jsonb",
+   "operators",
+   "json"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between the `->` and `->>` operators on `jsonb`?",
+   "bn": "`jsonb`-এ `->` আর `->>` operator-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "Both read a key (or an array element by index). `->` returns the value as `jsonb`, so you can keep navigating into it, while `->>` returns it as `text`, which is what you want for display, comparisons with strings, or casting like `(data->>'age')::int`.",
+   "bn": "দুটোই একটা key (বা index দিয়ে array-র element) পড়ে। `->` value-টা `jsonb` হিসেবে দেয়, তাই এর ভেতরে আরও যাওয়া যায়; আর `->>` দেয় `text` হিসেবে, যেটা দেখানো, string-এর সাথে তুলনা বা `(data->>'age')::int`-এর মতো cast করার জন্য দরকার।"
+  },
+  "explanation": {
+   "en": "A common bug is `WHERE data->'city' = 'Dhaka'`: it compares `jsonb` with a JSON value and errors because `Dhaka` isn't valid JSON. Use `->>` for text, or containment `@>`, which a GIN index can serve.",
+   "bn": "একটা সাধারণ bug হলো `WHERE data->'city' = 'Dhaka'`: এটা `jsonb`-কে একটা JSON value-এর সাথে তুলনা করে, আর `Dhaka` valid JSON না হওয়ায় error দেয়। Text-এর জন্য `->>` নাও, অথবা containment `@>`, যেটা GIN index ব্যবহার করতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Say \"one arrow keeps JSON, two arrows give text\" and show chaining `-> 'address' ->> 'city'`.",
+   "bn": "বলো \"এক arrow JSON রাখে, দুই arrow text দেয়\", তারপর `-> 'address' ->> 'city'` chain করে দেখাও।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — JSON Functions and Operators",
+    "url": "https://www.postgresql.org/docs/current/functions-json.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why would you choose `jsonb` over `json`?",
+    "bn": "`json`-এর বদলে কেন `jsonb` বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "pg-010",
+   "pg-016"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "SELECT '{\"name\": \"Rahim\", \"address\": {\"city\": \"Dhaka\"}}'::jsonb -> 'name';\n-- → \"Rahim\"   (jsonb, keeps the quotes)\nSELECT '{\"name\": \"Rahim\", \"address\": {\"city\": \"Dhaka\"}}'::jsonb ->> 'name';\n-- → Rahim     (text)\nSELECT '{\"name\": \"Rahim\", \"address\": {\"city\": \"Dhaka\"}}'::jsonb -> 'address' ->> 'city';\n-- → Dhaka"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q06",
+  "subtopic": "Schemas",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "schema",
+   "search-path",
+   "public"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a schema in PostgreSQL, and what is `search_path`?",
+   "bn": "PostgreSQL-এ schema কী, আর `search_path` কী?"
+  },
+  "answer": {
+   "en": "A schema is a namespace inside a database that groups tables, views and functions, so `billing.invoices` and `sales.invoices` can both exist. The hierarchy is cluster → database → schema → table. `search_path` lists the schemas PostgreSQL searches for unqualified names; by default it's `\"$user\", public`.",
+   "bn": "Schema হলো database-এর ভেতরের একটা namespace, যেটা table, view আর function একসাথে রাখে, তাই `billing.invoices` আর `sales.invoices` দুটোই থাকতে পারে। ক্রমটা হলো cluster → database → schema → table। Schema-র নাম ছাড়া কোনো নাম পেলে PostgreSQL কোন schema-গুলোতে খুঁজবে সেটা `search_path`-এ থাকে; default হলো `\"$user\", public`।"
+  },
+  "explanation": {
+   "en": "Schemas also separate permissions: you grant `USAGE` on a schema plus rights on its tables. Since PostgreSQL 15, ordinary users can no longer create objects in `public` by default.",
+   "bn": "Schema দিয়ে permission-ও আলাদা করা যায়: schema-তে `USAGE` আর তার table-গুলোর ওপর অধিকার grant করতে হয়। PostgreSQL 15 থেকে সাধারণ user default-ভাবে আর `public`-এ object বানাতে পারে না।"
+  },
+  "interviewTip": {
+   "en": "Contrast it with MySQL, where \"schema\" and \"database\" mean the same thing; in PostgreSQL a database contains many schemas.",
+   "bn": "MySQL-এর সাথে তুলনা করো, যেখানে \"schema\" আর \"database\" একই জিনিস; PostgreSQL-এ একটা database-এর ভেতরে অনেকগুলো schema থাকে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Schemas",
+    "url": "https://www.postgresql.org/docs/current/ddl-schemas.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can you join tables from two different databases in one query?",
+    "bn": "দুটো আলাদা database-এর table কি একটা query-তে join করা যায়?"
+   }
+  ],
+  "related": [
+   "pg-018",
+   "pg-032"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE SCHEMA billing;\nCREATE TABLE billing.invoices (id bigint PRIMARY KEY);\nSHOW search_path;                   -- → \"$user\", public\nSET search_path = billing, public;\nSELECT * FROM invoices;             -- now resolves to billing.invoices"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q07",
+  "subtopic": "VACUUM",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "vacuum",
+   "autovacuum",
+   "mvcc",
+   "bloat"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `VACUUM` do, and how is it different from `VACUUM FULL`?",
+   "bn": "`VACUUM` কী করে, আর `VACUUM FULL` থেকে এটা কীভাবে আলাদা?"
+  },
+  "answer": {
+   "en": "Because of MVCC, updates and deletes leave dead row versions. `VACUUM` marks their space as reusable and freezes old rows, without blocking normal reads and writes; autovacuum runs it for you. `VACUUM FULL` rewrites the whole table to give space back to the OS, but holds an exclusive lock the whole time.",
+   "bn": "MVCC-র কারণে update আর delete dead row version রেখে যায়। `VACUUM` সেগুলোর জায়গা আবার ব্যবহারযোগ্য করে আর পুরোনো row freeze করে, সাধারণ read/write block না করেই; autovacuum এটা নিজে থেকেই চালায়। `VACUUM FULL` পুরো table নতুন করে লিখে OS-কে জায়গা ফেরত দেয়, কিন্তু পুরো সময় একটা exclusive lock ধরে রাখে।"
+  },
+  "explanation": {
+   "en": "Plain `VACUUM` usually doesn't shrink the file; it makes room for new rows. Use `VACUUM FULL` only in a maintenance window, or `pg_repack` online.",
+   "bn": "সাধারণ `VACUUM` সাধারণত file ছোট করে না; নতুন row-এর জন্য জায়গা করে দেয়। `VACUUM FULL` শুধু maintenance window-তে চালাও, অথবা online করতে চাইলে `pg_repack`।"
+  },
+  "interviewTip": {
+   "en": "Link it to MVCC in one sentence (\"updates leave dead rows\"), then stress the lock difference.",
+   "bn": "এক বাক্যে MVCC-র সাথে যুক্ত করো (\"update dead row রেখে যায়\"), তারপর lock-এর পার্থক্যটায় জোর দাও।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Routine Vacuuming",
+    "url": "https://www.postgresql.org/docs/current/routine-vacuuming.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is transaction ID wraparound?",
+    "bn": "Transaction ID wraparound কী?"
+   }
+  ],
+  "related": [
+   "pg-007",
+   "pg-029"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "VACUUM (VERBOSE, ANALYZE) orders;   -- clean dead rows + refresh planner stats\nVACUUM FULL orders;                 -- rewrite table; blocks reads and writes\nSELECT relname, n_dead_tup, last_autovacuum\nFROM pg_stat_user_tables ORDER BY n_dead_tup DESC LIMIT 5;"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q08",
+  "subtopic": "EXPLAIN & EXPLAIN ANALYZE",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "explain",
+   "seq-scan",
+   "index-scan",
+   "query-plan"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In an `EXPLAIN` plan, what is the difference between a Seq Scan and an Index Scan?",
+   "bn": "`EXPLAIN` plan-এ Seq Scan আর Index Scan-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "A Seq Scan reads every row of the table and checks the filter on each one. An Index Scan walks an index to find the matching rows and then fetches only those. A Seq Scan isn't always bad: when a query matches a large share of the table, reading it straight through is cheaper, so the planner picks it.",
+   "bn": "Seq Scan table-এর প্রতিটা row পড়ে আর প্রতিটায় filter check করে। Index Scan index ধরে মেলে এমন row খুঁজে শুধু সেগুলোই আনে। Seq Scan সবসময় খারাপ নয়: query table-এর বড় একটা অংশ মেলালে সরাসরি পুরোটা পড়াই সস্তা, তাই planner সেটাই বাছে।"
+  },
+  "explanation": {
+   "en": "You'll also see Bitmap Heap Scan (many matches, fetched in page order) and Index Only Scan (all needed columns are in the index). `EXPLAIN` shows estimates; `EXPLAIN ANALYZE` runs the query and adds actual rows and timings.",
+   "bn": "Bitmap Heap Scan (অনেক match, page-এর ক্রমে আনা হয়) আর Index Only Scan (দরকারি সব column index-এই আছে)-ও দেখতে পাবে। `EXPLAIN` শুধু estimate দেখায়; `EXPLAIN ANALYZE` query-টা চালিয়ে আসল row আর timing যোগ করে।"
+  },
+  "interviewTip": {
+   "en": "Don't say \"Seq Scan means a missing index\"; say you compare estimated vs actual rows to judge the plan.",
+   "bn": "বলো না \"Seq Scan মানে index নেই\"; বরং বলো plan বিচার করতে তুমি estimated আর actual row তুলনা করো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Using EXPLAIN",
+    "url": "https://www.postgresql.org/docs/current/using-explain.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `EXPLAIN ANALYZE` run the query?",
+    "bn": "`EXPLAIN ANALYZE` কি query-টা সত্যিই চালায়?"
+   }
+  ],
+  "related": [
+   "pg-009",
+   "pg-005",
+   "pg-024"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "EXPLAIN SELECT * FROM users WHERE id = 42;\n-- Index Scan using users_pkey on users  (cost=... rows=1 ...)\n\nEXPLAIN SELECT * FROM users WHERE is_active;\n-- Seq Scan on users  (cost=... rows=...)  Filter: is_active"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q09",
+  "subtopic": "RETURNING",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "returning",
+   "insert",
+   "update",
+   "delete"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What does the `RETURNING` clause do in PostgreSQL?",
+   "bn": "PostgreSQL-এ `RETURNING` clause কী করে?"
+  },
+  "answer": {
+   "en": "`RETURNING` makes `INSERT`, `UPDATE`, `DELETE` (and `MERGE`) send back columns of the rows they changed, in the same statement. The classic use is getting the generated id after an insert without a second query. In PostgreSQL 18 you can also return `OLD` and `NEW` values.",
+   "bn": "`RETURNING` দিলে `INSERT`, `UPDATE`, `DELETE` (আর `MERGE`) একই statement-এ পরিবর্তিত row-গুলোর column ফেরত পাঠায়। সবচেয়ে পরিচিত ব্যবহার হলো দ্বিতীয় query ছাড়াই insert-এর পরে generate হওয়া id পাওয়া। PostgreSQL 18-এ `OLD` আর `NEW` value-ও return করা যায়।"
+  },
+  "explanation": {
+   "en": "It saves a round trip and avoids races, because a separate `SELECT` afterwards might see someone else's change. SQLite also supports `RETURNING`; MySQL doesn't.",
+   "bn": "এতে একটা round trip বাঁচে আর race এড়ানো যায়, কারণ পরে আলাদা `SELECT` চালালে অন্য কারো change দেখা যেতে পারে। SQLite-ও `RETURNING` support করে; MySQL করে না।"
+  },
+  "interviewTip": {
+   "en": "Show `INSERT ... RETURNING id`; it's what node-postgres code uses instead of MySQL's `insertId`.",
+   "bn": "`INSERT ... RETURNING id` দেখাও; MySQL-এর `insertId`-এর বদলে node-postgres code এটাই ব্যবহার করে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Returning Data from Modified Rows",
+    "url": "https://www.postgresql.org/docs/current/dml-returning.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you do an upsert in PostgreSQL?",
+    "bn": "PostgreSQL-এ upsert কীভাবে করবে?"
+   }
+  ],
+  "related": [
+   "pg-022"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "INSERT INTO users (email) VALUES ('rahim@example.com')\nRETURNING id, created_at;                 -- → 1 | 2026-10-26 ...\nDELETE FROM sessions WHERE expires_at < now()\nRETURNING user_id;                        -- the deleted rows' user_ids\nUPDATE products SET price = price * 1.1 WHERE id = 7\nRETURNING old.price, new.price;           -- PostgreSQL 18+"
+  },
+  "technology": "postgresql"
+ },
+ {
+  "id": "pg-q10",
+  "subtopic": "Security: Roles & Authentication",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "roles",
+   "users",
+   "grant",
+   "privileges"
+  ],
+  "technologyVersion": "PostgreSQL 18",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between a role and a user in PostgreSQL?",
+   "bn": "PostgreSQL-এ role আর user-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "PostgreSQL only has roles. A \"user\" is simply a role with the `LOGIN` attribute (`CREATE USER` = `CREATE ROLE ... LOGIN`), and a \"group\" is a role without login that other roles are granted membership in. Privileges are granted to roles, and members inherit them.",
+   "bn": "PostgreSQL-এ আসলে শুধু role আছে। \"User\" হলো `LOGIN` attribute-সহ একটা role (`CREATE USER` = `CREATE ROLE ... LOGIN`), আর \"group\" হলো login ছাড়া একটা role, যার membership অন্য role-দের দেওয়া হয়। Privilege role-কে grant করা হয়, আর member-রা সেটা inherit করে।"
+  },
+  "explanation": {
+   "en": "Roles are cluster-wide, not per database. Give the app its own least-privilege login role instead of connecting as the `postgres` superuser.",
+   "bn": "Role পুরো cluster-এর জন্য, আলাদা database-এর জন্য নয়। App-কে `postgres` superuser হিসেবে connect না করিয়ে কম privilege-এর নিজস্ব login role দাও।"
+  },
+  "interviewTip": {
+   "en": "Say \"a user is a role that can log in\", then add the least-privilege point for the app connection.",
+   "bn": "বলো \"user হলো এমন role যেটা login করতে পারে\", তারপর app connection-এর জন্য least privilege-এর কথাটা যোগ করো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Database Roles",
+    "url": "https://www.postgresql.org/docs/current/user-manag.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why shouldn't your app connect as the `postgres` superuser?",
+    "bn": "App কেন `postgres` superuser হিসেবে connect করা উচিত নয়?"
+   }
+  ],
+  "related": [
+   "pg-018",
+   "pg-032"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE ROLE readers;                    -- group role (NOLOGIN by default)\nGRANT SELECT ON ALL TABLES IN SCHEMA public TO readers;\nCREATE USER rahim;                      -- = CREATE ROLE rahim LOGIN\nGRANT readers TO rahim;                 -- rahim can now read those tables"
+  },
+  "technology": "postgresql"
+ }
+]

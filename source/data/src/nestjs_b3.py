@@ -43,6 +43,8 @@ QUESTIONS = [
 
             চালু করার উপায়: **দুটো** pipe-ই globally register করো। `ValidationPipe` শুধু class-typed parameter validate করে আর `StandardSchemaValidationPipe` শুধু যেসব parameter-এ schema আছে সেগুলো, তাই পুরোনো আর নতুন endpoint পাশাপাশি চলে, আর module ধরে ধরে migrate করা যায়।
         """,
+        quick_en=r"""class-validator uses decorated DTO classes checked by `ValidationPipe`; NestJS 12's Standard Schema takes a zod or Valibot schema via the `schema` option on `@Body()`, `@Query()` or `@Param()`, validated by `StandardSchemaValidationPipe`. Register both pipes globally and migrate module by module.""",
+        quick_bn=r"""class-validator-এ decorator দেওয়া DTO class থাকে, যেটা `ValidationPipe` check করে; NestJS 12-এর Standard Schema-তে `@Body()`, `@Query()` বা `@Param()`-এর `schema` option-এ zod বা Valibot schema দিই, আর `StandardSchemaValidationPipe` validate করে। দুটো pipe-ই global রেখে module ধরে ধরে migrate করি।""",
         ex_en=r"""
             **Trade-offs:**
             - Schemas can be **shared with the frontend** (React Hook Form + zod) — one source of truth for validation rules. That's the strongest argument.
@@ -139,6 +141,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Once, with one instance. `useExisting` creates an alias: the token `'LegacyCache'` resolves to whatever the `CacheService` token resolves to. The factory runs once at bootstrap because the provider is a default-scoped singleton.""",
         a_bn=r"""একবার, আর একটাই instance। `useExisting` একটা alias তৈরি করে: `'LegacyCache'` token resolve হয় `CacheService` token যা resolve করে ঠিক সেটাতেই। Provider default-scope singleton বলে factory bootstrap-এর সময় একবারই চলে।""",
+        quick_en=r"""The factory runs once and there is one `CacheService` instance: `useExisting` makes `'LegacyCache'` an alias that resolves to the same singleton as the `CacheService` token.""",
+        quick_bn=r"""Factory একবারই চলে, আর `CacheService`-এর instance একটাই: `useExisting` দিয়ে `'LegacyCache'` শুধু একটা alias, যেটা `CacheService` token-এর একই singleton-এ resolve হয়।""",
         ex_en=r"""
             The four custom provider forms:
             - `useValue` — a constant or a mock object (great for tests and config).
@@ -192,6 +196,8 @@ QUESTIONS = [
 
             Return করা module-এ `global: true` (বা `@Global()`) দিলে এর export সব জায়গায় পাওয়া যায়। আমি এটা শুধু আসল infrastructure-এর জন্য রাখি: config, database, logger, mail।
         """,
+        quick_en=r"""A dynamic module is returned by a static method, so its providers can depend on options from the importer: `forRoot()` configures it once, `forRootAsync()` takes options from providers like `ConfigService`, and `forFeature()` adds per-feature setup. Make only real infrastructure, like config, global.""",
+        quick_bn=r"""Dynamic module একটা static method থেকে return হয়, তাই এর provider import করা module-এর দেওয়া option-এর উপর নির্ভর করতে পারে: `forRoot()` একবার configure করে, `forRootAsync()` `ConfigService`-এর মতো provider থেকে option নেয়, আর `forFeature()` প্রতিটা feature-এর আলাদা setup দেয়। Global করি শুধু config-এর মতো আসল infrastructure-কে।""",
         ex_en=r"""
             - Under the hood, a dynamic module is just `{ module, providers, exports, imports, global }`. Options are usually exposed as a provider under a token (`MAIL_OPTIONS`) that the module's services inject.
             - `forRootAsync` supports `useFactory`, `useClass` and `useExisting`; the factory can be `async`.
@@ -288,6 +294,8 @@ QUESTIONS = [
 
             NestJS 12-এ নতুন ESM project Vitest দিয়ে আসে (`vi.fn()`, globals চালু); CommonJS project Jest ব্যবহার করে (`jest.fn()`)। দুটোতেই Nest-এর testing API একই।
         """,
+        quick_en=r"""Unit test: `Test.createTestingModule()` with `UsersService` and `{ provide: USERS_REPOSITORY, useValue: mock }`, asserting the found user and the `NotFoundException`. E2E: import `AppModule`, `.overrideProvider(MailService).useValue(mock)`, apply the `main.ts` pipes, and expect 400 from `POST /users` via supertest.""",
+        quick_bn=r"""Unit test-এ `Test.createTestingModule()`-এ `UsersService` আর `{ provide: USERS_REPOSITORY, useValue: mock }` দিয়ে found user আর `NotFoundException` দুটোই check করি। E2E-তে `AppModule` import করে `.overrideProvider(MailService).useValue(mock)` দিই, `main.ts`-এর মতো pipe লাগাই, তারপর supertest দিয়ে `POST /users` পাঠিয়ে 400 আশা করি।""",
         ex_en=r"""
             - **Biggest e2e gotcha:** anything configured in `main.ts` (`app.useGlobalPipes(...)`, `setGlobalPrefix`, `enableVersioning`) does **not** exist in the test app unless you repeat it. Registering pipes/guards via `APP_PIPE`/`APP_GUARD` providers avoids the duplication, because they live inside the module graph.
             - Reset mocks between tests (`vi.resetAllMocks()` / `jest.resetAllMocks()`) so state doesn't leak.
@@ -418,6 +426,8 @@ QUESTIONS = [
 
             Middleware register করা হয় `NestModule` implement করা module-এ: `configure(consumer)`-এর ভেতরে `consumer.apply(...).forRoutes(...)`, দরকার হলে `.exclude(...)`। `helmet()`-এর মতো global Express middleware `main.ts`-এ `app.use()` দিয়েও দেওয়া যায়।
         """,
+        quick_en=r"""Middleware runs first and doesn't know the handler, so it suits request-id logging; guards know the handler and its metadata and answer yes/no, so they do JWT and role checks; interceptors wrap the handler to transform responses. Register middleware in `configure(consumer)` with `apply().forRoutes()`.""",
+        quick_bn=r"""Middleware সবার আগে চলে আর কোন handler চলবে জানে না, তাই request-id logging-এর জন্য ঠিক; guard handler আর তার metadata জানে এবং শুধু হ্যাঁ/না বলে, তাই JWT আর role check; interceptor handler-কে wrap করে response বদলায়। Middleware register হয় `NestModule`-এর `configure(consumer)`-এ `apply().forRoutes()` দিয়ে।""",
         ex_en=r"""
             - **Why not auth in middleware?** You can verify a token there, but you can't cleanly read per-route metadata, you lose `@Public()`-style opt-outs, and it only works for HTTP. Guards also work for WebSockets and microservices.
             - **DI:** class middleware registered through `configure()` supports constructor injection. Middleware added with `app.use()` in `main.ts` is outside the DI container.
@@ -498,6 +508,8 @@ QUESTIONS = [
 
             **বিকল্প:** NestJS সম্প্রতি একটা official `@nestjs/drizzle` package publish করেছে (`DrizzleModule.forRoot({ drizzle, connection })`, `@InjectDrizzle()`), কিন্তু এটা একদম নতুন (0.0.x, Sept 2026) আর এর docs Drizzle v1 RC লক্ষ্য করে — evaluate করা যায়, তবে উপরের custom provider আজকের stable Drizzle 0.45-এর সাথে কাজ করে। TypeORM-এর আছে `@nestjs/typeorm` (`forRootAsync` + `forFeature` + `@InjectRepository`), Mongoose-এর `@nestjs/mongoose`, আর Prisma সাধারণত generated client wrap করা একটা `PrismaService` provider।
         """,
+        quick_en=r"""A global `DatabaseModule` with a `useFactory` pool provider from `ConfigService`, a `DRIZZLE` provider wrapping it for repositories to inject, and `pool.end()` in `OnApplicationShutdown` with `enableShutdownHooks()`. TypeORM and Mongoose have official Nest modules; Prisma is usually a `PrismaService`.""",
+        quick_bn=r"""একটা global `DatabaseModule` বানাই: `ConfigService` থেকে `useFactory` দিয়ে pool provider, তার উপর `DRIZZLE` provider (`drizzle({ client: pool, schema })`) যেটা repository inject করে, আর `enableShutdownHooks()`-সহ `OnApplicationShutdown`-এ `pool.end()`। TypeORM আর Mongoose-এর official Nest module আছে; Prisma সাধারণত একটা `PrismaService` provider।""",
         ex_en=r"""
             - **Pool sizing:** total connections = pool `max` × number of app instances. Ten pods with `max: 20` = 200 connections, which can exceed PostgreSQL's `max_connections`. Use PgBouncer or a managed pooler when you scale out.
             - **Pool errors:** node-postgres emits `error` on the pool when an idle connection drops (DB restart, failover). Attach a listener (`pool.on('error', ...)`) so it's logged instead of crashing the process.
@@ -606,6 +618,8 @@ QUESTIONS = [
 
             এটা advanced বিষয়: interview-এ মূল কথা হলো "scope bubbling" আর এর performance প্রভাব।
         """,
+        quick_en=r"""Request scope bubbles up: every provider and controller that depends on it also becomes request-scoped and is re-created per request, costing latency and breaking use in cron jobs or queue workers. Prefer AsyncLocalStorage (`nestjs-cls`), explicit arguments, or durable providers for per-tenant instances.""",
+        quick_bn=r"""Request scope উপরের দিকে ছড়িয়ে পড়ে: যারা এর উপর নির্ভর করে সেই সব provider আর controller-ও request-scoped হয়ে প্রতি request-এ নতুন করে তৈরি হয় — বাড়তি allocation আর latency, আর cron job বা queue worker-এ ব্যবহারই করা যায় না। এর বদলে AsyncLocalStorage (`nestjs-cls`), explicit argument, বা per-tenant instance-এর জন্য durable provider ভালো।""",
         ex_en=r"""
             - **Transient is different:** a singleton that injects a `TRANSIENT` provider gets its own fresh instance but **stays** a singleton — transient scope does not bubble the same way.
             - **How to verify:** add a counter in a controller constructor; with a request-scoped dependency it increments on every request.
@@ -766,6 +780,8 @@ QUESTIONS = [
 
             **সমাধান:** প্রথমে cycle ভাঙো। সাধারণত দুটো service একটা common concern share করে (customer lookup), যেটা তৃতীয় একটা provider-এ যাওয়া উচিত; অথবা এক দিক direct call-এর বদলে event (`OrderPlaced`) হতে পারে। Cycle সত্যিই দরকার হলে **দুই পাশেই** `@Inject(forwardRef(() => OtherService))` দাও। ESM build-এ parameter type-ও wrap করো (`WrapperType<OrdersService>`), যাতে metadata `Object` হয় আর class-কে আগেভাগে ছুঁতে না হয়।
         """,
+        quick_en=r"""Both come from the circular import: in CommonJS `UsersService` is still `undefined` when the decorator metadata is written, and in ESM reading it early throws a TDZ `ReferenceError`. Break the cycle with a third provider or an event; if it must stay, use `forwardRef()` on both sides (plus `WrapperType` in ESM).""",
+        quick_bn=r"""দুটো error-ই circular import থেকে আসে: CommonJS-এ decorator metadata লেখার সময় `UsersService` তখনো `undefined`, আর ESM-এ আগেভাগে পড়তে গেলে TDZ-এর `ReferenceError`। Shared কাজটা তৃতীয় provider-এ সরিয়ে বা event দিয়ে cycle ভাঙি; একান্তই রাখতে হলে দুই পাশে `forwardRef()` (ESM-এ সাথে `WrapperType`)।""",
         ex_en=r"""
             - `forwardRef` delays resolving the token until both classes exist; Nest then creates them in some order — don't rely on the other instance inside the constructor (use it in methods or `onModuleInit`).
             - Circular dependencies usually signal unclear module boundaries. In a modular monolith, dependencies should point one way (e.g. `Orders → Customers`), with events for the reverse direction.

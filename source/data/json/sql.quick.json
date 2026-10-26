@@ -1,0 +1,555 @@
+[
+ {
+  "id": "sql-q01",
+  "subtopic": "Constraints & Keys",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "primary-key",
+   "foreign-key",
+   "constraints"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between a primary key and a foreign key?",
+   "bn": "Primary key আর foreign key-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "A primary key uniquely identifies each row in its own table: it must be unique and not NULL, and a table has only one. A foreign key is a column in another table that must match an existing primary (or unique) key value, so it links the two tables and blocks references to rows that don't exist.",
+   "bn": "Primary key নিজের table-এর প্রতিটা row-কে আলাদাভাবে চেনায়: এটা unique আর NULL হতে পারে না, আর একটা table-এ একটাই থাকে। Foreign key হলো আরেকটা table-এর column, যার value-কে কোনো বিদ্যমান primary (বা unique) key-এর সাথে মিলতে হয়; এভাবে দুটো table যুক্ত হয়, আর নেই এমন row-কে reference করা আটকে যায়।"
+  },
+  "explanation": {
+   "en": "A foreign key column can repeat (one customer, many orders) and can be NULL unless you add `NOT NULL`. Its `ON DELETE` action (`RESTRICT`, `CASCADE`, `SET NULL`) decides what happens when the parent row is deleted.",
+   "bn": "Foreign key column-এ value বারবার আসতে পারে (একজন customer, অনেক order), আর `NOT NULL` না দিলে NULL-ও হতে পারে। Parent row delete হলে কী হবে সেটা ঠিক করে এর `ON DELETE` action (`RESTRICT`, `CASCADE`, `SET NULL`)।"
+  },
+  "interviewTip": {
+   "en": "Say \"PK identifies, FK references\", then mention that a foreign key column can repeat and can be NULL.",
+   "bn": "বলো \"PK চেনায়, FK reference করে\", তারপর উল্লেখ করো যে foreign key column-এ value বারবার আসতে পারে আর NULL-ও হতে পারে।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Constraints",
+    "url": "https://www.postgresql.org/docs/current/ddl-constraints.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does `ON DELETE CASCADE` do?",
+    "bn": "`ON DELETE CASCADE` কী করে?"
+   },
+   {
+    "en": "Can a table have more than one unique key?",
+    "bn": "একটা table-এ কি একাধিক unique key থাকতে পারে?"
+   }
+  ],
+  "related": [
+   "sql-007",
+   "pg-002"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE customers (id INT PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE orders (\n  id          INT PRIMARY KEY,\n  customer_id INT REFERENCES customers(id)   -- foreign key\n);\nINSERT INTO customers VALUES (1, 'Rahim');\nINSERT INTO orders VALUES (10, 1);   -- ok\nINSERT INTO orders VALUES (11, 99);  -- error: foreign key violation (no customer 99)"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q02",
+  "subtopic": "SQL Command Categories",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "ddl",
+   "dml",
+   "dcl",
+   "tcl"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What are DDL, DML, DCL and TCL? Give an example command for each.",
+   "bn": "DDL, DML, DCL আর TCL কী? প্রতিটার একটা করে command-এর উদাহরণ দাও।"
+  },
+  "answer": {
+   "en": "DDL (Data Definition Language) defines structure: `CREATE`, `ALTER`, `DROP`, `TRUNCATE`. DML (Data Manipulation Language) works with rows: `SELECT`, `INSERT`, `UPDATE`, `DELETE`. DCL controls permissions with `GRANT` and `REVOKE`, and TCL controls transactions with `BEGIN`, `COMMIT`, `ROLLBACK` and `SAVEPOINT`.",
+   "bn": "DDL (Data Definition Language) structure ঠিক করে: `CREATE`, `ALTER`, `DROP`, `TRUNCATE`। DML (Data Manipulation Language) row নিয়ে কাজ করে: `SELECT`, `INSERT`, `UPDATE`, `DELETE`। DCL `GRANT` আর `REVOKE` দিয়ে permission নিয়ন্ত্রণ করে, আর TCL `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT` দিয়ে transaction নিয়ন্ত্রণ করে।"
+  },
+  "explanation": {
+   "en": "Some books put `SELECT` in its own group, DQL. The split matters in practice: in MySQL and Oracle, DDL commits the open transaction implicitly, while PostgreSQL can roll DDL back.",
+   "bn": "কিছু বইয়ে `SELECT`-কে আলাদা group, DQL-এ রাখা হয়। ভাগটা বাস্তবেও কাজে লাগে: MySQL আর Oracle-এ DDL চালালে খোলা transaction নিজে থেকেই commit হয়ে যায়, কিন্তু PostgreSQL-এ DDL rollback করা যায়।"
+  },
+  "interviewTip": {
+   "en": "List the four groups with two commands each; adding that `TRUNCATE` counts as DDL shows you know the edge cases.",
+   "bn": "চারটা group আর প্রতিটায় দুটো করে command বলো; `TRUNCATE` যে DDL ধরা হয় সেটা যোগ করলে বোঝা যায় তুমি edge case-ও জানো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — SQL Commands",
+    "url": "https://www.postgresql.org/docs/current/sql-commands.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is `TRUNCATE` DDL while `DELETE` is DML?",
+    "bn": "`DELETE` DML হলেও `TRUNCATE` কেন DDL?"
+   }
+  ],
+  "related": [
+   "sql-009",
+   "pg-006"
+  ],
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q03",
+  "subtopic": "WHERE vs HAVING",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "where",
+   "having",
+   "group-by",
+   "aggregates"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `WHERE` and `HAVING`?",
+   "bn": "`WHERE` আর `HAVING`-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`WHERE` filters individual rows before grouping, so it can't use aggregates like `COUNT(*)`. `HAVING` filters groups after `GROUP BY`, so it can. You can use both in one query: `WHERE` first narrows the rows, then `HAVING` drops the groups you don't want.",
+   "bn": "`WHERE` group করার আগে প্রতিটা row filter করে, তাই এতে `COUNT(*)`-এর মতো aggregate ব্যবহার করা যায় না। `HAVING` `GROUP BY`-এর পরে group filter করে, তাই এতে করা যায়। একই query-তে দুটোই দেওয়া যায়: আগে `WHERE` row কমায়, তারপর `HAVING` অদরকারি group বাদ দেয়।"
+  },
+  "explanation": {
+   "en": "Putting `COUNT(*) >= 2` in `WHERE` is an error, because groups don't exist yet when `WHERE` runs. A plain row condition works in `HAVING` too, but it belongs in `WHERE`, which filters before the grouping work.",
+   "bn": "`COUNT(*) >= 2` `WHERE`-এ দিলে error হয়, কারণ `WHERE` চলার সময় group তৈরিই হয়নি। সাধারণ row condition `HAVING`-এও চলে, কিন্তু সেটা `WHERE`-এ রাখাই ঠিক, কারণ তাহলে grouping-এর আগেই row কমে যায়।"
+  },
+  "interviewTip": {
+   "en": "Say \"`WHERE` filters rows, `HAVING` filters groups\" and tie it to the order: `FROM` → `WHERE` → `GROUP BY` → `HAVING`.",
+   "bn": "বলো \"`WHERE` row filter করে, `HAVING` group filter করে\", তারপর ক্রমটার সাথে মেলাও: `FROM` → `WHERE` → `GROUP BY` → `HAVING`।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Table Expressions (WHERE, GROUP BY, HAVING)",
+    "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can you use a `SELECT` alias in `WHERE`?",
+    "bn": "`SELECT`-এর alias কি `WHERE`-এ ব্যবহার করা যায়?"
+   }
+  ],
+  "related": [
+   "sql-004",
+   "sql-001"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "-- employees: IT (60000, 45000), HR (50000, 30000), Sales (40000)\nSELECT dept, COUNT(*) AS staff\nFROM employees\nWHERE salary >= 40000        -- rows: drops the 30000 HR employee\nGROUP BY dept\nHAVING COUNT(*) >= 2;        -- groups: keeps only IT\n-- → IT | 2"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q04",
+  "subtopic": "GROUP BY & Aggregates",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "group-by",
+   "aggregates",
+   "count",
+   "sum"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `GROUP BY` do, and which columns are you allowed to put in the `SELECT` list with it?",
+   "bn": "`GROUP BY` কী করে, আর এর সাথে `SELECT` list-এ কোন কোন column রাখা যায়?"
+  },
+  "answer": {
+   "en": "`GROUP BY` puts rows with the same value in the listed columns into one group and returns one row per group, so aggregates like `COUNT`, `SUM` and `AVG` are computed per group. Every column in `SELECT` must either be in `GROUP BY` or be inside an aggregate function.",
+   "bn": "`GROUP BY` উল্লেখ করা column-এ একই value থাকা row-গুলোকে একটা group-এ রাখে আর প্রতিটা group-এর জন্য একটা row দেয়, তাই `COUNT`, `SUM`, `AVG`-এর মতো aggregate প্রতিটা group-এর জন্য আলাদা হিসাব হয়। `SELECT`-এর প্রতিটা column হয় `GROUP BY`-এ থাকতে হবে, নয়তো কোনো aggregate function-এর ভেতরে।"
+  },
+  "explanation": {
+   "en": "`SELECT dept, name, COUNT(*) ... GROUP BY dept` fails in PostgreSQL (\"must appear in the GROUP BY clause or be used in an aggregate function\") because a group has many names. Exception: PostgreSQL allows a column that depends on a grouped primary key.",
+   "bn": "`SELECT dept, name, COUNT(*) ... GROUP BY dept` PostgreSQL-এ fail করে (\"must appear in the GROUP BY clause or be used in an aggregate function\"), কারণ এক group-এ অনেকগুলো name থাকে। ব্যতিক্রম: group করা primary key-এর ওপর নির্ভরশীল column PostgreSQL মেনে নেয়।"
+  },
+  "interviewTip": {
+   "en": "State the rule \"grouped or aggregated\" and explain it: one output row per group can't show many different names.",
+   "bn": "নিয়মটা বলো \"হয় group করা, নয়তো aggregate\", আর কারণটা ব্যাখ্যা করো: প্রতি group-এ একটা output row অনেকগুলো আলাদা name দেখাতে পারে না।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Aggregate Functions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do aggregate functions treat NULL values?",
+    "bn": "Aggregate function NULL value-কে কীভাবে ধরে?"
+   }
+  ],
+  "related": [
+   "sql-003",
+   "sql-005"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "SELECT dept, COUNT(*) AS staff, SUM(salary) AS total\nFROM employees\nGROUP BY dept\nORDER BY dept;",
+   "output": " dept  | staff | total\n-------+-------+--------\n HR    |     2 |  80000\n IT    |     2 | 105000\n Sales |     1 |  40000"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q05",
+  "subtopic": "Set Operations",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "union",
+   "union-all",
+   "set-operations"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `UNION` and `UNION ALL`?",
+   "bn": "`UNION` আর `UNION ALL`-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "Both stack the results of two queries on top of each other. `UNION` removes duplicate rows, which costs a sort or hash step, while `UNION ALL` keeps every row and is faster. Both queries must return the same number of columns with compatible types.",
+   "bn": "দুটোই দুটো query-র result একটার নিচে আরেকটা জুড়ে দেয়। `UNION` duplicate row বাদ দেয়, তাই একটা sort বা hash ধাপের খরচ লাগে; `UNION ALL` সব row রাখে আর বেশি দ্রুত। দুটো query-কে একই সংখ্যক column আর মিলযোগ্য type দিতে হবে।"
+  },
+  "explanation": {
+   "en": "Use `UNION ALL` when the parts can't overlap or duplicates are fine. Column names come from the first query, and an `ORDER BY` at the end sorts the combined result.",
+   "bn": "অংশগুলো একে অপরের সাথে মিলতে না পারলে বা duplicate থাকলে সমস্যা না হলে `UNION ALL` নাও। Column-এর নাম আসে প্রথম query থেকে, আর শেষে `ORDER BY` দিলে পুরো জোড়া result sort হয়।"
+  },
+  "interviewTip": {
+   "en": "Mention the cost: \"`UNION` = `UNION ALL` + duplicate removal\", so default to `UNION ALL` when duplicates are impossible.",
+   "bn": "খরচটা বলো: \"`UNION` = `UNION ALL` + duplicate বাদ দেওয়া\", তাই duplicate সম্ভব না হলে `UNION ALL`-ই নাও।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Combining Queries (UNION, INTERSECT, EXCEPT)",
+    "url": "https://www.postgresql.org/docs/current/queries-union.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What do `INTERSECT` and `EXCEPT` return?",
+    "bn": "`INTERSECT` আর `EXCEPT` কী return করে?"
+   }
+  ],
+  "related": [
+   "sql-q06",
+   "sql-023"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "-- dhaka_customers: Rahim, Karim    ctg_customers: Karim, Nadia\nSELECT name FROM dhaka_customers\nUNION\nSELECT name FROM ctg_customers;   -- → Karim, Nadia, Rahim (3 rows)\n\n-- with UNION ALL instead → Rahim, Karim, Karim, Nadia (4 rows)"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q06",
+  "subtopic": "Set Operations",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "intersect",
+   "except",
+   "set-operations"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What do `INTERSECT` and `EXCEPT` do?",
+   "bn": "`INTERSECT` আর `EXCEPT` কী করে?"
+  },
+  "answer": {
+   "en": "`INTERSECT` returns the rows that appear in both query results, and `EXCEPT` returns the rows of the first query that are not in the second. Like `UNION`, they remove duplicates unless you add `ALL`, and both queries need matching columns.",
+   "bn": "`INTERSECT` সেই row-গুলো দেয় যেগুলো দুটো query-র result-এই আছে, আর `EXCEPT` প্রথম query-র সেই row-গুলো দেয় যেগুলো দ্বিতীয়টায় নেই। `UNION`-এর মতোই `ALL` না দিলে এরা duplicate বাদ দেয়, আর দুটো query-র column মিলতে হবে।"
+  },
+  "explanation": {
+   "en": "Oracle has traditionally called `EXCEPT` `MINUS`, and MySQL added both operators only in 8.0.31. Set operators compare whole rows and treat two NULLs as equal, unlike `NOT IN`.",
+   "bn": "Oracle-এ `EXCEPT`-কে প্রচলিতভাবে `MINUS` বলা হয়, আর MySQL দুটো operator যোগ করেছে কেবল 8.0.31-এ। Set operator পুরো row তুলনা করে আর `NOT IN`-এর মতো নয়, দুটো NULL-কে সমান ধরে।"
+  },
+  "interviewTip": {
+   "en": "Use a two-list example (\"customers in Dhaka and Ctg\") and say `EXCEPT` is a readable anti-join.",
+   "bn": "দুটো list-এর উদাহরণ দাও (\"Dhaka আর Ctg-এর customer\"), আর বলো `EXCEPT` হলো পড়তে সহজ একটা anti-join।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Combining Queries (UNION, INTERSECT, EXCEPT)",
+    "url": "https://www.postgresql.org/docs/current/queries-union.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How else can you find rows in A that are not in B?",
+    "bn": "A-তে আছে কিন্তু B-তে নেই এমন row আর কীভাবে বের করা যায়?"
+   }
+  ],
+  "related": [
+   "sql-q05",
+   "sql-016"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "-- dhaka_customers: Rahim, Karim    ctg_customers: Karim, Nadia\nSELECT name FROM dhaka_customers\nINTERSECT\nSELECT name FROM ctg_customers;   -- → Karim\n\n-- with EXCEPT instead → Rahim (in Dhaka, not in Ctg)"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q07",
+  "subtopic": "NULL Handling",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "null",
+   "is-null",
+   "coalesce"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you check for NULL in SQL, and why doesn't `= NULL` work?",
+   "bn": "SQL-এ NULL কীভাবে check করো, আর `= NULL` কেন কাজ করে না?"
+  },
+  "answer": {
+   "en": "NULL means \"unknown\", so any comparison with it, even `NULL = NULL`, gives UNKNOWN instead of TRUE, and `WHERE` drops the row. Use `IS NULL` / `IS NOT NULL` to test for it, and `COALESCE(col, default)` to replace NULL with a value.",
+   "bn": "NULL মানে \"অজানা\", তাই এর সাথে যেকোনো তুলনা, এমনকি `NULL = NULL`-ও, TRUE না হয়ে UNKNOWN হয়, আর `WHERE` row-টা বাদ দেয়। NULL check করতে `IS NULL` / `IS NOT NULL` ব্যবহার করো, আর NULL-এর জায়গায় কোনো value বসাতে `COALESCE(col, default)`।"
+  },
+  "explanation": {
+   "en": "NULL also spreads through arithmetic: `5 + NULL` is NULL. Aggregates like `SUM` and `AVG` skip NULLs, while `COUNT(*)` still counts the row.",
+   "bn": "Arithmetic-এও NULL ছড়িয়ে পড়ে: `5 + NULL`-এর ফল NULL। `SUM` আর `AVG`-এর মতো aggregate NULL বাদ দেয়, কিন্তু `COUNT(*)` row-টা ঠিকই গোনে।"
+  },
+  "interviewTip": {
+   "en": "Say \"NULL is unknown, not zero or empty\", then show `IS NULL` and `COALESCE` in one line each.",
+   "bn": "বলো \"NULL মানে অজানা, শূন্য বা খালি নয়\", তারপর `IS NULL` আর `COALESCE` এক line করে দেখাও।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Comparison Functions and Operators",
+    "url": "https://www.postgresql.org/docs/current/functions-comparison.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why can `NOT IN` with a subquery return no rows?",
+    "bn": "Subquery-সহ `NOT IN` কেন কোনো row না-ও দিতে পারে?"
+   },
+   {
+    "en": "What is the difference between NULL and an empty string?",
+    "bn": "NULL আর empty string-এর মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "sql-006",
+   "sql-016",
+   "sql-005"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "-- customers: ('Rahim', 'Dhaka'), ('Nadia', NULL)\nSELECT name FROM customers WHERE city = NULL;   -- → no rows\nSELECT name FROM customers WHERE city IS NULL;  -- → Nadia\nSELECT name, COALESCE(city, 'Unknown') AS city\nFROM customers;                                 -- → Rahim | Dhaka, Nadia | Unknown"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q08",
+  "subtopic": "Normalization",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "normalization",
+   "1nf",
+   "2nf",
+   "3nf"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What are 1NF, 2NF and 3NF?",
+   "bn": "1NF, 2NF আর 3NF কী?"
+  },
+  "answer": {
+   "en": "1NF: every column holds a single value and there are no repeating groups. 2NF: 1NF, and no non-key column depends on only part of a composite key. 3NF: 2NF, and no non-key column depends on another non-key column (no transitive dependency), so each fact is stored once.",
+   "bn": "1NF: প্রতিটা column-এ একটাই value, কোনো repeating group নেই। 2NF: 1NF, আর কোনো non-key column composite key-এর শুধু একটা অংশের ওপর নির্ভর করে না। 3NF: 2NF, আর কোনো non-key column অন্য কোনো non-key column-এর ওপর নির্ভর করে না (transitive dependency নেই), তাই প্রতিটা তথ্য একবারই রাখা হয়।"
+  },
+  "explanation": {
+   "en": "Example 3NF break: `employees(id, dept_id, dept_name)`, where `dept_name` depends on `dept_id`, not on `id`; move it to a `departments` table. The goal is avoiding update, insert and delete anomalies.",
+   "bn": "3NF ভাঙার উদাহরণ: `employees(id, dept_id, dept_name)`, এখানে `dept_name` নির্ভর করে `dept_id`-এর ওপর, `id`-এর ওপর নয়; এটাকে একটা `departments` table-এ সরাও। উদ্দেশ্য হলো update, insert আর delete anomaly এড়ানো।"
+  },
+  "interviewTip": {
+   "en": "Give one tiny example per form; the phrase \"the key, the whole key, and nothing but the key\" summarises 1NF to 3NF.",
+   "bn": "প্রতিটা form-এর জন্য একটা ছোট উদাহরণ দাও; \"the key, the whole key, and nothing but the key\" কথাটা 1NF থেকে 3NF-এর সারাংশ।"
+  },
+  "references": [
+   {
+    "title": "Microsoft Learn — Database normalization description",
+    "url": "https://learn.microsoft.com/en-us/office/troubleshoot/access/database-normalization-description"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you deliberately denormalize?",
+    "bn": "কখন ইচ্ছা করে denormalize করবে?"
+   }
+  ],
+  "related": [
+   "sql-011",
+   "pg-001",
+   "sql-032"
+  ],
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q09",
+  "subtopic": "Transactions & ACID",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "acid",
+   "transactions"
+  ],
+  "technologyVersion": "Version-independent (ISO SQL)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does ACID stand for?",
+   "bn": "ACID বলতে কী বোঝায়?"
+  },
+  "answer": {
+   "en": "ACID is the set of guarantees a transaction gives. Atomicity: all of its changes happen or none do. Consistency: it moves the database from one valid state to another, respecting constraints. Isolation: concurrent transactions don't see each other's half-done work. Durability: once committed, changes survive a crash.",
+   "bn": "ACID হলো transaction যে নিশ্চয়তাগুলো দেয়। Atomicity: হয় সব change হবে, নয়তো কোনোটাই না। Consistency: constraint মেনে database এক valid অবস্থা থেকে আরেক valid অবস্থায় যায়। Isolation: একসাথে চলা transaction একে অপরের অর্ধেক কাজ দেখে না। Durability: commit হয়ে গেলে change crash-এও টিকে থাকে।"
+  },
+  "explanation": {
+   "en": "Isolation isn't all-or-nothing: the isolation level (Read Committed by default in PostgreSQL) decides which effects of concurrent transactions you can see.",
+   "bn": "Isolation পুরোপুরি হ্যাঁ বা না নয়: কোন isolation level (PostgreSQL-এ default Read Committed) সেটা ঠিক করে একসাথে চলা transaction-এর কোন প্রভাব তুমি দেখতে পাবে।"
+  },
+  "interviewTip": {
+   "en": "Explain each letter with the money-transfer example instead of reciting four definitions.",
+   "bn": "চারটা সংজ্ঞা মুখস্থ বলার বদলে money transfer-এর উদাহরণ দিয়ে প্রতিটা অক্ষর ব্যাখ্যা করো।"
+  },
+  "references": [
+   {
+    "title": "PostgreSQL docs — Transactions (tutorial)",
+    "url": "https://www.postgresql.org/docs/current/tutorial-transactions.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What are the transaction isolation levels?",
+    "bn": "Transaction isolation level-গুলো কী কী?"
+   }
+  ],
+  "related": [
+   "sql-010",
+   "sql-029",
+   "pg-006"
+  ],
+  "code": {
+   "language": "sql",
+   "source": "BEGIN;\nUPDATE accounts SET balance = balance - 500 WHERE id = 1;\nUPDATE accounts SET balance = balance + 500 WHERE id = 2;\nCOMMIT;   -- both updates or neither (atomicity)"
+  },
+  "technology": "sql"
+ },
+ {
+  "id": "sql-q10",
+  "subtopic": "Indexes",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "indexes",
+   "clustered-index",
+   "non-clustered-index"
+  ],
+  "technologyVersion": "Engine-specific (SQL Server, MySQL InnoDB, PostgreSQL 18)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between a clustered and a non-clustered index?",
+   "bn": "Clustered আর non-clustered index-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "A clustered index stores the table rows themselves in index-key order, so a table can have only one. A non-clustered index is a separate structure holding key values plus a pointer to the row, and a table can have many. In SQL Server and MySQL InnoDB the primary key is clustered by default.",
+   "bn": "Clustered index-এ table-এর row-গুলোই index key-এর ক্রমে রাখা হয়, তাই একটা table-এ একটাই থাকতে পারে। Non-clustered index একটা আলাদা structure, যেখানে key value আর row-এর একটা pointer থাকে, আর একটা table-এ এরকম অনেকগুলো থাকতে পারে। SQL Server আর MySQL InnoDB-তে primary key default-ভাবে clustered।"
+  },
+  "explanation": {
+   "en": "PostgreSQL has no maintained clustered index: tables are heaps and every index is secondary. Its `CLUSTER` command reorders the table once, and new rows don't keep that order.",
+   "bn": "PostgreSQL-এ সবসময় বজায় থাকা clustered index নেই: table হলো heap, আর প্রতিটা index secondary। এর `CLUSTER` command table-টা একবার সাজিয়ে দেয়, নতুন row সেই ক্রম মানে না।"
+  },
+  "interviewTip": {
+   "en": "Use the book analogy carefully: a clustered index is like a dictionary sorted by word; a non-clustered one is the index at the back of a book.",
+   "bn": "Book-এর উপমাটা সাবধানে দাও: clustered index হলো শব্দ অনুযায়ী সাজানো অভিধানের মতো; non-clustered হলো বইয়ের শেষের index-এর মতো।"
+  },
+  "references": [
+   {
+    "title": "Microsoft Learn — Clustered and nonclustered indexes",
+    "url": "https://learn.microsoft.com/en-us/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why do indexes slow down writes?",
+    "bn": "Index কেন write ধীর করে?"
+   }
+  ],
+  "related": [
+   "pg-005",
+   "sql-020"
+  ],
+  "technology": "sql"
+ }
+]

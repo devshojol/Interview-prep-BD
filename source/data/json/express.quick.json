@@ -1,0 +1,558 @@
+[
+ {
+  "id": "express-q01",
+  "subtopic": "Request & Response Lifecycle",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "express",
+   "framework",
+   "node-http"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Express.js, and why use it instead of Node's built-in `http` module?",
+   "bn": "Express.js কী, আর Node-এর built-in `http` module-এর বদলে কেন এটা ব্যবহার করো?"
+  },
+  "answer": {
+   "en": "Express is a minimal web framework for Node.js that sits on top of the `http` module. It adds routing by method and path, a middleware pipeline, and helpers like `res.json()` and `req.params`, so you don't parse URLs and bodies or set headers by hand. Express 5 is the current version.",
+   "bn": "Express হলো Node.js-এর একটা minimal web framework, যেটা `http` module-এর উপর চলে। এটা method আর path ধরে routing, middleware pipeline, আর `res.json()`, `req.params`-এর মতো helper দেয়, তাই URL বা body নিজে parse করতে বা header হাতে set করতে হয় না। বর্তমান version হলো Express 5।"
+  },
+  "explanation": {
+   "en": "It is unopinionated: no fixed folder structure, ORM or validation, so you choose the libraries. Frameworks like NestJS can run on top of Express.",
+   "bn": "Express unopinionated: নির্দিষ্ট folder structure, ORM বা validation নেই, library তুমি নিজে বেছে নাও। NestJS-এর মতো framework Express-এর উপরেও চলতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Name the three things it adds: routing, middleware and request/response helpers.",
+   "bn": "এটা যে তিনটা জিনিস যোগ করে সেগুলো বলো: routing, middleware আর request/response helper।"
+  },
+  "references": [
+   {
+    "title": "Express — Hello world example",
+    "url": "https://expressjs.com/en/starter/hello-world.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does `express.json()` do?",
+    "bn": "`express.json()` কী করে?"
+   }
+  ],
+  "related": [
+   "express-001"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "import express from 'express';\nconst app = express();\napp.use(express.json());\napp.get('/health', (req, res) => res.json({ ok: true })); // → {\"ok\":true}\napp.listen(3000);"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q02",
+  "subtopic": "Middleware",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "app-use",
+   "app-get",
+   "routing",
+   "middleware"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `app.use()` and `app.get()`?",
+   "bn": "`app.use()` আর `app.get()`-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`app.use(path, fn)` mounts middleware for **every HTTP method** and every path that **starts with** `path` (default `/`), so it's used for parsers, auth, logging and routers. `app.get(path, fn)` is a route: it runs only for **GET** requests whose path matches exactly.",
+   "bn": "`app.use(path, fn)` middleware mount করে **সব HTTP method**-এর জন্য, আর যেসব path `path` দিয়ে **শুরু হয়** সেগুলোর জন্য (default `/`), তাই parser, auth, logging আর router-এর জন্য এটা ব্যবহার হয়। `app.get(path, fn)` হলো route: এটা শুধু সেইসব **GET** request-এ চলে যাদের path হুবহু মেলে।"
+  },
+  "explanation": {
+   "en": "Inside `app.use('/api', fn)`, `req.url` has the mount path stripped; use `req.originalUrl` for the full URL.",
+   "bn": "`app.use('/api', fn)`-এর ভেতরে `req.url` থেকে mount path বাদ যায়; পুরো URL-এর জন্য `req.originalUrl` ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Say \"use = prefix match, any method; get = exact path, GET only\" and give one example of each.",
+   "bn": "বলো \"use = prefix match, যেকোনো method; get = হুবহু path, শুধু GET\", আর প্রতিটার একটা example দাও।"
+  },
+  "references": [
+   {
+    "title": "Express — Using middleware",
+    "url": "https://expressjs.com/en/guide/using-middleware.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does `app.all()` do?",
+    "bn": "`app.all()` কী করে?"
+   }
+  ],
+  "related": [
+   "express-001",
+   "express-004"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "app.use('/api', logRequest);           // GET /api, POST /api, GET /api/users ...\napp.get('/api', (req, res) => res.send('get /api'));\n// GET  /api       → logRequest, then \"get /api\"\n// POST /api       → logRequest only (then 404)\n// GET  /api/users → logRequest only (then 404)"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q03",
+  "subtopic": "Routing (Express 5 Path Syntax)",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "router",
+   "express-router",
+   "mergeparams",
+   "modular"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is `express.Router()`, and why use it?",
+   "bn": "`express.Router()` কী, আর কেন ব্যবহার করো?"
+  },
+  "answer": {
+   "en": "`express.Router()` creates a mini-app with its own routes and middleware that you mount on a path with `app.use('/users', usersRouter)`. It splits a big app into one file per feature and lets you apply middleware (like auth) to just that group. Use `{ mergeParams: true }` when a nested router needs the parent's params.",
+   "bn": "`express.Router()` নিজস্ব route আর middleware-সহ একটা mini-app তৈরি করে, যেটা `app.use('/users', usersRouter)` দিয়ে একটা path-এ mount করা হয়। এতে বড় app feature অনুযায়ী আলাদা file-এ ভাগ হয়, আর শুধু ওই group-এ middleware (যেমন auth) লাগানো যায়। Nested router-এ parent-এর params লাগলে `{ mergeParams: true }` দাও।"
+  },
+  "explanation": {
+   "en": "Without `mergeParams`, `req.params.postId` would be missing inside `comments`. Routers also use Express 5 path syntax.",
+   "bn": "`mergeParams` না দিলে `comments`-এর ভেতরে `req.params.postId` পাওয়া যেত না। Router-এও Express 5-এর path syntax চলে।"
+  },
+  "interviewTip": {
+   "en": "Describe your usual layout: one router per resource, mounted in `app.js` under a version prefix like `/v1`.",
+   "bn": "তোমার সাধারণ layout বলো: প্রতি resource-এর জন্য একটা router, `app.js`-এ `/v1`-এর মতো version prefix-এর নিচে mount করা।"
+  },
+  "references": [
+   {
+    "title": "Express — Routing (express.Router)",
+    "url": "https://expressjs.com/en/guide/routing.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you protect every route in one router with an auth middleware?",
+    "bn": "একটা router-এর সব route-এ কীভাবে auth middleware লাগাবে?"
+   }
+  ],
+  "related": [
+   "express-029",
+   "express-007"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const comments = express.Router({ mergeParams: true });\ncomments.get('/', (req, res) => res.json({ postId: req.params.postId }));\n\nconst posts = express.Router();\nposts.use('/:postId/comments', comments);\napp.use('/posts', posts);\n// GET /posts/7/comments → {\"postId\":\"7\"}"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q04",
+  "subtopic": "Request & Response Lifecycle",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "req-params",
+   "req-query",
+   "req-body"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "For the route `app.get('/users/:id', ...)` and the request `GET /users/42?sort=name`, what are `req.params`, `req.query` and `req.body`?",
+   "bn": "`app.get('/users/:id', ...)` route আর `GET /users/42?sort=name` request-এর জন্য `req.params`, `req.query` আর `req.body` কী হবে?"
+  },
+  "answer": {
+   "en": "`req.params` is `{ id: '42' }` (from the path), `req.query` is `{ sort: 'name' }` (from the query string) and `req.body` is `undefined`: a GET has no body here and no body parser ran. In Express 5 `req.body` stays `undefined` until a parser like `express.json()` runs, and all params and query values are strings.",
+   "bn": "`req.params` হবে `{ id: '42' }` (path থেকে), `req.query` হবে `{ sort: 'name' }` (query string থেকে), আর `req.body` হবে `undefined`: এখানে GET-এর কোনো body নেই, body parser-ও চলেনি। Express 5-এ `express.json()`-এর মতো parser না চলা পর্যন্ত `req.body` `undefined` থাকে, আর params ও query-র সব value string।"
+  },
+  "explanation": {
+   "en": "`'42'` is a string, so convert it (`Number(req.params.id)`) or validate with a schema before using it.",
+   "bn": "`'42'` একটা string, তাই ব্যবহারের আগে convert করো (`Number(req.params.id)`) বা schema দিয়ে validate করো।"
+  },
+  "interviewTip": {
+   "en": "Map each one to its source: path → params, `?query` → query, request body + parser → body.",
+   "bn": "প্রতিটাকে তার উৎসের সাথে মিলিয়ে বলো: path → params, `?query` → query, request body + parser → body।"
+  },
+  "references": [
+   {
+    "title": "Express 5.x — API reference",
+    "url": "https://expressjs.com/en/5x/api.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is `req.query` for `?tag=a&tag=b`?",
+    "bn": "`?tag=a&tag=b` হলে `req.query` কী হবে?"
+   }
+  ],
+  "related": [
+   "express-003",
+   "express-004"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "app.get('/users/:id', (req, res) => {\n  res.json({ params: req.params, query: req.query, body: req.body });\n});\n// GET /users/42?sort=name → {\"params\":{\"id\":\"42\"},\"query\":{\"sort\":\"name\"}}\n// (body is undefined, so JSON.stringify leaves it out)"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q05",
+  "subtopic": "Request & Response Lifecycle",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "res-send",
+   "res-json",
+   "res-sendstatus",
+   "response"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `res.send()`, `res.json()` and `res.sendStatus()`?",
+   "bn": "`res.send()`, `res.json()` আর `res.sendStatus()`-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`res.send(body)` sends a string, Buffer or object and guesses the `Content-Type` (a string becomes `text/html`). `res.json(data)` always sends JSON with `application/json`. `res.sendStatus(code)` sets the status and sends its standard text, like `204` with an empty body; to set a status with a body, chain `res.status(201).json(data)`.",
+   "bn": "`res.send(body)` string, Buffer বা object পাঠায় আর `Content-Type` অনুমান করে নেয় (string হলে `text/html`)। `res.json(data)` সবসময় `application/json`-সহ JSON পাঠায়। `res.sendStatus(code)` status set করে তার standard text পাঠায়, যেমন `204` হলে খালি body; body-সহ status দিতে chain করো `res.status(201).json(data)`।"
+  },
+  "explanation": {
+   "en": "Express 5 gotcha: `res.send(404)` no longer sets the status; it responds `200` with the body `404`. Use `res.sendStatus(404)`.",
+   "bn": "Express 5-এর ফাঁদ: `res.send(404)` এখন আর status set করে না; এটা `200` দেয় আর body-তে `404` পাঠায়। `res.sendStatus(404)` ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Say that for APIs you use `res.status(...).json(...)`, and mention the Express 5 `res.send(number)` change.",
+   "bn": "বলো API-তে তুমি `res.status(...).json(...)` ব্যবহার করো, আর Express 5-এর `res.send(number)` পরিবর্তনটা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Express 5.x — API reference",
+    "url": "https://expressjs.com/en/5x/api.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens if you call `res.json()` twice in one handler?",
+    "bn": "একটা handler-এ দুবার `res.json()` call করলে কী হয়?"
+   }
+  ],
+  "related": [
+   "express-030",
+   "express-011"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "app.get('/a', (req, res) => res.send('<p>hi</p>'));       // 200 text/html\napp.get('/b', (req, res) => res.json({ ok: true }));      // 200 application/json\napp.delete('/c', (req, res) => res.sendStatus(204));      // 204, empty body\napp.post('/d', (req, res) => res.status(201).json({ id: 1 }));"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q06",
+  "subtopic": "Error-Handling Middleware",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "error-handling",
+   "async",
+   "express5",
+   "middleware"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "version-specific",
+  "question": {
+   "en": "How do you handle errors in Express 5? Do async route handlers still need `try/catch` or an `asyncHandler` wrapper?",
+   "bn": "Express 5-এ error কীভাবে handle করো? Async route handler-এ কি এখনো `try/catch` বা `asyncHandler` wrapper লাগে?"
+  },
+  "answer": {
+   "en": "No: in Express 5, if an `async` handler throws or a promise rejects, Express passes the error to `next(err)` automatically. You write one error-handling middleware with four arguments, `(err, req, res, next)`, register it after all routes, and send the error response there. In Express 4 you needed `try/catch` + `next(err)` or a wrapper.",
+   "bn": "না: Express 5-এ `async` handler throw করলে বা promise reject হলে Express নিজেই error-টা `next(err)`-এ পাঠায়। চার argument-এর একটা error-handling middleware লেখো, `(err, req, res, next)`, সব route-এর পরে register করো, আর সেখান থেকেই error response পাঠাও। Express 4-এ `try/catch` + `next(err)` বা wrapper লাগত।"
+  },
+  "explanation": {
+   "en": "The error handler must have exactly four parameters, or Express treats it as normal middleware. Log the real error, but don't send stack traces to clients.",
+   "bn": "Error handler-এ ঠিক চারটা parameter থাকতে হবে, নইলে Express এটাকে সাধারণ middleware ধরে। আসল error log করো, কিন্তু client-কে stack trace পাঠিও না।"
+  },
+  "interviewTip": {
+   "en": "Say \"Express 5 forwards rejected promises\", then show the four-argument handler registered last.",
+   "bn": "বলো \"Express 5 rejected promise নিজেই forward করে\", তারপর শেষে register করা চার argument-এর handler-টা দেখাও।"
+  },
+  "references": [
+   {
+    "title": "Express — Error handling",
+    "url": "https://expressjs.com/en/guide/error-handling.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why must the error handler be registered after the routes?",
+    "bn": "Error handler কেন route-গুলোর পরে register করতে হয়?"
+   }
+  ],
+  "related": [
+   "express-005",
+   "express-008",
+   "express-006"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "app.get('/users/:id', async (req, res) => {\n  const user = await db.findUser(req.params.id); // rejects: \"DB down\"\n  res.json(user);\n});\napp.use((err, req, res, next) => {\n  res.status(err.status ?? 500).json({ error: 'Internal Server Error' });\n}); // → 500 {\"error\":\"Internal Server Error\"}"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q07",
+  "subtopic": "CORS",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "cors",
+   "same-origin",
+   "browser",
+   "middleware"
+  ],
+  "technologyVersion": "Express 5.x (5.3), cors 2.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is CORS, and how do you enable it in an Express API?",
+   "bn": "CORS কী, আর Express API-তে কীভাবে চালু করো?"
+  },
+  "answer": {
+   "en": "CORS (Cross-Origin Resource Sharing) is how a server tells the **browser** that JavaScript from another origin (a different scheme, host or port) may read its responses. Browsers block those reads by default. In Express, use the `cors` middleware with an allow-list of your frontend origins, registered before the routes.",
+   "bn": "CORS (Cross-Origin Resource Sharing) হলো server-এর **browser**-কে জানানোর উপায় যে অন্য origin (আলাদা scheme, host বা port) থেকে আসা JavaScript তার response পড়তে পারবে। Browser default-এ এই পড়া block করে। Express-এ route-এর আগে `cors` middleware register করো, frontend origin-গুলোর একটা allow-list দিয়ে।"
+  },
+  "explanation": {
+   "en": "CORS is not security for your API: `curl` and servers ignore it, so you still need authentication. With cookies, `origin: '*'` is not allowed; list exact origins and set `credentials: true`.",
+   "bn": "CORS তোমার API-র security নয়: `curl` বা server এটা মানে না, তাই authentication লাগবেই। Cookie থাকলে `origin: '*'` চলে না; নির্দিষ্ট origin দাও আর `credentials: true` set করো।"
+  },
+  "interviewTip": {
+   "en": "Say the browser enforces it and the server grants it with response headers; a client-side fix can't solve it.",
+   "bn": "বলো browser এটা enforce করে আর server response header দিয়ে অনুমতি দেয়; client-এ কিছু করে এটা সমাধান হয় না।"
+  },
+  "references": [
+   {
+    "title": "Express — cors middleware",
+    "url": "https://expressjs.com/en/resources/middleware/cors.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is a preflight request?",
+    "bn": "Preflight request কী?"
+   }
+  ],
+  "related": [
+   "express-015",
+   "express-017"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "import cors from 'cors';\napp.use(cors({ origin: ['http://localhost:5173'] }));\n// request from that origin → Access-Control-Allow-Origin: http://localhost:5173\n// request from any other origin → no CORS header, so the browser blocks the read"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q08",
+  "subtopic": "Project Structure",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "mvc",
+   "architecture",
+   "controllers",
+   "services"
+  ],
+  "technologyVersion": "Version-independent concept (Express 5.x)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you structure an Express project? What is MVC in an Express API?",
+   "bn": "Express project কীভাবে সাজাও? Express API-তে MVC কী?"
+  },
+  "answer": {
+   "en": "MVC splits code into **Models** (data and database access), **Views** (the output: HTML templates, or JSON in an API) and **Controllers** (handle the request and call the model). In APIs I add a **service** layer for business logic: routes → controllers (HTTP only) → services → models/repositories, so each layer is easy to test and change.",
+   "bn": "MVC code-কে ভাগ করে **Model** (data আর database access), **View** (output: HTML template, API-তে JSON) আর **Controller** (request সামলায়, model-কে call করে)-এ। API-তে আমি business logic-এর জন্য একটা **service** layer যোগ করি: route → controller (শুধু HTTP) → service → model/repository, যাতে প্রতিটা layer সহজে test আর পরিবর্তন করা যায়।"
+  },
+  "explanation": {
+   "en": "Express doesn't force any structure. Keep `req`/`res` out of services so the same logic works from tests, jobs and other routes.",
+   "bn": "Express কোনো structure চাপিয়ে দেয় না। Service-এ `req`/`res` রেখো না, যাতে একই logic test, job আর অন্য route থেকেও চলে।"
+  },
+  "interviewTip": {
+   "en": "Draw the request path through the layers and say what each one is not allowed to do.",
+   "bn": "Layer-গুলোর মধ্য দিয়ে request-এর পথটা এঁকে দেখাও, আর বলো কোন layer কী করতে পারবে না।"
+  },
+  "references": [
+   {
+    "title": "Express — FAQ (How should I structure my application?)",
+    "url": "https://expressjs.com/en/starter/faq.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why split `app.js` (the app) from `server.js` (the `listen()` call)?",
+    "bn": "`app.js` (app) আর `server.js` (`listen()` call) আলাদা রাখো কেন?"
+   }
+  ],
+  "related": [
+   "express-007",
+   "express-026"
+  ],
+  "code": {
+   "language": "text",
+   "source": "src/\n  routes/users.routes.js        # URL + method → controller\n  controllers/users.controller.js # read req, call service, send res\n  services/users.service.js     # business rules\n  models/user.model.js          # schema / DB access\n  middlewares/  app.js  server.js"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q09",
+  "subtopic": "REST APIs",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "status-codes",
+   "http",
+   "rest"
+  ],
+  "technologyVersion": "Version-independent concept (HTTP, RFC 9110)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Which HTTP status codes should a REST API commonly return?",
+   "bn": "একটা REST API সাধারণত কোন কোন HTTP status code return করে?"
+  },
+  "answer": {
+   "en": "Success: `200 OK` (read or update), `201 Created` (after POST), `204 No Content` (delete). Client errors: `400` (invalid input), `401` (not logged in), `403` (logged in but not allowed), `404` (not found), `409` (conflict, like a duplicate email), `429` (too many requests). Server errors: `500` for unexpected bugs.",
+   "bn": "সফল হলে: `200 OK` (read বা update), `201 Created` (POST-এর পরে), `204 No Content` (delete)। Client-এর ভুল: `400` (ভুল input), `401` (login করা নেই), `403` (login আছে কিন্তু অনুমতি নেই), `404` (পাওয়া যায়নি), `409` (conflict, যেমন duplicate email), `429` (অনেক বেশি request)। Server-এর ভুল: অপ্রত্যাশিত bug-এ `500`।"
+  },
+  "explanation": {
+   "en": "Remember the families: 2xx success, 3xx redirect, 4xx the client's fault, 5xx the server's fault. Don't return `200` with `{ error: ... }`.",
+   "bn": "Family-গুলো মনে রাখো: 2xx সফল, 3xx redirect, 4xx client-এর ভুল, 5xx server-এর ভুল। `{ error: ... }`-সহ `200` return কোরো না।"
+  },
+  "interviewTip": {
+   "en": "Explain `401` vs `403` clearly; it's the most common follow-up.",
+   "bn": "`401` আর `403`-এর পার্থক্য পরিষ্কার করে বলো; এটাই সবচেয়ে সাধারণ follow-up।"
+  },
+  "references": [
+   {
+    "title": "MDN — HTTP response status codes",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the difference between `401` and `403`?",
+    "bn": "`401` আর `403`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "express-009",
+   "express-022"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "res.status(201).json(newUser);              // created\nres.sendStatus(204);                        // deleted, no body\nres.status(404).json({ error: 'User not found' });"
+  },
+  "technology": "express"
+ },
+ {
+  "id": "express-q10",
+  "subtopic": "Middleware",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "express-static",
+   "static-files",
+   "middleware"
+  ],
+  "technologyVersion": "Express 5.x (5.3)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "How do you serve static files (images, CSS, a built frontend) with Express?",
+   "bn": "Express দিয়ে static file (image, CSS, build করা frontend) কীভাবে serve করো?"
+  },
+  "answer": {
+   "en": "Use the built-in `express.static` middleware: `app.use(express.static('public'))` serves files from the `public` folder, so `public/logo.png` is available at `/logo.png`. Add a prefix with `app.use('/assets', express.static('public'))`. In Express 5 dotfiles and dot-folders (like `/.well-known`) are not served by default.",
+   "bn": "Built-in `express.static` middleware ব্যবহার করো: `app.use(express.static('public'))` `public` folder থেকে file serve করে, তাই `public/logo.png` পাওয়া যায় `/logo.png`-এ। Prefix দিতে `app.use('/assets', express.static('public'))`। Express 5-এ dotfile আর dot-folder (যেমন `/.well-known`) default-এ serve হয় না।"
+  },
+  "explanation": {
+   "en": "Use an absolute path so it works from any working directory. In production, NGINX or a CDN often serves static files instead.",
+   "bn": "Absolute path দাও যাতে যেকোনো working directory থেকে চলে। Production-এ প্রায়ই NGINX বা CDN static file serve করে।"
+  },
+  "interviewTip": {
+   "en": "Show the one-liner, then mention absolute paths and serving through a CDN in production.",
+   "bn": "এক লাইনের code-টা দেখাও, তারপর absolute path আর production-এ CDN দিয়ে serve করার কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "Express — Serving static files",
+    "url": "https://expressjs.com/en/starter/static-files.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you serve a React SPA so that deep links like `/dashboard` work?",
+    "bn": "React SPA এমনভাবে কীভাবে serve করবে যাতে `/dashboard`-এর মতো deep link কাজ করে?"
+   }
+  ],
+  "related": [
+   "express-002",
+   "express-031"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "import path from 'node:path';\napp.use(express.static(path.join(import.meta.dirname, 'public')));\n// public/hello.txt → GET /hello.txt → 200 \"hello\""
+  },
+  "technology": "express"
+ }
+]

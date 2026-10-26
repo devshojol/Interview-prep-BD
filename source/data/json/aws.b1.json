@@ -58,6 +58,10 @@
    "aws-003",
    "aws-027"
   ],
+  "quickAnswer": {
+   "en": "IaaS means you manage the OS and everything above it (EC2), PaaS means the provider runs the platform and you bring code or data (RDS), and SaaS is finished software (Gmail). AWS secures the cloud and you secure what you put in it: on EC2 you patch the OS, on RDS AWS patches the engine, on Lambda you own code, IAM and data.",
+   "bn": "IaaS-এ OS থেকে উপরের সবকিছু তুমি manage করো (EC2), PaaS-এ platform চালায় provider আর তুমি শুধু code বা data আনো (RDS), আর SaaS হলো তৈরি software (Gmail)। AWS cloud-টা secure করে, cloud-এ যা রাখো সেটা secure করা তোমার কাজ: EC2-তে OS patch তুমি করো, RDS-এ engine patch করে AWS, আর Lambda-তে তোমার দায়িত্ব code, IAM আর data।"
+  },
   "commonMistakes": {
    "en": "Saying \"serverless means I have no security responsibility\", or assuming AWS is responsible when a misconfigured S3 bucket leaks data.",
    "bn": "\"Serverless মানে আমার কোনো security দায়িত্ব নেই\" বলা, অথবা ভুল configure করা S3 bucket থেকে data leak হলে সেটা AWS-এর দায় ভাবা।"
@@ -110,6 +114,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "A Region is a separate geographic area with several isolated AZs, and each AZ is one or more data centres with independent power and networking, linked by low-latency connections. Spreading across AZs gives high availability, but it doesn't survive a whole-Region outage; that needs a multi-Region DR design.",
+   "bn": "Region হলো আলাদা একটা geographic এলাকা, যার ভেতরে কয়েকটা isolated AZ থাকে; প্রতিটা AZ এক বা একাধিক data centre, যাদের power আর networking আলাদা, আর AZ-গুলো low-latency link দিয়ে যুক্ত। কয়েকটা AZ-এ ছড়ালে high availability পাওয়া যায়, কিন্তু পুরো Region down হলে টিকতে multi-Region DR design লাগে।"
+  },
   "options": [
    {
     "en": "An Availability Zone is exactly one data centre, and a Region is a group of CloudFront edge locations",
@@ -195,6 +203,10 @@
    "aws-015",
    "aws-024"
   ],
+  "quickAnswer": {
+   "en": "A policy is a JSON document that allows or denies actions; a user is a long-term identity, a group bundles users to share policies, and a role has no long-term credentials, so whoever assumes it gets temporary STS credentials. Today people sign in through IAM Identity Center with MFA, and workloads use roles, not access keys.",
+   "bn": "Policy হলো JSON document, যেটা কোন action allow বা deny হবে বলে দেয়; user হলো long-term identity, group অনেক user-কে একসাথে policy দেয়, আর role-এর কোনো long-term credential নেই, যে assume করে সে STS থেকে temporary credential পায়। এখন মানুষ IAM Identity Center দিয়ে MFA-সহ login করে, আর workload access key-এর বদলে role ব্যবহার করে।"
+  },
   "commonMistakes": {
    "en": "Thinking a group can be assumed like a role, sharing one IAM user between several developers, or committing access keys to Git or a `.env` file.",
    "bn": "Group-কে role-এর মতো assume করা যায় ভাবা, কয়েকজন developer মিলে একটা IAM user শেয়ার করা, বা access key Git-এ বা `.env` file-এ commit করা।"
@@ -255,6 +267,10 @@
    "aws-003",
    "aws-015"
   ],
+  "quickAnswer": {
+   "en": "Attach an IAM role with a least-privilege policy to the instance (an instance profile). The SDK's default credential chain picks up its temporary, auto-rotating credentials from the metadata service, so no access keys sit in `.env`, user data or Git.",
+   "bn": "Instance-এ least-privilege policy-সহ একটা IAM role attach করো (instance profile)। SDK-এর default credential chain metadata service থেকে temporary, নিজে থেকে rotate হওয়া credential নিয়ে নেয়, তাই `.env`, user data বা Git-এ কোনো access key রাখতে হয় না।"
+  },
   "options": [
    {
     "en": "Create an IAM user and put its access key ID and secret access key in the app's `.env` file on the server",
@@ -339,6 +355,10 @@
    "aws-012",
    "aws-026"
   ],
+  "quickAnswer": {
+   "en": "EC2 gives you virtual servers in your VPC: the instance type sets the hardware size, the AMI is the boot image, and user data is a first-boot script. EBS persists across stop/start while instance store data is lost on stop or terminate, and you pay On-Demand, with Savings Plans/Reserved Instances, or on reclaimable Spot.",
+   "bn": "EC2 তোমার VPC-র ভেতরে virtual server দেয়: instance type ঠিক করে hardware-এর size, AMI হলো boot image, আর user data হলো প্রথম boot-এ চলা script। EBS stop/start-এর পরেও থাকে, কিন্তু instance store-এর data stop বা terminate হলে হারিয়ে যায়; দাম দাও On-Demand, Savings Plans/Reserved Instances, বা সস্তা কিন্তু AWS ফেরত নিতে পারে এমন Spot-এ।"
+  },
   "commonMistakes": {
    "en": "Storing a database on instance store, assuming the public IP is permanent, or still choosing Amazon Linux 2 for new servers.",
    "bn": "Instance store-এ database রাখা, public IP স্থায়ী ভাবা, বা নতুন server-এর জন্য এখনো Amazon Linux 2 বেছে নেওয়া।"
@@ -412,6 +432,10 @@
    "aws-007",
    "aws-026"
   ],
+  "quickAnswer": {
+   "en": "Storage classes trade storage price against retrieval cost and speed: Standard for hot data, Standard-IA for rare reads, Glacier tiers for archives, and Intelligent-Tiering when access is unpredictable. Versioning keeps old versions so overwrites and deletes can be undone, and lifecycle rules transition or expire objects.",
+   "bn": "Storage class-গুলো storage-এর দাম আর retrieval-এর খরচ ও speed-এর মধ্যে trade-off করে: hot data-র জন্য Standard, কম পড়া data-র জন্য Standard-IA, archive-এর জন্য Glacier tier, আর access pattern অজানা হলে Intelligent-Tiering। Versioning পুরনো version রেখে দেয় বলে overwrite বা delete undo করা যায়, আর lifecycle rule object-কে নিজে থেকে অন্য class-এ সরায় বা expire করে।"
+  },
   "commonMistakes": {
    "en": "Enabling versioning without expiring noncurrent versions, or assuming \"Glacier\" always means hours-long retrieval (Glacier Instant Retrieval is millisecond access).",
    "bn": "Noncurrent version expire না করে versioning চালু করা, অথবা ভাবা যে \"Glacier\" মানেই কয়েক ঘণ্টার retrieval (Glacier Instant Retrieval-এ millisecond-এ access পাওয়া যায়)।"
@@ -476,6 +500,10 @@
    "aws-013",
    "aws-014"
   ],
+  "quickAnswer": {
+   "en": "Block Public Access is on, ACLs are disabled (Object Ownership = Bucket owner enforced), and the object is encrypted at rest with SSE-S3 automatically, so it's private. To serve files publicly, put CloudFront with OAC in front; for temporary access, use presigned URLs.",
+   "bn": "Block Public Access চালু থাকে, ACL disabled থাকে (Object Ownership = Bucket owner enforced), আর object নিজে থেকেই SSE-S3 দিয়ে encrypted থাকে, তাই এটা private। Public-ভাবে file দিতে হলে সামনে OAC-সহ CloudFront বসাও; কিছু সময়ের জন্য access দিতে presigned URL ব্যবহার করো।"
+  },
   "options": [
    {
     "en": "The object is publicly readable by default, so anyone with the object URL can download it",

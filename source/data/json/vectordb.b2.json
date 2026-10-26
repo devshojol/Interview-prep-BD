@@ -61,6 +61,10 @@
    "vec-016",
    "vec-001"
   ],
+  "quickAnswer": {
+   "en": "Keyword search (BM25) scores documents by matching words, so it wins on exact terms like product codes, names and error messages but misses synonyms. Semantic search compares embeddings, so it matches meaning and paraphrases but is weaker on exact identifiers. In production, combine both (hybrid search).",
+   "bn": "Keyword search (BM25) শব্দ মিলিয়ে document-কে score দেয়, তাই product code, নাম বা error message-এর মতো exact term-এ জেতে, কিন্তু synonym ধরতে পারে না। Semantic search embedding তুলনা করে, তাই অর্থ আর paraphrase মেলায়, কিন্তু exact identifier-এ দুর্বল। Production-এ দুটো মিলিয়ে ব্যবহার করো (hybrid search)।"
+  },
   "commonMistakes": {
    "en": "Claiming semantic search makes keyword search obsolete, or that BM25 \"understands\" synonyms.",
    "bn": "দাবি করা যে semantic search keyword search-কে অপ্রয়োজনীয় করে দিয়েছে, অথবা BM25 synonym \"বোঝে\"।"
@@ -116,6 +120,10 @@
    "vec-003",
    "vec-014"
   ],
+  "quickAnswer": {
+   "en": "Exact k-NN compares the query with every vector, which gets too slow at millions of vectors. ANN indexes like HNSW or IVF look only at a small, promising part of the data, so they return nearly the same top results far faster, at the cost of occasionally missing a true neighbour.",
+   "bn": "Exact k-NN query-কে প্রতিটা vector-এর সাথে তুলনা করে, লাখ লাখ vector হলে সেটা অনেক ধীর। HNSW বা IVF-এর মতো ANN index data-র ছোট, সম্ভাবনাময় একটা অংশ দেখে, তাই প্রায় একই top result অনেক দ্রুত দেয়, বিনিময়ে মাঝে মাঝে আসল কোনো neighbour বাদ পড়তে পারে।"
+  },
   "options": [
    {
     "en": "Exact search compares the query with every vector, which is too slow at millions of vectors; ANN returns nearly the same top results far faster by trading a little recall",
@@ -195,6 +203,10 @@
    "vec-015",
    "vec-008"
   ],
+  "quickAnswer": {
+   "en": "We chunk because embedding models have token limits, one vector for a long document blurs into an average, and RAG can only send a few focused passages to the LLM. Start around a few hundred tokens with 10–20% overlap, prefer splitting by headings and paragraphs, then measure.",
+   "bn": "Chunk করি কারণ embedding model-এর token limit আছে, লম্বা document-এর একটা vector সবকিছুর ঝাপসা গড় হয়ে যায়, আর RAG-এ LLM-কে মাত্র কয়েকটা focused passage পাঠানো যায়। কয়েকশো token আর 10–20% overlap দিয়ে শুরু করো, heading আর paragraph ধরে ভাগ করাকে প্রাধান্য দাও, তারপর মেপে দেখো।"
+  },
   "commonMistakes": {
    "en": "Embedding whole documents as one vector, cutting chunks by raw character count through the middle of tables, or never revisiting chunk size after launch.",
    "bn": "পুরো document একটা vector হিসেবে embed করা, raw character গুনে table-এর মাঝখান দিয়ে chunk কাটা, অথবা launch-এর পর আর কখনো chunk size নিয়ে ভাবা না।"
@@ -270,6 +282,10 @@
    "vec-027",
    "vec-025"
   ],
+  "quickAnswer": {
+   "en": "Flat search compares every vector: perfect recall, fine for small or heavily filtered sets. HNSW is a layered neighbour graph with the best speed/recall and good insert handling but more memory. IVFFlat clusters vectors and scans only the nearest `probes` clusters: faster build, less memory, lower recall, so HNSW is the default.",
+   "bn": "Flat search প্রতিটা vector তুলনা করে: recall নিখুঁত, ছোট বা খুব filter করা set-এর জন্য ঠিক আছে। HNSW একটা layered neighbour graph: speed/recall সবচেয়ে ভালো, insert ভালো সামলায়, তবে memory বেশি লাগে। IVFFlat vector-কে cluster করে শুধু কাছের `probes` cluster scan করে: build দ্রুত, memory কম, recall কম; তাই default হিসেবে HNSW।"
+  },
   "commonMistakes": {
    "en": "Creating an IVFFlat index on an empty table, expecting `ef_search` changes to need a reindex (it's a query-time setting), or comparing indexes without measuring recall.",
    "bn": "খালি table-এ IVFFlat index তৈরি করা, ভাবা যে `ef_search` বদলাতে reindex লাগে (এটা query-time setting), অথবা recall না মেপেই index তুলনা করা।"
@@ -340,6 +356,10 @@
    "vec-017",
    "vec-032"
   ],
+  "quickAnswer": {
+   "en": "First check what the failing questions actually retrieved. Then fix PDF and table extraction, chunk by headings and paragraphs with a Bangla-aware sentence splitter (Bangla sentences end with \"।\"), keep tables whole, add 10–20% overlap, prepend the title and section path to each chunk, and re-measure recall.",
+   "bn": "আগে দেখো fail করা প্রশ্নগুলোতে আসলে কী retrieve হয়েছিল। তারপর PDF আর table extraction ঠিক করো, Bangla বোঝে এমন sentence splitter দিয়ে heading আর paragraph ধরে chunk করো (Bangla বাক্য \"।\" দিয়ে শেষ হয়), table পুরোটা এক সাথে রাখো, 10–20% overlap দাও, প্রতিটা chunk-এর আগে title আর section path যোগ করো, আর আবার recall মাপো।"
+  },
   "commonMistakes": {
    "en": "Jumping straight to \"use a bigger LLM\" or \"increase top-k\" without checking whether the right text was ever in a single chunk.",
    "bn": "সঠিক text কখনো একটা chunk-এ ছিল কিনা না দেখে সরাসরি \"বড় LLM ব্যবহার করো\" বা \"top-k বাড়াও\"-তে চলে যাওয়া।"
@@ -410,6 +430,10 @@
    "vec-023",
    "vec-030"
   ],
+  "quickAnswer": {
+   "en": "For each list, walk the ids with their 1-based rank and add `1 / (k + rank)` to each id's total in a `Map`, then sort by score and take the top `limit`. RRF uses only ranks, so BM25 scores and cosine similarities don't need to be on the same scale. O(N log N) for N total ids.",
+   "bn": "প্রতিটা list-এ id-গুলো তাদের 1-based rank-সহ ঘুরে একটা `Map`-এ প্রতিটা id-এর total-এ `1 / (k + rank)` যোগ করো, তারপর score দিয়ে sort করে top `limit` নাও। RRF শুধু rank ব্যবহার করে, তাই BM25 score আর cosine similarity একই scale-এ থাকার দরকার নেই। মোট N id-এর জন্য O(N log N)।"
+  },
   "commonMistakes": {
    "en": "Adding raw BM25 and cosine scores directly, using 0-based ranks (changes the scores), or counting a duplicate id twice within the same list.",
    "bn": "Raw BM25 আর cosine score সরাসরি যোগ করা, 0-based rank ব্যবহার করা (score বদলে যায়), অথবা একই list-এ duplicate id দুইবার গোনা।"
@@ -485,6 +509,10 @@
    "vec-011",
    "vec-028"
   ],
+  "quickAnswer": {
+   "en": "Vectors from two models aren't comparable, so build model B in parallel: add a new `vector(1024)` column, dual-write new chunks, backfill in resumable batches, build the HNSW index `CONCURRENTLY`, shadow-compare quality, then switch query and column together behind a flag, keeping model A for rollback.",
+   "bn": "দুটো আলাদা model-এর vector তুলনা করা যায় না, তাই model B পাশাপাশি বানাও: নতুন `vector(1024)` column যোগ করো, নতুন chunk দুই model-এই লেখো, resumable batch-এ backfill করো, `CONCURRENTLY` দিয়ে HNSW index বানাও, shadow traffic-এ quality মেলাও, তারপর flag-এর পেছনে query আর column একসাথে switch করো; rollback-এর জন্য model A রেখে দাও।"
+  },
   "commonMistakes": {
    "en": "Re-embedding in place (mixing models in one column during the backfill), switching query embeddings before documents are done, or forgetting to re-tune thresholds.",
    "bn": "জায়গায় বসে আবার embed করা (backfill-এর সময় এক column-এ model মিশিয়ে ফেলা), document শেষ হওয়ার আগেই query embedding বদলে ফেলা, অথবা threshold আবার tune করতে ভুলে যাওয়া।"
@@ -542,6 +570,10 @@
    "vec-026",
    "vec-010"
   ],
+  "quickAnswer": {
+   "en": "pgvector applies the `WHERE` after the HNSW scan, which hands back only about `ef_search` (default 40) candidates, and few of them belong to tenant 7. Enable iterative index scans (`hnsw.iterative_scan`, pgvector 0.8+), raise `ef_search`, or use a partial index or partition per tenant.",
+   "bn": "pgvector HNSW scan-এর পরে `WHERE` apply করে, আর scan মাত্র প্রায় `ef_search` (default 40)-টা candidate দেয়, যার খুব কমই tenant 7-এর। Iterative index scan চালু করো (`hnsw.iterative_scan`, pgvector 0.8+), `ef_search` বাড়াও, অথবা tenant-ভিত্তিক partial index বা partition ব্যবহার করো।"
+  },
   "code": {
    "language": "sql",
    "source": "SELECT id\nFROM docs\nWHERE tenant_id = 7\nORDER BY embedding <=> $1\nLIMIT 10;"

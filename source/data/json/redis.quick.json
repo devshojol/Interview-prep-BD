@@ -1,0 +1,540 @@
+[
+ {
+  "id": "redis-q01",
+  "subtopic": "In-Memory Storage",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "redis",
+   "in-memory",
+   "use-cases"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Redis, and what is it commonly used for?",
+   "bn": "Redis কী, আর সাধারণত কী কাজে ব্যবহার হয়?"
+  },
+  "answer": {
+   "en": "Redis is an in-memory key-value data store: every value lives under a key, and a value can be a string, hash, list, set, sorted set, stream and more. Because the data is in RAM, reads and writes are very fast, so it's used for caching, sessions, rate limiting, queues, leaderboards and real-time messaging, usually next to a main database.",
+   "bn": "Redis হলো একটা in-memory key-value data store: প্রতিটা value একটা key-এর অধীনে থাকে, আর value হতে পারে string, hash, list, set, sorted set, stream ইত্যাদি। Data RAM-এ থাকে বলে read/write খুব দ্রুত, তাই caching, session, rate limiting, queue, leaderboard আর real-time messaging-এ ব্যবহার হয়, সাধারণত একটা main database-এর পাশাপাশি।"
+  },
+  "explanation": {
+   "en": "The usual follow-up is \"can it replace my database?\". For most apps, no: RAM is limited and costly, and durability is configurable rather than guaranteed, so PostgreSQL or MongoDB stay the source of truth.",
+   "bn": "সাধারণ follow-up হলো \"এটা কি database-এর জায়গা নিতে পারে?\"। বেশিরভাগ app-এ না: RAM সীমিত আর দামি, আর durability configurable, guaranteed না; তাই PostgreSQL বা MongoDB-ই source of truth থাকে।"
+  },
+  "interviewTip": {
+   "en": "Give the one-line definition, then name three real uses from your own projects (cache, sessions, rate limiter).",
+   "bn": "এক line-এ definition দাও, তারপর নিজের project থেকে তিনটা আসল ব্যবহার বলো (cache, session, rate limiter)।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Data types",
+    "url": "https://redis.io/docs/latest/develop/data-types/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Can Redis be your primary database?",
+    "bn": "Redis কি primary database হতে পারে?"
+   }
+  ],
+  "related": [
+   "redis-001",
+   "redis-006"
+  ],
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q02",
+  "subtopic": "In-Memory Storage",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "single-threaded",
+   "atomicity",
+   "performance"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Is Redis single-threaded? If so, how is it still so fast?",
+   "bn": "Redis কি single-threaded? তাহলে এত দ্রুত কীভাবে?"
+  },
+  "answer": {
+   "en": "Redis executes commands on one main thread, one command at a time (I/O threads can help with network reads and writes, but commands still run serially). It's fast because the data is in RAM and most commands are O(1) or O(log N), and one thread means no locks: every single command is atomic.",
+   "bn": "Redis একটা main thread-এ একবারে একটা করে command execute করে (network read/write-এ I/O thread সাহায্য করতে পারে, কিন্তু command চলে একটার পর একটা)। এটা দ্রুত কারণ data RAM-এ থাকে আর বেশিরভাগ command O(1) বা O(log N); আর এক thread মানে lock নেই: প্রতিটা command atomic।"
+  },
+  "explanation": {
+   "en": "The flip side: one slow command blocks everyone. `KEYS *` or `HGETALL` on a huge hash can freeze all clients, so use `SCAN` and keep values small.",
+   "bn": "উল্টো দিকটা হলো: একটা ধীর command সবাইকে আটকে দেয়। বিশাল hash-এ `KEYS *` বা `HGETALL` সব client-কে থামিয়ে দিতে পারে, তাই `SCAN` ব্যবহার করো আর value ছোট রাখো।"
+  },
+  "interviewTip": {
+   "en": "Say \"single-threaded command execution\" (not \"Redis has one thread\") and add the \"one slow command blocks everyone\" gotcha.",
+   "bn": "\"Single-threaded command execution\" বলো (\"Redis-এর একটাই thread\" না), আর \"একটা ধীর command সবাইকে আটকে দেয়\" gotcha-টা যোগ করো।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Diagnosing latency issues",
+    "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/latency/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is `KEYS *` dangerous in production?",
+    "bn": "Production-এ `KEYS *` কেন বিপজ্জনক?"
+   }
+  ],
+  "related": [
+   "redis-001",
+   "redis-007"
+  ],
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q03",
+  "subtopic": "Strings, Hashes, Lists, Sets, Sorted Sets",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "data-types",
+   "hash",
+   "sorted-set",
+   "string"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Which Redis data type would you pick for a page-view counter, a user profile, and a game leaderboard?",
+   "bn": "Page-view counter, user profile আর game leaderboard-এর জন্য Redis-এর কোন data type বেছে নেবে?"
+  },
+  "answer": {
+   "en": "A string for the counter (`INCR` is atomic), a hash for the profile (read or update single fields with `HGET`/`HSET`), and a sorted set for the leaderboard (members ordered by score, so the top N is one `ZRANGE ... REV` call).",
+   "bn": "Counter-এর জন্য string (`INCR` atomic), profile-এর জন্য hash (`HGET`/`HSET` দিয়ে আলাদা field পড়া বা update করা যায়), আর leaderboard-এর জন্য sorted set (member score অনুযায়ী সাজানো, তাই top N একটাই `ZRANGE ... REV` call)।"
+  },
+  "explanation": {
+   "en": "Storing a profile as one JSON string also works, but then changing one field means reading, parsing and rewriting the whole value, and two writers can overwrite each other.",
+   "bn": "Profile-কে একটা JSON string হিসেবে রাখাও যায়, কিন্তু তখন একটা field বদলাতে পুরো value পড়ে, parse করে আবার লিখতে হয়, আর দুজন writer একে অপরের লেখা মুছে দিতে পারে।"
+  },
+  "interviewTip": {
+   "en": "Match each use case to a type and name the one command that makes it a good fit.",
+   "bn": "প্রতিটা use case-এর সাথে একটা type মেলাও, আর কোন command-এর কারণে সেটা উপযুক্ত সেটা বলো।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Data types",
+    "url": "https://redis.io/docs/latest/develop/data-types/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use a set instead of a list?",
+    "bn": "কখন list-এর বদলে set ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "redis-003",
+   "redis-016"
+  ],
+  "code": {
+   "language": "text",
+   "source": "INCR page:views                          # (integer) 1  → String\nHSET user:1 name \"Rahim\" city \"Dhaka\"    # (integer) 2  → Hash\nZADD lb 120 \"rahim\" 95 \"karim\"           # (integer) 2  → Sorted set\nZRANGE lb 0 0 REV WITHSCORES             # 1) \"rahim\" 2) \"120\""
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q04",
+  "subtopic": "TTL & Expiration",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "ttl",
+   "expire",
+   "expiration"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you make a Redis key expire, and what do `TTL` results `-1` and `-2` mean?",
+   "bn": "Redis key কীভাবে expire করাবে, আর `TTL`-এর result `-1` ও `-2` মানে কী?"
+  },
+  "answer": {
+   "en": "Set the expiry when writing (`SET key value EX 60`) or on an existing key (`EXPIRE key 60`); Redis deletes the key once the time runs out. `TTL` returns the seconds left, `-1` if the key exists but has no expiry, and `-2` if the key doesn't exist.",
+   "bn": "লেখার সময় expiry দাও (`SET key value EX 60`) অথবা আগে থেকে থাকা key-তে (`EXPIRE key 60`); সময় শেষ হলে Redis key-টা মুছে দেয়। `TTL` বাকি second দেয়, key আছে কিন্তু expiry নেই হলে `-1`, আর key-ই না থাকলে `-2`।"
+  },
+  "explanation": {
+   "en": "Gotcha: a plain `SET` on a key that had a TTL removes the TTL. Pass `EX` again, or `KEEPTTL` to keep the remaining time.",
+   "bn": "Gotcha: TTL-ওয়ালা key-তে সাধারণ `SET` করলে TTL মুছে যায়। আবার `EX` দাও, অথবা বাকি সময় রাখতে `KEEPTTL` দাও।"
+  },
+  "interviewTip": {
+   "en": "Prefer `SET ... EX` in one command over `SET` then `EXPIRE`, and say why: a crash between the two leaves a key that never expires.",
+   "bn": "`SET`-এর পরে আলাদা `EXPIRE`-এর বদলে এক command-এ `SET ... EX` বলো, আর কারণও বলো: দুটোর মাঝে crash হলে key আর কখনো expire হয় না।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — EXPIRE",
+    "url": "https://redis.io/docs/latest/commands/expire/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to the TTL if you overwrite the key with a plain `SET`?",
+    "bn": "সাধারণ `SET` দিয়ে key overwrite করলে TTL-এর কী হয়?"
+   }
+  ],
+  "related": [
+   "redis-004",
+   "redis-018",
+   "redis-020"
+  ],
+  "code": {
+   "language": "text",
+   "source": "SET otp:017 4821 EX 60    # OK\nTTL otp:017               # (integer) 60, then 59, 58 ...\nSET user:1:name \"Rahim\"   # OK\nTTL user:1:name           # (integer) -1 → no expiry\nTTL nothing:here          # (integer) -2 → key doesn't exist"
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q05",
+  "subtopic": "Cache-Aside",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "cache-aside",
+   "caching",
+   "node-redis"
+  ],
+  "technologyVersion": "Redis Open Source 8.10; node-redis 6.3",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is a cache hit and a cache miss, and what are the steps of cache-aside?",
+   "bn": "Cache hit আর cache miss কী, আর cache-aside-এর ধাপগুলো কী কী?"
+  },
+  "answer": {
+   "en": "A hit means the data was found in the cache; a miss means it wasn't, so you go to the database. Cache-aside: read Redis first; on a miss, read the DB, save the result in Redis with a TTL, and return it; on writes, update the DB and delete the cached key.",
+   "bn": "Hit মানে data cache-এ পাওয়া গেছে; miss মানে পাওয়া যায়নি, তাই database-এ যেতে হয়। Cache-aside: আগে Redis পড়ো; miss হলে DB পড়ো, result TTL-সহ Redis-এ রাখো, তারপর return করো; write-এর সময় DB update করে cached key delete করো।"
+  },
+  "explanation": {
+   "en": "Always set a TTL: without one, a missed invalidation means stale data forever. Delete the key on update rather than writing the new value, which avoids races between two writers.",
+   "bn": "সবসময় TTL দাও: না দিলে একবার invalidation miss হলে stale data চিরকাল থাকে। Update-এর সময় নতুন value লেখার বদলে key delete করো, তাতে দুই writer-এর race এড়ানো যায়।"
+  },
+  "interviewTip": {
+   "en": "Say the four steps in order and finish with \"TTL as a safety net, delete on write\".",
+   "bn": "চারটা ধাপ ক্রম অনুযায়ী বলো, আর শেষে বলো \"safety net হিসেবে TTL, write-এ delete\"।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — node-redis guide",
+    "url": "https://redis.io/docs/latest/develop/clients/nodejs/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is cache-aside different from write-through?",
+    "bn": "Cache-aside আর write-through-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "redis-005",
+   "redis-013",
+   "redis-014"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "async function getProduct(id) {\n  const key = `product:${id}`;\n  const cached = await redis.get(key);\n  if (cached) return JSON.parse(cached);                 // hit\n  const product = await db.findProduct(id);              // miss → DB\n  await redis.set(key, JSON.stringify(product), { expiration: { type: 'EX', value: 300 } });\n  return product;\n}"
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q06",
+  "subtopic": "Persistence (RDB/AOF)",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "persistence",
+   "rdb",
+   "aof"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Redis keeps data in RAM. Does it lose everything on restart? What are RDB and AOF?",
+   "bn": "Redis data RAM-এ রাখে। Restart করলে কি সব হারিয়ে যায়? RDB আর AOF কী?"
+  },
+  "answer": {
+   "en": "Not necessarily: Redis can persist to disk. RDB saves a point-in-time snapshot every so often (compact, fast restarts, but you lose writes since the last snapshot). AOF logs every write and replays it on restart; with `appendfsync everysec` you lose about one second of writes. Many setups use both.",
+   "bn": "জরুরি না: Redis disk-এ persist করতে পারে। RDB মাঝে মাঝে point-in-time snapshot নেয় (ছোট file, দ্রুত restart, কিন্তু শেষ snapshot-এর পরের write হারায়)। AOF প্রতিটা write log করে আর restart-এ replay করে; `appendfsync everysec`-এ মোটামুটি এক second-এর write হারাতে পারে। অনেক setup-এ দুটোই চালু থাকে।"
+  },
+  "explanation": {
+   "en": "For a pure cache you may turn persistence off: the database is the source of truth. For sessions or queues, use AOF so a restart doesn't log everyone out or drop jobs.",
+   "bn": "শুধু cache হলে persistence বন্ধ রাখতে পারো: database-ই source of truth। Session বা queue-এর জন্য AOF ব্যবহার করো, যাতে restart-এ সবাই logout না হয় বা job না হারায়।"
+  },
+  "interviewTip": {
+   "en": "Answer \"snapshot vs write log\", then tie the choice to the data: cache, sessions or queue.",
+   "bn": "\"Snapshot বনাম write log\" বলো, তারপর data অনুযায়ী choice মেলাও: cache, session নাকি queue।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Persistence",
+    "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which persistence would you use for a pure cache?",
+    "bn": "শুধু cache-এর জন্য কোন persistence ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "redis-027",
+   "redis-006"
+  ],
+  "code": {
+   "language": "text",
+   "source": "# redis.conf\nsave 3600 1 300 100 60 10000   # RDB: snapshot if N changes in M seconds\nappendonly yes                  # turn AOF on\nappendfsync everysec            # fsync once per second"
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q07",
+  "subtopic": "Pub/Sub vs Streams",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "pubsub",
+   "streams",
+   "messaging"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "In one line each: what is Redis Pub/Sub, and what is a Redis Stream?",
+   "bn": "এক line করে বলো: Redis Pub/Sub কী, আর Redis Stream কী?"
+  },
+  "answer": {
+   "en": "Pub/Sub is a live broadcast: a published message goes only to clients subscribed at that moment and is never stored. A Stream is a stored, append-only log: messages stay until trimmed, can be read again, and consumer groups share work with acknowledgements.",
+   "bn": "Pub/Sub হলো live broadcast: publish করা message শুধু সেই মুহূর্তে subscribe করা client-রা পায়, কোথাও store হয় না। Stream হলো store করা append-only log: trim না করা পর্যন্ত message থাকে, আবার পড়া যায়, আর consumer group acknowledgement-সহ কাজ ভাগ করে নেয়।"
+  },
+  "explanation": {
+   "en": "Rule of thumb: losing a message is fine (typing indicators, live notifications) → Pub/Sub; every message must be processed (orders, jobs) → Streams.",
+   "bn": "সহজ নিয়ম: message হারালে সমস্যা নেই (typing indicator, live notification) → Pub/Sub; প্রতিটা message process করতেই হবে (order, job) → Streams।"
+  },
+  "interviewTip": {
+   "en": "Use the words \"fire-and-forget\" for Pub/Sub and \"persistent log with consumer groups\" for Streams.",
+   "bn": "Pub/Sub-এর জন্য \"fire-and-forget\" আর Streams-এর জন্য \"consumer group-সহ persistent log\" কথাগুলো বলো।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Streams",
+    "url": "https://redis.io/docs/latest/develop/data-types/streams/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to Pub/Sub messages while a subscriber is offline?",
+    "bn": "Subscriber offline থাকলে Pub/Sub message-এর কী হয়?"
+   }
+  ],
+  "related": [
+   "redis-015",
+   "redis-009",
+   "redis-021"
+  ],
+  "code": {
+   "language": "text",
+   "source": "PUBLISH news \"hello\"        # (integer) 0 → nobody subscribed, message is gone\nXADD orders * status paid   # returns an auto-generated ID like \"1761460000000-0\"\nXRANGE orders - +           # the entry is still there to read later"
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q08",
+  "subtopic": "Redis vs Memcached",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "memcached",
+   "comparison",
+   "caching"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Name two things Redis can do that Memcached can't.",
+   "bn": "Redis পারে কিন্তু Memcached পারে না, এমন দুটো জিনিস বলো।"
+  },
+  "answer": {
+   "en": "Redis has rich data types with atomic server-side operations (hashes, lists, sorted sets, streams), while Memcached stores only plain string values. Redis can also persist data to disk and replicate it, while Memcached is a purely in-memory cache that loses everything on restart.",
+   "bn": "Redis-এ server-side atomic operation-সহ rich data type আছে (hash, list, sorted set, stream), আর Memcached শুধু সাধারণ string value রাখে। Redis data disk-এ persist আর replicate করতে পারে, অথচ Memcached পুরোপুরি in-memory cache, restart হলে সব হারায়।"
+  },
+  "explanation": {
+   "en": "Others you can mention: Pub/Sub, Streams, Lua scripting and transactions. Memcached's strength is a simple multi-threaded string cache.",
+   "bn": "আরও বলা যায়: Pub/Sub, Streams, Lua scripting আর transaction। Memcached-এর শক্তি হলো সহজ multi-threaded string cache।"
+  },
+  "interviewTip": {
+   "en": "Give the two differences, then say when Memcached still makes sense, so it sounds like a judgement, not a fan answer.",
+   "bn": "দুটো পার্থক্য বলো, তারপর বলো কখন Memcached এখনও ঠিক আছে, তাতে উত্তরটা fan-এর মতো না শুনিয়ে বিচার-বিবেচনার মতো শোনাবে।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Data types",
+    "url": "https://redis.io/docs/latest/develop/data-types/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you still choose Memcached?",
+    "bn": "কখন এখনও Memcached বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "redis-011"
+  ],
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q09",
+  "subtopic": "Eviction Policies",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "eviction",
+   "maxmemory",
+   "ttl"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between expiry and eviction in Redis?",
+   "bn": "Redis-এ expiry আর eviction-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "Expiry is planned: you give a key a TTL and Redis deletes it when the time is up. Eviction happens when memory reaches `maxmemory`: Redis removes keys according to `maxmemory-policy`, such as `allkeys-lru` (least recently used). The default, `noeviction`, removes nothing and rejects writes instead.",
+   "bn": "Expiry পরিকল্পিত: key-কে TTL দাও, সময় শেষ হলে Redis সেটা মুছে দেয়। Eviction হয় যখন memory `maxmemory`-তে পৌঁছায়: তখন Redis `maxmemory-policy` অনুযায়ী key সরায়, যেমন `allkeys-lru` (সবচেয়ে কম সম্প্রতি ব্যবহৃত)। Default `noeviction` কিছু মোছে না, বরং write reject করে।"
+  },
+  "explanation": {
+   "en": "`volatile-*` policies only evict keys that have a TTL. If most keys have no TTL, they behave almost like `noeviction`.",
+   "bn": "`volatile-*` policy শুধু TTL-ওয়ালা key evict করে। বেশিরভাগ key-এর TTL না থাকলে এরা প্রায় `noeviction`-এর মতোই আচরণ করে।"
+  },
+  "interviewTip": {
+   "en": "Say \"expiry = time-based, eviction = memory-based\", then name the default and the usual cache setting.",
+   "bn": "বলো \"expiry = সময়ভিত্তিক, eviction = memory-ভিত্তিক\", তারপর default আর cache-এর সাধারণ setting-এর নাম বলো।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Key eviction",
+    "url": "https://redis.io/docs/latest/develop/reference/eviction/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which policy would you use if Redis also stores sessions?",
+    "bn": "Redis-এ session-ও থাকলে কোন policy ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "redis-017",
+   "redis-026"
+  ],
+  "code": {
+   "language": "text",
+   "source": "# redis.conf for a pure cache\nmaxmemory 2gb\nmaxmemory-policy allkeys-lru"
+  },
+  "technology": "redis"
+ },
+ {
+  "id": "redis-q10",
+  "subtopic": "Atomicity & Transactions",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "pipelining",
+   "multi",
+   "transactions",
+   "performance"
+  ],
+  "technologyVersion": "Redis Open Source 8.10",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between pipelining and a `MULTI`/`EXEC` transaction?",
+   "bn": "Pipelining আর `MULTI`/`EXEC` transaction-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "Pipelining is a network trick: the client sends many commands without waiting for each reply, saving round trips, but other clients' commands can run in between. `MULTI`/`EXEC` queues commands and runs them as one isolated block that nothing interrupts, though there's no rollback if one command fails.",
+   "bn": "Pipelining হলো network-এর কৌশল: client প্রতিটা reply-এর অপেক্ষা না করে অনেক command পাঠায়, তাতে round trip বাঁচে, কিন্তু মাঝখানে অন্য client-এর command চলতে পারে। `MULTI`/`EXEC` command-গুলো queue করে একটা isolated block হিসেবে চালায়, মাঝে কেউ ঢুকতে পারে না, তবে কোনো command fail করলে rollback হয় না।"
+  },
+  "explanation": {
+   "en": "They combine: a client can send a whole `MULTI` … `EXEC` block in one pipeline. For logic like \"read, decide, then write\" atomically, use a Lua script instead.",
+   "bn": "দুটো একসাথেও চলে: client পুরো `MULTI` … `EXEC` block একটা pipeline-এ পাঠাতে পারে। \"পড়ো, সিদ্ধান্ত নাও, তারপর লেখো\" ধরনের logic atomically করতে Lua script ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Say \"pipelining = speed, `MULTI` = isolation\", and mention \"no rollback\" to show you know the catch.",
+   "bn": "বলো \"pipelining = speed, `MULTI` = isolation\", আর \"rollback নেই\" কথাটা বলে দেখাও যে catch-টা জানো।"
+  },
+  "references": [
+   {
+    "title": "Redis docs — Pipelining",
+    "url": "https://redis.io/docs/latest/develop/using-commands/pipelining/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens in `EXEC` if one queued command fails at runtime?",
+    "bn": "Queue করা একটা command runtime-এ fail করলে `EXEC`-এ কী হয়?"
+   }
+  ],
+  "related": [
+   "redis-029",
+   "redis-002"
+  ],
+  "technology": "redis"
+ }
+]

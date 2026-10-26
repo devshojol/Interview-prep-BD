@@ -52,6 +52,10 @@
   "related": [
    "mongoose-001"
   ],
+  "quickAnswer": {
+   "en": "Instance methods (`schema.methods`) run on a document, statics (`schema.statics`) run on the model, and query helpers (`schema.query`) chain on queries, with `this` being the document, model or query. Write them as regular functions, not arrow functions, so `this` is bound.",
+   "bn": "Instance method (`schema.methods`) চলে document-এর ওপর, static (`schema.statics`) চলে model-এর ওপর, আর query helper (`schema.query`) query-তে chain করা যায়; `this` হয় যথাক্রমে document, model বা query। Arrow function না, সাধারণ function লেখো, যাতে `this` ঠিকমতো bind হয়।"
+  },
   "commonMistakes": {
    "en": "Using arrow functions (then `this` is undefined); putting a static on `schema.methods` and wondering why `User.findByEmail` is undefined.",
    "bn": "Arrow function ব্যবহার করা (তখন `this` undefined); static-কে `schema.methods`-এ রেখে অবাক হওয়া যে `User.findByEmail` কেন undefined।"
@@ -120,6 +124,10 @@
    "mongoose-003",
    "mongoose-012"
   ],
+  "quickAnswer": {
+   "en": "Validators live on schema paths: built-ins like `required`, `min`/`max`, `enum` and `match`, plus custom (sync or async) `validate` functions. They run on `save()`/`create()` or `doc.validate()`, but not on `updateOne`/`findOneAndUpdate` unless you pass `runValidators: true`; failures throw a `ValidationError`.",
+   "bn": "Validator থাকে schema path-এ: `required`, `min`/`max`, `enum`, `match`-এর মতো built-in, আর custom (sync বা async) `validate` function। এগুলো চলে `save()`/`create()` বা `doc.validate()`-এ, কিন্তু `runValidators: true` না দিলে `updateOne`/`findOneAndUpdate`-এ চলে না; fail করলে `ValidationError` throw হয়।"
+  },
   "commonMistakes": {
    "en": "Assuming validation runs on every write; treating `unique` as a validator; writing validators as arrow functions that need `this`.",
    "bn": "ধরে নেওয়া প্রতিটি write-এ validation চলে; `unique`-কে validator মনে করা; `this` লাগে এমন validator arrow function দিয়ে লেখা।"
@@ -189,6 +197,10 @@
    "mongoose-007",
    "mongoose-024"
   ],
+  "quickAnswer": {
+   "en": "`.lean()` skips hydration and returns plain JavaScript objects, so it's faster and uses much less memory. You lose `save()`, change tracking, instance methods, virtuals, getters and defaults, so use it on read-only paths like API lists and reports.",
+   "bn": "`.lean()` hydration বাদ দিয়ে plain JavaScript object return করে, তাই এটা দ্রুত আর অনেক কম memory নেয়। কিন্তু `save()`, change tracking, instance method, virtual, getter আর default হারাও, তাই API list বা report-এর মতো read-only জায়গায় ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Calling `.save()` on a lean result; expecting virtuals in lean output; assuming lean turns `ObjectId`s into strings.",
    "bn": "Lean result-এ `.save()` call করা; lean output-এ virtual আশা করা; ধরে নেওয়া যে lean `ObjectId`-কে string বানিয়ে দেয়।"
@@ -263,6 +275,10 @@
    "mongoose-005",
    "mongoose-012"
   ],
+  "quickAnswer": {
+   "en": "One four-argument Express middleware, registered after the routes, checks errors from specific to generic: `ValidationError` → 400 with per-field messages, `CastError` → 400, driver error `code === 11000` → 409 using `keyValue`, `DocumentNotFoundError` → 404, and anything else → a logged, generic 500.",
+   "bn": "Route-গুলোর পরে register করা চার parameter-এর একটা Express middleware error-গুলো specific থেকে generic ক্রমে check করে: `ValidationError` → field অনুযায়ী message সহ 400, `CastError` → 400, driver-এর `code === 11000` → `keyValue` দেখে 409, `DocumentNotFoundError` → 404, আর বাকি সব → log করে generic 500।"
+  },
   "commonMistakes": {
    "en": "Checking `err.name === \"MongoError\"` (old class name); returning `err.message` to clients; defining the handler with three parameters so Express treats it as normal middleware.",
    "bn": "`err.name === \"MongoError\"` check করা (পুরনো class name); client-কে `err.message` return করা; তিনটা parameter দিয়ে handler define করা, ফলে Express এটাকে সাধারণ middleware মনে করে।"
@@ -334,6 +350,10 @@
   "related": [
    "mongoose-012"
   ],
+  "quickAnswer": {
+   "en": "Nothing is deleted: with the default `strictQuery: false` (since Mongoose 7), the unknown `emial` filter is sent to MongoDB as-is, no document has that field, and `deletedCount` is 0.",
+   "bn": "কিছুই delete হয় না: default `strictQuery: false` (Mongoose 7 থেকে) থাকায় অচেনা `emial` filter যেমন আছে তেমনই MongoDB-তে যায়, কোনো document-এ ওই field নেই, তাই `deletedCount` হয় 0।"
+  },
   "options": [
    {
     "en": "Mongoose maps the typo to the closest schema path, `email`, and deletes that user",
@@ -384,8 +404,8 @@
    "bn": "1. **Query selector injection + plain-text password।** `{ \"email\": \"admin@shop.com\", \"password\": { \"$ne\": null } }` পাঠালেই admin হিসেবে login হয়ে যায়। Fix: দুইটা value-ই string কি না validate করো (zod), **শুধু email দিয়ে** query করো, app-এ bcrypt/argon2 hash compare করো। Mongoose-এর **`sanitizeFilter`** option আরেকটা স্তর যোগ করে: `$` key থাকা nested object-কে `$eq`-এ মুড়ে দেয়, ফলে `{ $ne: null }` একটা literal value হয়ে যায় যা কিছুই match করে না (ইচ্ছাকৃতভাবে যোগ করা operator-এর জন্য `mongoose.trusted()` ব্যবহার করো)।\n2. **Mass assignment।** `User.create(req.body)` যেকোনো schema field নেয়, তাই client `role: \"admin\"` বা `isVerified: true` পাঠাতে পারে। `strict` mode শুধু schema-তে না থাকা field বাদ দেয় — `role` তো schema-তেই আছে। Fix: অনুমোদিত field explicitly বেছে নাও; privileged field server-side-এ set করো।\n3. **Regex injection / ReDoS।** Raw user input regular expression হয়ে যায়: `.*` দিলে সব বেরিয়ে আসে, আর catastrophic backtracking-ওয়ালা pattern database-এর CPU পুড়িয়ে দেয়। Case-insensitive regex anchor করা থাকলেও দক্ষভাবে index ব্যবহার করতে পারে না। Fix: type আর length validate করো, special character escape করো, result সীমিত করো; index-backed prefix search চাইলে একটা normalised lowercase field-এর ওপর case-sensitive `^prefix` match করো — অথবা text index / Atlas Search ব্যবহার করো।\n4. **Sensitive data ফাঁস।** পুরো document return করলে `passwordHash`, reset token আর internal field বেরিয়ে যায়। Fix: sensitive path-এ `select: false` আর একটা `toJSON` transform (অথবা explicit response DTO)।"
   },
   "explanation": {
-   "en": "- **`sanitizeFilter` is not a substitute for validation:** it protects filters, not updates, and it doesn't stop `$where`/`$function` code you build yourself. Validation at the edge remains the primary control.\n- **`strictQuery: false` (default since Mongoose 7)** means unknown filter keys pass through to MongoDB — another reason to validate the shape of any user-controlled filter (e.g. API \"filter\" query params).\n- **Express 5 helps a little:** its default `'simple'` query parser doesn't build nested objects from `?q[$ne]=x`, but JSON bodies can still contain objects.\n- **Performance angle:** bounded `limit`, `.lean()` and indexed, case-sensitive prefix queries also prevent a single request from exhausting database CPU — security and performance overlap here.\n- **Logging:** never log full request bodies on auth routes (passwords) and redact tokens.",
-   "bn": "- **`sanitizeFilter` validation-এর বিকল্প না:** এটা filter রক্ষা করে, update না, আর তুমি নিজে যে `$where`/`$function` code বানাও সেটাও আটকায় না। Edge-এ validation-ই মূল নিয়ন্ত্রণ।\n- **`strictQuery: false` (Mongoose 7 থেকে default)** মানে অজানা filter key MongoDB পর্যন্ত চলে যায় — user-controlled যেকোনো filter-এর (যেমন API-র \"filter\" query param) shape validate করার আরেকটা কারণ।\n- **Express 5 একটু সাহায্য করে:** এর default `'simple'` query parser `?q[$ne]=x` থেকে nested object বানায় না, কিন্তু JSON body-তে তবুও object থাকতে পারে।\n- **Performance-এর দিক:** সীমিত `limit`, `.lean()` আর indexed, case-sensitive prefix query একটা request-কে database-এর CPU শেষ করে ফেলা থেকেও আটকায় — এখানে security আর performance মিলে যায়।\n- **Logging:** auth route-এ কখনো পুরো request body log কোরো না (password থাকে), আর token redact করো।"
+   "en": "- **`sanitizeFilter` also neutralises your own operators.** With it on, `{ nameLower: { $regex: \"^abc\" } }` becomes `{ nameLower: { $eq: { $regex: \"^abc\" } } }` and matches nothing. Wrap operators you add on purpose in `mongoose.trusted()`, as the fixed search does, or pass a `RegExp` object, which isn't a `$` key.\n- **`sanitizeFilter` is not a substitute for validation:** it protects filters, not updates, and it doesn't stop `$where`/`$function` code you build yourself. Validation at the edge remains the primary control.\n- **`strictQuery: false` (default since Mongoose 7)** means unknown filter keys pass through to MongoDB — another reason to validate the shape of any user-controlled filter (e.g. API \"filter\" query params).\n- **Express 5 helps a little:** its default `'simple'` query parser doesn't build nested objects from `?q[$ne]=x`, but JSON bodies can still contain objects.\n- **Performance angle:** bounded `limit`, `.lean()` and indexed, case-sensitive prefix queries also prevent a single request from exhausting database CPU — security and performance overlap here.\n- **Logging:** never log full request bodies on auth routes (passwords) and redact tokens.",
+   "bn": "- **`sanitizeFilter` তোমার নিজের operator-ও নিষ্ক্রিয় করে দেয়।** এটা চালু থাকলে `{ nameLower: { $regex: \"^abc\" } }` হয়ে যায় `{ nameLower: { $eq: { $regex: \"^abc\" } } }`, যা কিছুই match করে না। ইচ্ছা করে যোগ করা operator `mongoose.trusted()`-এ মুড়ে দাও, যেমন fixed search-এ করা হয়েছে, অথবা একটা `RegExp` object দাও, কারণ সেটা `$` key না।\n- **`sanitizeFilter` validation-এর বিকল্প না:** এটা filter রক্ষা করে, update না, আর তুমি নিজে যে `$where`/`$function` code বানাও সেটাও আটকায় না। Edge-এ validation-ই মূল নিয়ন্ত্রণ।\n- **`strictQuery: false` (Mongoose 7 থেকে default)** মানে অজানা filter key MongoDB পর্যন্ত চলে যায় — user-controlled যেকোনো filter-এর (যেমন API-র \"filter\" query param) shape validate করার আরেকটা কারণ।\n- **Express 5 একটু সাহায্য করে:** এর default `'simple'` query parser `?q[$ne]=x` থেকে nested object বানায় না, কিন্তু JSON body-তে তবুও object থাকতে পারে।\n- **Performance-এর দিক:** সীমিত `limit`, `.lean()` আর indexed, case-sensitive prefix query একটা request-কে database-এর CPU শেষ করে ফেলা থেকেও আটকায় — এখানে security আর performance মিলে যায়।\n- **Logging:** auth route-এ কখনো পুরো request body log কোরো না (password থাকে), আর token redact করো।"
   },
   "interviewTip": {
    "en": "For each snippet, state the attack first (payload or scenario), then the fix, then the Mongoose feature that adds depth. Concrete payloads make the answer far more convincing than \"sanitise inputs\".",
@@ -419,6 +439,10 @@
    "mongoose-018",
    "mongoose-024"
   ],
+  "quickAnswer": {
+   "en": "Login allows `$ne` operator injection with plain-text passwords, `create(req.body)` lets clients set `role`, raw regex input allows injection and ReDoS, and the profile leaks the password hash. Fix with string validation + bcrypt + `sanitizeFilter`, a field whitelist, escaped and length-limited search input, and `select: false`.",
+   "bn": "Login-এ `$ne` দিয়ে operator injection সম্ভব আর password plain text-এ, `create(req.body)` দিয়ে client নিজেই `role` set করতে পারে, raw regex input-এ injection আর ReDoS হয়, আর profile response password hash ফাঁস করে। সমাধান: string validation + bcrypt + `sanitizeFilter`, field whitelist, escape করা ও length সীমিত search input, আর `select: false`।"
+  },
   "commonMistakes": {
    "en": "Believing Mongoose schemas make injection impossible; relying on `strict` mode to block privileged fields; escaping regex input but still allowing unlimited length and unbounded results.",
    "bn": "Mongoose schema থাকলে injection অসম্ভব মনে করা; privileged field আটকাতে `strict` mode-এর ওপর ভরসা করা; regex input escape করলেও সীমাহীন length আর unbounded result রেখে দেওয়া।"
@@ -430,7 +454,7 @@
   "extraCode": [
    {
     "language": "javascript",
-    "source": "mongoose.set(\"sanitizeFilter\", true);   // defence in depth against query selector injection\n\n// 1) Login: strings only, look up by email, compare the hash in the app\nconst { email, password } = LoginBody.parse(req.body);          // zod schema\nconst user = await User.findOne({ email }).select(\"+passwordHash\");\nconst ok = user && (await bcrypt.compare(password, user.passwordHash));\n\n// 2) Signup: whitelist fields; role/flags are never taken from the client\nconst { name, email: newEmail, password: pw } = SignupBody.parse(req.body);\nconst created = await User.create({ name, email: newEmail, passwordHash: await bcrypt.hash(pw, 12) });\n\n// 3) Search: validated, length-limited, escaped, bounded result; a case-sensitive\n//    prefix on a lowercase copy (nameLower) can use an index, unlike $options: \"i\"\nconst { q } = SearchQuery.parse(req.query);                      // z.string().min(1).max(50)\nconst safe = q.toLowerCase().replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\");\nconst products = await Product.find({ nameLower: { $regex: `^${safe}` } })\n  .limit(20).lean();\n\n// 4) Profile: sensitive fields hidden by the schema\nres.json(await User.findById(req.userId));",
+    "source": "mongoose.set(\"sanitizeFilter\", true);   // defence in depth against query selector injection\n\n// 1) Login: strings only, look up by email, compare the hash in the app\nconst { email, password } = LoginBody.parse(req.body);          // zod schema\nconst user = await User.findOne({ email }).select(\"+passwordHash\");\nconst ok = user && (await bcrypt.compare(password, user.passwordHash));\n\n// 2) Signup: whitelist fields; role/flags are never taken from the client\nconst { name, email: newEmail, password: pw } = SignupBody.parse(req.body);\nconst created = await User.create({ name, email: newEmail, passwordHash: await bcrypt.hash(pw, 12) });\n\n// 3) Search: validated, length-limited, escaped, bounded result; a case-sensitive\n//    prefix on a lowercase copy (nameLower) can use an index, unlike $options: \"i\".\n//    sanitizeFilter would wrap our own $regex in $eq too, so mark it as trusted.\nconst { q } = SearchQuery.parse(req.query);                      // z.string().min(1).max(50)\nconst safe = q.toLowerCase().replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\");\nconst products = await Product.find({ nameLower: mongoose.trusted({ $regex: `^${safe}` }) })\n  .limit(20).lean();\n\n// 4) Profile: sensitive fields hidden by the schema\nres.json(await User.findById(req.userId));",
     "label": {
      "en": "Fixed version",
      "bn": "সংশোধিত version"
@@ -507,6 +531,10 @@
    "mongoose-014",
    "mongoose-008"
   ],
+  "quickAnswer": {
+   "en": "Use a plugin: add `isDeleted`/`deletedAt`, add `{ isDeleted: false }` in `find*`, count, update and `aggregate` middleware, and purge with a TTL index on `deletedAt` after 30 days. Pitfalls: hooks skip the native driver and `bulkWrite`, `$geoNear`/`$search` must stay first, and unique fields need partial indexes.",
+   "bn": "একটা plugin বানাও: `isDeleted`/`deletedAt` field যোগ করো, `find*`, count, update আর `aggregate` middleware-এ `{ isDeleted: false }` বসাও, আর 30 দিন পর মুছতে `deletedAt`-এ TTL index দাও। সাবধান: native driver আর `bulkWrite`-এ hook চলে না, `$geoNear`/`$search` প্রথম stage-এই থাকতে হবে, আর unique field-এ partial index লাগবে।"
+  },
   "commonMistakes": {
    "en": "Adding only a `find` hook (missing `findOne`, counts and aggregations); forgetting to backfill the flag; keeping a plain unique index on email so deleted users block sign-ups.",
    "bn": "শুধু `find` hook যোগ করা (`findOne`, count আর aggregation বাদ পড়ে); flag backfill করতে ভুলে যাওয়া; email-এ সাধারণ unique index রেখে দেওয়া, ফলে delete হওয়া user sign-up আটকে দেয়।"
@@ -581,6 +609,10 @@
    "mongoose-003",
    "mongoose-030"
   ],
+  "quickAnswer": {
+   "en": "The unique index failed to build because duplicate phones already existed (reported only as an `'index'` event), and Mongoose before 9.10.4 rebuilds unchanged indexes at each start on MongoDB 9.0. Upgrade, set `autoIndex: false`, and build indexes in one reviewed migration per deploy after removing duplicates.",
+   "bn": "আগে থেকেই duplicate phone থাকায় unique index build fail করেছে (শুধু একটা `'index'` event হিসেবে জানানো হয়েছে), আর MongoDB 9.0-তে 9.10.4-এর আগের Mongoose প্রতিবার start-এ অপরিবর্তিত index আবার build করে। Upgrade করো, `autoIndex: false` দাও, আর duplicate সরিয়ে প্রতি deploy-এ একবার review করা migration দিয়ে index বানাও।"
+  },
   "commonMistakes": {
    "en": "Leaving `autoIndex` on in production \"because it's convenient\"; running `syncIndexes()` on every boot; assuming a unique index exists because it's in the schema; dropping an index without hiding it first.",
    "bn": "\"সুবিধাজনক\" বলে production-এ `autoIndex` চালু রাখা; প্রতিটি boot-এ `syncIndexes()` চালানো; schema-তে আছে বলেই unique index আছে ধরে নেওয়া; আগে hide না করে index drop করা।"

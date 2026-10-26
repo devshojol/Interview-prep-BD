@@ -54,6 +54,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""The default method is **weighted round-robin**. Requests go to each server in turn in proportion to its `weight` (default 1), so here each server gets about a third of the traffic. Servers that failed recently (per `max_fails`/`fail_timeout`) are skipped temporarily.""",
         a_bn=r"""Default পদ্ধতি হলো **weighted round-robin**। Request পালাক্রমে প্রতিটা server-এ যায়, প্রত্যেকের `weight` (default 1) অনুপাতে, তাই এখানে প্রতিটা server মোটামুটি এক-তৃতীয়াংশ traffic পায়। সম্প্রতি fail করা server (`max_fails`/`fail_timeout` অনুযায়ী) সাময়িকভাবে বাদ দেওয়া হয়।""",
+        quick_en=r"""Weighted round-robin: each server in turn, in proportion to its `weight` (all 1 here), so each gets about a third of the traffic. Servers that failed recently (per `max_fails`/`fail_timeout`) are skipped for a while.""",
+        quick_bn=r"""Weighted round-robin: প্রতিটা server পালা করে, তার `weight` অনুযায়ী (এখানে সবগুলো 1), তাই প্রত্যেকে মোটামুটি এক-তৃতীয়াংশ traffic পায়। সম্প্রতি fail করা server (`max_fails`/`fail_timeout` অনুযায়ী) কিছুক্ষণের জন্য বাদ পড়ে।""",
         ex_en=r"""
             The tempting wrong answer is "least connections", because people assume the default is the "smart" one. You have to opt in with `least_conn;`, and similarly `ip_hash;`, `hash …;` or `random;`.
 
@@ -93,6 +95,8 @@ QUESTIONS = [
             - **Entry point** (`index.html`, `/`, `sw.js`, `manifest.webmanifest`): `Cache-Control: no-cache`। Browser file রাখতে পারে, কিন্তু প্রতিবার revalidate করতে হয়, ETag/Last-Modified-এর কারণে যেটা শুধু একটা সস্তা `304`। ফলে user সবসময় সর্বশেষ HTML পায়।
             - **Deploy-এর পরিচ্ছন্নতা:** আগের release-এর asset কিছুদিন রেখে দাও (overlapping বা atomic release), কারণ deploy-এর আগে খোলা tab এখনো পুরনো chunk চাইবে। CDN HTML cache করলে deploy-এর সময় সেটা purge করো।
         """,
+        quick_en=r"""Browsers cached `index.html` for 7 days, and it points to hashed chunks that the deploy deleted, so they 404. Serve hashed assets with `max-age=31536000, immutable` and `index.html` with `no-cache`, and keep the previous release's assets around for a while.""",
+        quick_bn=r"""Browser `index.html` ৭ দিনের জন্য cache করে রেখেছে, আর সেটা এমন hashed chunk-এর দিকে point করে যেগুলো deploy-এ মুছে গেছে, তাই 404 আসে। Hashed asset-এ `max-age=31536000, immutable` দাও, `index.html`-এ `no-cache`, আর আগের release-এর asset কিছুদিন রেখে দাও।""",
         ex_en=r"""
             - **`expires` vs `add_header`:** `expires 1y` sets both `Expires` and `Cache-Control: max-age`. To add `immutable`, use `add_header Cache-Control …` instead. Using both produces two `Cache-Control` headers.
             - **The `add_header` inheritance trap:** adding `add_header Cache-Control` inside a location drops server-level headers such as HSTS for those responses. On NGINX 1.29.3+ use `add_header_inherit merge;`, or repeat the security headers through a shared `include`.
@@ -158,6 +162,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""Use `listen 443 ssl;` together with the **`http2 on;`** directive, available since NGINX 1.25.1. The older `http2` **parameter** on the `listen` line is deprecated: it still works, but NGINX logs a deprecation warning. HTTP/2 is then negotiated with browsers via TLS ALPN.""",
         a_bn=r"""`listen 443 ssl;`-এর সাথে **`http2 on;`** directive ব্যবহার করো, যেটা NGINX 1.25.1 থেকে আছে। `listen` line-এর পুরনো `http2` **parameter** deprecated: এটা এখনো কাজ করে, কিন্তু NGINX একটা deprecation warning log করে। এরপর browser-এর সাথে TLS ALPN দিয়ে HTTP/2 negotiate হয়।""",
+        quick_en=r"""`listen 443 ssl;` plus `http2 on;`, available since NGINX 1.25.1. The old `http2` parameter on the `listen` line is deprecated: it still works but logs a warning.""",
+        quick_bn=r"""`listen 443 ssl;`-এর সাথে `http2 on;`, যেটা NGINX 1.25.1 থেকে আছে। `listen` line-এ পুরনো `http2` parameter deprecated: এখনো কাজ করে, কিন্তু warning log করে।""",
         ex_en=r"""
             The tempting wrong answer is `listen 443 ssl http2;`, because most tutorials written before 2023 use it. It's deprecated, not removed, so it's a "works but outdated" answer.
 
@@ -182,7 +188,7 @@ QUESTIONS = [
         id="nginx-022", sub="NGINX with Node.js", diff="medium", type="scenario",
         prio="high", market="bangladesh", mins=8,
         tags=["pm2", "systemd", "vps", "deployment", "ufw"],
-        ver="NGINX 1.30 stable, Node.js 24 LTS, PM2 / systemd", vs=False, status="stable",
+        ver="NGINX 1.30 stable, Node.js 26 LTS, PM2 / systemd", vs=False, status="stable",
         q_en=r"""A client wants their Express API and React frontend running on a single Ubuntu VPS behind NGINX. It must survive crashes and reboots and, ideally, update without downtime. Describe your setup: how Node runs, how NGINX fits in, and what you'd lock down.""",
         q_bn=r"""একজন client তাদের Express API আর React frontend একটা Ubuntu VPS-এ NGINX-এর পেছনে চালাতে চায়। Crash আর reboot-এর পরেও চালু থাকতে হবে, আর সম্ভব হলে downtime ছাড়া update করা যাবে। তোমার setup বর্ণনা করো: Node কীভাবে চলবে, NGINX কোথায় বসবে, আর কী কী lock down করবে।""",
         a_en=r"""
@@ -225,6 +231,8 @@ QUESTIONS = [
             - database আর upload-এর backup;
             - uptime আর disk monitoring।
         """,
+        quick_en=r"""NGINX on 80/443 terminates TLS, serves the React build and proxies `/api/` to Node on `127.0.0.1:3000`, which runs under systemd or PM2 cluster mode (`pm2 reload` for zero downtime). Lock it down with `ufw`, key-only SSH, a non-root app user, security updates, protected secrets and backups.""",
+        quick_bn=r"""80/443-এ NGINX TLS terminate করে, React build serve করে আর `/api/` proxy করে `127.0.0.1:3000`-এর Node-এ; Node চলে systemd বা PM2 cluster mode-এ (zero downtime-এর জন্য `pm2 reload`)। নিরাপত্তার জন্য `ufw`, শুধু key দিয়ে SSH, non-root app user, security update, সুরক্ষিত secret আর backup রাখো।""",
         ex_en=r"""
             - **systemd vs PM2:** systemd has no extra dependency and integrates with the OS (journald, resource limits, sandboxing options such as `NoNewPrivileges`). PM2 adds cluster mode, rolling reloads and a friendly CLI. Both are fine; don't run **both** for the same app.
             - **PM2 stop signal:** PM2 sends SIGINT and waits `kill_timeout` (1.6 s by default) before SIGKILL. Raise it if graceful shutdown needs longer.
@@ -331,6 +339,8 @@ QUESTIONS = [
             4. **Version প্রকাশ হওয়া:** `server_tokens off;` `Server` header আর error page থেকে version number সরিয়ে দেয়। এটা ছোট hardening; আসল সুরক্ষা আসে patch করা থেকে।
             5. **অচেনা host:** স্পষ্টভাবে একটা catch-all `default_server` যোগ করো। Port 80-এ এটা `return 444;` ব্যবহার করে (কোনো response ছাড়াই connection বন্ধ)। 443-এ ব্যবহার করে `ssl_reject_handshake on;`, যেটা certificate ছাড়াই অচেনা SNI নামের জন্য TLS প্রত্যাখ্যান করে, ফলে IP scanner জানতেই পারে না তুমি কোন domain host করছ। শুধু তোমার আসল `server_name`-এর request app-এ পৌঁছায়, এতে password-reset link poisoning-এর মতো Host-header attack আটকে যায়।
         """,
+        quick_en=r"""Set `ssl_protocols TLSv1.2 TLSv1.3`, add security headers with `always` (and `add_header_inherit merge` on 1.30, because an inner `add_header` drops inherited ones), and `server_tokens off`. Add a catch-all `default_server` with `return 444` on port 80 and `ssl_reject_handshake on` on 443.""",
+        quick_bn=r"""`ssl_protocols TLSv1.2 TLSv1.3` দাও, security header `always` দিয়ে যোগ করো (1.30-এ `add_header_inherit merge`-ও দাও, কারণ ভেতরের `add_header` inherit হওয়া header বাদ দেয়), আর `server_tokens off`। অচেনা host-এর জন্য একটা catch-all `default_server` রাখো: port 80-এ `return 444`, আর 443-এ `ssl_reject_handshake on`।""",
         ex_en=r"""
             - **Why a catch-all matters:** without an explicit `default_server`, NGINX uses the **first** server block for a given `listen` address as the default. That's often your main app, so any Host value, including an attacker's, gets served by it. Apps that build absolute URLs from the Host header (reset emails, redirects) become exploitable.
             - **HSTS caution:** `includeSubDomains` and especially `preload` are hard to undo. A forgotten HTTP-only subdomain becomes unreachable, so roll out with a short `max-age` first.
@@ -445,6 +455,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""About **2,048**. `worker_connections` is **per worker** and counts **all** connections the worker holds, including connections to upstream servers, not only client connections. A proxied request occupies one client connection plus one upstream connection, so 4 × 1,024 / 2 ≈ 2,048 simultaneous proxied clients.""",
         a_bn=r"""প্রায় **২,০৪৮**। `worker_connections` হলো **প্রতি worker-এর** limit, আর worker যত connection ধরে রাখে **সব** এর মধ্যে গোনা হয়, upstream server-এর connection-সহ, শুধু client connection না। একটা proxied request একটা client connection আর একটা upstream connection দখল করে, তাই 4 × 1,024 / 2 ≈ ২,০৪৮ জন proxied client একসাথে।""",
+        quick_en=r"""About 2,048: `worker_connections` is per worker and also counts upstream connections, so each proxied client uses two. That gives 4 × 1,024 / 2.""",
+        quick_bn=r"""প্রায় 2,048: `worker_connections` প্রতি worker-এর হিসাব, আর এতে upstream connection-ও গোনা হয়, তাই প্রতিটা proxied client দুটো connection নেয়। হিসাবটা 4 × 1,024 / 2।""",
         ex_en=r"""
             The tempting wrong answer is 4,096, which forgets the upstream side. That's correct only for pure static file serving. The docs explicitly say the number includes connections with proxied servers.
 
@@ -580,6 +592,8 @@ QUESTIONS = [
 
             Stickiness handshake-এর সমস্যা মেটায়; adapter মেটায় instance-গুলোর মধ্যে messaging। দুটোই লাগবে।
         """,
+        quick_en=r"""Socket.IO's polling requests must reach the same process, so round-robin causes "Session ID unknown"; add stickiness (`hash $remote_addr consistent`, or `sticky cookie` on 1.30). Broadcasts don't cross instances either, so add the Redis adapter: you need both fixes.""",
+        quick_bn=r"""Socket.IO-র polling request-গুলো একই process-এ যেতে হয়, তাই round-robin-এ "Session ID unknown" আসে; stickiness দাও (`hash $remote_addr consistent`, বা 1.30-এ `sticky cookie`)। আবার broadcast এক instance থেকে আরেক instance-এ যায় না, তাই Redis adapter যোগ করো: দুটো সমাধানই লাগবে।""",
         ex_en=r"""
             - **`ip_hash` vs `hash $remote_addr consistent`:** `ip_hash` uses only the first three octets of an IPv4 address, so an entire /24 (an office, or a carrier's NAT pool) sticks to one server and load becomes uneven. Hashing the full address, or using cookies, spreads load better.
             - **Behind a CDN or load balancer,** `$remote_addr` is the proxy's IP, so every client lands on one instance. Restore the real client IP with the `realip` module first, or use cookie affinity.
@@ -690,6 +704,8 @@ QUESTIONS = [
 
             **৪. আবার যাতে না ঘটে।** Production-এর মতো config দিয়ে campaign-এর প্রত্যাশিত peak-এর দ্বিগুণে load test করো। NGINX-এর active connection (`stub_status`), FD-এর ব্যবহার, TIME_WAIT-এর সংখ্যা, upstream-এর p95 latency আর 5xx rate-এর উপর alert রাখো। Campaign-এর আগে pre-scale করো, আর দায়িত্বপ্রাপ্ত ব্যক্তি ও সময়সীমাসহ একটা blameless postmortem লেখো।
         """,
+        quick_en=r"""Stabilise first (capacity, stale cache, tighter rate limits), then read each error: exhausted `worker_connections`, the FD limit, ephemeral port exhaustion from no upstream keepalive, and a slow `/api/cart`. Fix with keepalive, coherent FD and connection limits, a faster cart path and bounded retries.""",
+        quick_bn=r"""আগে system স্থির করো (capacity বাড়াও, stale cache serve করো, rate limit কড়া করো), তারপর প্রতিটা error পড়ো: `worker_connections` শেষ, file descriptor limit, upstream keepalive না থাকায় ephemeral port শেষ হয়ে যাওয়া, আর ধীর `/api/cart`। সমাধান: keepalive, মিল রেখে FD ও connection limit বাড়ানো, cart path দ্রুত করা আর retry সীমিত রাখা।""",
         ex_en=r"""
             **How the failure cascades:** a slow endpoint means requests take longer, so more concurrent connections are held, then `worker_connections`/FD limits are hit, then new connections fail with 502, then clients retry, which adds even more load. Breaking any link (faster app, caching, shedding load, bounded retries) stops the spiral, which is why mitigation can start before the root cause is fully known.
 

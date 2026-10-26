@@ -14,7 +14,7 @@
    "finish-event",
    "coding"
   ],
-  "technologyVersion": "Express 5.x; Node.js 24 LTS / 26",
+  "technologyVersion": "Express 5.x; Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -62,6 +62,10 @@
    "express-001",
    "express-025"
   ],
+  "quickAnswer": {
+   "en": "Record `process.hrtime.bigint()` at the start, call `next()` immediately, and log on `res.on('finish')`, when status and duration are final. On `res.on('close')`, if `res.writableFinished` is still `false`, log the request as aborted; use `req.originalUrl` for the full path.",
+   "bn": "শুরুতে `process.hrtime.bigint()` রেখে সাথে সাথে `next()` call করো, আর `res.on('finish')`-এ log করো, কারণ তখন status আর duration চূড়ান্ত। `res.on('close')`-এ যদি `res.writableFinished` তখনো `false` থাকে, request-টা aborted হিসেবে log করো; পুরো path-এর জন্য `req.originalUrl` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Logging right after `next()` (async handlers haven't responded yet), forgetting to call `next()` (every request hangs), or registering the timer after the routes.",
    "bn": "`next()`-এর ঠিক পরে log করা (async handler তখনও response দেয়নি), `next()` call করতে ভুলে যাওয়া (সব request ঝুলে থাকে), অথবা route-এর পরে timer register করা।"
@@ -140,6 +144,10 @@
    "express-012",
    "express-003"
   ],
+  "quickAnswer": {
+   "en": "Validate and coerce the query with zod (`limit` max 100, `sort` an enum), put filter values in placeholders (`$1`, `$2`), and map `sort` to a whitelisted `ORDER BY` fragment with `id` as tie-breaker. Run the page query and a `count(*)` in parallel to return `total` and `totalPages`.",
+   "bn": "আগে zod দিয়ে query validate ও coerce করো (`limit` সর্বোচ্চ 100, `sort` একটা enum), filter-এর value placeholder-এ (`$1`, `$2`) দাও, আর `sort`-কে whitelist করা `ORDER BY` অংশে map করো, tie-breaker `id`। Page query আর `count(*)` parallel-এ চালিয়ে `total` আর `totalPages` দাও।"
+  },
   "commonMistakes": {
    "en": "Interpolating `req.query.sort` into `ORDER BY`, not capping `limit` (`?limit=1000000`), or sorting without a unique tie-breaker so rows jump between pages.",
    "bn": "`req.query.sort` সরাসরি `ORDER BY`-তে বসিয়ে দেওয়া, `limit`-এর সীমা না রাখা (`?limit=1000000`), অথবা unique tie-breaker ছাড়া sort করা, ফলে row এক page থেকে আরেক page-এ লাফায়।"
@@ -217,6 +225,10 @@
    "express-009",
    "express-007"
   ],
+  "quickAnswer": {
+   "en": "Version in the URL path (`/v1`, `/v2`), each version its own `express.Router()` sharing the same services, and bump only for breaking changes. To retire a version, announce a timeline, send `Deprecation` and `Sunset` headers, contact the remaining clients, then return `410 Gone`.",
+   "bn": "URL path-এ version রাখো (`/v1`, `/v2`), প্রতিটা version আলাদা `express.Router()`, কিন্তু service একই; নতুন version শুধু breaking change-এর জন্য। পুরোনো version বন্ধ করতে timeline ঘোষণা করো, `Deprecation` আর `Sunset` header পাঠাও, বাকি client-দের সাথে যোগাযোগ করো, তারপর `410 Gone` দাও।"
+  },
   "commonMistakes": {
    "en": "Creating a new version for every additive change, copying the whole codebase per version, or switching v1 off on a date without measuring who still uses it.",
    "bn": "প্রতিটি additive change-এ নতুন version বানানো, প্রতি version-এ পুরো codebase কপি করা, অথবা কে এখনও ব্যবহার করছে না মেপেই নির্দিষ্ট তারিখে v1 বন্ধ করে দেওয়া।"
@@ -273,6 +285,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`res.sendStatus(404)`: it still sets the status and sends \"Not Found\" as the body, exactly as in Express 4. `app.del` and `req.param()` were removed, and `res.send(404)` no longer sets the status.",
+   "bn": "`res.sendStatus(404)`: এটা এখনো Express 4-এর মতোই status set করে আর body হিসেবে \"Not Found\" পাঠায়। `app.del` আর `req.param()` বাদ দেওয়া হয়েছে, আর `res.send(404)` এখন আর status set করে না।"
+  },
   "options": [
    {
     "en": "`app.del('/users/:id', removeUser)`",
@@ -309,7 +325,7 @@
    "query-parser",
    "rollout"
   ],
-  "technologyVersion": "Express 4.x → 5.x; Node.js 24 LTS",
+  "technologyVersion": "Express 4.x → 5.x; Node.js 26 LTS",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -318,8 +334,8 @@
    "bn": "তোমার দায়িত্বে একটি বড় Express 4 codebase (প্রায় 150টি route, অনেক third-party middleware, এখনও Node 18-এ)। Production-এ Express 5-এ migration-এর পরিকল্পনা করো: কী কী ভাঙবে, কীভাবে খুঁজে বের করবে, আর কীভাবে নিরাপদে rollout করবে?"
   },
   "answer": {
-   "en": "**0. Upgrade Node first, separately.** Node 18 is end-of-life; move to Node 24 LTS in its own release so you don't debug two upgrades at once. (Express 5 needs Node 18+, but you want a supported runtime.)\n\n**1. Inventory what breaks — loud vs silent:**\n- *Loud (crash at startup or on first call):* route syntax — `'*'` → `'/*splat'` or `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, regex characters in path strings; removed APIs such as `app.del`, `req.param`, `res.sendfile`.\n- *Silent (wrong behaviour):* `res.send(status)` now sends the number as a 200 body; `req.query` uses the **simple** parser (nested `?filter[price][gte]=10` no longer becomes an object) and is read-only; `req.body` is `undefined` without a parser; `express.urlencoded` defaults to `extended: false`; `express.static` ignores dot-directories (e.g. `/.well-known` → 404); `req.host` keeps the port; `res.status()` rejects non-integers; `res.redirect('back')` is gone.\n- *Improvement:* async errors are forwarded automatically — wrappers become unnecessary but are harmless, so remove them later.\n\n**2. Find it:** run the official codemods (`npx codemod@latest @expressjs/v5-migration-recipe`), grep for the risky patterns, update `@types/express`, check each third-party middleware for v5 support (especially anything that mutates `req.query`), and run the full test suite. Add tests for query parsing, wildcard routes and static files.\n\n**3. Roll out safely:** deploy to staging and **replay real traffic** (or shadow it), diffing status codes and bodies between v4 and v5. Then canary 5% of production instances and watch per-route 404/400/500 rates and latency, with a fast rollback. Expand gradually.",
-   "bn": "**0. আগে Node upgrade, আলাদাভাবে।** Node 18 end-of-life; নিজস্ব একটি release-এ Node 24 LTS-এ যাও, যাতে একসাথে দুটো upgrade debug করতে না হয়। (Express 5-এর জন্য Node 18+ লাগে, কিন্তু তোমার দরকার supported runtime।)\n\n**1. কী ভাঙবে তার তালিকা — জোরালো বনাম নীরব:**\n- *জোরালো (startup-এ বা প্রথম call-এ crash):* route syntax — `'*'` → `'/*splat'` বা `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, path string-এ regex character; সরানো API যেমন `app.del`, `req.param`, `res.sendfile`।\n- *নীরব (ভুল আচরণ):* `res.send(status)` এখন number-কে 200 body হিসেবে পাঠায়; `req.query` **simple** parser ব্যবহার করে (nested `?filter[price][gte]=10` আর object হয় না) এবং read-only; parser ছাড়া `req.body` `undefined`; `express.urlencoded`-এর default `extended: false`; `express.static` dot-directory ignore করে (যেমন `/.well-known` → 404); `req.host` port রেখে দেয়; `res.status()` non-integer reject করে; `res.redirect('back')` আর নেই।\n- *উন্নতি:* async error স্বয়ংক্রিয়ভাবে forward হয় — wrapper অপ্রয়োজনীয় কিন্তু ক্ষতিকর নয়, তাই পরে সরাও।\n\n**2. খুঁজে বের করা:** অফিসিয়াল codemod চালাও (`npx codemod@latest @expressjs/v5-migration-recipe`), ঝুঁকিপূর্ণ pattern grep করো, `@types/express` update করো, প্রতিটি third-party middleware-এর v5 support যাচাই করো (বিশেষ করে যেগুলো `req.query` বদলায়), আর পুরো test suite চালাও। Query parsing, wildcard route আর static file-এর জন্য test যোগ করো।\n\n**3. নিরাপদ rollout:** staging-এ deploy করে **আসল traffic replay** করো (বা shadow করো), v4 আর v5-এর মধ্যে status code ও body-র diff দেখো। তারপর production instance-এর 5%-এ canary, route অনুযায়ী 404/400/500 rate আর latency দেখো, দ্রুত rollback-এর ব্যবস্থা রাখো। ধীরে ধীরে বাড়াও।"
+   "en": "**0. Upgrade Node first, separately.** Node 18 is end-of-life; move to the current Active LTS (Node 26; Node 24 is in Maintenance) in its own release so you don't debug two upgrades at once. (Express 5 needs Node 18+, but you want a supported runtime.)\n\n**1. Inventory what breaks — loud vs silent:**\n- *Loud (crash at startup or on first call):* route syntax — `'*'` → `'/*splat'` or `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, regex characters in path strings; removed APIs such as `app.del`, `req.param`, `res.sendfile`.\n- *Silent (wrong behaviour):* `res.send(status)` now sends the number as a 200 body; `req.query` uses the **simple** parser (nested `?filter[price][gte]=10` no longer becomes an object) and is read-only; `req.body` is `undefined` without a parser; `express.urlencoded` defaults to `extended: false`; `express.static` ignores dot-directories (e.g. `/.well-known` → 404); `req.host` keeps the port; `res.status()` rejects non-integers; `res.redirect('back')` is gone.\n- *Improvement:* async errors are forwarded automatically — wrappers become unnecessary but are harmless, so remove them later.\n\n**2. Find it:** run the official codemods (`npx codemod@latest @expressjs/v5-migration-recipe`), grep for the risky patterns, update `@types/express`, check each third-party middleware for v5 support (especially anything that mutates `req.query`), and run the full test suite. Add tests for query parsing, wildcard routes and static files.\n\n**3. Roll out safely:** deploy to staging and **replay real traffic** (or shadow it), diffing status codes and bodies between v4 and v5. Then canary 5% of production instances and watch per-route 404/400/500 rates and latency, with a fast rollback. Expand gradually.",
+   "bn": "**0. আগে Node upgrade, আলাদাভাবে।** Node 18 end-of-life; নিজস্ব একটি release-এ বর্তমান Active LTS-এ যাও (Node 26; Node 24 এখন Maintenance-এ), যাতে একসাথে দুটো upgrade debug করতে না হয়। (Express 5-এর জন্য Node 18+ লাগে, কিন্তু তোমার দরকার supported runtime।)\n\n**1. কী ভাঙবে তার তালিকা — জোরালো বনাম নীরব:**\n- *জোরালো (startup-এ বা প্রথম call-এ crash):* route syntax — `'*'` → `'/*splat'` বা `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, path string-এ regex character; সরানো API যেমন `app.del`, `req.param`, `res.sendfile`।\n- *নীরব (ভুল আচরণ):* `res.send(status)` এখন number-কে 200 body হিসেবে পাঠায়; `req.query` **simple** parser ব্যবহার করে (nested `?filter[price][gte]=10` আর object হয় না) এবং read-only; parser ছাড়া `req.body` `undefined`; `express.urlencoded`-এর default `extended: false`; `express.static` dot-directory ignore করে (যেমন `/.well-known` → 404); `req.host` port রেখে দেয়; `res.status()` non-integer reject করে; `res.redirect('back')` আর নেই।\n- *উন্নতি:* async error স্বয়ংক্রিয়ভাবে forward হয় — wrapper অপ্রয়োজনীয় কিন্তু ক্ষতিকর নয়, তাই পরে সরাও।\n\n**2. খুঁজে বের করা:** অফিসিয়াল codemod চালাও (`npx codemod@latest @expressjs/v5-migration-recipe`), ঝুঁকিপূর্ণ pattern grep করো, `@types/express` update করো, প্রতিটি third-party middleware-এর v5 support যাচাই করো (বিশেষ করে যেগুলো `req.query` বদলায়), আর পুরো test suite চালাও। Query parsing, wildcard route আর static file-এর জন্য test যোগ করো।\n\n**3. নিরাপদ rollout:** staging-এ deploy করে **আসল traffic replay** করো (বা shadow করো), v4 আর v5-এর মধ্যে status code ও body-র diff দেখো। তারপর production instance-এর 5%-এ canary, route অনুযায়ী 404/400/500 rate আর latency দেখো, দ্রুত rollback-এর ব্যবস্থা রাখো। ধীরে ধীরে বাড়াও।"
   },
   "explanation": {
    "en": "- **Why separate \"loud\" from \"silent\":** startup crashes are found by any test run; silent changes only show up as wrong responses, so they need targeted tests and traffic diffing.\n- **Query parser decision:** if clients send nested filters, either keep compatibility with `app.set('query parser', 'extended')` (and validate strictly) or migrate clients first. Decide before the rollout, not after a spike of 400s.\n- **Middleware that writes to `req.query`** (some sanitisers/validators) breaks because it's a getter now — move parsed values to `res.locals` or a custom property.\n- **`.well-known`** (ACME challenges, app links) silently 404s with the new `dotfiles` default — serve it explicitly with `dotfiles: 'allow'`.\n- **`app.listen` callback** now receives errors such as `EADDRINUSE` instead of them being thrown — check the argument.\n- **Ownership:** split the work per module/team, track it on a checklist, and keep the canary running long enough to see daily traffic patterns.",
@@ -354,6 +370,10 @@
    "express-002",
    "express-003"
   ],
+  "quickAnswer": {
+   "en": "Upgrade Node to the current LTS first, in a separate release. Then find loud breaks (route syntax like `'*'`, removed APIs) and silent ones (`req.query` parser, `undefined` `req.body`, `res.send(status)`) with the official codemod and tests, and roll out via traffic replay on staging and a canary with fast rollback.",
+   "bn": "আগে আলাদা release-এ Node-কে বর্তমান LTS-এ তোলো। তারপর official codemod আর test দিয়ে স্পষ্ট ভাঙন (`'*'`-এর মতো route syntax, বাদ পড়া API) আর নীরব ভাঙন (`req.query` parser, `undefined` `req.body`, `res.send(status)`) খুঁজে বের করো, আর staging-এ traffic replay ও দ্রুত rollback-সহ canary দিয়ে rollout করো।"
+  },
   "commonMistakes": {
    "en": "Upgrading Node and Express in one big-bang release, trusting \"it boots\" as proof of compatibility, or forgetting that the query parser change silently alters filters.",
    "bn": "এক বড় release-এ একসাথে Node আর Express upgrade করা, \"boot হচ্ছে\" দেখেই compatibility-র প্রমাণ ধরে নেওয়া, অথবা ভুলে যাওয়া যে query parser-এর পরিবর্তন নীরবে filter বদলে দেয়।"
@@ -432,6 +452,10 @@
    "express-009",
    "express-007"
   ],
+  "quickAnswer": {
+   "en": "Require an `Idempotency-Key` per logical payment and claim it atomically in PostgreSQL (`INSERT … ON CONFLICT DO NOTHING` on user + key) with a request fingerprint. The winner charges, passing the same key to the payment provider, and stores the response; retries get `409` while in progress or the stored response afterwards.",
+   "bn": "প্রতিটা logical payment-এর জন্য একটা `Idempotency-Key` বাধ্যতামূলক করো আর PostgreSQL-এ request fingerprint-সহ atomically claim করো (user + key-এর উপর `INSERT … ON CONFLICT DO NOTHING`)। যে জেতে সে charge করে, payment provider-কেও একই key দেয়, আর response save করে; চলাকালীন retry পায় `409`, পরে পায় save করা response।"
+  },
   "commonMistakes": {
    "en": "Checking \"does a payment with these details already exist?\" (legitimate identical payments exist), using an in-memory map (doesn't work across instances), or not forwarding the key to the payment provider.",
    "bn": "\"এই details-এর payment কি আগে থেকেই আছে?\" check করা (বৈধ হুবহু payment-ও থাকতে পারে), in-memory map ব্যবহার করা (instance-জুড়ে কাজ করে না), অথবা payment provider-কে key forward না করা।"

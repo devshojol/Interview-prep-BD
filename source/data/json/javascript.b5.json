@@ -59,6 +59,10 @@
    "js-017",
    "js-034"
   ],
+  "quickAnswer": {
+   "en": "`S1 S2 M1 M3 A1 M2 T1 T1-micro T2 T3 A2`. Sync code runs first, the whole microtask queue (including microtasks added while draining) empties after the script and after every task, and timers run in the order they were queued, so `T1-micro` beats `T2` and `A2` waits for the last timer.",
+   "bn": "`S1 S2 M1 M3 A1 M2 T1 T1-micro T2 T3 A2`। আগে sync code চলে; script-এর পরে আর প্রতিটা task-এর পরে পুরো microtask queue খালি হয় (চলার সময় নতুন যোগ হওয়া microtask-সহ); আর timer চলে queue-তে ঢোকার order-এ, তাই `T1-micro` `T2`-এর আগে চলে আর `A2` শেষ timer-এর জন্য অপেক্ষা করে।"
+  },
   "commonMistakes": {
    "en": "Running a whole `.then` chain at once (`M1, M2, M3`), or running all timers before the microtask created inside `T1`.",
    "bn": "পুরো `.then` chain একবারে চালিয়ে দেওয়া (`M1, M2, M3`), অথবা `T1`-এর ভেতরে তৈরি microtask-এর আগেই সব timer চালিয়ে দেওয়া।"
@@ -130,6 +134,10 @@
    "js-031",
    "js-036"
   ],
+  "quickAnswer": {
+   "en": "It's prototype pollution: `JSON.parse` creates an own `__proto__` key, `for...in` visits it, and `target['__proto__']` returns `Object.prototype`, so `merge` writes `isAdmin` onto the prototype all objects inherit. Fix: merge only own keys, skip `__proto__`, `constructor` and `prototype`, and validate the body with a schema.",
+   "bn": "এটা prototype pollution: `JSON.parse` একটা নিজস্ব `__proto__` key তৈরি করে, `for...in` সেটা পায়, আর `target['__proto__']` `Object.prototype` return করে, তাই `merge` এমন prototype-এ `isAdmin` লিখে দেয় যেখান থেকে সব object inherit করে। Fix: শুধু own key merge করো, `__proto__`, `constructor` আর `prototype` বাদ দাও, আর body schema দিয়ে validate করো।"
+  },
   "commonMistakes": {
    "en": "Only blocking the string `'__proto__'` (forgetting `constructor.prototype`), or assuming `JSON.parse` output is \"just data\" and therefore safe to merge.",
    "bn": "শুধু `'__proto__'` string block করা (`constructor.prototype` ভুলে যাওয়া), অথবা ধরে নেওয়া যে `JSON.parse`-এর output \"শুধুই data\", তাই merge করা নিরাপদ।"
@@ -215,6 +223,10 @@
    "js-030",
    "js-039"
   ],
+  "quickAnswer": {
+   "en": "It's DOM-based XSS: the URL's `q` goes into `innerHTML`, so a link containing an `<img onerror>` payload runs attacker code in your origin. Defend in layers: `textContent`/`createElement` for user data, only `http(s)` links, DOMPurify for required HTML, plus a nonce-based CSP, Trusted Types and `HttpOnly` cookies.",
+   "bn": "এটা DOM-based XSS: URL-এর `q` সরাসরি `innerHTML`-এ যায়, তাই `<img onerror>` payload-ওয়ালা একটা link তোমার origin-এ attacker-এর code চালিয়ে দেয়। কয়েক স্তরে রক্ষা করো: user data-র জন্য `textContent`/`createElement`, link-এ শুধু `http(s)` URL, HTML লাগলে DOMPurify-র মতো sanitizer, সাথে nonce-based CSP, Trusted Types আর `HttpOnly` cookie।"
+  },
   "commonMistakes": {
    "en": "Relying on `encodeURIComponent` or a regex that strips `<script>` (event-handler attributes and `javascript:` URLs bypass it), or assuming `innerHTML` is safe because \"`<script>` tags inserted via innerHTML don't run\" — `onerror` handlers do.",
    "bn": "`encodeURIComponent` বা `<script>` মুছে দেওয়া একটা regex-এর উপর ভরসা করা (event-handler attribute আর `javascript:` URL এটাকে এড়িয়ে যায়), অথবা ধরে নেওয়া যে \"innerHTML দিয়ে বসানো `<script>` tag চলে না\" বলে `innerHTML` নিরাপদ — কিন্তু `onerror` handler ঠিকই চলে।"
@@ -290,6 +302,10 @@
    "js-038",
    "js-039"
   ],
+  "quickAnswer": {
+   "en": "GC is mark-and-sweep: whatever is reachable from roots (globals, the stack, listeners, timers) stays, so a leak is memory still reachable but no longer needed. I compare heap snapshots and follow retainers (usually listeners, intervals or subscriptions), then give every mount a cleanup and bound my caches.",
+   "bn": "GC mark-and-sweep পদ্ধতিতে কাজ করে: root (global, stack, listener, timer) থেকে যা reach করা যায় তা থেকে যায়, তাই leak মানে এমন memory যা এখনও reachable কিন্তু আর দরকার নেই। Heap snapshot compare করে retainer ধরে আমি কারণ খুঁজি (সাধারণত listener, interval বা subscription), তারপর প্রতিটা mount-এর জন্য cleanup রাখি আর cache-এর size সীমিত করি।"
+  },
   "commonMistakes": {
    "en": "Believing circular references leak in modern engines (they don't with tracing GC), calling \"GC\" manually as a fix, or using `WeakRef` to \"fix\" a leak that is really a missing cleanup.",
    "bn": "ভাবা যে আধুনিক engine-এ circular reference leak করে (tracing GC-তে করে না), fix হিসেবে হাতে \"GC\" চালানো, অথবা আসলে cleanup বাদ পড়ায় হওয়া leak-কে `WeakRef` দিয়ে \"ঠিক\" করা।"
@@ -365,6 +381,10 @@
    "js-037",
    "js-019"
   ],
+  "quickAnswer": {
+   "en": "In a loop, run the task; on failure, stop if retries are used up or `shouldRetry(err)` is false, else wait a random delay up to `min(maxDelay, baseDelay * 2 ** attempt)` (full jitter). Pass one `AbortSignal` to the task and to an abortable `sleep`, with `AbortSignal.timeout` for an overall limit.",
+   "bn": "একটা loop-এ task চালাই; fail করলে, retry শেষ হয়ে গেলে বা `shouldRetry(err)` false হলে থেমে যাই, নইলে `min(maxDelay, baseDelay * 2 ** attempt)` পর্যন্ত একটা random delay (full jitter) অপেক্ষা করে আবার চেষ্টা করি। একই `AbortSignal` task আর abortable `sleep` দুটোকেই দিই, আর পুরো কাজের সীমা দিতে `AbortSignal.timeout` যোগ করি।"
+  },
   "commonMistakes": {
    "en": "Retrying every error including 4xx, fixed delays without jitter, a `sleep` that ignores the abort signal (so cancel waits for the full delay), or retrying non-idempotent writes blindly.",
    "bn": "4xx সহ সব error-এ retry করা, jitter ছাড়া নির্দিষ্ট delay, abort signal উপেক্ষা করা `sleep` (ফলে cancel করলেও পুরো delay অপেক্ষা করতে হয়), অথবা non-idempotent write অন্ধভাবে retry করা।"
@@ -444,6 +464,10 @@
    "js-029",
    "js-039"
   ],
+  "quickAnswer": {
+   "en": "The browser drains the whole microtask queue before it can render, handle input or run timers, so microtasks that keep queuing microtasks block the page like one long synchronous loop. Work in time-boxed chunks and yield to the task queue (`setTimeout`, or `scheduler.yield()` where supported), or use a Web Worker.",
+   "bn": "Browser render, input handle বা timer চালানোর আগে পুরো microtask queue খালি করে, তাই microtask যদি একের পর এক নতুন microtask যোগ করতে থাকে, page একটা লম্বা synchronous loop-এর মতোই আটকে যায়। কাজকে ছোট time-boxed chunk-এ ভাগ করে মাঝে মাঝে task queue-তে yield করো (`setTimeout`, বা যেখানে support আছে `scheduler.yield()`), অথবা Web Worker ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Wrapping a heavy loop in `async` or `Promise.resolve().then(...)` and expecting it to run \"in the background\", or yielding with `await Promise.resolve()` — that's still a microtask and doesn't let the browser render.",
    "bn": "ভারী loop-কে `async` বা `Promise.resolve().then(...)`-এ মুড়ে ভাবা যে এটা \"background-এ\" চলবে, অথবা `await Promise.resolve()` দিয়ে yield করা — এটাও microtask, browser-কে render করার সুযোগ দেয় না।"

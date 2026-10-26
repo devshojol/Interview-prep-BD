@@ -62,6 +62,10 @@
    "js-004",
    "js-020"
   ],
+  "quickAnswer": {
+   "en": "Return a function that closes over a `Map`: build a key, return the cached value on a hit, otherwise call `fn.apply(this, args)` and store the result. For LRU, delete and re-insert the key on a hit and evict the first key when the size passes `maxSize`; memoize only pure functions.",
+   "bn": "এমন একটা function return করি যেটা একটা `Map`-এর উপর closure রাখে: key বানাই, cache-এ থাকলে সেটা return করি, না থাকলে `fn.apply(this, args)` call করে result রেখে দিই। LRU-র জন্য hit হলে key delete করে আবার insert করি, আর size `maxSize` ছাড়ালে প্রথম key বাদ দিই; memoize শুধু pure function-এর জন্য নিরাপদ।"
+  },
   "commonMistakes": {
    "en": "Memoizing impure functions (e.g. ones that read the current time or the DOM), using an object as the cache with arbitrary string keys like `'__proto__'`, or forgetting to forward `this`.",
    "bn": "Impure function memoize করা (যেমন যেগুলো current time বা DOM পড়ে), arbitrary string key (যেমন `'__proto__'`) সহ object-কে cache হিসেবে ব্যবহার করা, অথবা `this` forward করতে ভুলে যাওয়া।"
@@ -141,6 +145,10 @@
    "js-019",
    "js-024"
   ],
+  "quickAnswer": {
+   "en": "`rejected: User 7 not found`. `return fetchUser(id)` returns the pending promise without awaiting it, so the `try` block finishes before the rejection happens and the `catch` never runs; `return await fetchUser(id)` fixes it.",
+   "bn": "`rejected: User 7 not found`। `return fetchUser(id)` promise-টা await না করেই return করে, তাই rejection ঘটার আগেই `try` block শেষ হয়ে যায় আর `catch` কখনো চলে না; `return await fetchUser(id)` লিখলে ঠিক হয়।"
+  },
   "commonMistakes": {
    "en": "Believing `try/catch` around any expression that \"involves\" a promise will catch its rejection — only an awaited rejection is thrown at that point.",
    "bn": "ভাবা যে promise \"জড়িত\" এমন যেকোনো expression `try/catch`-এ রাখলেই তার rejection ধরা পড়বে — আসলে শুধু await করা rejection-ই ওই জায়গায় throw হয়।"
@@ -235,6 +243,10 @@
    "js-021",
    "js-037"
   ],
+  "quickAnswer": {
+   "en": "`forEach` ignores the promises its `async` callback returns, so nothing awaits the saves: the log and `return` run while `saved` is still `0`, and failed saves become unhandled rejections. Use `for...of` with `await` for sequential saves, or `await Promise.all(orders.map(...))` for parallel ones.",
+   "bn": "`forEach` তার `async` callback-এর return করা promise-গুলো ফেলে দেয়, তাই কেউ save-গুলোর জন্য অপেক্ষা করে না: `saved` তখনও `0` থাকতেই log আর `return` চলে যায়, আর fail করা save unhandled rejection হয়ে যায়। একটার পর একটা save করতে `for...of` + `await`, আর parallel-এ করতে `await Promise.all(orders.map(...))` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it by adding `await` before `orders.forEach(...)` — `forEach` returns `undefined`, so there is nothing to await.",
    "bn": "`orders.forEach(...)`-এর আগে `await` বসিয়ে \"fix\" করা — `forEach` `undefined` return করে, তাই await করার মতো কিছুই নেই।"
@@ -315,6 +327,10 @@
    "js-004",
    "js-016"
   ],
+  "quickAnswer": {
+   "en": "Each function call creates an execution context, pushed onto the call stack (LIFO) and popped on return. Its lexical environment holds its variables plus a link to the outer environment where the function was defined; lookups walk that scope chain, and a function that outlives its parent keeps that environment alive (a closure).",
+   "bn": "প্রতিটা function call একটা execution context তৈরি করে, যেটা call stack-এ (LIFO) push হয় আর return করলে pop হয়। তার lexical environment-এ থাকে নিজের variable আর function যেখানে define হয়েছে সেই outer environment-এর reference; variable খোঁজা হয় এই scope chain ধরে, আর function তার parent call-এর পরেও বেঁচে থাকলে parent-এর environment-ও closure হিসেবে বেঁচে থাকে।"
+  },
   "commonMistakes": {
    "en": "Saying scope is determined by where a function is *called* (that's dynamic scoping, which JavaScript doesn't use — only `this` is call-site dependent).",
    "bn": "বলা যে function যেখানে *call* হয় সেখান থেকে scope ঠিক হয় (এটা dynamic scoping, JavaScript তা ব্যবহার করে না — শুধু `this` call site-এর উপর নির্ভর করে)।"
@@ -340,7 +356,7 @@
    "node",
    "require-esm"
   ],
-  "technologyVersion": "ES2015+ modules; ES2025 import attributes; Node.js 24 LTS / 26 (`require(esm)` since 22.12 / 20.19)",
+  "technologyVersion": "ES2015+ modules; ES2025 import attributes; Node.js 26 LTS / 24 (`require(esm)` since 22.12 / 20.19)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -387,6 +403,10 @@
   "related": [
    "js-025"
   ],
+  "quickAnswer": {
+   "en": "ES modules are the standard: static `import`/`export`, live read-only bindings, top-level `await`, strict mode, no `__dirname`. CommonJS `require()` is a synchronous runtime call that returns whatever is on `module.exports`; in Node, ESM can import CJS, and CJS can `require()` synchronous ESM since 22.12 / 20.19.",
+   "bn": "ES module হলো standard: static `import`/`export`, live read-only binding, top-level `await`, strict mode, আর `__dirname` নেই। CommonJS-এর `require()` runtime-এ চলা একটা synchronous call, যেটা `module.exports`-এ যা আছে তা-ই দেয়; Node-এ ESM CJS import করতে পারে, আর 22.12 / 20.19 থেকে CJS synchronous ESM-কে `require()` করতে পারে।"
+  },
   "commonMistakes": {
    "en": "Saying CommonJS can never load ES modules (outdated since Node 22.12 / 20.19), or forgetting the `.js` extension in ESM relative imports in Node.",
    "bn": "বলা যে CommonJS কখনোই ES module load করতে পারে না (Node 22.12 / 20.19 থেকে এটা পুরনো তথ্য), অথবা Node-এ ESM-এর relative import-এ `.js` extension দিতে ভুলে যাওয়া।"
@@ -450,6 +470,10 @@
   "related": [
    "js-035"
   ],
+  "quickAnswer": {
+   "en": "It logs `[4, 16, 36]`. Iterator helpers are lazy: values are pulled one at a time through `filter`, `map` and `take(3)`, which stops after three values and closes the generator, so the infinite generator never has to finish.",
+   "bn": "এটা `[4, 16, 36]` log করে। Iterator helper lazy: value একটা একটা করে `filter`, `map` আর `take(3)` দিয়ে টানা হয়, আর `take(3)` তিনটা value পেয়েই থেমে generator বন্ধ করে দেয়, তাই infinite generator-কে কখনো শেষ হতে হয় না।"
+  },
   "code": {
    "language": "javascript",
    "source": "function* naturals() {\n  let n = 1;\n  while (true) yield n++;\n}\n\nconst result = naturals()\n  .filter((n) => n % 2 === 0)\n  .map((n) => n * n)\n  .take(3)\n  .toArray();\n\nconsole.log(result);",
@@ -530,6 +554,10 @@
   "related": [
    "js-018"
   ],
+  "quickAnswer": {
+   "en": "`750 undefined ['owner'] false 1`. `#balance` is a real private field, so `w['#balance']` and `Object.keys` can't see it, and `#balance in obj` is a valid brand check that is `true` only for objects actually created by `Wallet`.",
+   "bn": "`750 undefined ['owner'] false 1`। `#balance` সত্যিকারের private field, তাই `w['#balance']` বা `Object.keys` এটা দেখতে পায় না; আর `#balance in obj` একটা valid brand check, যেটা শুধু `Wallet` দিয়ে তৈরি object-এর জন্য `true` হয়।"
+  },
   "code": {
    "language": "javascript",
    "source": "class Wallet {\n  #balance = 0;\n  static #count = 0;\n\n  constructor(owner) {\n    this.owner = owner;\n    Wallet.#count++;\n  }\n\n  deposit(amount) {\n    this.#balance += amount;\n    return this;\n  }\n\n  get balance() {\n    return this.#balance;\n  }\n\n  static isWallet(obj) {\n    return #balance in obj;\n  }\n\n  static get count() {\n    return Wallet.#count;\n  }\n}\n\nconst w = new Wallet('Nadia').deposit(500).deposit(250);\nconsole.log(w.balance, w['#balance'], Object.keys(w), Wallet.isWallet({ balance: 750 }), Wallet.count);",

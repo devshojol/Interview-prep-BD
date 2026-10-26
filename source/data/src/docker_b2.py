@@ -32,7 +32,7 @@ QUESTIONS = [
         id="docker-005", sub="Port Mapping", diff="easy", type="debugging",
         prio="high", market="both", mins=3,
         tags=["port-mapping", "localhost", "0.0.0.0", "networking", "express"],
-        ver="Docker Engine 29, Node.js 24 LTS, Express 5.x", vs=False, status="stable",
+        ver="Docker Engine 29, Node.js 26 LTS, Express 5.x", vs=False, status="stable",
         q_en=r"""
             You run `docker run -d -p 3000:3000 my-api`. `docker ps` shows the container is Up, and the logs say `API listening on 127.0.0.1:3000`. But `curl http://localhost:3000/health` from the host fails with "Connection reset by peer". Here is the startup code. What's wrong, and how do you fix it?
         """,
@@ -76,6 +76,8 @@ QUESTIONS = [
 
             **সমাধান:** container-এর ভেতরে সব interface-এ listen করো: `0.0.0.0` দাও, অথবা host বাদ দাও, তাহলে Node unspecified address ব্যবহার করবে। Host-এ কতটা expose হবে সেটা নিয়ন্ত্রণ করে port publishing (`-p`)। Port public না চাইলে host side-এ সীমিত করো: `-p 127.0.0.1:3000:3000`।
         """,
+        quick_en=r"""The app listens on `127.0.0.1`, which inside a container is the container's own loopback, so the forwarded traffic finds nothing listening. Bind to `0.0.0.0` and control host exposure with `-p` (for example `-p 127.0.0.1:3000:3000`).""",
+        quick_bn=r"""App `127.0.0.1`-এ listen করছে, আর container-এর ভেতরে সেটা container-এর নিজের loopback; তাই forward হয়ে আসা traffic কাউকে listen করতে পায় না। `0.0.0.0`-এ bind করো, আর host-এ কতটা খোলা থাকবে সেটা `-p` দিয়ে ঠিক করো (যেমন `-p 127.0.0.1:3000:3000`)।""",
         ex_en=r"""
             - **Prove it:** `docker exec my-api wget -qO- http://127.0.0.1:3000/health` works from inside the container, which shows the app itself is healthy and the problem is the bind address. `docker exec my-api netstat -tln` (BusyBox on Alpine) shows `127.0.0.1:3000` instead of `0.0.0.0:3000` or `:::3000`.
             - **Same trap with dev servers:** Vite listens on `localhost` by default, so use `vite --host` inside containers.
@@ -115,6 +117,8 @@ QUESTIONS = [
             - **Bind mount:** host-এর একটা নির্দিষ্ট path container-এ map করে (`./src:/app/src`)। Host আর container একই file সরাসরি (live) দেখে। **Local development-এর জন্য ব্যবহার করো** (hot reload), অথবা config-এর মতো নির্দিষ্ট host file share করতে। অসুবিধা: host path-এর উপর নির্ভরতা, UID/permission mismatch, আর macOS/Windows-এ ধীর I/O।
             - **tmpfs:** শুধু memory-তে থাকে, কখনো disk-এ লেখা হয় না, container stop হলেই মুছে যায়। **Scratch বা sensitive temporary data-র জন্য ব্যবহার করো**, যেমন read-only container-এর `/tmp`।
         """,
+        quick_en=r"""Named volumes are Docker-managed storage that survives `docker rm`, so use them for databases and persistent data. Bind mounts map a specific host path, which suits local development, and tmpfs is memory-only scratch space that disappears when the container stops.""",
+        quick_bn=r"""Named volume হলো Docker-এর manage করা storage, `docker rm`-এর পরেও থেকে যায়, তাই database আর persistent data-র জন্য এটাই। Bind mount host-এর একটা নির্দিষ্ট path container-এ map করে, local development-এর জন্য ভালো; আর tmpfs শুধু memory-তে থাকে, container stop হলেই মুছে যায়।""",
         ex_en=r"""
             - **Volume initialisation:** when an **empty** named volume is mounted over a directory that already has files in the image, Docker copies those files (with their ownership) into the volume. Bind mounts don't do this. They simply hide whatever the image had at that path.
             - **Backups:** volumes are still just data on one host. Back them up (e.g. `pg_dump`, or a temporary container that tars the volume), and use managed databases when you need high availability.
@@ -181,6 +185,8 @@ QUESTIONS = [
             - **সঠিক ও cacheable build:** macOS-এর জন্য build করা host `node_modules` Linux image-এ ঢুকে যেতে পারে। Log বা `.git`-এর মতো অপ্রাসঙ্গিক file বদলালেও `COPY . .`-এর cache নষ্ট হয়।
             - **Security:** `.env` file, `.npmrc` token আর key image-এর বাইরে থাকে।
         """,
+        quick_en=r"""The build context is the set of files sent to the builder (the `.` in `docker build .`), and `COPY` can only read from it. A `.dockerignore` keeps `node_modules`, `.git` and `.env` out, which makes builds faster, keeps the cache stable and stops secrets leaking into the image.""",
+        quick_bn=r"""Build context হলো builder-এর কাছে পাঠানো file-গুলোর set (`docker build .`-এর `.`), আর `COPY` শুধু এখান থেকেই পড়তে পারে। `.dockerignore` দিয়ে `node_modules`, `.git`, `.env` বাদ দিলে build দ্রুত হয়, cache ঠিক থাকে, আর secret image-এ leak হয় না।""",
         ex_en=r"""
             - BuildKit only transfers the files a build actually uses, and it transfers them incrementally. But `COPY . .` uses **everything** that isn't ignored, so the ignore file still matters.
             - Syntax is similar to `.gitignore`: `#` comments, `**` globs, and `!` exceptions (e.g. ignore `.env*` but keep `!.env.example`).
@@ -225,7 +231,7 @@ QUESTIONS = [
         id="docker-014", sub="Dockerfiles", diff="medium", type="debugging",
         prio="high", market="both", mins=6,
         tags=["sigterm", "pid1", "graceful-shutdown", "exec-form", "exit-code"],
-        ver="Docker Engine 29, Node.js 24 LTS", vs=False, status="stable",
+        ver="Docker Engine 29, Node.js 24 (Maintenance LTS)", vs=False, status="stable",
         q_en=r"""
             During every deploy, users see failed requests. `docker stop api` always takes exactly 10 seconds, the container ends with exit code 137, and the app's `process.on('SIGTERM', …)` handler never logs anything. Here is the Dockerfile (`package.json` has `"start": "node server.js"`). Find the root cause and fix it.
         """,
@@ -292,6 +298,8 @@ QUESTIONS = [
             2. **Graceful shutdown** implement করো: SIGTERM পেলে `server.close()` call করো, চলমান request শেষ করো, DB pool বন্ধ করো, আর deadline-এর আগে exit 0 দাও।
             3. চাইলে একটা init process ব্যবহার করো (`docker run --init` বা Compose-এ `init: true`), যেটা signal forward করে আর zombie process পরিষ্কার করে। Request ১০ সেকেন্ডের বেশি সময় নিতে পারলে `stop_grace_period` বাড়াও।
         """,
+        quick_en=r"""Shell-form `CMD npm start` makes `/bin/sh` PID 1, and the shell doesn't forward SIGTERM, so Node never sees it and Docker sends SIGKILL after 10 seconds (exit 137). Use exec form `CMD ["node", "server.js"]` and handle SIGTERM with a graceful shutdown.""",
+        quick_bn=r"""Shell-form `CMD npm start`-এ `/bin/sh` PID 1 হয়, আর shell SIGTERM forward করে না; তাই Node signal পায় না, আর ১০ সেকেন্ড পরে Docker SIGKILL পাঠায় (exit 137)। Exec form `CMD ["node", "server.js"]` দিয়ে Node সরাসরি চালাও, আর SIGTERM-এ graceful shutdown করো।""",
         ex_en=r"""
             - **Exit codes:** 0 = clean graceful exit, 143 = terminated by SIGTERM (128 + 15) without handling it, 137 = SIGKILL (also what you see after an OOM kill, so check `OOMKilled` in `docker inspect`).
             - **PID 1 is special in Linux:** the kernel doesn't apply the default "terminate" action for signals the process hasn't installed a handler for. A bare `CMD ["node", "server.js"]` without a SIGTERM handler can therefore still ignore `docker stop`. Either handle the signal or run with `--init`.
@@ -322,7 +330,7 @@ QUESTIONS = [
         id="docker-015", sub="Multi-stage Builds", diff="medium", type="coding",
         prio="high", market="both", mins=8,
         tags=["multi-stage", "nextjs", "standalone", "non-root", "image-size"],
-        ver="Next.js 16.4, Node.js 24 LTS, Docker Engine 29 / BuildKit", vs=True, status="stable",
+        ver="Next.js 16.4, Node.js 24 (Maintenance LTS), Docker Engine 29 / BuildKit", vs=True, status="stable",
         q_en=r"""
             Write a production Dockerfile for a Next.js 16 app configured with `output: 'standalone'`.
 
@@ -406,6 +414,8 @@ QUESTIONS = [
 
             পুরো `node_modules` আর source পাঠানোর তুলনায় এই image সাধারণত কয়েকশো MB ছোট হয়, আর এতে compiler, test বা devDependencies থাকে না।
         """,
+        quick_en=r"""Use three stages: `deps` runs `npm ci` with a cache mount, `builder` runs `next build` to produce `.next/standalone`, and `runner` copies only the standalone output, `.next/static` and `public` into a fresh `node:24-alpine`. The final image runs as `USER node` with exec-form `CMD`.""",
+        quick_bn=r"""তিনটা stage: `deps`-এ cache mount দিয়ে `npm ci`, `builder`-এ `next build` চালিয়ে `.next/standalone` তৈরি, আর `runner`-এ নতুন `node:24-alpine`-এ শুধু standalone output, `.next/static` আর `public` copy করা। Final image চলে `USER node` হিসেবে, exec-form `CMD` দিয়ে।""",
         ex_en=r"""
             - **`HOSTNAME=0.0.0.0` matters:** Docker sets `HOSTNAME` to the container ID, and the standalone server binds to `HOSTNAME`. Without the override it may bind to the wrong interface and be unreachable through the published port.
             - **`public/` and `.next/static`** aren't copied into standalone. Forgetting them gives 404s for CSS/JS chunks and images. (If the project has no `public/` folder, that `COPY` fails, so create an empty one.)
@@ -541,6 +551,8 @@ QUESTIONS = [
             - **Networking:** সব service project-এর default network share করে, তাই API service name দিয়েই `db:5432` আর `cache:6379`-এ পৌঁছায়। শুধু API port publish করে, তাও `127.0.0.1`-এ bind করা।
             - **Profiles:** `migrate` `tools` profile-এর অংশ, তাই সাধারণ `up` এটাকে উপেক্ষা করে আর দরকার হলে আলাদাভাবে চালানো যায়।
         """,
+        quick_en=r"""Give Postgres a `pg_isready` healthcheck and make the API wait with `depends_on: condition: service_healthy`, keep data in a named volume, and use `${POSTGRES_PASSWORD:?…}` so Compose fails fast. Publish only the API on `127.0.0.1:3000`, and put `migrate` in a profile so a plain `up` skips it.""",
+        quick_bn=r"""Postgres-এ `pg_isready` healthcheck দাও, আর `depends_on: condition: service_healthy` দিয়ে API-কে অপেক্ষা করাও; data রাখো named volume-এ, আর `${POSTGRES_PASSWORD:?…}` দিয়ে value না থাকলে Compose-কে সাথে সাথে fail করাও। শুধু API-কে `127.0.0.1:3000`-এ publish করো, আর `migrate`-কে একটা profile-এ রাখো যাতে সাধারণ `up` সেটা চালায় না।""",
         ex_en=r"""
             - **No `version:` key:** Compose v2+ (now v5) ignores the top-level `version` and warns about it. The file is validated against the Compose Specification.
             - **Health check timing:** `start_period` gives Postgres time to initialise on first boot without counting failures. After that, `interval × retries` bounds how long dependants wait before Compose gives up because the dependency is unhealthy.
@@ -571,7 +583,7 @@ QUESTIONS = [
         id="docker-024", sub="Container Debugging", diff="hard", type="scenario",
         prio="high", market="both", mins=10,
         tags=["exit-code-137", "oom", "debugging", "memory-limits", "nodejs-heap"],
-        ver="Docker Engine 29, Node.js 24 LTS", vs=False, status="stable",
+        ver="Docker Engine 29, Node.js 26 LTS", vs=False, status="stable",
         q_en=r"""In production, your Node.js API container keeps restarting, and `docker ps` shows `Restarting (137)`. Walk me through how you would find the root cause and fix it.""",
         q_bn=r"""Production-এ তোমার Node.js API container বারবার restart হচ্ছে, আর `docker ps`-এ দেখাচ্ছে `Restarting (137)`। Root cause কীভাবে খুঁজে বের করবে আর ঠিক করবে, ধাপে ধাপে বলো।""",
         a_en=r"""
@@ -596,6 +608,8 @@ QUESTIONS = [
 
             `OOMKilled=false` হলে খোঁজো কে SIGKILL পাঠাল: খুব ছোট stop timeout-ওয়ালা deploy script, orchestrator-এর health-check-ভিত্তিক restart, অথবা কেউ `docker kill` চালিয়েছে কি না।
         """,
+        quick_en=r"""137 means SIGKILL (128 + 9), usually the OOM killer: check `OOMKilled` in `docker inspect`, then `docker events`, `docker stats` and the logs. If V8's heap limit is above the container limit, the cgroup kills Node before any JS error, so set `--max-old-space-size` below the limit and find the leak.""",
+        quick_bn=r"""137 মানে SIGKILL (128 + 9), সাধারণত OOM killer: `docker inspect`-এ `OOMKilled` দেখো, তারপর `docker events`, `docker stats` আর log। V8-এর heap limit container limit-এর চেয়ে বেশি হলে JS error আসার আগেই cgroup Node-কে kill করে, তাই `--max-old-space-size` limit-এর নিচে রাখো আর leak খুঁজে বের করো।""",
         ex_en=r"""
             - **RSS vs heap:** the container limit applies to the whole process RSS: V8 heap plus Buffers, native addons, thread stacks and worker threads. `--max-old-space-size` only caps the old-generation heap, so leave headroom.
             - **Restart policy back-off:** Docker waits progressively longer between restarts of a crash-looping container. Logs and `RestartCount` stay with the same container.
@@ -680,6 +694,8 @@ QUESTIONS = [
 
             **বিকল্প:** Docker Swarm mode (`deploy.update_config.order: start-first` health check-সহ rolling update দেয়), অথবা Kamal-এর মতো tool, যেগুলো ঠিক এই flow-টাই script করে। Service-এর সংখ্যা বাড়লে managed orchestrator (ECS, EKS)-এর জটিলতা মেনে নেওয়ার মতো হয়ে যায়।
         """,
+        quick_en=r"""Run blue/green slots on each VM: start the new image in the idle slot, wait until it's healthy, switch the NGINX upstream and reload gracefully, then drain the old slot, one VM at a time. The app must shut down gracefully on SIGTERM and use expand/contract migrations.""",
+        quick_bn=r"""প্রতিটা VM-এ blue/green slot রাখো: নতুন image idle slot-এ চালাও, healthy হওয়া পর্যন্ত অপেক্ষা করো, NGINX upstream switch করে graceful reload দাও, তারপর পুরনো slot drain করো; এভাবে একবারে একটা VM। App-কে SIGTERM-এ graceful shutdown করতে হবে, আর migration হতে হবে expand/contract ধরনের।""",
         ex_en=r"""
             **Failure scenarios to cover:**
             - The new version never becomes healthy → the script aborts before touching NGINX, so users never see it.

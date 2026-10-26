@@ -44,6 +44,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The four-argument function `(err, req, res, next)`: Express detects error-handling middleware by its arity, so it must declare all four parameters. It is skipped normally and runs only when an error reaches `next(err)` or, in Express 5, is thrown or rejected in a handler.",
+   "bn": "চার argument-এর function `(err, req, res, next)`: Express error-handling middleware চেনে তার arity দেখে, তাই চারটা parameter-ই declare করতে হয়। সাধারণ সময়ে এটা skip হয়, শুধু `next(err)`-এ error গেলে বা Express 5-এ handler-এ throw/reject হলে চলে।"
+  },
   "options": [
    {
     "en": "`app.use((req, res, next) => { if (res.statusCode >= 400) res.json({ error: true }); })`",
@@ -128,6 +132,10 @@
    "express-032",
    "express-022"
   ],
+  "quickAnswer": {
+   "en": "Use nouns plus methods: `GET /orders` and `GET /orders/:id` (200, or 404), `POST /orders` (201 with `Location`), `PUT`/`PATCH /orders/:id` (200 or 204), `DELETE /orders/:id` (204). `GET`, `PUT` and `DELETE` are idempotent; `POST` is not (retries need an idempotency key), and `PATCH` isn't guaranteed to be.",
+   "bn": "Resource-এর নাম noun, কাজ HTTP method: `GET /orders` আর `GET /orders/:id` (200, বা 404), `POST /orders` (201, সাথে `Location`), `PUT`/`PATCH /orders/:id` (200 বা 204), `DELETE /orders/:id` (204)। `GET`, `PUT` আর `DELETE` idempotent; `POST` নয় (retry করতে idempotency key লাগে), আর `PATCH` idempotent হবে এমন নিশ্চয়তা নেই।"
+  },
   "commonMistakes": {
    "en": "Verbs in URLs (`/getOrders`, `/createOrder`), returning `200` with `{ \"error\": ... }` for failures, or saying `POST` is idempotent.",
    "bn": "URL-এ verb রাখা (`/getOrders`, `/createOrder`), failure-এ `{ \"error\": ... }` সহ `200` return করা, অথবা `POST`-কে idempotent বলা।"
@@ -193,6 +201,10 @@
    "express-001",
    "express-011"
   ],
+  "quickAnswer": {
+   "en": "On the valid-key path the middleware neither calls `next()` nor responds, so the request hangs until a timeout. It also needs a `return` after sending the `401`; otherwise adding `next()` later would run the protected route for bad keys and cause `ERR_HTTP_HEADERS_SENT`.",
+   "bn": "Valid key-এর ক্ষেত্রে middleware `next()`-ও call করে না, response-ও পাঠায় না, তাই timeout পর্যন্ত request ঝুলে থাকে। সাথে `401` পাঠানোর পরে `return` দরকার; নইলে পরে `next()` যোগ করলে ভুল key-তেও protected route চলবে আর `ERR_HTTP_HEADERS_SENT` হবে।"
+  },
   "commonMistakes": {
    "en": "Adding `next()` at the bottom without a `return` in the error branch, or \"fixing\" the hang with a global timeout instead of the missing `next()`.",
    "bn": "Error branch-এ `return` না দিয়ে শুধু নিচে `next()` যোগ করা, অথবা `next()` ঠিক না করে global timeout দিয়ে ঝুলে থাকা \"ঠিক\" করা।"
@@ -273,6 +285,10 @@
    "express-006",
    "express-012"
   ],
+  "quickAnswer": {
+   "en": "`res.status(400).json(...)` sends a response but doesn't stop the function, so without `return` the handler still creates the order and then tries to respond again, causing `ERR_HTTP_HEADERS_SENT`. Fix: `return` after every response, or in Express 5 `throw` and let the error middleware respond.",
+   "bn": "`res.status(400).json(...)` response পাঠায় কিন্তু function থামায় না, তাই `return` না থাকলে handler তবুও order তৈরি করে আবার response পাঠাতে যায়, ফলে `ERR_HTTP_HEADERS_SENT`। সমাধান: প্রতিটা response-এর পরে `return`, অথবা Express 5-এ `throw` করে error middleware-কে response দিতে দাও।"
+  },
   "commonMistakes": {
    "en": "Wrapping the second `res.json` in `if (!res.headersSent)` — it hides the error but the invalid order is still created.",
    "bn": "দ্বিতীয় `res.json`-কে `if (!res.headersSent)` দিয়ে মুড়ে দেওয়া — এতে error লুকায়, কিন্তু invalid order তবুও তৈরি হয়।"
@@ -357,6 +373,10 @@
    "express-006",
    "express-028"
   ],
+  "quickAnswer": {
+   "en": "A factory that runs zod `safeParse` on params, query and body, responds `400` with `z.flattenError()` errors per part, or stores the parsed values and calls `next()`. In Express 5 `req.query` is a read-only getter, so keep parsed data in `res.locals.validated`, and use `z.strictObject()` to block mass assignment.",
+   "bn": "একটা factory, যেটা params, query আর body-তে zod `safeParse` চালায়; fail করলে প্রতিটা অংশের `z.flattenError()` error-সহ `400` দেয়, নইলে parse করা value রেখে `next()` call করে। Express 5-এ `req.query` read-only getter, তাই parse করা data `res.locals.validated`-এ রাখো, আর mass assignment ঠেকাতে `z.strictObject()` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Assigning `req.query = result.data` (throws in Express 5 ES modules), validating but then using the raw `req.body` in the handler, or passing the whole body straight into an ORM `create()` call.",
    "bn": "`req.query = result.data` assign করা (Express 5-এর ES module-এ throw করে), validate করার পরেও handler-এ raw `req.body` ব্যবহার করা, অথবা পুরো body সরাসরি ORM-এর `create()`-এ পাঠিয়ে দেওয়া।"
@@ -431,6 +451,10 @@
    "express-006",
    "express-018"
   ],
+  "quickAnswer": {
+   "en": "Risks: DoS from huge or many files, trusting client `mimetype` and `originalname`, and malicious content. Authenticate first, mount `upload.single()` only on that route with `limits`, check magic bytes, re-encode with `sharp`, generate the storage key server-side, serve with `nosniff`, and map `LIMIT_FILE_SIZE` to 413.",
+   "bn": "ঝুঁকি: বিশাল বা অনেক file দিয়ে DoS, client-এর দেওয়া `mimetype` আর `originalname` বিশ্বাস করা, আর ক্ষতিকর content। আগে authenticate করো, `limits`-সহ `upload.single()` শুধু ওই route-এ দাও, magic bytes যাচাই করো, `sharp` দিয়ে re-encode করো, storage key server-এ তৈরি করো, `nosniff` দিয়ে serve করো, আর `LIMIT_FILE_SIZE`-কে 413-এ map করো।"
+  },
   "commonMistakes": {
    "en": "Using `app.use(upload.any())` globally, saving files under `public/` with their original names, or validating only the file extension.",
    "bn": "Globally `app.use(upload.any())` ব্যবহার করা, file-গুলো original নামে `public/`-এর নিচে save করা, অথবা শুধু file extension validate করা।"
@@ -484,6 +508,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`203.0.113.7`: with `trust proxy` set to 1, Express trusts exactly one hop and takes the rightmost address, the one NGINX appended. Anything to its left came from the client and can be forged.",
+   "bn": "`203.0.113.7`: `trust proxy` 1 হলে Express ঠিক একটা hop বিশ্বাস করে আর সবচেয়ে ডানের address নেয়, যেটা NGINX যোগ করেছে। তার বাঁয়ের সবকিছু client দিয়েছে, তাই সেটা জাল হতে পারে।"
+  },
   "options": [
    {
     "en": "`1.1.1.1` — the leftmost address is the original client",

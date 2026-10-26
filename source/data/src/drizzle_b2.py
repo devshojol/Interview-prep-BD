@@ -58,6 +58,8 @@ QUESTIONS = [
 
             তাই function success log করে কিন্তু session গুলো valid থেকে যায় — এটা একটা আসল security bug, কারণ চুরি হওয়া session revoke হয় না। সমাধান: delete-টা `await` করো (আর কয়টা session revoke হলো জানতে `.returning()` ব্যবহার করো)।
         """,
+        quick_en=r"""The delete is never awaited, and Drizzle builders are lazy thenables that send SQL only when awaited (or `.execute()` is called), so the other sessions are never revoked. Fix it by awaiting the delete, ideally with `.returning()` to see what was removed.""",
+        quick_bn=r"""Delete-টা `await` করা হয়নি, আর Drizzle builder হলো lazy thenable — `await` (বা `.execute()`) না করলে SQL পাঠায়ই না, তাই অন্য session-গুলো revoke হয় না। Fix: delete-টা `await` করো, সম্ভব হলে `.returning()` দিয়ে দেখো কী মুছলো।""",
         ex_en=r"""
             - **Lazy vs eager:** a normal Promise starts work immediately; Drizzle builders don't, because you can keep chaining (`.where()`, `.limit()`, `.prepare()`) before execution. Verified: an un-awaited `db.update(...)` leaves the row unchanged.
             - **Catch it automatically:** enable `@typescript-eslint/no-floating-promises` with `checkThenables: true` — with its default options (typescript-eslint v8) it only checks native Promises, so an un-awaited Drizzle builder is **not** reported (verified). The official `eslint-plugin-drizzle` adds `enforce-delete-with-where` / `enforce-update-with-where`.
@@ -101,6 +103,8 @@ QUESTIONS = [
 
             দুটো স্বাধীন: relation ছাড়াও FK থাকতে পারে (শুধু join ব্যবহার করলে), আবার FK ছাড়াও relation থাকতে পারে (legacy table, cross-database link)। বেশিরভাগ app-এ আমি **দুটোই** ব্যবহার করি — integrity-র জন্য FK, সুবিধাজনক nested query-র জন্য relation।
         """,
+        quick_en=r"""A foreign key (`.references()`) is a database constraint that PostgreSQL enforces on every write; `relations()` is app-level metadata that only powers nested `db.query` results and generates no SQL. They're independent, and most apps use both.""",
+        quick_bn=r"""Foreign key (`.references()`) হলো database constraint, যেটা PostgreSQL প্রতিটা write-এ check করে; `relations()` হলো app-level metadata, যেটা শুধু `db.query`-এর nested result-এর কাজে লাগে আর কোনো SQL তৈরি করে না। দুটো স্বাধীন, আর বেশিরভাগ app-এ দুটোই ব্যবহার করি।""",
         ex_en=r"""
             - **Without an FK**, a relation happily "works" while the database fills with orphan rows (posts whose author was deleted). Relations don't protect data.
             - **`onDelete` choices:** `cascade` (delete children), `restrict`/`no action` (block the delete), `set null` (keep child, clear link). Pick per business rule — cascading deletes on orders or payments are usually a bad idea.
@@ -167,6 +171,8 @@ QUESTIONS = [
 
             তাই: default-এ builder, বিশেষ expression-এর জন্য `sql` fragment, আর জটিল report-এর জন্য পুরো raw query (`db.execute(sql...)`) — সবই একই connection আর transaction দিয়ে।
         """,
+        quick_en=r"""Raw SQL through `pg` gives full control but untyped results and string-built dynamic queries; Drizzle's builder is typed, composable and parameterised; the `sql` tag is the escape hatch for expressions the builder lacks, still with bound parameters. Use the builder by default and `sql` for the special cases.""",
+        quick_bn=r"""`pg` দিয়ে raw SQL-এ পুরো control থাকে, কিন্তু result untyped আর dynamic query string জোড়া দিয়ে বানাতে হয়; Drizzle-এর builder typed, composable আর parameterised; `sql` tag হলো builder যা পারে না তার escape hatch, সেখানেও value bound parameter থাকে। Default হিসেবে builder, বিশেষ ক্ষেত্রে `sql`।""",
         ex_en=r"""
             - **Type of `sql<T>`** is a promise to TypeScript, not a runtime check. If PostgreSQL returns `bigint` as a string, use `.mapWith(Number)` to convert.
             - **`db.execute()` results** are driver-specific: with node-postgres you read `result.rows`.
@@ -259,6 +265,8 @@ QUESTIONS = [
 
             `pgTable`-এর তৃতীয় argument index/constraint-এর একটা **array** return করে (এখনকার রূপ; পুরোনো object রূপ deprecated)।
         """,
+        quick_en=r"""Use an `authorId` FK with `onDelete: 'cascade'`, a composite `uniqueIndex` on `(authorId, slug)`, an index on `author_id` (PostgreSQL doesn't index FKs) and a partial index on `published_at` where `published = true`. `post_tags` gets a composite primary key, cascade from posts and restrict from tags.""",
+        quick_bn=r"""`onDelete: 'cascade'`-সহ `authorId` FK, `(authorId, slug)`-এ composite `uniqueIndex`, `author_id`-এ একটা index (PostgreSQL FK-তে নিজে index বানায় না), আর `published = true` শর্তে `published_at`-এ partial index। `post_tags`-এ composite primary key, posts থেকে cascade আর tags থেকে restrict।""",
         ex_en=r"""
             - **Why `restrict` on tags:** the database refuses `DELETE FROM tags` while `post_tags` rows reference it (SQLSTATE `23503`), so the app can show "tag is in use" instead of silently removing it from posts.
             - **Composite index column order matters:** `(author_id, slug)` serves "find by author + slug" and "filter by author", but not "find by slug" alone.
@@ -396,6 +404,8 @@ QUESTIONS = [
             - `users.name` select করলেও **`groupBy(users.id)`** যথেষ্ট, কারণ `id` primary key আর PostgreSQL জানে `name` এর উপর নির্ভরশীল।
             - Aggregate (`desc(count(posts.id))`) তারপর `asc(users.name)` দিয়ে sort করলে ক্রম নির্দিষ্ট হয়।
         """,
+        quick_en=r"""`leftJoin` posts with `published = true` inside the join's ON clause (a WHERE would drop Karim), use `count(posts.id)` so users without posts get 0, `groupBy(users.id)`, and order by `desc(count(posts.id))` then `asc(users.name)`. Result: Nadia 2, Rahim 1, Karim 0.""",
+        quick_bn=r"""posts-কে `leftJoin` করি আর `published = true` শর্তটা join-এর ON-এ রাখি (WHERE-এ রাখলে Karim বাদ পড়ে), `count(posts.id)` দিই যাতে post ছাড়া user 0 পায়, `groupBy(users.id)` করি, তারপর `desc(count(posts.id))` আর `asc(users.name)` দিয়ে sort। Result: Nadia 2, Rahim 1, Karim 0।""",
         ex_en=r"""
             - **Result shape:** with a field object in `select({...})`, Drizzle returns flat rows. Without it, `select().from(users).leftJoin(posts, ...)` returns `{ users: {...}, posts: {...} | null }` per row — the joined side is nullable in the type, mirroring SQL.
             - **ON vs WHERE** is the classic outer-join trap in any SQL dialect, and it's the main thing this question tests.
@@ -453,6 +463,8 @@ QUESTIONS = [
 
             Relation definition থেকে result পুরোপুরি typed, আর Drizzle পুরো tree-টাকে একটাই SQL statement-এ compile করে।
         """,
+        quick_en=r"""Define `relations()` from users to posts to `postTags` to tags, pass tables and relations as `schema` to `drizzle()`, then call `db.query.users.findMany()` with `columns`, a callback `where` and nested `with` options. Drizzle builds the whole typed tree in one SQL statement.""",
+        quick_bn=r"""users থেকে posts, `postTags` হয়ে tags পর্যন্ত `relations()` define করি, table আর relation দুটোই `schema` হিসেবে `drizzle()`-এ দিই, তারপর `columns`, callback `where` আর nested `with` দিয়ে `db.query.users.findMany()` call করি। Drizzle পুরো typed tree একটাই SQL statement-এ বানায়।""",
         ex_en=r"""
             - **`findFirst`** adds `limit 1` and returns an object or `undefined`; `where` can also be a plain filter: `findFirst({ where: eq(posts.slug, 'pg-18'), with: { author: true } })`.
             - **When to prefer the builder:** aggregates, complex joins and reporting. RQB shines for "load this entity graph for an API response".
@@ -547,6 +559,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Exactly one statement. Drizzle compiles the relational query into a single SQL query that uses `left join lateral (...)` subqueries with `json_agg` to build the nested arrays, then maps the JSON into typed objects.""",
         a_bn=r"""ঠিক একটা statement। Drizzle relational query-টাকে একটাই SQL query-তে compile করে, যেটা nested array বানাতে `json_agg` সহ `left join lateral (...)` subquery ব্যবহার করে, তারপর JSON-কে typed object-এ map করে।""",
+        quick_en=r"""Exactly one: Drizzle compiles the relational query into a single SQL statement with lateral subqueries and `json_agg`, then maps the JSON into typed objects, so there's no N+1.""",
+        quick_bn=r"""ঠিক একটা: Drizzle relational query-কে lateral subquery আর `json_agg` দিয়ে একটাই SQL statement-এ compile করে, তারপর JSON-কে typed object-এ map করে — তাই কোনো N+1 হয় না।""",
         ex_en=r"""
             Verified SQL (shape) for a filtered version:
 
@@ -610,6 +624,8 @@ QUESTIONS = [
             - `transfers` row insert করে return করো।
             - টাকার জন্য `numeric(12, 2)`, যেটা Drizzle floating-point ভুল এড়াতে **string** হিসেবে দেয়; `CHECK (balance >= 0)` constraint শেষ safety net।
         """,
+        quick_en=r"""Run everything in `db.transaction(async (tx) => ...)` and use `tx` for every query. Debit with one guarded `UPDATE ... WHERE id = from AND balance >= amount RETURNING`, throw `InsufficientFundsError` if no row returns, call `tx.rollback()` if the credit finds no receiver, then insert the transfer row.""",
+        quick_bn=r"""সব কাজ `db.transaction(async (tx) => ...)`-এর ভেতরে, আর প্রতিটা query `tx` দিয়ে। Debit করি একটাই guarded `UPDATE ... WHERE id = from AND balance >= amount RETURNING` দিয়ে, কোনো row না ফিরলে `InsufficientFundsError` throw করি, receiver না পেলে `tx.rollback()`, তারপর transfer row insert।""",
         ex_en=r"""
             - **Verified behaviour:** `transfer(1, 2, '200.00')` → balances 300.00 / 300.00; `transfer(2, 1, '1000.00')` → `InsufficientFundsError`, nothing changed; `transfer(1, 99, '10.00')` → `TransactionRollbackError`, the debit is undone.
             - **Why not SELECT then UPDATE:** reading the balance and writing `balance - amount` from JavaScript is a lost-update race under the default READ COMMITTED isolation. Either use the conditional update (above), `SELECT ... FOR UPDATE` (`.for('update')`), or SERIALIZABLE isolation with retries on `40001`.

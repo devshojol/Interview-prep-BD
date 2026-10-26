@@ -63,6 +63,10 @@
    "pg-004",
    "pg-029"
   ],
+  "quickAnswer": {
+   "en": "The real danger is `ACCESS EXCLUSIVE` locks queueing behind long queries, so run every DDL step with a short `lock_timeout` and retry. Expand, backfill, enforce: add a nullable column, backfill in batches, `CREATE INDEX CONCURRENTLY`, add the FK and `NOT NULL` check as `NOT VALID`, then `VALIDATE`.",
+   "bn": "আসল বিপদ হলো long query-র পেছনে `ACCESS EXCLUSIVE` lock-এর queue, তাই প্রতিটা DDL step ছোট `lock_timeout` দিয়ে চালাও আর retry করো। Expand, backfill, enforce: nullable column যোগ করো, batch-এ backfill, `CREATE INDEX CONCURRENTLY`, FK আর `NOT NULL` check `NOT VALID` হিসেবে যোগ করো, তারপর `VALIDATE`।"
+  },
   "commonMistakes": {
    "en": "Running `ALTER TABLE orders ADD COLUMN merchant_id bigint NOT NULL REFERENCES merchants(id)` in one go, backfilling with a single `UPDATE`, or running DDL without `lock_timeout`.",
    "bn": "এক ধাক্কায় `ALTER TABLE orders ADD COLUMN merchant_id bigint NOT NULL REFERENCES merchants(id)` চালানো, একটা মাত্র `UPDATE` দিয়ে backfill করা, অথবা `lock_timeout` ছাড়া DDL চালানো।"
@@ -146,6 +150,10 @@
    "pg-011",
    "pg-027"
   ],
+  "quickAnswer": {
+   "en": "Don't roll production back, because that loses 38 minutes of other writes. Restore the last base backup on a separate server, replay WAL to just before the `DELETE` (ideally `recovery_target_xid`), pause and verify, then copy the missing orders back into production.",
+   "bn": "Production-কে পিছিয়ে নিয়ো না, তাতে অন্য table-এর 38 মিনিটের write হারিয়ে যাবে। আলাদা server-এ শেষ base backup restore করো, `DELETE`-এর ঠিক আগ পর্যন্ত WAL replay করো (সম্ভব হলে `recovery_target_xid` দিয়ে), pause করে যাচাই করো, তারপর হারানো order-গুলো production-এ ফেরত copy করো।"
+  },
   "commonMistakes": {
    "en": "Restoring the whole production cluster to 14:31, or restoring last night's `pg_dump` and losing the day's orders.",
    "bn": "পুরো production cluster ১৪:৩১-এ ফিরিয়ে নেওয়া, অথবা গত রাতের `pg_dump` restore করে সারা দিনের order হারানো।"
@@ -219,6 +227,10 @@
    "pg-026",
    "pg-021"
   ],
+  "quickAnswer": {
+   "en": "Physical streaming replication copies the whole cluster block for block, read-only and same major version, for HA and read scaling. Logical replication publishes chosen tables to a writable subscriber that can run another major version, for upgrades and CDC. Replicas lag, so read-your-writes needs routing to the primary.",
+   "bn": "Physical streaming replication পুরো cluster block ধরে ধরে copy করে, read-only আর একই major version, HA আর read scaling-এর জন্য। Logical replication বাছাই করা table একটা writable subscriber-এ পাঠায়, যেটা অন্য major version-এও চলতে পারে, upgrade আর CDC-র জন্য। Replica পিছিয়ে থাকে, তাই নিজের write পড়তে হলে primary-তে route করো।"
+  },
   "commonMistakes": {
    "en": "Assuming replicas are always up to date, or expecting logical replication to copy schema changes and sequences automatically.",
    "bn": "ধরে নেওয়া যে replica সবসময় up to date, অথবা আশা করা যে logical replication schema পরিবর্তন আর sequence নিজে থেকেই কপি করবে।"
@@ -278,6 +290,10 @@
    "pg-013",
    "pg-005"
   ],
+  "quickAnswer": {
+   "en": "PG18's B-tree skip scan can use the `(tenant_id, created_at)` index without a `tenant_id` filter by doing one `created_at` range search per distinct tenant. With only 12 tenants that's about 12 small descents, so the planner may pick it without a new index.",
+   "bn": "PG18-এর B-tree skip scan `tenant_id` filter ছাড়াও `(tenant_id, created_at)` index ব্যবহার করতে পারে, প্রতিটা আলাদা tenant-এর জন্য একবার করে `created_at` range search করে। মাত্র 12টা tenant হলে এটা প্রায় 12টা ছোট search, তাই নতুন index ছাড়াই planner এটা বেছে নিতে পারে।"
+  },
   "options": [
    {
     "en": "The index can't help at all, because the leading column `tenant_id` isn't in the `WHERE` clause; a separate index on `created_at` is the only option.",
@@ -363,6 +379,10 @@
    "pg-025",
    "pg-031"
   ],
+  "quickAnswer": {
+   "en": "It's MVCC bloat plus missed freezing: dead row versions aren't being vacuumed. First find what holds back the xmin horizon (long or idle-in-transaction sessions, abandoned replication slots), then tune autovacuum per table and reclaim space with `pg_repack` or `VACUUM FULL`.",
+   "bn": "এটা MVCC bloat, সাথে freezing-ও হচ্ছে না: dead row version-গুলো vacuum হচ্ছে না। আগে খুঁজে বের করো xmin horizon কে আটকে রাখছে (long বা idle-in-transaction session, পরিত্যক্ত replication slot), তারপর table অনুযায়ী autovacuum tune করো আর `pg_repack` বা `VACUUM FULL` দিয়ে জায়গা ফেরত নাও।"
+  },
   "commonMistakes": {
    "en": "Running `VACUUM FULL` on a busy production table during peak hours, disabling autovacuum because it \"uses I/O\", or cancelling anti-wraparound vacuums.",
    "bn": "ব্যস্ত সময়ে busy production table-এ `VACUUM FULL` চালানো, \"I/O খায়\" বলে autovacuum বন্ধ করা, অথবা anti-wraparound vacuum cancel করা।"
@@ -436,6 +456,10 @@
    "pg-013",
    "pg-029"
   ],
+  "quickAnswer": {
+   "en": "Range-partition `events` by `created_at`, one partition per day, so retention is a cheap detach-and-drop and time filters prune partitions. Keys must include the partition key, keep indexes few, serve dashboards from an hourly rollup table, and create future partitions ahead of time.",
+   "bn": "`events`-কে `created_at` দিয়ে দিনে একটা করে range partition করো, তাহলে পুরোনো data সরানো মানে সস্তা detach আর drop, আর time filter দিলে partition pruning হয়। Key-তে partition key রাখতেই হবে, index কম রাখো, dashboard চালাও hourly rollup table থেকে, আর ভবিষ্যতের partition আগে থেকেই বানিয়ে রাখো।"
+  },
   "commonMistakes": {
    "en": "Partitioning by `user_id` when every query and the retention policy are time-based, creating hourly partitions (thousands of tables), or forgetting that unique keys must include the partition key.",
    "bn": "সব query আর retention policy সময়-ভিত্তিক হওয়া সত্ত্বেও `user_id` ধরে partition করা, ঘণ্টাভিত্তিক partition বানানো (হাজার হাজার table), অথবা ভুলে যাওয়া যে unique key-তে partition key থাকতেই হবে।"
@@ -510,6 +534,10 @@
    "pg-021",
    "pg-029"
   ],
+  "quickAnswer": {
+   "en": "Stabilise first, then find the cause: check `pg_stat_activity` for wait events and lock chains, and `pg_stat_statements` for a query whose time or call count jumped. Cancel runaway queries, contain the source with a flag or `statement_timeout`, then fix the plan, index or statistics.",
+   "bn": "আগে system স্থির করো, তারপর কারণ খোঁজো: `pg_stat_activity`-তে wait event আর lock chain দেখো, আর `pg_stat_statements`-এ দেখো কোন query-র সময় বা call সংখ্যা হঠাৎ বেড়েছে। লাগামছাড়া query cancel করো, flag বা `statement_timeout` দিয়ে উৎস আটকাও, তারপর plan, index বা statistics ঠিক করো।"
+  },
   "commonMistakes": {
    "en": "Restarting PostgreSQL first (losing all evidence and the cache), raising `max_connections` or `work_mem` globally in a panic, or adding indexes blindly without `CONCURRENTLY`.",
    "bn": "প্রথমেই PostgreSQL restart করা (সব প্রমাণ আর cache হারানো), আতঙ্কে globally `max_connections` বা `work_mem` বাড়ানো, অথবা `CONCURRENTLY` ছাড়া অন্ধভাবে index যোগ করা।"
@@ -584,6 +612,10 @@
    "pg-021",
    "pg-030"
   ],
+  "quickAnswer": {
+   "en": "A hybrid: a shared schema with `tenant_id` and row-level security for the many small tenants, and dedicated databases for the few enterprises. Enforce isolation with `tenant_id` in keys, `FORCE ROW LEVEL SECURITY`, a transaction-local `app.tenant_id` setting, and an app role that isn't the owner or superuser.",
+   "bn": "একটা hybrid: অনেকগুলো ছোট tenant-এর জন্য `tenant_id` আর row-level security-সহ shared schema, আর অল্প কয়েকটা enterprise-এর জন্য আলাদা database। Isolation নিশ্চিত করো key-তে `tenant_id`, `FORCE ROW LEVEL SECURITY`, transaction-local `app.tenant_id` setting আর এমন app role দিয়ে যেটা owner বা superuser নয়।"
+  },
   "commonMistakes": {
    "en": "Connecting as the table owner (RLS silently doesn't apply without `FORCE`), using session-level `SET app.tenant_id` behind a transaction-mode pooler (the setting leaks to the next tenant's transaction), or choosing schema-per-tenant for thousands of tenants without considering migrations and catalog size.",
    "bn": "Table owner হিসেবে connect করা (`FORCE` ছাড়া RLS নীরবে প্রয়োগ হয় না), transaction-mode pooler-এর পেছনে session-level `SET app.tenant_id` ব্যবহার করা (setting পরের tenant-এর transaction-এ চলে যায়), অথবা migration আর catalog-এর আকার না ভেবে হাজারো tenant-এর জন্য schema-per-tenant বেছে নেওয়া।"

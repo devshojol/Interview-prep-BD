@@ -49,6 +49,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Create `proxy.ts` at the project root (or in `src/`, next to `app/`) exporting a `proxy` function. Next.js 16 renamed Middleware to Proxy, so `middleware.ts` is the deprecated legacy name; use `config.matcher` to limit which paths it runs on.",
+   "bn": "Project root-এ (বা `src/`-এ, `app/`-এর পাশে) `proxy.ts` বানাও যেটা একটা `proxy` function export করে। Next.js 16 Middleware-এর নাম বদলে Proxy রেখেছে, তাই `middleware.ts` এখন deprecated legacy নাম; কোন path-এ চলবে তা `config.matcher` দিয়ে সীমিত করো।"
+  },
   "options": [
    {
     "en": "`middleware.ts` in the project root, exporting a `middleware` function",
@@ -123,6 +127,10 @@
   "related": [
    "next-011"
   ],
+  "quickAnswer": {
+   "en": "Inside the `deletePost` Server Action (or the data-access function it calls), on every call. A Server Action is a public POST endpoint anyone can call with any id, so `proxy.ts` and hidden buttons are not enough.",
+   "bn": "`deletePost` Server Action-এর ভেতরে (বা যে data-access function-কে এটা call করে সেখানে), প্রতিবার call-এ। Server Action হলো একটা public POST endpoint, যেকেউ যেকোনো id দিয়ে call করতে পারে, তাই `proxy.ts` বা button লুকানো যথেষ্ট না।"
+  },
   "options": [
    {
     "en": "Only in `proxy.ts`, because it runs before every request to `/dashboard`",
@@ -203,6 +211,10 @@
    "next-004",
    "next-003"
   ],
+  "quickAnswer": {
+   "en": "`layout.tsx` is a Server Component, which can't use `useState` or create context. Move the provider into a `'use client'` file like `app/providers.tsx` and wrap `{children}` with it; the layout and the pages stay Server Components.",
+   "bn": "`layout.tsx` একটা Server Component, যেখানে `useState` বা context তৈরি চলে না। Provider-টা `app/providers.tsx`-এর মতো একটা `'use client'` file-এ সরাও আর সেটা দিয়ে `{children}` wrap করো; layout আর page-গুলো Server Component-ই থাকে।"
+  },
   "commonMistakes": {
    "en": "Adding `'use client'` to `app/layout.tsx`, or believing that everything rendered inside a client provider becomes a Client Component.",
    "bn": "`app/layout.tsx`-এ `'use client'` দেওয়া, অথবা ভাবা যে client provider-এর ভেতরে render হওয়া সবকিছুই Client Component হয়ে যায়।"
@@ -287,6 +299,10 @@
    "next-015",
    "next-010"
   ],
+  "quickAnswer": {
+   "en": "ISR serves a static page and regenerates it later. Today you use `'use cache'` with `cacheLife` and `cacheTag`, prebuild known slugs with `generateStaticParams`, and revalidate the tag from a CMS webhook; legacy equivalents are `export const revalidate` and Pages Router `getStaticProps` with `revalidate`.",
+   "bn": "ISR static page দেয় আর পরে সেটা regenerate করে। এখন `cacheLife` ও `cacheTag`-সহ `'use cache'` ব্যবহার করো, `generateStaticParams` দিয়ে জানা slug আগে build করো, আর CMS webhook থেকে tag revalidate করো; legacy উপায় হলো `export const revalidate` আর Pages Router-এর `revalidate`-সহ `getStaticProps`।"
+  },
   "commonMistakes": {
    "en": "Expecting `revalidate: 60` to update the page exactly every 60 seconds for everyone (it only marks it stale; regeneration happens on the next request), or using `getStaticProps` inside `app/`.",
    "bn": "আশা করা যে `revalidate: 60` সবার জন্য ঠিক প্রতি ৬০ সেকেন্ডে page update করবে (এটা শুধু stale চিহ্নিত করে; regeneration হয় পরের request-এ), অথবা `app/`-এর ভেতরে `getStaticProps` ব্যবহার করা।"
@@ -359,6 +375,10 @@
    "next-003",
    "next-006"
   ],
+  "quickAnswer": {
+   "en": "An `@modal` slot (parallel route) renders next to `children`, and `@modal/(.)photos/[id]` intercepts soft navigations to show the photo in the modal. A hard load renders the normal `app/photos/[id]` page, and `@modal/default.tsx` returns `null` when the slot has nothing to show.",
+   "bn": "একটা `@modal` slot (parallel route) `children`-এর পাশে render হয়, আর `@modal/(.)photos/[id]` soft navigation intercept করে photo-টা modal-এ দেখায়। Hard load-এ সাধারণ `app/photos/[id]` page দেখায়, আর slot-এ দেখানোর কিছু না থাকলে `@modal/default.tsx` `null` return করে।"
+  },
   "commonMistakes": {
    "en": "Counting the `@modal` slot as a route segment when choosing `(.)` vs `(..)`, or forgetting `default.tsx` so the v16 build fails.",
    "bn": "`(.)` বনাম `(..)` বেছে নেওয়ার সময় `@modal` slot-কে route segment হিসেবে গোনা, অথবা `default.tsx` ভুলে যাওয়া — ফলে v16 build fail করে।"
@@ -432,6 +452,10 @@
    "next-004",
    "next-019"
   ],
+  "quickAnswer": {
+   "en": "Measure first with `next analyze` (the Turbopack bundle analyzer). Then push `'use client'` down to small leaves, do heavy work in Server Components, lazy-load late widgets with `next/dynamic`, optimise package imports and load third-party scripts with `next/script`.",
+   "bn": "আগে `next analyze` (Turbopack bundle analyzer) দিয়ে মাপো। তারপর `'use client'`-কে ছোট leaf component-এ নামাও, ভারী কাজ Server Component-এ করো, পরে লাগবে এমন widget `next/dynamic` দিয়ে lazy-load করো, package import optimise করো, আর third-party script `next/script` দিয়ে load করো।"
+  },
   "commonMistakes": {
    "en": "Starting with micro-optimisations (minifier settings) before measuring, lazy-loading above-the-fold content, or making the whole page a Client Component \"because it has one button\".",
    "bn": "মাপার আগেই micro-optimisation (minifier setting) দিয়ে শুরু করা, screen-এর উপরের দিকের content lazy-load করা, অথবা \"একটা button আছে বলে\" পুরো page Client Component বানিয়ে ফেলা।"
@@ -491,6 +515,10 @@
    "next-006",
    "next-003"
   ],
+  "quickAnswer": {
+   "en": "`app/error.tsx`. A segment's `error.tsx` sits inside that segment's own `layout.tsx`, so it can't catch errors the layout throws; the error bubbles to the parent segment's boundary.",
+   "bn": "`app/error.tsx`। কোনো segment-এর `error.tsx` সেই segment-এর নিজের `layout.tsx`-এর ভেতরে থাকে, তাই layout-এর throw করা error ধরতে পারে না; error উপরের segment-এর boundary-তে চলে যায়।"
+  },
   "code": {
    "language": "text",
    "source": "app/\n├── layout.tsx\n├── error.tsx\n└── dashboard/\n    ├── layout.tsx     ← throws\n    ├── error.tsx\n    └── page.tsx"
@@ -584,6 +612,10 @@
    "next-024",
    "next-030"
   ],
+  "quickAnswer": {
+   "en": "Classify data by audience and freshness: product details cached for days with tags, prices and stock in a short-lived separately tagged cache, region in the URL, and per-user data streamed inside `<Suspense>`. Checkout is always dynamic and re-reads price and stock from the database.",
+   "bn": "Data-কে কার জন্য আর কতটা fresh দরকার সেই অনুযায়ী ভাগ করো: product details tag-সহ কয়েক দিনের জন্য cache, price আর stock আলাদা tag-সহ অল্প সময়ের cache-এ, region URL-এ, আর user-ভিত্তিক data `<Suspense>`-এর ভেতরে stream। Checkout সবসময় dynamic, আর database থেকে price ও stock আবার পড়ে।"
+  },
   "commonMistakes": {
    "en": "Making the whole product page dynamic because it shows a cart badge, caching per-user data in a shared cache, keying caches by a currency cookie (unbounded variants, not prerenderable), or trusting cached prices at checkout.",
    "bn": "একটা cart badge দেখায় বলে পুরো product page dynamic করে ফেলা, per-user data shared cache-এ রাখা, currency cookie দিয়ে cache key বানানো (সীমাহীন variant, prerender করা যায় না), অথবা checkout-এ cached দামের উপর ভরসা করা।"

@@ -59,6 +59,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "One master process reads the config, opens the listening ports and manages workers; the workers do all the work. Each worker runs a non-blocking event loop (`epoll`/`kqueue`) that handles thousands of connections without a thread per connection, and `worker_processes auto` starts one worker per CPU core.",
+   "bn": "একটা master process config পড়ে, listening port খোলে আর worker-গুলো manage করে; আসল কাজ সব worker-রা করে। প্রতিটা worker একটা non-blocking event loop (`epoll`/`kqueue`) চালায়, connection-প্রতি thread ছাড়াই হাজার হাজার connection সামলায়, আর `worker_processes auto` প্রতি CPU core-এ একটা worker চালু করে।"
+  },
   "commonMistakes": {
    "en": "Saying NGINX is \"multi-threaded with one thread per request\", setting `worker_processes` far above the CPU count, or thinking the master process handles traffic.",
    "bn": "NGINX-কে \"প্রতি request-এ একটা thread-ওয়ালা multi-threaded server\" বলা, CPU-র সংখ্যার চেয়ে অনেক বেশি `worker_processes` set করা, অথবা ভাবা যে master process traffic সামলায়।"
@@ -130,6 +134,10 @@
   "related": [
    "nginx-001"
   ],
+  "quickAnswer": {
+   "en": "A forward proxy acts for clients (like an office proxy), while a reverse proxy sits in front of servers and receives requests on their behalf. In front of Node.js, NGINX adds TLS termination, load balancing, fast static files, compression, slow-client buffering and rate limits, and keeps the app private on `127.0.0.1`.",
+   "bn": "Forward proxy client-দের হয়ে কাজ করে (যেমন অফিসের proxy), আর reverse proxy server-দের সামনে বসে তাদের হয়ে request নেয়। Node.js-এর সামনে NGINX TLS termination, load balancing, দ্রুত static file, compression, slow client buffering আর rate limit দেয়, আর app-কে `127.0.0.1`-এ লুকিয়ে রাখে।"
+  },
   "commonMistakes": {
    "en": "Calling a VPN a forward proxy (it works at a different layer), or forgetting that the app needs `X-Forwarded-*` headers once it sits behind a reverse proxy.",
    "bn": "VPN-কে forward proxy বলা (এটা অন্য layer-এ কাজ করে), অথবা ভুলে যাওয়া যে reverse proxy-র পেছনে বসার পর app-এর `X-Forwarded-*` header লাগে।"
@@ -202,6 +210,10 @@
   "related": [
    "nginx-001"
   ],
+  "quickAnswer": {
+   "en": "The config is nested contexts (main, `events`, `http`, `server`, `location`), and inner contexts inherit outer directives unless they redefine them. The catch: one `add_header` or `proxy_set_header` at an inner level drops all inherited ones; apply changes with `nginx -t` and then a graceful reload.",
+   "bn": "Config হলো nested context (main, `events`, `http`, `server`, `location`), আর ভেতরের context বাইরের directive inherit করে, যদি না নিজে আবার define করে। সাবধান: ভেতরের level-এ একটা `add_header` বা `proxy_set_header` দিলেই inherit হওয়া সবগুলো বাদ পড়ে যায়; পরিবর্তন apply করো `nginx -t` চালিয়ে, তারপর graceful reload দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Running `systemctl restart nginx` for every change (it drops connections), editing without `nginx -t`, or putting `upstream`/`map` blocks inside `server`.",
    "bn": "প্রতিটা পরিবর্তনে `systemctl restart nginx` চালানো (এতে connection কেটে যায়), `nginx -t` না চালিয়েই edit করা, অথবা `upstream`/`map` block `server`-এর ভেতরে রাখা।"
@@ -269,6 +281,10 @@
   "related": [
    "nginx-003"
   ],
+  "quickAnswer": {
+   "en": "`client_max_body_size 10m;`. Its default is 1m, so NGINX rejects the 5 MB upload with 413 before it reaches Node; raise it on the upload location rather than globally.",
+   "bn": "`client_max_body_size 10m;`। এর default 1m, তাই 5 MB upload Node-এ পৌঁছানোর আগেই NGINX 413 দিয়ে ফিরিয়ে দেয়; global-এ না বাড়িয়ে শুধু upload location-এ বাড়াও।"
+  },
   "options": [
    {
     "en": "`proxy_buffer_size 8m;`",
@@ -313,12 +329,12 @@
    "bn": "এই server block দেখে বলো, `GET /images/photo.png` কোন response দেবে?"
   },
   "answer": {
-   "en": "The answer is **D**. NGINX first checks exact (`=`) matches, then finds the **longest prefix** match, which is `/images/` here, and remembers it. Because that prefix isn't marked `^~`, NGINX then tests **regex locations in the order they appear**. `~* \\.(png|jpe?g|gif)$` matches, so it wins. The remembered prefix is used only if no regex matches.",
-   "bn": "উত্তর **D**। NGINX প্রথমে exact (`=`) match দেখে, তারপর **সবচেয়ে লম্বা prefix** match খোঁজে, এখানে `/images/`, আর সেটা মনে রাখে। ওই prefix-এ `^~` চিহ্ন নেই, তাই NGINX এরপর **file-এ যে ক্রমে আছে সেই ক্রমে regex location** পরীক্ষা করে। `~* \\.(png|jpe?g|gif)$` মিলে যায়, তাই এটাই জেতে। কোনো regex না মিললে তবেই মনে রাখা prefix ব্যবহার হয়।"
+   "en": "The response is `regex` (option **B**). NGINX first checks exact (`=`) matches, then finds the **longest prefix** match, which is `/images/` here, and remembers it. Because that prefix isn't marked `^~`, NGINX then tests **regex locations in the order they appear**. `~* \\.(png|jpe?g|gif)$` matches, so it wins. The remembered prefix is used only if no regex matches.",
+   "bn": "Response হবে `regex` (option **B**)। NGINX প্রথমে exact (`=`) match দেখে, তারপর **সবচেয়ে লম্বা prefix** match খোঁজে, এখানে `/images/`, আর সেটা মনে রাখে। ওই prefix-এ `^~` চিহ্ন নেই, তাই NGINX এরপর **file-এ যে ক্রমে আছে সেই ক্রমে regex location** পরীক্ষা করে। `~* \\.(png|jpe?g|gif)$` মিলে যায়, তাই এটাই জেতে। কোনো regex না মিললে তবেই মনে রাখা prefix ব্যবহার হয়।"
   },
   "explanation": {
-   "en": "The full algorithm:\n1. `=` exact match → use it immediately (`/images/logo.png` → **E**).\n2. Find the longest prefix match. If it's marked `^~`, use it and **skip regexes** (`/images/icons/cart.png` → **C**, even though it ends in `.png`).\n3. Otherwise check `~` (case-sensitive) and `~*` (case-insensitive) regexes in file order; the first match wins (`/images/photo.png` → **D**).\n4. If no regex matches, use the longest prefix from step 2 (`/images/readme.txt` → **B**; `/about` → **A**).\n\nThe tempting wrong answer is B, from people who assume \"longest prefix always wins\". The `^~` answer (C) is wrong because `^~` only wins when it **is** the longest prefix match. It isn't \"checked first\".",
-   "bn": "পুরো algorithm:\n1. `=` exact match → সাথে সাথে সেটা ব্যবহার (`/images/logo.png` → **E**)।\n2. সবচেয়ে লম্বা prefix match খোঁজো। সেটা `^~` চিহ্নিত হলে সেটাই ব্যবহার করো আর **regex বাদ দাও** (`/images/icons/cart.png` → **C**, যদিও শেষে `.png`)।\n3. না হলে file-এর ক্রমে `~` (case-sensitive) আর `~*` (case-insensitive) regex পরীক্ষা করো; প্রথম যেটা মেলে সেটা জেতে (`/images/photo.png` → **D**)।\n4. কোনো regex না মিললে ধাপ ২-এর সবচেয়ে লম্বা prefix ব্যবহার করো (`/images/readme.txt` → **B**; `/about` → **A**)।\n\nবিভ্রান্তিকর ভুল উত্তর হলো B, যারা ধরে নেয় \"সবচেয়ে লম্বা prefix সবসময় জেতে\" তারা এটা বেছে নেয়। `^~`-এর উত্তর (C) ভুল, কারণ `^~` তখনই জেতে যখন সেটাই সবচেয়ে লম্বা prefix match। এটা \"আগে check করা হয়\" না।"
+   "en": "The full algorithm:\n1. `=` exact match → use it immediately (`/images/logo.png` → `exact`).\n2. Find the longest prefix match. If it's marked `^~`, use it and **skip regexes** (`/images/icons/cart.png` → `icons`, even though it ends in `.png`).\n3. Otherwise check `~` (case-sensitive) and `~*` (case-insensitive) regexes in file order; the first match wins (`/images/photo.png` → `regex`).\n4. If no regex matches, use the longest prefix from step 2 (`/images/readme.txt` → `images`; `/about` → `root`).\n\nThe most common wrong choice is option A (`images`), from people who assume \"longest prefix always wins\". Option C (`icons`) is wrong because `^~` only wins when it **is** the longest prefix match. It isn't \"checked first\".",
+   "bn": "পুরো algorithm:\n1. `=` exact match → সাথে সাথে সেটা ব্যবহার (`/images/logo.png` → `exact`)।\n2. সবচেয়ে লম্বা prefix match খোঁজো। সেটা `^~` চিহ্নিত হলে সেটাই ব্যবহার করো আর **regex বাদ দাও** (`/images/icons/cart.png` → `icons`, যদিও শেষে `.png`)।\n3. না হলে file-এর ক্রমে `~` (case-sensitive) আর `~*` (case-insensitive) regex পরীক্ষা করো; প্রথম যেটা মেলে সেটা জেতে (`/images/photo.png` → `regex`)।\n4. কোনো regex না মিললে ধাপ ২-এর সবচেয়ে লম্বা prefix ব্যবহার করো (`/images/readme.txt` → `images`; `/about` → `root`)।\n\nসবচেয়ে বেশি মানুষ যে ভুলটা করে সেটা option A (`images`): তারা ধরে নেয় \"সবচেয়ে লম্বা prefix সবসময় জেতে\"। Option C (`icons`) ভুল, কারণ `^~` তখনই জেতে যখন সেটাই সবচেয়ে লম্বা prefix match। এটা \"আগে check করা হয়\" না।"
   },
   "interviewTip": {
    "en": "Recite the order as \"exact, longest prefix (stop if `^~`), regex in file order, else the prefix\". Then trace two or three URLs through it out loud. Tracing shows understanding, not memorisation.",
@@ -334,30 +350,43 @@
     "url": "https://nginx.org/en/docs/http/request_processing.html"
    }
   ],
-  "followUps": [],
+  "followUps": [
+   {
+    "en": "What would `GET /images/icons/cart.png` return, and why does its `.png` ending not matter?",
+    "bn": "`GET /images/icons/cart.png` কী return করবে, আর এর শেষে `.png` থাকলেও কেন কিছু যায় আসে না?"
+   },
+   {
+    "en": "If you moved the regex location above `location /images/`, would any response change?",
+    "bn": "Regex location-টা `location /images/`-এর উপরে সরালে কি কোনো response বদলাবে?"
+   }
+  ],
   "related": [
    "nginx-003"
   ],
+  "quickAnswer": {
+   "en": "`regex`: NGINX remembers the longest prefix match (`/images/`), but since it isn't marked `^~`, it then tests regex locations in order and the image regex matches. The remembered prefix is used only if no regex matches.",
+   "bn": "`regex`: NGINX সবচেয়ে লম্বা prefix match (`/images/`) মনে রাখে, কিন্তু সেটা `^~` দিয়ে mark করা নেই, তাই এরপর regex location-গুলো ক্রম অনুযায়ী পরীক্ষা করে, আর image-এর regex match করে। কোনো regex match না করলে তবেই মনে রাখা prefix ব্যবহার হয়।"
+  },
   "code": {
    "language": "nginx",
-   "source": "server {\n    listen 80;\n\n    location / {\n        return 200 \"A\";\n    }\n    location /images/ {\n        return 200 \"B\";\n    }\n    location ^~ /images/icons/ {\n        return 200 \"C\";\n    }\n    location ~* \\.(png|jpe?g|gif)$ {\n        return 200 \"D\";\n    }\n    location = /images/logo.png {\n        return 200 \"E\";\n    }\n}"
+   "source": "server {\n    listen 80;\n\n    location / {\n        return 200 \"root\";\n    }\n    location /images/ {\n        return 200 \"images\";\n    }\n    location ^~ /images/icons/ {\n        return 200 \"icons\";\n    }\n    location ~* \\.(png|jpe?g|gif)$ {\n        return 200 \"regex\";\n    }\n    location = /images/logo.png {\n        return 200 \"exact\";\n    }\n}"
   },
   "options": [
    {
-    "en": "B — `/images/` is the longest matching prefix",
-    "bn": "B — `/images/` হলো সবচেয়ে লম্বা মিলে যাওয়া prefix"
+    "en": "`images`: `/images/` is the longest matching prefix",
+    "bn": "`images`: `/images/` হলো সবচেয়ে লম্বা মিলে যাওয়া prefix"
    },
    {
-    "en": "D — the regex location wins over a plain prefix match",
-    "bn": "D — সাধারণ prefix match-এর উপর regex location জিতে যায়"
+    "en": "`regex`: the regex location wins over a plain prefix match",
+    "bn": "`regex`: সাধারণ prefix match-এর উপর regex location জিতে যায়"
    },
    {
-    "en": "C — `^~` locations are always checked first",
-    "bn": "C — `^~` location সবসময় আগে check করা হয়"
+    "en": "`icons`: `^~` locations are always checked first",
+    "bn": "`icons`: `^~` location সবসময় আগে check করা হয়"
    },
    {
-    "en": "A — `/` matches every request",
-    "bn": "A — `/` সব request-এর সাথেই মেলে"
+    "en": "`root`: `/` matches every request",
+    "bn": "`root`: `/` সব request-এর সাথেই মেলে"
    }
   ],
   "correctIndex": 1,
@@ -422,6 +451,10 @@
    "nginx-012",
    "nginx-002"
   ],
+  "quickAnswer": {
+   "en": "The trailing slash in `proxy_pass http://127.0.0.1:4000/;` is a URI part, so NGINX replaces the matched `/api/` with `/` and Express receives `/products`. Drop it (`proxy_pass http://127.0.0.1:4000;`) to pass the original path unchanged.",
+   "bn": "`proxy_pass http://127.0.0.1:4000/;`-এর শেষের slash একটা URI part, তাই NGINX match হওয়া `/api/`-কে `/` দিয়ে replace করে, আর Express পায় `/products`। Slash-টা বাদ দাও (`proxy_pass http://127.0.0.1:4000;`), তাহলে আসল path অপরিবর্তিত যাবে।"
+  },
   "commonMistakes": {
    "en": "Adding Express rewrites to \"fix\" the path instead of correcting `proxy_pass`, or assuming the trailing slash is purely cosmetic.",
    "bn": "`proxy_pass` ঠিক না করে path \"ঠিক\" করতে Express-এ rewrite যোগ করা, অথবা ধরে নেওয়া যে শেষের slash শুধুই দেখার ব্যাপার।"
@@ -500,6 +533,10 @@
   "related": [
    "nginx-013"
   ],
+  "quickAnswer": {
+   "en": "Cache 200s for 10 seconds in a `proxy_cache_path` zone, with `proxy_cache_lock on` against stampedes and `proxy_cache_use_stale` for errors and updates. A `map` on the `Authorization` header and session cookie feeds `proxy_cache_bypass`/`proxy_no_cache`, and `$upstream_cache_status` shows HIT or MISS.",
+   "bn": "একটা `proxy_cache_path` zone-এ 200 response ১০ সেকেন্ড cache করো; stampede ঠেকাতে `proxy_cache_lock on`, আর error ও update-এর সময় `proxy_cache_use_stale`। `Authorization` header আর session cookie-র উপর একটা `map` `proxy_cache_bypass`/`proxy_no_cache` চালায়, আর `$upstream_cache_status` দেখায় HIT না MISS।"
+  },
   "commonMistakes": {
    "en": "Caching responses for logged-in users, forgetting `proxy_no_cache` (bypassed responses still get stored), using a huge TTL for \"performance\", and ignoring `Set-Cookie`.",
    "bn": "Logged-in user-দের response cache করা, `proxy_no_cache` ভুলে যাওয়া (bypass করা response-ও তখন store হয়ে যায়), \"performance\"-এর জন্য বিশাল TTL দেওয়া, আর `Set-Cookie` উপেক্ষা করা।"
@@ -582,6 +619,10 @@
    "nginx-023",
    "nginx-001"
   ],
+  "quickAnswer": {
+   "en": "Layer it: a CDN for static assets and bot or DDoS traffic, redundant NGINX nodes doing real-IP, rate limits, micro-caching and `least_conn`, and stateless app replicas pre-scaled before midnight. Protect checkout and the database with atomic Redis stock reservation, a queue or waiting room and idempotency keys.",
+   "bn": "Layer করে সাজাও: static asset আর bot বা DDoS traffic-এর জন্য CDN, একাধিক NGINX node যারা real IP, rate limit, micro-caching আর `least_conn` সামলায়, আর মাঝরাতের আগেই scale করে রাখা stateless app replica। Checkout আর database বাঁচাতে Redis-এ atomic stock reservation, queue বা waiting room আর idempotency key ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Relying on autoscaling alone for a cliff-edge spike, rate-limiting on the CDN's IP instead of the real client IP, and caching personalised or checkout responses.",
    "bn": "হঠাৎ খাড়া spike-এর জন্য শুধু autoscaling-এর উপর ভরসা করা, আসল client IP-র বদলে CDN-এর IP দিয়ে rate-limit করা, আর personalised বা checkout response cache করা।"

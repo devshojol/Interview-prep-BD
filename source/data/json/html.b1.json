@@ -57,6 +57,10 @@
    "html-011",
    "html-022"
   ],
+  "quickAnswer": {
+   "en": "Semantic HTML means choosing elements for their meaning, not their look, so browsers, screen readers and search engines understand the page. For structure I use `<header>`, `<nav>`, `<main>` (one per page), `<aside>`, `<footer>`, plus `<article>` and `<section>` with their own headings.",
+   "bn": "Semantic HTML মানে চেহারা নয়, অর্থ দেখে element বেছে নেওয়া, যাতে browser, screen reader আর search engine page-টা বুঝতে পারে। Structure-এর জন্য আমি `<header>`, `<nav>`, `<main>` (page-এ একটাই), `<aside>`, `<footer>` আর নিজস্ব heading-সহ `<article>`/`<section>` ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Wrapping everything in `<section>` \"because it's semantic\", using several visible `<main>` elements, or choosing heading levels by font size (`<h4>` because it looks smaller) instead of document hierarchy.",
    "bn": "\"Semantic\" ভেবে সবকিছু `<section>` দিয়ে wrap করা, একাধিক visible `<main>` রাখা, অথবা document hierarchy না দেখে font size দেখে heading level বেছে নেওয়া (ছোট দেখায় বলে `<h4>`)।"
@@ -126,6 +130,10 @@
    "html-001",
    "html-017"
   ],
+  "quickAnswer": {
+   "en": "`<!DOCTYPE html>` turns on standards mode, `lang` tells screen readers and translation tools the language, `<meta charset=\"utf-8\">` (first in `<head>`) stops text like Bangla turning into garbage, and the viewport meta makes phones lay out at device width so media queries work.",
+   "bn": "`<!DOCTYPE html>` standards mode চালু করে, `lang` screen reader আর translation tool-কে ভাষা জানায়, `<head>`-এর শুরুতে `<meta charset=\"utf-8\">` থাকলে Bangla text ভেঙে যায় না, আর viewport meta phone-কে device width ধরে layout করতে বলে, তাই media query ঠিকমতো কাজ করে।"
+  },
   "commonMistakes": {
    "en": "Putting `<meta charset>` after a large `<style>` block or third-party scripts, forgetting `lang`, and adding `user-scalable=no` \"to stop iOS zoom on inputs\" (fix that with a 16px input font size instead).",
    "bn": "বড় `<style>` block বা third-party script-এর পরে `<meta charset>` রাখা, `lang` দিতে ভুলে যাওয়া, আর \"iOS-এ input-এ zoom থামাতে\" `user-scalable=no` দেওয়া (এর সঠিক সমাধান হলো input-এর font size 16px রাখা)।"
@@ -182,6 +190,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`<button type=\"button\">` with a click listener. Loading more products without changing the URL is an action, and actions use `<button>`; `<a href>` is for navigating to a URL.",
+   "bn": "Click listener-সহ `<button type=\"button\">`। URL না বদলে আরও product load করা একটা action, আর action-এর জন্য `<button>`; `<a href>` শুধু কোনো URL-এ navigate করার জন্য।"
+  },
   "options": [
    {
     "en": "`<a href=\"#\" onclick=\"loadMore()\">Load more</a>`",
@@ -262,6 +274,10 @@
    "html-023",
    "html-030"
   ],
+  "quickAnswer": {
+   "en": "A plain script blocks parsing; `defer` downloads in parallel and runs after parsing in document order; `async` runs as soon as it arrives, in any order; modules are deferred by default. I use `defer` or modules for app code and `async` only for independent scripts like analytics.",
+   "bn": "সাধারণ script parsing থামিয়ে দেয়; `defer` parallel-এ download হয়ে parsing শেষে document order-এ চলে; `async` এলেই চলে, order-এর গ্যারান্টি নেই; আর module default-ভাবেই deferred। App code-এর জন্য আমি `defer` বা module, আর analytics-এর মতো স্বাধীন script-এ শুধু `async` ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Believing `async` preserves order, adding `defer` to inline scripts, or adding `defer` to `type=\"module\"` thinking it's needed.",
    "bn": "`async` ক্রম বজায় রাখে বলে মনে করা, inline script-এ `defer` দেওয়া, বা দরকার ভেবে `type=\"module\"`-এ `defer` যোগ করা।"
@@ -330,6 +346,10 @@
    "html-024",
    "html-028"
   ],
+  "quickAnswer": {
+   "en": "HTML attributes handle the built-in rules (`type=\"email\"`, `required`, `minlength=\"8\"`), and `setCustomValidity()` handles the password match, re-checked on `input` of both fields. The browser won't fire `submit` while invalid, so the handler just calls `preventDefault()` and sends `FormData` with `fetch`.",
+   "bn": "Built-in rule-এর জন্য HTML attribute (`type=\"email\"`, `required`, `minlength=\"8\"`), আর password মেলানোর জন্য `setCustomValidity()`, যেটা দুই password field-এর `input`-এই আবার check করি। Form invalid থাকলে browser `submit` event-ই fire করে না, তাই handler-এ শুধু `preventDefault()` করে `fetch` দিয়ে `FormData` পাঠাই।"
+  },
   "commonMistakes": {
    "en": "Only listening on the confirm field, never clearing the custom message, using `form.submit()` (which skips validation), or treating client-side validation as sufficient.",
    "bn": "শুধু confirm field-এ listener দেওয়া, custom message কখনো না মোছা, `form.submit()` ব্যবহার করা (যেটা validation এড়িয়ে যায়), অথবা client-side validation-কেই যথেষ্ট মনে করা।"
@@ -403,6 +423,10 @@
    "html-015",
    "html-016"
   ],
+  "quickAnswer": {
+   "en": "Use a native `<dialog>` opened with `showModal()` (or `command=\"show-modal\"`): you get the top layer, an inert page behind it, Esc to close and the dialog role for free. Then name it with `aria-labelledby`, autofocus Cancel, and test that focus returns to the trigger.",
+   "bn": "Native `<dialog>` `showModal()` (বা `command=\"show-modal\"`) দিয়ে খুলি: top layer, পেছনের page inert হওয়া, Esc-এ বন্ধ হওয়া আর dialog role সব ফ্রি পাওয়া যায়। তারপর `aria-labelledby` দিয়ে নাম দিই, Cancel-এ autofocus রাখি, আর trigger-এ focus ফেরে কিনা test করি।"
+  },
   "commonMistakes": {
    "en": "Opening with `dialog.show()` or `setAttribute('open', '')` and expecting modal behaviour, putting initial focus on the destructive button, or forgetting an accessible name.",
    "bn": "`dialog.show()` বা `setAttribute('open', '')` দিয়ে খুলে modal আচরণ আশা করা, destructive button-এ প্রথম focus দেওয়া, অথবা accessible name দিতে ভুলে যাওয়া।"
@@ -473,6 +497,10 @@
    "html-030",
    "html-029"
   ],
+  "quickAnswer": {
+   "en": "HTML is parsed incrementally into the DOM and CSS into the CSSOM, then come style, layout, paint and compositing. Classic scripts block the parser, stylesheets block rendering, and the preload scanner reads ahead to fetch resources early, so anything referenced only from CSS or JS is found late.",
+   "bn": "HTML ধাপে ধাপে parse হয়ে DOM, আর CSS থেকে CSSOM তৈরি হয়; তারপর style, layout, paint আর compositing। Classic script parser আটকায়, stylesheet render আটকায়, আর preload scanner আগেভাগে HTML পড়ে resource fetch শুরু করে, তাই যা শুধু CSS বা JS-এ আছে সেটা দেরিতে খুঁজে পাওয়া যায়।"
+  },
   "commonMistakes": {
    "en": "Saying CSS blocks DOM parsing directly, believing the browser waits for the entire HTML before building the DOM, or not knowing about the preload scanner at all.",
    "bn": "CSS সরাসরি DOM parsing আটকায় বলা, browser পুরো HTML পাওয়ার পরেই DOM বানায় বলে মনে করা, অথবা preload scanner সম্পর্কে একেবারেই না জানা।"
@@ -552,6 +580,10 @@
    "html-012",
    "html-018"
   ],
+  "quickAnswer": {
+   "en": "Measure field LCP and split it into TTFB, load delay, load time and render delay, then fix each part: CDN-cached server-rendered HTML, small inline critical CSS with deferred scripts, a real hero `<img>` with `fetchpriority=\"high\"` (never lazy), subset Bangla fonts, and budgets in CI.",
+   "bn": "আগে field data থেকে LCP মেপে TTFB, load delay, load time আর render delay-এ ভাগ করি, তারপর একে একে ঠিক করি: CDN-এ cache করা server-rendered HTML, ছোট inline critical CSS আর `defer` করা script, `fetchpriority=\"high\"`-সহ আসল hero `<img>` (কখনো lazy নয়), subset করা Bangla font, আর CI-তে performance budget।"
+  },
   "commonMistakes": {
    "en": "Lazy-loading the hero image, preloading everything, optimising only bundle size while the LCP image is discovered late, or testing only on a fast laptop on office Wi-Fi.",
    "bn": "Hero image lazy-load করা, সবকিছু preload করা, LCP image দেরিতে খুঁজে পাওয়া যাচ্ছে অথচ শুধু bundle size optimise করা, অথবা শুধু অফিসের Wi-Fi-তে দ্রুত laptop-এ test করা।"

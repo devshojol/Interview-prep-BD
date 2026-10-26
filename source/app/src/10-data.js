@@ -36,6 +36,7 @@
       explanation: biObj(raw.explanation),
       interviewTip: biObj(raw.interviewTip),
       commonMistakes: raw.commonMistakes ? biObj(raw.commonMistakes) : null,
+      quickAnswer: raw.quickAnswer ? biObj(raw.quickAnswer) : null,
       code: codeObj(raw.code),
       setup: codeObj(raw.setup),
       extraCode: Array.isArray(raw.extraCode)
@@ -80,10 +81,11 @@
         else if (!BN.test(o.bn)) warnings.push(where + ': Bangla ' + f + ' contains no Bangla characters');
       });
       if (!isObj(q.interviewTip) || !q.interviewTip.en || !q.interviewTip.bn) warnings.push(where + ': interview tip missing a language');
+      if (!SHORT_TYPES.includes(q.type) && (!isObj(q.quickAnswer) || !q.quickAnswer.en || !q.quickAnswer.bn)) warnings.push(where + ': quick answer missing a language');
       if (!isStr(q.technologyVersion) || !q.technologyVersion) errors.push(where + ': missing technologyVersion');
       if (q.versionSensitive && !/\d/.test(q.technologyVersion || '')) errors.push(where + ': versionSensitive but technologyVersion has no version number');
       if (!isStr(q.verifiedAt) || !/^\d{4}-\d{2}-\d{2}$/.test(q.verifiedAt)) warnings.push(where + ': missing/invalid verifiedAt');
-      if (!Array.isArray(q.references) || !q.references.length) warnings.push(where + ': no documentation references');
+      if ((!Array.isArray(q.references) || !q.references.length) && q.type !== 'behavioral') warnings.push(where + ': no documentation references');
       if (q.type === 'mcq') {
         if (!Array.isArray(q.options) || q.options.length !== 4) errors.push(where + ': MCQ must have 4 options');
         else q.options.forEach((o, k) => { if (!isObj(o) || !o.en || !o.bn) errors.push(where + ': MCQ option ' + k + ' missing a language'); });
@@ -117,7 +119,7 @@
     const t = TECH_MAP.get(q.technology);
     q._sTitle = normalizeText(q.question.en + ' \n ' + q.question.bn);
     q._sMeta = normalizeText([q.subtopic, q.tags.join(' '), q.id, t ? t.name : '', q.type].join(' '));
-    q._sBody = normalizeText([q.answer.en, q.answer.bn, q.explanation.en, q.explanation.bn].join(' '));
+    q._sBody = normalizeText([q.quickAnswer ? q.quickAnswer.en + ' ' + q.quickAnswer.bn : '', q.answer.en, q.answer.bn, q.explanation.en, q.explanation.bn].join(' '));
   });
   const BY_TECH = new Map(TECHS.map((t) => [t.id, []]));
   QUESTIONS.forEach((q) => BY_TECH.get(q.technology).push(q));

@@ -1,0 +1,554 @@
+[
+ {
+  "id": "drizzle-q01",
+  "subtopic": "Schema Definitions",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "schema",
+   "pgtable",
+   "basics"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the schema in Drizzle, and what is it used for?",
+   "bn": "Drizzle-এ schema কী, আর এটা কী কাজে লাগে?"
+  },
+  "answer": {
+   "en": "The schema is plain TypeScript where you declare your tables with functions like `pgTable()`, columns, constraints and indexes. It is the single source of truth: queries use it for type checking, TypeScript types are inferred from it, and Drizzle Kit compares it with the database to create migrations.",
+   "bn": "Schema হলো সাধারণ TypeScript, যেখানে `pgTable()`-এর মতো function দিয়ে table, column, constraint আর index declare করা হয়। এটাই single source of truth: query এটা দিয়ে type check হয়, TypeScript type এখান থেকেই infer হয়, আর Drizzle Kit এটাকে database-এর সাথে তুলনা করে migration বানায়।"
+  },
+  "explanation": {
+   "en": "Changing the schema file does not change the database by itself; you still run `drizzle-kit generate` + `migrate` (or `push` locally).",
+   "bn": "Schema file বদলালেই database বদলায় না; তার জন্য এখনো `drizzle-kit generate` + `migrate` (বা local-এ `push`) চালাতে হয়।"
+  },
+  "interviewTip": {
+   "en": "Say \"TypeScript tables, one source for types, queries and migrations\".",
+   "bn": "বলো \"TypeScript-এ table, type, query আর migration — সবকিছুর একটাই উৎস\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Schema declaration",
+    "url": "https://orm.drizzle.team/docs/sql-schema-declaration"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does `.references()` add to a column?",
+    "bn": "Column-এ `.references()` কী যোগ করে?"
+   }
+  ],
+  "related": [
+   "drizzle-002",
+   "drizzle-010"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "import { pgTable, integer, text } from 'drizzle-orm/pg-core';\n\nexport const users = pgTable('users', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  name: text().notNull(),\n});"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q02",
+  "subtopic": "Drizzle Kit",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "drizzle-kit",
+   "migrations",
+   "generate",
+   "push"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 / drizzle-kit 0.31 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What do `drizzle-kit generate`, `migrate`, `push` and `pull` do?",
+   "bn": "`drizzle-kit generate`, `migrate`, `push` আর `pull` কী করে?"
+  },
+  "answer": {
+   "en": "`generate` compares your schema with the last snapshot and writes a SQL migration file; `migrate` applies the pending migration files to the database. `push` applies schema changes directly with no migration files (good for local prototyping), and `pull` introspects an existing database and generates the TypeScript schema from it.",
+   "bn": "`generate` schema-কে আগের snapshot-এর সাথে তুলনা করে একটা SQL migration file লেখে; `migrate` বাকি থাকা migration file-গুলো database-এ চালায়। `push` কোনো migration file ছাড়াই সরাসরি schema-র পরিবর্তন database-এ বসায় (local prototyping-এর জন্য ভালো), আর `pull` পুরোনো database introspect করে তার TypeScript schema বানিয়ে দেয়।"
+  },
+  "explanation": {
+   "en": "Use `generate` + `migrate` for anything shared (CI, staging, production) because the SQL is reviewed and replayable; `push` leaves no history.",
+   "bn": "Shared যেকোনো জায়গায় (CI, staging, production) `generate` + `migrate` ব্যবহার করো, কারণ SQL review আর replay করা যায়; `push` কোনো history রাখে না।"
+  },
+  "interviewTip": {
+   "en": "Give one line per command, then add \"push locally, migrate in production\".",
+   "bn": "প্রতিটা command-এর জন্য এক line বলো, তারপর যোগ করো \"local-এ push, production-এ migrate\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Migrations",
+    "url": "https://orm.drizzle.team/docs/migrations"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Where do you configure Drizzle Kit?",
+    "bn": "Drizzle Kit কোথায় configure করো?"
+   }
+  ],
+  "related": [
+   "drizzle-007",
+   "drizzle-017",
+   "drizzle-029"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "npx drizzle-kit generate   # schema.ts → drizzle/0001_xxx.sql (no DB connection)\nnpx drizzle-kit migrate    # runs pending .sql files, records them in the DB\nnpx drizzle-kit push       # syncs schema straight to the DB, no files\nnpx drizzle-kit pull       # existing DB → schema.ts"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q03",
+  "subtopic": "Type Inference",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "typescript",
+   "inferselect",
+   "inferinsert"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What are `$inferSelect` and `$inferInsert` in Drizzle?",
+   "bn": "Drizzle-এ `$inferSelect` আর `$inferInsert` কী?"
+  },
+  "answer": {
+   "en": "They give you TypeScript types straight from a table, with no code generation. `typeof users.$inferSelect` is the shape of a row you read back; `typeof users.$inferInsert` is what you pass to `insert()`, where columns that are nullable or have defaults become optional.",
+   "bn": "এগুলো code generation ছাড়াই সরাসরি table থেকে TypeScript type দেয়। `typeof users.$inferSelect` হলো পড়ে আনা row-এর shape; `typeof users.$inferInsert` হলো `insert()`-এ যা পাঠাও, যেখানে nullable বা default থাকা column optional হয়ে যায়।"
+  },
+  "explanation": {
+   "en": "Because the types come from the schema, renaming a column breaks every wrong query at compile time instead of at runtime.",
+   "bn": "Type যেহেতু schema থেকে আসে, column rename করলে ভুল query-গুলো runtime-এ নয়, compile time-এই ধরা পড়ে।"
+  },
+  "interviewTip": {
+   "en": "Say \"select type for reading, insert type for writing; defaults make insert fields optional\".",
+   "bn": "বলো \"পড়ার জন্য select type, লেখার জন্য insert type; default থাকলে insert field optional\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Goodies (type API)",
+    "url": "https://orm.drizzle.team/docs/goodies"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is a generated identity `id` missing from the insert type?",
+    "bn": "Insert type-এ generated identity `id` কেন থাকে না?"
+   }
+  ],
+  "related": [
+   "drizzle-006",
+   "drizzle-002"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "export type User = typeof users.$inferSelect;    // { id: number; name: string; bio: string | null }\nexport type NewUser = typeof users.$inferInsert; // { name: string; bio?: string | null }\n// (id is an always-generated identity, so it is not in NewUser)"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q04",
+  "subtopic": "Relational Queries",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "select",
+   "rqb",
+   "relations",
+   "joins"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable); v1 RC = preview",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `db.select()` and `db.query` (relational queries) in Drizzle?",
+   "bn": "Drizzle-এ `db.select()` আর `db.query` (relational query)-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`db.select()` is the SQL-like builder: you write joins, filters and grouping yourself, and joined results come back as flat rows. `db.query.users.findMany({ with: { posts: true } })` uses the relations you defined to return nested objects in one SQL statement, but it needs `schema` passed to `drizzle()`.",
+   "bn": "`db.select()` হলো SQL-এর মতো builder: join, filter, grouping নিজে লেখো, আর join-এর result আসে flat row হিসেবে। `db.query.users.findMany({ with: { posts: true } })` তোমার define করা relation ব্যবহার করে একটাই SQL statement-এ nested object ফেরত দেয়, তবে এর জন্য `drizzle()`-এ `schema` দিতে হয়।"
+  },
+  "explanation": {
+   "en": "Use `select()` for reports, aggregates and complex joins, and `db.query` for reading entity trees. The v1 release candidate changes the relational API (`defineRelations`, object-style `where`), but that is still preview.",
+   "bn": "Report, aggregate আর জটিল join-এর জন্য `select()`, entity tree পড়ার জন্য `db.query`। v1 release candidate-এ relational API বদলাচ্ছে (`defineRelations`, object-style `where`), তবে সেটা এখনো preview।"
+  },
+  "interviewTip": {
+   "en": "Contrast \"flat rows you shape yourself\" with \"nested objects from relations\".",
+   "bn": "এই তুলনাটা করো: \"নিজে সাজানো flat row\" বনাম \"relation থেকে nested object\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Relational queries",
+    "url": "https://orm.drizzle.team/docs/rqb"
+   },
+   {
+    "title": "Drizzle docs — Select",
+    "url": "https://orm.drizzle.team/docs/select"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `with` cause N+1 queries?",
+    "bn": "`with` কি N+1 query তৈরি করে?"
+   }
+  ],
+  "related": [
+   "drizzle-014",
+   "drizzle-015",
+   "drizzle-027"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "await db.select().from(users).leftJoin(posts, eq(posts.authorId, users.id));\n// → [{ users: {...}, posts: {...} }, { users: {...}, posts: null }]   (flat rows)\n\nawait db.query.users.findMany({ with: { posts: true } });\n// → [{ id: 1, name: 'Rahim', posts: [{...}] }, { id: 2, name: 'Karim', posts: [] }]"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q05",
+  "subtopic": "Drizzle vs Raw SQL",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "sql-template",
+   "parameters",
+   "sql-injection"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the `sql` template tag in Drizzle, and is it safe from SQL injection?",
+   "bn": "Drizzle-এর `sql` template tag কী, আর এটা কি SQL injection থেকে নিরাপদ?"
+  },
+  "answer": {
+   "en": "`sql` lets you write raw SQL fragments when the builder doesn't cover something, like a database function. It is safe for values: everything you interpolate with `${}` is sent as a bound parameter, and interpolated columns become quoted column names. Only `sql.raw()` inserts text unescaped, so never pass user input to it.",
+   "bn": "Builder যেটা পারে না, যেমন কোনো database function, সেখানে `sql` দিয়ে raw SQL-এর টুকরো লেখা যায়। Value-র জন্য এটা নিরাপদ: `${}` দিয়ে যা interpolate করো সব bound parameter হিসেবে যায়, আর column দিলে সেটা quoted column name হয়। শুধু `sql.raw()` text হুবহু বসায়, তাই তাতে কখনো user input দিও না।"
+  },
+  "explanation": {
+   "en": "Write `sql<number>` (with the fragment after it) to give an expression's result a TypeScript type, for example a `count(*)` in a select.",
+   "bn": "কোনো expression-এর result-এ TypeScript type দিতে `sql<number>` লেখো (তার পরে fragment), যেমন select-এর ভেতরে একটা `count(*)`।"
+  },
+  "interviewTip": {
+   "en": "Say \"values become parameters; only `sql.raw()` is dangerous\".",
+   "bn": "বলো \"value parameter হয়ে যায়; বিপদ শুধু `sql.raw()`-এ\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Magic sql operator",
+    "url": "https://orm.drizzle.team/docs/sql"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you allow a user-chosen sort column safely?",
+    "bn": "User-এর বেছে নেওয়া sort column নিরাপদে কীভাবে দেবে?"
+   }
+  ],
+  "related": [
+   "drizzle-008",
+   "drizzle-011"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "const email = req.query.email; // user input\nawait db.select().from(users).where(sql`lower(${users.email}) = ${email}`);\n// → ... where lower(\"users\".\"email\") = $1   (email sent separately as a parameter)"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q06",
+  "subtopic": "Drizzle vs Prisma",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "prisma",
+   "codegen",
+   "comparison"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable) / Prisma ORM 7",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Does Drizzle need a code-generation step like `prisma generate`?",
+   "bn": "Drizzle-এ কি `prisma generate`-এর মতো code-generation step লাগে?"
+  },
+  "answer": {
+   "en": "No. Prisma reads its own `schema.prisma` file and generates a client, so you rerun `prisma generate` after every schema change to update the types. Drizzle's schema is already TypeScript, so types are inferred instantly by the compiler; Drizzle Kit only generates SQL migrations, not a client.",
+   "bn": "না। Prisma নিজের `schema.prisma` file পড়ে একটা client generate করে, তাই schema বদলালেই type update করতে আবার `prisma generate` চালাতে হয়। Drizzle-এর schema আগে থেকেই TypeScript, তাই compiler সাথে সাথে type infer করে; Drizzle Kit শুধু SQL migration বানায়, কোনো client নয়।"
+  },
+  "explanation": {
+   "en": "Beyond codegen, the bigger difference is style: Prisma offers a high-level object API with nested writes, Drizzle stays close to SQL.",
+   "bn": "Codegen-এর বাইরে বড় পার্থক্য হলো style: Prisma-র high-level object API-তে nested write আছে, আর Drizzle SQL-এর কাছাকাছি থাকে।"
+  },
+  "interviewTip": {
+   "en": "Answer \"no\", then name the one-line reason: the schema is TypeScript.",
+   "bn": "আগে \"না\" বলো, তারপর এক line-এ কারণ: schema-টাই TypeScript।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Overview",
+    "url": "https://orm.drizzle.team/docs/overview"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you still choose Prisma?",
+    "bn": "কখন তবুও Prisma বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "drizzle-020",
+   "drizzle-001"
+  ],
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q07",
+  "subtopic": "CRUD Queries",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "insert",
+   "bulk-insert",
+   "returning"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you insert several rows at once in Drizzle and get the created rows back?",
+   "bn": "Drizzle-এ একসাথে কয়েকটা row insert করে তৈরি হওয়া row-গুলো কীভাবে ফেরত পাবে?"
+  },
+  "answer": {
+   "en": "Pass an array to `values()`, which builds one multi-row `INSERT` statement, and add `.returning()` to get the inserted rows with generated values such as `id`. Without `.returning()` you only get the driver's query result (such as the row count), not the rows.",
+   "bn": "`values()`-এ একটা array দাও, তাতে একটাই multi-row `INSERT` statement তৈরি হয়, আর `.returning()` যোগ করলে `id`-র মতো generated value-সহ insert হওয়া row-গুলো ফেরত আসে। `.returning()` ছাড়া শুধু driver-এর query result (যেমন row count) পাও, row-গুলো নয়।"
+  },
+  "explanation": {
+   "en": "For very large imports, split the array into chunks: one statement has a limit on bound parameters, and huge statements hold locks longer.",
+   "bn": "অনেক বড় import হলে array-কে ভাগ করে নাও: একটা statement-এ bound parameter-এর সীমা আছে, আর বিশাল statement বেশি সময় lock ধরে রাখে।"
+  },
+  "interviewTip": {
+   "en": "Mention \"one statement, not a loop of inserts\" and `.returning()`.",
+   "bn": "বলো \"loop-এ অনেক insert নয়, একটাই statement\", আর `.returning()`-এর কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Insert",
+    "url": "https://orm.drizzle.team/docs/insert"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens if one row violates a unique constraint?",
+    "bn": "একটা row unique constraint ভাঙলে কী হয়?"
+   }
+  ],
+  "related": [
+   "drizzle-004"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "const rows = await db.insert(users)\n  .values([{ name: 'Rahim' }, { name: 'Karim' }])\n  .returning({ id: users.id, name: users.name });\n// → [ { id: 1, name: 'Rahim' }, { id: 2, name: 'Karim' } ]"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q08",
+  "subtopic": "Upserts (onConflictDoUpdate)",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "upsert",
+   "on-conflict",
+   "insert"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you write an upsert (\"insert or update\") in Drizzle?",
+   "bn": "Drizzle-এ upsert (\"insert, নয়তো update\") কীভাবে লেখো?"
+  },
+  "answer": {
+   "en": "Chain `.onConflictDoUpdate({ target, set })` on an insert: if a row with the same value in the `target` column already exists, it is updated with `set` instead. `.onConflictDoNothing()` simply skips the duplicate. The target column must have a unique constraint or index.",
+   "bn": "Insert-এর সাথে `.onConflictDoUpdate({ target, set })` জুড়ে দাও: `target` column-এ একই value-র row আগে থেকে থাকলে নতুন row না বানিয়ে `set` দিয়ে সেটাকে update করে। `.onConflictDoNothing()` duplicate-টা শুধু বাদ দেয়। Target column-এ unique constraint বা index থাকতেই হবে।"
+  },
+  "explanation": {
+   "en": "It compiles to PostgreSQL's `INSERT ... ON CONFLICT`, so it is atomic, unlike \"select, then insert or update\" in application code.",
+   "bn": "এটা PostgreSQL-এর `INSERT ... ON CONFLICT`-এ compile হয়, তাই atomic — application code-এ \"আগে select, তারপর insert বা update\" করার মতো race হয় না।"
+  },
+  "interviewTip": {
+   "en": "Name both methods and mention the unique-constraint requirement.",
+   "bn": "দুটো method-এর নাম বলো আর unique constraint লাগার শর্তটা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Insert (upserts and conflicts)",
+    "url": "https://orm.drizzle.team/docs/insert"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you use the incoming value in a multi-row upsert?",
+    "bn": "Multi-row upsert-এ নতুন আসা value কীভাবে ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "drizzle-018",
+   "drizzle-004"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "await db.insert(users)\n  .values({ email: 'a@x.com', name: 'Rahim Uddin' })\n  .onConflictDoUpdate({ target: users.email, set: { name: 'Rahim Uddin' } })\n  .returning({ id: users.id, name: users.name });\n// email exists as id 1 → [ { id: 1, name: 'Rahim Uddin' } ]   (no new row)"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q09",
+  "subtopic": "Column Types",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "jsonb",
+   "type",
+   "column-types"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you type a `jsonb` column in Drizzle, and does that validate the data?",
+   "bn": "Drizzle-এ `jsonb` column-এর type কীভাবে দেবে, আর তাতে কি data validate হয়?"
+  },
+  "answer": {
+   "en": "Add `.$type<T>()` to the column, for example `jsonb().$type<{ theme: string }>()`, and selects and inserts use that type. It is compile-time only: Drizzle does not check the JSON at runtime, so validate incoming data yourself (with zod, for example).",
+   "bn": "Column-এ `.$type<T>()` যোগ করো, যেমন `jsonb().$type<{ theme: string }>()`, তাহলে select আর insert সেই type ব্যবহার করবে। এটা শুধু compile-time-এর: Drizzle runtime-এ JSON check করে না, তাই আসা data নিজে validate করো (যেমন zod দিয়ে)।"
+  },
+  "explanation": {
+   "en": "Prefer `jsonb` over `json` in PostgreSQL: it is stored in a binary form that can be indexed and queried efficiently.",
+   "bn": "PostgreSQL-এ `json`-এর চেয়ে `jsonb` ভালো: এটা binary আকারে থাকে, তাই index করা আর দ্রুত query করা যায়।"
+  },
+  "interviewTip": {
+   "en": "Stress \"type only, no runtime check\"; that is the point interviewers probe.",
+   "bn": "জোর দিয়ে বলো \"শুধু type, runtime check নেই\"; interviewer এটাই যাচাই করে।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — PostgreSQL column types",
+    "url": "https://orm.drizzle.team/docs/column-types/pg"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you validate request bodies before inserting?",
+    "bn": "Insert-এর আগে request body কীভাবে validate করবে?"
+   }
+  ],
+  "related": [
+   "drizzle-002"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "export const profiles = pgTable('profiles', {\n  id: integer().primaryKey().generatedAlwaysAsIdentity(),\n  settings: jsonb().$type<{ theme: 'light' | 'dark' }>().notNull(),\n});\n// insert({ settings: { theme: 'blue' } }) → TypeScript error, but raw SQL could still store it"
+  },
+  "technology": "drizzle"
+ },
+ {
+  "id": "drizzle-q10",
+  "subtopic": "Transactions",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "transactions",
+   "rollback",
+   "tx"
+  ],
+  "technologyVersion": "Drizzle ORM 0.45 (stable)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you run a transaction in Drizzle?",
+   "bn": "Drizzle-এ transaction কীভাবে চালাও?"
+  },
+  "answer": {
+   "en": "Call `db.transaction(async (tx) => { ... })` and run every query inside through `tx`. If the callback finishes, Drizzle commits; if it throws (or you call `tx.rollback()`), everything inside is rolled back.",
+   "bn": "`db.transaction(async (tx) => { ... })` call করো আর ভেতরের প্রতিটা query `tx` দিয়ে চালাও। Callback ঠিকমতো শেষ হলে Drizzle commit করে; আর throw হলে (বা `tx.rollback()` call করলে) ভেতরের সবকিছু rollback হয়।"
+  },
+  "explanation": {
+   "en": "The classic bug is using `db` instead of `tx` inside the callback: that query runs on another connection outside the transaction and is not rolled back.",
+   "bn": "সাধারণ bug হলো callback-এর ভেতরে `tx`-এর বদলে `db` ব্যবহার করা: সেই query অন্য connection-এ transaction-এর বাইরে চলে, তাই rollback হয় না।"
+  },
+  "interviewTip": {
+   "en": "Say \"commit on return, rollback on throw, always use `tx`\".",
+   "bn": "বলো \"return হলে commit, throw হলে rollback, আর সবসময় `tx`\"।"
+  },
+  "references": [
+   {
+    "title": "Drizzle docs — Transactions",
+    "url": "https://orm.drizzle.team/docs/transactions"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why keep HTTP calls out of a transaction?",
+    "bn": "Transaction-এর ভেতরে HTTP call কেন রাখবে না?"
+   }
+  ],
+  "related": [
+   "drizzle-016",
+   "drizzle-025"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "await db.transaction(async (tx) => {\n  await tx.update(accounts).set({ balance: sql`${accounts.balance} - 100` }).where(eq(accounts.id, 1));\n  await tx.update(accounts).set({ balance: sql`${accounts.balance} + 100` }).where(eq(accounts.id, 2));\n}); // both updates commit together, or neither does"
+  },
+  "technology": "drizzle"
+ }
+]

@@ -49,6 +49,8 @@ QUESTIONS = [
 
             Production-এ আমি সাধারণত দুটো মেলাই — **hybrid search** — যাতে exact match আর অর্থ দুটোই গুরুত্ব পায়।
         """,
+        quick_en=r"""Keyword search (BM25) scores documents by matching words, so it wins on exact terms like product codes, names and error messages but misses synonyms. Semantic search compares embeddings, so it matches meaning and paraphrases but is weaker on exact identifiers. In production, combine both (hybrid search).""",
+        quick_bn=r"""Keyword search (BM25) শব্দ মিলিয়ে document-কে score দেয়, তাই product code, নাম বা error message-এর মতো exact term-এ জেতে, কিন্তু synonym ধরতে পারে না। Semantic search embedding তুলনা করে, তাই অর্থ আর paraphrase মেলায়, কিন্তু exact identifier-এ দুর্বল। Production-এ দুটো মিলিয়ে ব্যবহার করো (hybrid search)।""",
         ex_en=r"""
             - **Negation example:** "laptop without touchscreen" embeds very close to "touchscreen laptop"; keyword search with a filter or query parsing handles it better.
             - **Language tooling:** full-text search depends on tokenisers and stemmers per language. Check whether your engine has a proper analyser for Bangla; if not, a simple (no-stemming) configuration or n-gram matching is the fallback, and a multilingual embedding model can cover the gap.
@@ -89,6 +91,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""Exact k-NN is a brute-force scan — cost grows linearly with the number of vectors and their dimension. ANN indexes such as HNSW or IVF only examine a small, promising part of the data, so queries stay fast at millions of vectors, at the price of occasionally missing a true neighbour.""",
         a_bn=r"""Exact k-NN হলো brute-force scan — খরচ vector-এর সংখ্যা আর dimension-এর সাথে সরলরৈখিকভাবে বাড়ে। HNSW বা IVF-এর মতো ANN index data-র শুধু ছোট, সম্ভাবনাময় একটা অংশ দেখে, তাই লাখো vector-এও query দ্রুত থাকে — বিনিময়ে মাঝে মাঝে একটা আসল neighbour বাদ পড়তে পারে।""",
+        quick_en=r"""Exact k-NN compares the query with every vector, which gets too slow at millions of vectors. ANN indexes like HNSW or IVF look only at a small, promising part of the data, so they return nearly the same top results far faster, at the cost of occasionally missing a true neighbour.""",
+        quick_bn=r"""Exact k-NN query-কে প্রতিটা vector-এর সাথে তুলনা করে, লাখ লাখ vector হলে সেটা অনেক ধীর। HNSW বা IVF-এর মতো ANN index data-র ছোট, সম্ভাবনাময় একটা অংশ দেখে, তাই প্রায় একই top result অনেক দ্রুত দেয়, বিনিময়ে মাঝে মাঝে আসল কোনো neighbour বাদ পড়তে পারে।""",
         ex_en=r"""
             Exact search is *always* correct, so option B is wrong, and option C reverses the trade-off — ANN can only match exact search's accuracy, never beat it. Option D is false: pgvector, for example, does exact search with `ORDER BY embedding <=> $1 LIMIT k` when no index exists.
 
@@ -136,6 +140,8 @@ QUESTIONS = [
 
             Fixed size-এর চেয়ে ভালো: **কাঠামো অনুযায়ী ভাগ করা** — heading, paragraph, list item — আর প্রতিটা chunk-এর শুরুতে document-এর title ও section heading জুড়ে দেওয়া।
         """,
+        quick_en=r"""We chunk because embedding models have token limits, one vector for a long document blurs into an average, and RAG can only send a few focused passages to the LLM. Start around a few hundred tokens with 10–20% overlap, prefer splitting by headings and paragraphs, then measure.""",
+        quick_bn=r"""Chunk করি কারণ embedding model-এর token limit আছে, লম্বা document-এর একটা vector সবকিছুর ঝাপসা গড় হয়ে যায়, আর RAG-এ LLM-কে মাত্র কয়েকটা focused passage পাঠানো যায়। কয়েকশো token আর 10–20% overlap দিয়ে শুরু করো, heading আর paragraph ধরে ভাগ করাকে প্রাধান্য দাও, তারপর মেপে দেখো।""",
         ex_en=r"""
             - **Words aren't tokens:** models count tokens, and Bangla text often uses more tokens per word than English with many tokenisers — size chunks by the model's tokeniser, not by characters.
             - **Keep units intact:** don't cut tables, code blocks or numbered steps in half; convert tables to text rows that each make sense alone.
@@ -212,6 +218,8 @@ QUESTIONS = [
 
             আমার default HNSW; build time বা memory সীমাবদ্ধতা হলে IVFFlat; ছোট বা অনেক বেশি filter করা set-এর জন্য flat।
         """,
+        quick_en=r"""Flat search compares every vector: perfect recall, fine for small or heavily filtered sets. HNSW is a layered neighbour graph with the best speed/recall and good insert handling but more memory. IVFFlat clusters vectors and scans only the nearest `probes` clusters: faster build, less memory, lower recall, so HNSW is the default.""",
+        quick_bn=r"""Flat search প্রতিটা vector তুলনা করে: recall নিখুঁত, ছোট বা খুব filter করা set-এর জন্য ঠিক আছে। HNSW একটা layered neighbour graph: speed/recall সবচেয়ে ভালো, insert ভালো সামলায়, তবে memory বেশি লাগে। IVFFlat vector-কে cluster করে শুধু কাছের `probes` cluster scan করে: build দ্রুত, memory কম, recall কম; তাই default হিসেবে HNSW।""",
         ex_en=r"""
             - **Why IVFFlat needs data first:** its cluster centroids are learned from the rows present at build time; built on an empty or tiny table, the lists are poor and queries return fewer results.
             - **Memory matters:** HNSW performs best when the index fits in RAM (`shared_buffers` + OS cache). Index builds also benefit from a larger `maintenance_work_mem` — pgvector logs a notice when the graph no longer fits.
@@ -289,6 +297,8 @@ QUESTIONS = [
 
             **6. আবার মূল্যায়ন করো** fail হওয়া set আর বড় একটা golden set দিয়ে; আগে-পরে recall@k তুলনা করো।
         """,
+        quick_en=r"""First check what the failing questions actually retrieved. Then fix PDF and table extraction, chunk by headings and paragraphs with a Bangla-aware sentence splitter (Bangla sentences end with "।"), keep tables whole, add 10–20% overlap, prepend the title and section path to each chunk, and re-measure recall.""",
+        quick_bn=r"""আগে দেখো fail করা প্রশ্নগুলোতে আসলে কী retrieve হয়েছিল। তারপর PDF আর table extraction ঠিক করো, Bangla বোঝে এমন sentence splitter দিয়ে heading আর paragraph ধরে chunk করো (Bangla বাক্য "।" দিয়ে শেষ হয়), table পুরোটা এক সাথে রাখো, 10–20% overlap দাও, প্রতিটা chunk-এর আগে title আর section path যোগ করো, আর আবার recall মাপো।""",
         ex_en=r"""
             - **Why fixed 1,000-character splits hurt:** they cut mid-sentence and mid-table, and in Bangla a fixed character count means very different token counts than in English.
             - **Mixed-language documents:** detect language per chunk and store it as metadata; it helps filtering and evaluation, and confirms your embedding model handles both.
@@ -350,6 +360,8 @@ QUESTIONS = [
 
             উদাহরণে `p2` পায় 1/62 + 1/61 ≈ 0.03252 আর `p7` পায় 1/61 + 1/63 ≈ 0.03227, তাই `p2` সামান্য ব্যবধানে `p7`-এর আগে; `p4` (শুধু vector list-এ, rank 2) `p9`-কে (শুধু keyword list-এ, rank 3) হারায়।
         """,
+        quick_en=r"""For each list, walk the ids with their 1-based rank and add `1 / (k + rank)` to each id's total in a `Map`, then sort by score and take the top `limit`. RRF uses only ranks, so BM25 scores and cosine similarities don't need to be on the same scale. O(N log N) for N total ids.""",
+        quick_bn=r"""প্রতিটা list-এ id-গুলো তাদের 1-based rank-সহ ঘুরে একটা `Map`-এ প্রতিটা id-এর total-এ `1 / (k + rank)` যোগ করো, তারপর score দিয়ে sort করে top `limit` নাও। RRF শুধু rank ব্যবহার করে, তাই BM25 score আর cosine similarity একই scale-এ থাকার দরকার নেই। মোট N id-এর জন্য O(N log N)।""",
         ex_en=r"""
             - **Why `k`?** It dampens the advantage of the very top ranks so one list can't dominate. 60 comes from the original RRF paper and is a common default; some engines use other defaults (Qdrant's documentation, for example, uses a smaller constant), so treat it as tunable.
             - **Edge cases:** duplicate ids inside one list (count only the first occurrence), empty lists, ties (break them deterministically, e.g. by id), and `limit` larger than the number of unique ids.
@@ -438,6 +450,8 @@ QUESTIONS = [
             7. **Feature flag-এর পেছনে cutover** (percentage বা tenant অনুযায়ী) — query embedding আর document column একসাথে বদলাবে।
             8. **Rollback window:** model A-এর column আর index কিছুদিন রেখে দাও; স্থিতিশীল হলে dual-write বন্ধ করে সেগুলো drop করো।
         """,
+        quick_en=r"""Vectors from two models aren't comparable, so build model B in parallel: add a new `vector(1024)` column, dual-write new chunks, backfill in resumable batches, build the HNSW index `CONCURRENTLY`, shadow-compare quality, then switch query and column together behind a flag, keeping model A for rollback.""",
+        quick_bn=r"""দুটো আলাদা model-এর vector তুলনা করা যায় না, তাই model B পাশাপাশি বানাও: নতুন `vector(1024)` column যোগ করো, নতুন chunk দুই model-এই লেখো, resumable batch-এ backfill করো, `CONCURRENTLY` দিয়ে HNSW index বানাও, shadow traffic-এ quality মেলাও, তারপর flag-এর পেছনে query আর column একসাথে switch করো; rollback-এর জন্য model A রেখে দাও।""",
         ex_en=r"""
             - **Cache keys must include the model version** — a cached query embedding from model A must never be used against model B's column.
             - **Storage during migration roughly doubles** (two vectors per row plus two indexes) — check disk and RAM headroom first, or migrate per partition/tenant.
@@ -497,6 +511,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""With approximate indexes, pgvector applies the `WHERE` filter **after** the index scan. HNSW hands back roughly `ef_search` nearest candidates, most belonging to other tenants, so only a handful survive the filter. Iterative index scans (pgvector 0.8+) keep scanning until enough rows pass the filter.""",
         a_bn=r"""Approximate index-এ pgvector `WHERE` filter প্রয়োগ করে index scan-এর **পরে**। HNSW মোটামুটি `ef_search`-সংখ্যক কাছের candidate ফেরত দেয়, যার বেশিরভাগ অন্য tenant-এর, তাই filter পেরিয়ে টেকে মাত্র কয়েকটা। Iterative index scan (pgvector 0.8+) যথেষ্ট row filter পার না হওয়া পর্যন্ত scan চালিয়ে যায়।""",
+        quick_en=r"""pgvector applies the `WHERE` after the HNSW scan, which hands back only about `ef_search` (default 40) candidates, and few of them belong to tenant 7. Enable iterative index scans (`hnsw.iterative_scan`, pgvector 0.8+), raise `ef_search`, or use a partial index or partition per tenant.""",
+        quick_bn=r"""pgvector HNSW scan-এর পরে `WHERE` apply করে, আর scan মাত্র প্রায় `ef_search` (default 40)-টা candidate দেয়, যার খুব কমই tenant 7-এর। Iterative index scan চালু করো (`hnsw.iterative_scan`, pgvector 0.8+), `ef_search` বাড়াও, অথবা tenant-ভিত্তিক partial index বা partition ব্যবহার করো।""",
         ex_en=r"""
             This is the classic **post-filtering** pitfall of filtered ANN search. The pgvector docs give the same arithmetic: with the default `ef_search` of 40 and a filter matching 10% of rows, you get about 4 matches on average.
 

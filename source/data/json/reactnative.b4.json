@@ -1,0 +1,713 @@
+[
+ {
+  "id": "rn-025",
+  "subtopic": "expo-sqlite",
+  "difficulty": "hard",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 4,
+  "tags": [
+   "expo-sqlite",
+   "transactions",
+   "withtransactionasync",
+   "concurrency"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-sqlite ~58), React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "`transfer()` runs. While it is between its two `runAsync` calls, another screen runs the analytics `INSERT` on the same `db`. Then the second `UPDATE` in `transfer()` throws, so the transaction is rolled back. What happens to the analytics row?",
+   "bn": "`transfer()` চলছে। এর দুইটা `runAsync` call-এর মাঝখানে থাকা অবস্থায় অন্য একটা screen একই `db`-তে analytics `INSERT` চালায়। তারপর `transfer()`-এর দ্বিতীয় `UPDATE` throw করে, তাই transaction rollback হয়। Analytics row-এর কী হবে?"
+  },
+  "answer": {
+   "en": "It is **rolled back**. `withTransactionAsync` simply runs `BEGIN`, awaits your callback and then commits or rolls back on the same connection. Because of async/await, other code keeps running while the callback awaits, and its queries go to the same connection, inside the open transaction. The Expo docs warn about exactly this: the transaction \"is not exclusive and can be interrupted by other async queries\".\n\nThe fix is `withExclusiveTransactionAsync(async (txn) => { ... })`: only queries executed on `txn` belong to the transaction, so unrelated queries elsewhere aren't swept in. Note that it isn't supported on web.",
+   "bn": "এটা **rollback হয়**। `withTransactionAsync` শুধু `BEGIN` চালায়, তোমার callback await করে, তারপর একই connection-এ commit বা rollback করে। Async/await-এর কারণে callback await করার সময় অন্য code চলতে থাকে, আর তাদের query একই connection-এ, খোলা transaction-এর ভেতরেই যায়। Expo docs ঠিক এটা নিয়েই সতর্ক করে: এই transaction exclusive না, আর অন্য async query এর মাঝে ঢুকে পড়তে পারে।\n\nসমাধান হলো `withExclusiveTransactionAsync(async (txn) => { ... })`: শুধু `txn`-এ চালানো query-গুলোই transaction-এর অংশ, তাই অন্য জায়গার অপ্রাসঙ্গিক query ভেতরে টেনে আনা হয় না। খেয়াল রাখো, এটা web-এ support করে না।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is **\"it is kept, it auto-commits\"**. In SQLite a statement auto-commits only when *no* transaction is open on that connection. Here one is open, so the `INSERT` is just another statement in it. I reproduced this in sqlite3: `BEGIN`, debit, analytics `INSERT`, failing `UPDATE`, `ROLLBACK`, and the analytics table was empty afterwards. There's no `SQLITE_BUSY` either, because it's the same connection, and `withTransactionAsync` has no queue.\n\nThe opposite problem also exists: a stray query that runs during the transaction and fails can make *your* transaction roll back. Practical rules:\n- Keep transactions short and DB-only; never `await fetch()` inside one.\n- Use `withExclusiveTransactionAsync` when other parts of the app may query at the same time, and run every statement on `txn`.\n- Batch writes (imports, sync) inside one transaction for speed and atomicity.",
+   "bn": "সবচেয়ে লোভনীয় ভুল উত্তর হলো **\"থেকে যায়, auto-commit হয়\"**। SQLite-এ কোনো statement তখনই auto-commit হয় যখন ওই connection-এ *কোনো* transaction খোলা নেই। এখানে একটা খোলা আছে, তাই `INSERT`-টা সেই transaction-এরই আরেকটা statement। আমি sqlite3-এ এটা চালিয়ে দেখেছি: `BEGIN`, debit, analytics `INSERT`, fail করা `UPDATE`, `ROLLBACK`, আর পরে analytics table খালি। `SQLITE_BUSY`-ও হয় না, কারণ connection একই, আর `withTransactionAsync`-এর কোনো queue নেই।\n\nউল্টো সমস্যাও আছে: transaction চলার সময় বাইরের কোনো query fail করলে *তোমার* transaction rollback হয়ে যেতে পারে। কাজের নিয়ম:\n- Transaction ছোট আর শুধু DB-র কাজে রাখো; ভেতরে কখনো `await fetch()` কোরো না।\n- App-এর অন্য অংশ একই সময়ে query চালাতে পারলে `withExclusiveTransactionAsync` ব্যবহার করো, আর প্রতিটা statement `txn`-এ চালাও।\n- Import বা sync-এর মতো অনেক write এক transaction-এ batch করো, গতি আর atomicity দুইটার জন্যই।"
+  },
+  "interviewTip": {
+   "en": "Explain it in terms of the connection: \"one connection, one open transaction, everything on it joins\". Then give the fix and its web limitation. Mentioning that you'd keep network calls out of transactions shows production sense.",
+   "bn": "Connection দিয়ে ব্যাখ্যা করো: \"একটা connection, একটা খোলা transaction, এতে যা চলে সব ভেতরে ঢোকে\"। তারপর সমাধান আর web-এর সীমাবদ্ধতা বলো। Transaction-এর ভেতরে network call না রাখার কথা বললে production-এর অভিজ্ঞতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Expo docs — SQLite (expo-sqlite)",
+    "url": "https://docs.expo.dev/versions/latest/sdk/sqlite/"
+   },
+   {
+    "title": "SQLite — Transactions",
+    "url": "https://www.sqlite.org/lang_transaction.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why should you never await a network request inside a SQLite transaction?",
+    "bn": "SQLite transaction-এর ভেতরে কেন কখনো network request await করা উচিত না?"
+   },
+   {
+    "en": "How would you make importing 5,000 rows fast?",
+    "bn": "5,000টা row import দ্রুত কীভাবে করবে?"
+   }
+  ],
+  "related": [
+   "rn-023",
+   "rn-032",
+   "sql-010"
+  ],
+  "quickAnswer": {
+   "en": "It is rolled back too: `withTransactionAsync` isn't exclusive, so any query that runs on the connection while the transaction is open joins it. Use `withExclusiveTransactionAsync(async (txn) => ...)` and run the transaction's queries on `txn` (not available on web).",
+   "bn": "এটাও rollback হয়: `withTransactionAsync` exclusive না, তাই transaction খোলা থাকা অবস্থায় connection-এ যে query-ই চলে, সেটা এর ভেতরে ঢুকে যায়। `withExclusiveTransactionAsync(async (txn) => ...)` ব্যবহার করো আর transaction-এর query-গুলো `txn`-এ চালাও (web-এ নেই)।"
+  },
+  "commonMistakes": {
+   "en": "Calling `db.runAsync` inside `withExclusiveTransactionAsync` instead of `txn.runAsync` (those statements are not part of the exclusive transaction), and awaiting network requests while a transaction is open.",
+   "bn": "`withExclusiveTransactionAsync`-এর ভেতরে `txn.runAsync`-এর বদলে `db.runAsync` call করা (সেই statement-গুলো exclusive transaction-এর অংশ হয় না), আর transaction খোলা রেখে network request await করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "async function transfer(db: SQLiteDatabase, from: number, to: number, amount: number) {\n  await db.withTransactionAsync(async () => {\n    await db.runAsync('UPDATE accounts SET balance = balance - ? WHERE id = ?', amount, from);\n    await db.runAsync('UPDATE accounts SET balance = balance + ? WHERE id = ?', amount, to);\n  });\n}\n\n// Another screen, at the same moment:\nawait db.runAsync('INSERT INTO analytics_events (name) VALUES (?)', 'wallet_opened');"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "async function transfer(db: SQLiteDatabase, from: number, to: number, amount: number) {\n  await db.withExclusiveTransactionAsync(async (txn) => {\n    await txn.runAsync('UPDATE accounts SET balance = balance - ? WHERE id = ?', amount, from);\n    await txn.runAsync('UPDATE accounts SET balance = balance + ? WHERE id = ?', amount, to);\n  });\n}",
+    "label": {
+     "en": "Fixed: exclusive transaction (native only)",
+     "bn": "সংশোধিত: exclusive transaction (শুধু native)"
+    }
+   }
+  ],
+  "options": [
+   {
+    "en": "It is kept: a `runAsync` call made outside the transaction callback always auto-commits on its own",
+    "bn": "থেকে যায়: transaction callback-এর বাইরে করা `runAsync` call সবসময় নিজে নিজে auto-commit হয়"
+   },
+   {
+    "en": "It is rolled back too: `withTransactionAsync` is not exclusive, so any query that runs on the database while it is open becomes part of the transaction",
+    "bn": "এটাও rollback হয়: `withTransactionAsync` exclusive না, তাই এটা খোলা থাকা অবস্থায় database-এ যে query-ই চলে, সেটা transaction-এর অংশ হয়ে যায়"
+   },
+   {
+    "en": "The analytics `INSERT` fails with `SQLITE_BUSY` because the transaction holds the write lock",
+    "bn": "Analytics `INSERT` `SQLITE_BUSY` দিয়ে fail করে, কারণ write lock transaction-এর হাতে"
+   },
+   {
+    "en": "expo-sqlite queues the analytics `INSERT` until the transaction finishes and then commits it separately",
+    "bn": "expo-sqlite analytics `INSERT`-কে transaction শেষ হওয়া পর্যন্ত queue-তে রাখে, তারপর আলাদাভাবে commit করে"
+   }
+  ],
+  "correctIndex": 1,
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-026",
+  "subtopic": "expo-sqlite",
+  "difficulty": "hard",
+  "type": "scenario",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 10,
+  "tags": [
+   "drizzle",
+   "expo-sqlite",
+   "migrations",
+   "uselivequery",
+   "orm"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-sqlite ~58), Drizzle ORM 0.45",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Your expense-tracker app has grown to 12 tables with hand-written SQL and `user_version` migrations, and bugs keep coming from column-name typos and mismatched row types. A teammate proposes Drizzle ORM on top of `expo-sqlite`. How would you set it up (schema, migrations, live queries), and when is it worth it compared with raw SQL?",
+   "bn": "তোমার expense-tracker app এখন 12টা table-এ বড় হয়েছে, হাতে লেখা SQL আর `user_version` migration দিয়ে, আর column-এর নামের typo আর row type না মেলা থেকে বারবার bug আসছে। একজন teammate `expo-sqlite`-এর ওপরে Drizzle ORM ব্যবহারের প্রস্তাব দিল। তুমি এটা কীভাবে setup করবে (schema, migration, live query), আর raw SQL-এর তুলনায় কখন এটা লাভজনক?"
+  },
+  "answer": {
+   "en": "**Setup**\n1. Install `drizzle-orm` and, as a dev dependency, `drizzle-kit`, plus `babel-plugin-inline-import`.\n2. Write the schema in TypeScript (`sqliteTable`), so row types come from one place: `typeof expenses.$inferSelect`.\n3. Create the client: `drizzle(openDatabaseSync('app.db', { enableChangeListener: true }), { schema })` from `drizzle-orm/expo-sqlite`.\n4. `drizzle.config.ts` with `dialect: 'sqlite'` and **`driver: 'expo'`**, then `npx drizzle-kit generate`. This writes SQL migration files plus a `migrations.js` bundle.\n5. Let Metro and Babel import `.sql` files (`sourceExts.push('sql')` and the `inline-import` plugin), so the migrations ship **inside the app bundle**.\n6. In the root layout, `useMigrations(db, migrations)` returns `{ success, error }`; render the app only after `success`.\n7. Read with `useLiveQuery(db.select()...)`, which re-renders when the underlying table changes.\n\n**Is it worth it?** Here, yes: 12 tables, typos and type mismatches are exactly what a typed schema and generated migrations fix, and queries stay close to SQL. For a 2-table app, raw `expo-sqlite` with a few typed helpers is simpler. Since the database already exists, I'd make the Drizzle schema match the current tables exactly and introduce it carefully (baseline), rather than letting a generated \"create everything\" migration run against existing users' data.",
+   "bn": "**Setup**\n1. `drizzle-orm` install করো, আর dev dependency হিসেবে `drizzle-kit`, সাথে `babel-plugin-inline-import`।\n2. Schema TypeScript-এ লেখো (`sqliteTable`), যাতে row type এক জায়গা থেকেই আসে: `typeof expenses.$inferSelect`।\n3. Client বানাও: `drizzle-orm/expo-sqlite` থেকে `drizzle(openDatabaseSync('app.db', { enableChangeListener: true }), { schema })`।\n4. `dialect: 'sqlite'` আর **`driver: 'expo'`**-সহ `drizzle.config.ts`, তারপর `npx drizzle-kit generate`। এটা SQL migration file আর একটা `migrations.js` bundle লেখে।\n5. Metro আর Babel-কে `.sql` file import করতে দাও (`sourceExts.push('sql')` আর `inline-import` plugin), যাতে migration **app bundle-এর ভেতরেই** যায়।\n6. Root layout-এ `useMigrations(db, migrations)` `{ success, error }` return করে; `success` হওয়ার পরেই app render করো।\n7. `useLiveQuery(db.select()...)` দিয়ে পড়ো, যেটা নিচের table বদলালে re-render করে।\n\n**লাভ আছে কি?** এখানে হ্যাঁ: 12টা table, typo আর type mismatch ঠিক সেই সমস্যা যেটা typed schema আর generate করা migration সমাধান করে, আর query SQL-এর কাছাকাছিই থাকে। 2-table-এর app-এর জন্য কয়েকটা typed helper-সহ raw `expo-sqlite` বেশি সহজ। যেহেতু database আগে থেকেই আছে, আমি Drizzle schema-কে বর্তমান table-এর সাথে হুবহু মিলিয়ে সাবধানে (baseline করে) চালু করব, পুরনো user-দের data-র ওপর generate করা \"সব কিছু create করো\" migration চলতে দেব না।"
+  },
+  "explanation": {
+   "en": "**Trade-offs to state honestly**\n- **Pros:** types inferred from the schema, compile-time errors for wrong columns, reviewable SQL migrations in git, a query builder that maps 1:1 to SQL (`db.select().from(...).where(...)`), placeholders bound automatically.\n- **Cons:** extra dependency and build config (Metro/Babel), migrations run at app start so a bad one blocks launch for every user, and an ORM doesn't remove the need to understand indexes and query plans.\n- **Live queries** re-run the whole query when a table it reads changes. That's fine for a screen of 50 rows; for big lists combine it with `LIMIT` and pagination.\n- **Don't mix migration systems** on one database: either drizzle-kit migrations or hand-written `user_version` steps.\n- **Tooling:** Drizzle Studio's Expo dev-tools plugin (`expo-drizzle-studio-plugin`) lets you browse the on-device database during development.\n- **Version note:** this uses the stable Drizzle 0.45 API. At the time of writing the Drizzle Expo guide installs the 1.0 release candidate (`drizzle-orm@rc`); treat v1 as preview until it's stable, and check its migration-format changes before upgrading.\n- **Money:** store amounts as integers in the smallest unit (poisha) to avoid floating-point rounding.",
+   "bn": "**সৎভাবে বলার মতো trade-off**\n- **সুবিধা:** schema থেকে type infer হয়, ভুল column-এ compile-time error, git-এ review করার মতো SQL migration, SQL-এর সাথে 1:1 মেলে এমন query builder (`db.select().from(...).where(...)`), placeholder আপনা-আপনি bind হয়।\n- **অসুবিধা:** বাড়তি dependency আর build config (Metro/Babel), migration app start-এ চলে বলে একটা খারাপ migration সব user-এর launch আটকে দেয়, আর ORM থাকলেও index আর query plan বোঝার দরকার ফুরায় না।\n- **Live query** যে table পড়ে সেটা বদলালে পুরো query আবার চালায়। 50 row-এর screen-এ সমস্যা নেই; বড় list-এর জন্য `LIMIT` আর pagination-এর সাথে ব্যবহার করো।\n- **একই database-এ দুই migration system মেশাবে না:** হয় drizzle-kit migration, নয়তো হাতে লেখা `user_version` ধাপ।\n- **Tooling:** Drizzle Studio-র Expo dev-tools plugin (`expo-drizzle-studio-plugin`) দিয়ে development-এর সময় device-এর database দেখা যায়।\n- **Version note:** এখানে stable Drizzle 0.45 API ব্যবহার করা হয়েছে। এই লেখার সময় Drizzle-এর Expo guide 1.0 release candidate (`drizzle-orm@rc`) install করে; v1 stable না হওয়া পর্যন্ত একে preview হিসেবে ধরো, আর upgrade-এর আগে migration format-এর পরিবর্তন দেখে নাও।\n- **টাকা:** floating-point rounding এড়াতে amount সবচেয়ে ছোট unit-এ (পয়সা) integer হিসেবে রাখো।"
+  },
+  "interviewTip": {
+   "en": "Structure it as setup → migration strategy for existing users → when not to use it. The \"existing database baseline\" point is what separates someone who has migrated a real app from someone who followed a tutorial.",
+   "bn": "এভাবে সাজাও: setup → পুরনো user-দের জন্য migration strategy → কখন ব্যবহার করবে না। \"আগে থেকে থাকা database-এর baseline\" কথাটাই আসল app migrate করা মানুষকে tutorial দেখা মানুষ থেকে আলাদা করে।"
+  },
+  "references": [
+   {
+    "title": "Drizzle ORM — Expo SQLite",
+    "url": "https://orm.drizzle.team/docs/connect-expo-sqlite"
+   },
+   {
+    "title": "Expo docs — SQLite (expo-sqlite)",
+    "url": "https://docs.expo.dev/versions/latest/sdk/sqlite/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "A generated migration fails on some users' devices at startup. How do you recover?",
+    "bn": "Generate করা একটা migration কিছু user-এর device-এ startup-এ fail করছে। কীভাবে সামলাবে?"
+   },
+   {
+    "en": "How does `useLiveQuery` know when to re-run, and what does it cost?",
+    "bn": "`useLiveQuery` কীভাবে বোঝে কখন আবার চালাতে হবে, আর এর খরচ কী?"
+   }
+  ],
+  "related": [
+   "rn-023",
+   "drizzle-001",
+   "drizzle-017"
+  ],
+  "quickAnswer": {
+   "en": "Write the schema with `sqliteTable`, create the client with `drizzle()` from `drizzle-orm/expo-sqlite`, generate migrations with drizzle-kit (`driver: 'expo'`), bundle them via Metro/Babel, apply them with `useMigrations`, and read with `useLiveQuery`. Worth it for many tables; tiny apps can stay on raw SQL.",
+   "bn": "`sqliteTable` দিয়ে schema লেখো, `drizzle-orm/expo-sqlite`-এর `drizzle()` দিয়ে client বানাও, drizzle-kit (`driver: 'expo'`) দিয়ে migration generate করো, Metro/Babel দিয়ে `.sql` file bundle করো, `useMigrations` দিয়ে চালাও, আর `useLiveQuery` দিয়ে পড়ো। অনেক table আর typed query থাকলে লাভ বেশি; ছোট app raw SQL-এই থাকতে পারে।"
+  },
+  "commonMistakes": {
+   "en": "Forgetting `driver: 'expo'` or the Metro/Babel `.sql` config (migrations fail to bundle), rendering screens before `useMigrations` reports success, and using `drizzle-kit push` (a direct dev-database sync) as if it were a migration strategy for installed apps.",
+   "bn": "`driver: 'expo'` বা Metro/Babel-এর `.sql` config ভুলে যাওয়া (migration bundle হয় না), `useMigrations` success জানানোর আগেই screen render করা, আর `drizzle-kit push`-কে (সরাসরি dev database sync) install করা app-এর migration strategy মনে করা।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// src/db/schema.ts\nimport { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';\n\nexport const expenses = sqliteTable(\n  'expenses',\n  {\n    id: integer('id').primaryKey({ autoIncrement: true }),\n    title: text('title').notNull(),\n    amount: integer('amount').notNull(), // poisha, not floating-point taka\n    category: text('category').notNull(),\n    spentAt: integer('spent_at', { mode: 'timestamp_ms' }).notNull(),\n  },\n  (t) => [index('expenses_spent_at_idx').on(t.spentAt)],\n);\nexport type Expense = typeof expenses.$inferSelect;\n\n// src/db/client.ts\nimport { drizzle } from 'drizzle-orm/expo-sqlite';\nimport { openDatabaseSync } from 'expo-sqlite';\nimport * as schema from './schema';\n\nconst expo = openDatabaseSync('app.db', { enableChangeListener: true });\nexport const db = drizzle(expo, { schema });\n\n// src/app/_layout.tsx\nimport { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';\nimport { Stack } from 'expo-router';\nimport { ActivityIndicator, Text } from 'react-native';\nimport migrations from '../../drizzle/migrations';\nimport { db } from '../db/client';\n\nexport default function RootLayout() {\n  const { success, error } = useMigrations(db, migrations);\n  if (error) return <Text>Database upgrade failed: {error.message}</Text>;\n  if (!success) return <ActivityIndicator />;\n  return <Stack />;\n}\n\n// src/app/index.tsx (excerpt)\nimport { desc } from 'drizzle-orm';\nimport { useLiveQuery } from 'drizzle-orm/expo-sqlite';\nimport { db } from '../db/client';\nimport { expenses } from '../db/schema';\n\nconst { data } = useLiveQuery(\n  db.select().from(expenses).orderBy(desc(expenses.spentAt)).limit(50),\n);\nawait db.insert(expenses).values({ title: 'Rickshaw', amount: 8000, category: 'transport', spentAt: new Date() });"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "// drizzle.config.ts\nimport { defineConfig } from 'drizzle-kit';\n\nexport default defineConfig({\n  dialect: 'sqlite',\n  driver: 'expo',\n  schema: './src/db/schema.ts',\n  out: './drizzle',\n});\n\n// metro.config.js\nconst { getDefaultConfig } = require('expo/metro-config');\nconst config = getDefaultConfig(__dirname);\nconfig.resolver.sourceExts.push('sql');\nmodule.exports = config;\n\n// babel.config.js\nmodule.exports = function (api) {\n  api.cache(true);\n  return {\n    presets: ['babel-preset-expo'],\n    plugins: [['inline-import', { extensions: ['.sql'] }]],\n  };\n};\n\n// then: npx drizzle-kit generate",
+    "label": {
+     "en": "Config files",
+     "bn": "Config file"
+    }
+   }
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-027",
+  "subtopic": "Offline-First",
+  "difficulty": "extreme",
+  "type": "system-design",
+  "market": "international",
+  "priority": "medium",
+  "estimatedMinutes": 20,
+  "tags": [
+   "offline-first",
+   "sync",
+   "outbox",
+   "idempotency",
+   "conflict-resolution",
+   "expo-sqlite"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-sqlite ~58), React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Design an offline-first field-sales app in React Native/Expo: sales reps create and edit orders and notes in areas with no signal for hours, and the data must sync to the server when they're back online, possibly from two devices. Cover local storage, the sync protocol, conflicts, idempotency and failure cases.",
+   "bn": "React Native/Expo-তে একটা offline-first field-sales app design করো: sales rep-রা এমন এলাকায় order আর note তৈরি ও edit করে যেখানে ঘণ্টার পর ঘণ্টা network থাকে না, আর online ফিরলে data server-এ sync হতে হবে, হয়তো দুইটা device থেকে। Local storage, sync protocol, conflict, idempotency আর failure case-গুলো আলোচনা করো।"
+  },
+  "answer": {
+   "en": "*(Advanced, senior-level question.)*\n\n**Requirements:** every action works offline; nothing the user saved is ever lost; syncing twice never creates duplicates; the server stays authoritative for prices and stock.\n\n**Local layer: SQLite is the source of truth for the UI.** Screens read only from `expo-sqlite` (live queries or change listeners), never straight from the network. Records get **client-generated UUIDs**, so they have stable ids before the server sees them.\n\n**Outbox.** Every user change runs in one local transaction that (1) updates the row and (2) appends an operation to an `outbox` table with a unique `op_id`. A crash can't leave one without the other.\n\n**Push.** A single sync worker sends outbox ops **in order**, each with `Idempotency-Key: op_id` and the `base_version` it was edited from. The server stores processed keys, so a retry after a lost response returns the same result instead of creating a second order. Success → save `server_version`, delete the op. Network error or 5xx/429 → stop and back off. 4xx/409 → park the op and show it to the user, so one bad op doesn't block the queue forever.\n\n**Pull.** `GET /changes?since=<cursor>` returns rows changed since the last cursor, including **tombstones** for deletes. Rows with a pending local op aren't overwritten. The cursor is saved in the same transaction as the rows.\n\n**Conflicts:** use server versions, not device clocks. Notes: field-level merge or keep both copies. Orders: send *intents* (\"add 2 × item X\"), and let the server validate stock and price and reject or adjust.\n\n**Triggers:** after each write, on reconnect (NetInfo), when the app returns to the foreground, and opportunistically in a background task.",
+   "bn": "*(Advanced, senior-level প্রশ্ন।)*\n\n**Requirement:** প্রতিটা কাজ offline-এ চলবে; user যা save করেছে তা কখনো হারাবে না; দুইবার sync করলেও duplicate হবে না; price আর stock-এর ব্যাপারে server-ই চূড়ান্ত।\n\n**Local layer: UI-এর source of truth হলো SQLite।** Screen শুধু `expo-sqlite` থেকে পড়ে (live query বা change listener), সরাসরি network থেকে কখনো না। Record-গুলো **client-এ generate করা UUID** পায়, তাই server দেখার আগেই এদের স্থির id থাকে।\n\n**Outbox।** User-এর প্রতিটা পরিবর্তন একটা local transaction-এ চলে, যেটা (1) row update করে আর (2) unique `op_id`-সহ একটা operation `outbox` table-এ যোগ করে। Crash হলেও একটা হবে আর অন্যটা হবে না, এমন অবস্থা তৈরি হয় না।\n\n**Push।** একটাই sync worker outbox-এর op-গুলো **ক্রমানুসারে** পাঠায়, প্রতিটার সাথে `Idempotency-Key: op_id` আর যে `base_version` থেকে edit হয়েছে সেটা। Server process করা key রেখে দেয়, তাই response হারিয়ে গিয়ে retry হলেও দ্বিতীয় order তৈরি না হয়ে একই result ফেরত আসে। Success → `server_version` save করো, op মুছে ফেলো। Network error বা 5xx/429 → থামো আর back off করো। 4xx/409 → op-টা park করে user-কে দেখাও, যাতে একটা খারাপ op চিরকাল queue আটকে না রাখে।\n\n**Pull।** `GET /changes?since=<cursor>` শেষ cursor-এর পর বদলানো row ফেরত দেয়, delete-এর জন্য **tombstone**-সহ। যে row-এর local op এখনো pending, সেটা overwrite হয় না। Cursor row-গুলোর সাথে একই transaction-এ save হয়।\n\n**Conflict:** device-এর clock না, server version ব্যবহার করো। Note: field-level merge, অথবা দুইটা copy-ই রাখো। Order: *intent* পাঠাও (\"item X × 2 যোগ করো\"), আর server stock ও price validate করে reject বা adjust করুক।\n\n**কখন sync চলবে:** প্রতিটা write-এর পরে, network ফিরলে (NetInfo), app foreground-এ ফিরলে, আর সুযোগ পেলে background task-এ।"
+  },
+  "explanation": {
+   "en": "**Failure cases and how the design handles them**\n- **Response lost after the server committed:** the retry carries the same `op_id`, and the server returns the stored result: no duplicate order.\n- **App killed mid-sync:** ops are deleted only after success, inside a local transaction, so the worst case is a safe re-send.\n- **Two pushes at once** (reconnect + foreground): one in-process lock (`pushing` flag) so ops never go out of order.\n- **Device clock wrong** (common on cheap phones): ordering uses server versions and the server's change cursor; client timestamps are for display only.\n- **Auth token expired mid-sync:** refresh and continue; if refresh fails, keep the outbox and ask the user to sign in. Never drop unsynced data on logout without warning.\n- **Huge first sync:** paginate the pull and write each page in one transaction.\n- **Schema changes:** both the local migrations and the API must tolerate old app versions still sending old op formats; version the payload.\n\n**Other points worth raising:** show sync status in the UI (pending badge, \"last synced\"), cap retries with exponential backoff and jitter, encrypt the local database (SQLCipher) if it holds customer personal data, and wipe it on logout. Libraries such as WatermelonDB, PowerSync or Replicache implement parts of this; the Expo docs have a local-first guide. I'd still be able to explain the outbox/idempotency core myself.",
+   "bn": "**Failure case আর design কীভাবে সামলায়**\n- **Server commit করার পরে response হারিয়ে গেল:** retry একই `op_id` নিয়ে যায়, আর server রেখে দেওয়া result ফেরত দেয়: duplicate order হয় না।\n- **Sync-এর মাঝখানে app kill হলো:** op শুধু success-এর পরে, local transaction-এর ভেতরে মোছা হয়, তাই সবচেয়ে খারাপ অবস্থায় নিরাপদে আবার পাঠানো হয়।\n- **একসাথে দুইটা push** (reconnect + foreground): একটা in-process lock (`pushing` flag), যাতে op কখনো ক্রম ভেঙে না যায়।\n- **Device-এর clock ভুল** (সস্তা phone-এ প্রায়ই হয়): ক্রম ঠিক হয় server version আর server-এর change cursor দিয়ে; client timestamp শুধু দেখানোর জন্য।\n- **Sync-এর মাঝখানে auth token expire:** refresh করে চালিয়ে যাও; refresh fail করলে outbox রেখে দিয়ে user-কে sign in করতে বলো। সতর্ক না করে logout-এ কখনো unsynced data ফেলে দিও না।\n- **বিশাল প্রথম sync:** pull paginate করো, আর প্রতিটা page এক transaction-এ লেখো।\n- **Schema পরিবর্তন:** local migration আর API দুইটাকেই পুরনো app version থেকে আসা পুরনো op format সহ্য করতে হবে; payload-এ version রাখো।\n\n**আরও যা বলার মতো:** UI-তে sync status দেখাও (pending badge, \"last synced\"), exponential backoff আর jitter দিয়ে retry সীমিত করো, local database-এ customer-এর personal data থাকলে encrypt করো (SQLCipher), আর logout-এ মুছে ফেলো। WatermelonDB, PowerSync বা Replicache-এর মতো library এর কিছু অংশ implement করে; Expo docs-এ একটা local-first guide-ও আছে। তবুও outbox/idempotency-র মূল অংশ আমি নিজে ব্যাখ্যা করতে পারা উচিত।"
+  },
+  "interviewTip": {
+   "en": "Lead with the two invariants: \"the UI reads only from SQLite\" and \"every change is written with its outbox op in one transaction\". Then walk through push, pull and conflicts, and finish with two or three failure cases; interviewers grade the failure cases most.",
+   "bn": "দুইটা invariant দিয়ে শুরু করো: \"UI শুধু SQLite থেকে পড়ে\" আর \"প্রতিটা পরিবর্তন তার outbox op-সহ এক transaction-এ লেখা হয়\"। তারপর push, pull আর conflict ব্যাখ্যা করো, আর শেষ করো দুই-তিনটা failure case দিয়ে; interviewer সবচেয়ে বেশি নম্বর দেয় failure case-এ।"
+  },
+  "references": [
+   {
+    "title": "Expo docs — Local-first architecture",
+    "url": "https://docs.expo.dev/guides/local-first/"
+   },
+   {
+    "title": "Expo docs — SQLite (expo-sqlite)",
+    "url": "https://docs.expo.dev/versions/latest/sdk/sqlite/"
+   },
+   {
+    "title": "SQLite — UPSERT",
+    "url": "https://www.sqlite.org/lang_upsert.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Rep A and rep B edit the same order's quantity offline. Walk through what happens when both sync.",
+    "bn": "Rep A আর rep B offline অবস্থায় একই order-এর quantity edit করল। দুজনেই sync করলে কী হয়, ধাপে ধাপে বলো।"
+   },
+   {
+    "en": "How does the server implement idempotency keys, and how long does it keep them?",
+    "bn": "Server idempotency key কীভাবে implement করে, আর কতদিন রাখে?"
+   },
+   {
+    "en": "How would you test this sync logic without real devices going offline?",
+    "bn": "সত্যিকারের device offline না করেই এই sync logic কীভাবে test করবে?"
+   }
+  ],
+  "related": [
+   "rn-021",
+   "rn-029",
+   "rn-031"
+  ],
+  "quickAnswer": {
+   "en": "Make SQLite the UI's source of truth, write each change and an outbox op (with a unique `op_id`) in one transaction, push ops in order with that id as an idempotency key, and pull server changes with a cursor and tombstones. Resolve conflicts with server versions, not device clocks.",
+   "bn": "SQLite-কে UI-এর source of truth বানাও, প্রতিটা পরিবর্তন আর একটা outbox op (unique `op_id`-সহ) এক transaction-এ লেখো, ওই id idempotency key হিসেবে দিয়ে op-গুলো ক্রমানুসারে push করো, আর cursor আর tombstone দিয়ে server-এর পরিবর্তন pull করো। Conflict সমাধান করো server version দিয়ে, device clock দিয়ে না।"
+  },
+  "commonMistakes": {
+   "en": "Using last-write-wins on device timestamps, retrying POSTs without an idempotency key (duplicate orders), letting screens read from the API cache while writes go to SQLite (two sources of truth), and deleting outbox rows before the server confirms.",
+   "bn": "Device timestamp দিয়ে last-write-wins করা, idempotency key ছাড়া POST retry করা (duplicate order), write SQLite-এ গেলেও screen-কে API cache থেকে পড়তে দেওয়া (দুইটা source of truth), আর server confirm করার আগেই outbox row মুছে ফেলা।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "CREATE TABLE notes (\n  id TEXT PRIMARY KEY NOT NULL,        -- client-generated UUID\n  title TEXT NOT NULL,\n  body TEXT NOT NULL DEFAULT '',\n  updated_at INTEGER NOT NULL,         -- device time, display only\n  server_version INTEGER,              -- NULL until first successful push\n  deleted INTEGER NOT NULL DEFAULT 0   -- tombstone\n);\n\nCREATE TABLE outbox (\n  seq INTEGER PRIMARY KEY AUTOINCREMENT,\n  op_id TEXT NOT NULL UNIQUE,          -- sent as the Idempotency-Key\n  entity_id TEXT NOT NULL,\n  op TEXT NOT NULL CHECK (op IN ('upsert', 'delete')),\n  payload TEXT NOT NULL,               -- JSON\n  base_version INTEGER,                -- server version the edit started from\n  attempts INTEGER NOT NULL DEFAULT 0,\n  parked INTEGER NOT NULL DEFAULT 0,   -- needs user attention (409 / validation error)\n  last_error TEXT\n);\n\nCREATE TABLE sync_state (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);\n\n-- A local edit: row + outbox op in ONE transaction\nBEGIN;\nINSERT INTO notes (id, title, body, updated_at) VALUES (?, ?, ?, ?)\n  ON CONFLICT (id) DO UPDATE SET\n    title = excluded.title, body = excluded.body, updated_at = excluded.updated_at;\nINSERT INTO outbox (op_id, entity_id, op, payload, base_version) VALUES (?, ?, 'upsert', ?, ?);\nCOMMIT;\n\n-- Pull: apply a server row unless a local change is still pending\nINSERT INTO notes (id, title, body, updated_at, server_version, deleted) VALUES (?, ?, ?, ?, ?, ?)\n  ON CONFLICT (id) DO UPDATE SET\n    title = excluded.title, body = excluded.body, updated_at = excluded.updated_at,\n    server_version = excluded.server_version, deleted = excluded.deleted\n  WHERE NOT EXISTS (SELECT 1 FROM outbox WHERE outbox.entity_id = excluded.id);"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "import type { SQLiteDatabase } from 'expo-sqlite';\n\ntype OutboxRow = {\n  seq: number; op_id: string; entity_id: string;\n  op: 'upsert' | 'delete'; payload: string; base_version: number | null;\n};\n\nlet pushing = false;\n\nexport async function pushOutbox(\n  db: SQLiteDatabase,\n  send: (row: OutboxRow) => Promise<Response>, // sets Idempotency-Key: row.op_id\n): Promise<'done' | 'offline' | 'retry-later'> {\n  if (pushing) return 'done'; // one push loop at a time keeps ops in order\n  pushing = true;\n  try {\n    const rows = await db.getAllAsync<OutboxRow>(\n      `SELECT seq, op_id, entity_id, op, payload, base_version\n         FROM outbox WHERE parked = 0 ORDER BY seq LIMIT 50`,\n    );\n    for (const row of rows) {\n      let res: Response;\n      try {\n        res = await send(row);\n      } catch {\n        return 'offline'; // keep the op; try again on reconnect\n      }\n      if (res.ok) {\n        const { serverVersion } = await res.json();\n        await db.withTransactionAsync(async () => {\n          await db.runAsync('UPDATE notes SET server_version = ? WHERE id = ?', serverVersion, row.entity_id);\n          await db.runAsync('DELETE FROM outbox WHERE seq = ?', row.seq);\n        });\n      } else if (res.status === 429 || res.status >= 500) {\n        await db.runAsync(\n          'UPDATE outbox SET attempts = attempts + 1, last_error = ? WHERE seq = ?',\n          `HTTP ${res.status}`, row.seq,\n        );\n        return 'retry-later'; // back off, keep the order\n      } else {\n        // 409 conflict or validation error: park it, show it in the UI, don't block the queue\n        await db.runAsync('UPDATE outbox SET parked = 1, last_error = ? WHERE seq = ?', `HTTP ${res.status}`, row.seq);\n      }\n    }\n    return 'done';\n  } finally {\n    pushing = false;\n  }\n}",
+    "label": {
+     "en": "Push loop (logic tested with node:sqlite and a fake server)",
+     "bn": "Push loop (node:sqlite আর একটা fake server দিয়ে logic test করা)"
+    }
+   }
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-028",
+  "subtopic": "State Management",
+  "difficulty": "medium",
+  "type": "comparison",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 5,
+  "tags": [
+   "state-management",
+   "context",
+   "zustand",
+   "redux-toolkit",
+   "tanstack-query"
+  ],
+  "technologyVersion": "React 19.3, React Native 0.88 (Zustand 5, Redux Toolkit 2, TanStack Query 5)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "In a React Native app, when would you use React Context, a store like Zustand or Redux Toolkit, and TanStack Query? Where would you keep the logged-in user, the cart, and the product list from the API?",
+   "bn": "একটা React Native app-এ কখন React Context, Zustand বা Redux Toolkit-এর মতো store, আর TanStack Query ব্যবহার করবে? Logged-in user, cart, আর API থেকে আসা product list তুমি কোথায় রাখবে?"
+  },
+  "answer": {
+   "en": "I first split state by **who owns it**:\n\n- **Server state** (product list, orders, profile from the API) is a cache of data that lives on the server. It needs fetching, caching, deduping, refetching and invalidation, so it goes in **TanStack Query** (or RTK Query). The **product list** belongs here.\n- **Client state** that many screens change, like the **cart**, goes in a small store. **Zustand** is minimal, has no provider, and lets components subscribe to a slice with a selector, so only they re-render. **Redux Toolkit** gives the same with more structure (slices, DevTools, middleware), which helps larger teams.\n- **Context** is a way to pass a value down the tree, not a state manager. It's ideal for values that rarely change: theme, locale, the **logged-in user/session**, the database handle. Every consumer re-renders when the value changes, so it's a poor fit for fast-changing state.\n\nLocal UI state (an input's text, a modal open flag) stays in `useState` in the component.",
+   "bn": "আমি প্রথমে state ভাগ করি **কার মালিকানা** দিয়ে:\n\n- **Server state** (product list, order, API থেকে আসা profile) হলো server-এ থাকা data-র একটা cache। এর জন্য fetching, caching, dedupe, refetch আর invalidation লাগে, তাই এটা যায় **TanStack Query**-তে (বা RTK Query)। **Product list** এখানে।\n- অনেক screen যে client state বদলায়, যেমন **cart**, সেটা যায় একটা ছোট store-এ। **Zustand** ছোট, provider লাগে না, আর component selector দিয়ে একটা অংশে subscribe করতে পারে, ফলে শুধু তারাই re-render হয়। **Redux Toolkit** একই জিনিস আরও structure-সহ দেয় (slice, DevTools, middleware), যেটা বড় team-এ কাজে লাগে।\n- **Context** হলো tree-র নিচে value পাঠানোর উপায়, state manager না। কম বদলায় এমন value-র জন্য আদর্শ: theme, locale, **logged-in user/session**, database handle। Value বদলালে প্রতিটা consumer re-render হয়, তাই দ্রুত বদলানো state-এর জন্য এটা ভালো না।\n\nLocal UI state (input-এর text, modal open flag) component-এর `useState`-এই থাকে।"
+  },
+  "explanation": {
+   "en": "- **Mobile specifics for TanStack Query:** it doesn't know about app focus or connectivity in React Native by default. Wire `focusManager` to `AppState` (refetch when the app returns to the foreground) and `onlineManager` to NetInfo (pause when offline). Persist the cache with a persister if the app should show data on a cold start offline.\n- **Re-render cost:** putting the cart in Context means every consumer re-renders on each change. With Zustand, `useCart((s) => s.items[id])` re-renders only when that value changes.\n- **Don't copy server data into a store** and sync it by hand; that creates two sources of truth and stale bugs. Read it from the query cache.\n- **Persisting client state:** Zustand's `persist` middleware with AsyncStorage or MMKV keeps the cart across launches. Never persist tokens this way; use SecureStore.\n- **Legacy:** classic Redux with hand-written action types, `connect()` and no Toolkit is legacy; new Redux code uses Redux Toolkit (`createSlice`, `configureStore`).",
+   "bn": "- **TanStack Query-এর mobile-নির্দিষ্ট বিষয়:** default-ভাবে এটা React Native-এ app focus বা connectivity জানে না। `focusManager`-কে `AppState`-এর সাথে যুক্ত করো (app foreground-এ ফিরলে refetch) আর `onlineManager`-কে NetInfo-র সাথে (offline হলে থেমে থাকে)। Offline অবস্থায় cold start-এ data দেখাতে চাইলে persister দিয়ে cache persist করো।\n- **Re-render-এর খরচ:** cart Context-এ রাখলে প্রতিটা পরিবর্তনে সব consumer re-render হয়। Zustand-এ `useCart((s) => s.items[id])` শুধু সেই value বদলালেই re-render হয়।\n- **Server data store-এ copy করে হাতে sync কোরো না**; এতে দুইটা source of truth আর stale data-র bug তৈরি হয়। Query cache থেকেই পড়ো।\n- **Client state persist করা:** AsyncStorage বা MMKV-সহ Zustand-এর `persist` middleware cart-কে launch-এর পরেও রেখে দেয়। Token কখনো এভাবে persist কোরো না; SecureStore ব্যবহার করো।\n- **Legacy:** হাতে লেখা action type, `connect()` আর Toolkit ছাড়া classic Redux এখন legacy; নতুন Redux code Redux Toolkit (`createSlice`, `configureStore`) ব্যবহার করে।"
+  },
+  "interviewTip": {
+   "en": "Start with \"server state vs client state\". That one distinction answers most of the question, and then naming the RN-specific wiring (AppState, NetInfo) shows you've shipped a real mobile app.",
+   "bn": "\"Server state বনাম client state\" দিয়ে শুরু করো। এই একটা পার্থক্যই প্রশ্নের বেশিরভাগ উত্তর দেয়, তারপর RN-নির্দিষ্ট wiring (AppState, NetInfo)-এর কথা বললে বোঝা যায় তুমি সত্যিকারের mobile app ship করেছ।"
+  },
+  "references": [
+   {
+    "title": "react.dev — Passing Data Deeply with Context",
+    "url": "https://react.dev/learn/passing-data-deeply-with-context"
+   },
+   {
+    "title": "Zustand (GitHub)",
+    "url": "https://github.com/pmndrs/zustand"
+   },
+   {
+    "title": "TanStack Query (GitHub)",
+    "url": "https://github.com/TanStack/query"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you make TanStack Query refetch when the app comes back to the foreground in React Native?",
+    "bn": "React Native-এ app foreground-এ ফিরলে TanStack Query কীভাবে refetch করাবে?"
+   },
+   {
+    "en": "When would you choose Redux Toolkit over Zustand?",
+    "bn": "কখন Zustand-এর বদলে Redux Toolkit বেছে নেবে?"
+   }
+  ],
+  "related": [
+   "rn-029",
+   "react-008",
+   "react-017"
+  ],
+  "quickAnswer": {
+   "en": "Split state by owner: server data like the product list goes in TanStack Query (caching, refetching, invalidation); shared client state like the cart goes in Zustand or Redux Toolkit with selectors; rarely-changing values like the session or theme go through Context. Local UI state stays in `useState`.",
+   "bn": "State-কে মালিক অনুযায়ী ভাগ করো: product list-এর মতো server data যায় TanStack Query-তে (caching, refetch, invalidation); cart-এর মতো shared client state যায় selector-সহ Zustand বা Redux Toolkit-এ; session বা theme-এর মতো কম বদলানো value যায় Context দিয়ে। Local UI state থাকে `useState`-এ।"
+  },
+  "commonMistakes": {
+   "en": "Fetching in `useEffect` and storing the response in Redux/Zustand by hand, putting fast-changing state in one big Context, and treating \"which library\" as more important than \"who owns this data\".",
+   "bn": "`useEffect`-এ fetch করে response হাতে Redux/Zustand-এ রাখা, দ্রুত বদলানো state একটা বড় Context-এ রাখা, আর \"কোন library\" প্রশ্নটাকে \"এই data-র মালিক কে\"-এর চেয়ে বেশি গুরুত্ব দেওয়া।"
+  },
+  "code": {
+   "language": "tsx",
+   "source": "// Client state shared by many screens: Zustand\nimport { create } from 'zustand';\n\ntype CartState = {\n  items: Record<string, number>;\n  add: (productId: string) => void;\n  clear: () => void;\n};\n\nexport const useCart = create<CartState>()((set) => ({\n  items: {},\n  add: (id) => set((s) => ({ items: { ...s.items, [id]: (s.items[id] ?? 0) + 1 } })),\n  clear: () => set({ items: {} }),\n}));\n\n// Server state: TanStack Query\nimport { useQuery } from '@tanstack/react-query';\n\ntype Product = { id: string; name: string; price: number };\n\nexport function useProducts() {\n  return useQuery({\n    queryKey: ['products'],\n    queryFn: async (): Promise<Product[]> => {\n      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products`);\n      if (!res.ok) throw new Error(`HTTP ${res.status}`);\n      return res.json();\n    },\n    staleTime: 60_000,\n  });\n}\n\n// A row subscribes only to its own quantity\nfunction CartBadge({ productId }: { productId: string }) {\n  const qty = useCart((s) => s.items[productId] ?? 0);\n  return qty > 0 ? <Text>{qty}</Text> : null;\n}"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-029",
+  "subtopic": "Networking",
+  "difficulty": "medium",
+  "type": "scenario",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 7,
+  "tags": [
+   "fetch",
+   "abortcontroller",
+   "retry",
+   "backoff",
+   "netinfo",
+   "offline"
+  ],
+  "technologyVersion": "React Native 0.88, Expo SDK 58 (@react-native-community/netinfo)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Users on mobile data report that the order list \"spins forever\" in places with weak signal, and that tapping **Retry** quickly sometimes sends duplicate requests. How would you make networking in your React Native app robust on flaky networks?",
+   "bn": "Mobile data ব্যবহার করা user-রা জানাচ্ছে, দুর্বল signal-এর জায়গায় order list \"চিরকাল ঘুরতেই থাকে\", আর দ্রুত **Retry** চাপলে মাঝে মাঝে duplicate request যায়। দুর্বল network-এ তোমার React Native app-এর networking কীভাবে মজবুত করবে?"
+  },
+  "answer": {
+   "en": "**1. Always time out.** `fetch` has no default timeout, so a stalled connection can hang for a long time. I wrap it with an `AbortController` that aborts after ~10 s and always clear the timer in `finally`.\n\n**2. Retry only what's safe, with backoff.** Retry network errors, timeouts and 408/429/5xx, but not other 4xx. Use exponential backoff with **jitter** (random delay) so thousands of phones don't retry in sync, and cap the attempts. Only retry idempotent requests (GET/PUT, or POST with an `Idempotency-Key`), otherwise a retried \"place order\" can create two orders.\n\n**3. Know when you're offline.** NetInfo (`useNetInfo()`) drives an offline banner and pauses work; TanStack Query's `onlineManager` can be connected to it so queries pause offline and refetch on reconnect. `isInternetReachable` can be `null` at first, so treat \"unknown\" carefully.\n\n**4. Fix the UX.** Show cached data with a \"last updated\" note instead of a spinner, give an explicit error state with Retry, disable the button while a request is in flight, and dedupe identical requests (TanStack Query does this per query key). Cancel requests when the screen unmounts.",
+   "bn": "**1. সবসময় timeout রাখো।** `fetch`-এর কোনো default timeout নেই, তাই আটকে যাওয়া connection অনেকক্ষণ ঝুলে থাকতে পারে। আমি এটাকে একটা `AbortController` দিয়ে wrap করি, যেটা ~10 s পরে abort করে, আর `finally`-তে সবসময় timer clear করি।\n\n**2. শুধু নিরাপদ request retry করো, backoff দিয়ে।** Network error, timeout আর 408/429/5xx retry করো, বাকি 4xx না। **Jitter** (random delay)-সহ exponential backoff ব্যবহার করো, যাতে হাজার হাজার phone একসাথে retry না করে, আর attempt-এর সংখ্যা সীমিত রাখো। শুধু idempotent request retry করো (GET/PUT, বা `Idempotency-Key`-সহ POST), নইলে retry হওয়া \"place order\" দুইটা order বানিয়ে ফেলতে পারে।\n\n**3. কখন offline সেটা জানো।** NetInfo (`useNetInfo()`) দিয়ে offline banner দেখাও আর কাজ থামাও; TanStack Query-র `onlineManager` এর সাথে যুক্ত করা যায়, যাতে offline-এ query থেমে থাকে আর network ফিরলে refetch হয়। `isInternetReachable` শুরুতে `null` হতে পারে, তাই \"অজানা\" অবস্থাটা সাবধানে handle করো।\n\n**4. UX ঠিক করো।** Spinner-এর বদলে cached data আর \"last updated\" note দেখাও, Retry-সহ পরিষ্কার error state দাও, request চলার সময় button disable রাখো, আর একই request dedupe করো (TanStack Query query key অনুযায়ী এটা করে)। Screen unmount হলে request cancel করো।"
+  },
+  "explanation": {
+   "en": "- **Clarify first:** which calls are reads vs writes, whether the API supports idempotency keys, and what users should see offline.\n- **Tested behaviour of the helper below** (run in Node with a fake `fetch`): a hang, then 503, then a network error, then 200 succeeds on the 4th call; a 404 fails immediately after 1 call; four 503s give up after 1 + 3 retries.\n- **Caveat:** the helper replaces any `signal` the caller passed. If callers need their own cancellation too, combine both signals (or abort your controller when theirs aborts).\n- **Android cleartext:** plain `http://` URLs are blocked by default on modern Android and by App Transport Security on iOS; use HTTPS (a common \"works in dev, fails in release\" bug).\n- **Writes while offline** belong in a local outbox (see the offline-first design) rather than in an in-memory retry loop that dies with the app.\n- **Respect `Retry-After`** on 429/503 when the server sends it.",
+   "bn": "- **আগে জেনে নাও:** কোন call read আর কোনটা write, API idempotency key support করে কি না, আর offline-এ user কী দেখবে।\n- **নিচের helper-এর test করা আচরণ** (Node-এ fake `fetch` দিয়ে চালানো): একবার আটকে যাওয়া, তারপর 503, তারপর network error, তারপর 200 হলে 4th call-এ সফল হয়; 404 হলে 1 call-এর পরেই সাথে সাথে fail করে; পরপর চারটা 503 হলে 1 + 3 retry-এর পরে হাল ছেড়ে দেয়।\n- **সতর্কতা:** caller কোনো `signal` দিলে helper সেটা বদলে দেয়। Caller-এর নিজের cancellation-ও লাগলে দুইটা signal মিলিয়ে নাও (বা caller-এরটা abort হলে নিজের controller abort করো)।\n- **Android cleartext:** আধুনিক Android-এ default-ভাবে সাধারণ `http://` URL block হয়, আর iOS-এ App Transport Security block করে; HTTPS ব্যবহার করো (\"dev-এ চলে, release-এ চলে না\" ধরনের সাধারণ bug)।\n- **Offline অবস্থার write** একটা local outbox-এ যাওয়া উচিত (offline-first design দেখো), memory-র retry loop-এ না, যেটা app বন্ধ হলেই হারিয়ে যায়।\n- Server পাঠালে 429/503-এ **`Retry-After` মেনে চলো**।"
+  },
+  "interviewTip": {
+   "en": "Use the order \"timeout → safe retries with backoff and jitter → offline detection → UX\". Saying \"only idempotent requests are retried\" early prevents the interviewer's favourite follow-up about duplicate orders.",
+   "bn": "\"Timeout → backoff আর jitter-সহ নিরাপদ retry → offline detection → UX\" এই ক্রমে বলো। শুরুতেই \"শুধু idempotent request retry হয়\" বললে duplicate order নিয়ে interviewer-এর প্রিয় follow-up প্রশ্নটা আগেই সামলানো হয়ে যায়।"
+  },
+  "references": [
+   {
+    "title": "React Native — Networking",
+    "url": "https://reactnative.dev/docs/network"
+   },
+   {
+    "title": "Expo docs — NetInfo",
+    "url": "https://docs.expo.dev/versions/latest/sdk/netinfo/"
+   },
+   {
+    "title": "TanStack Query (GitHub)",
+    "url": "https://github.com/TanStack/query"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why add jitter to exponential backoff?",
+    "bn": "Exponential backoff-এ jitter কেন যোগ করা হয়?"
+   },
+   {
+    "en": "How would you safely retry a 'place order' POST?",
+    "bn": "'place order' POST নিরাপদে কীভাবে retry করবে?"
+   }
+  ],
+  "related": [
+   "rn-027",
+   "rn-028",
+   "rn-030"
+  ],
+  "quickAnswer": {
+   "en": "Wrap `fetch` with an `AbortController` timeout, retry only idempotent requests on network errors, timeouts and 408/429/5xx using exponential backoff with jitter, and use NetInfo (plus TanStack Query's `onlineManager`) for an offline state. Show cached data and disable Retry while a request is in flight.",
+   "bn": "`fetch`-কে `AbortController` timeout দিয়ে wrap করো, শুধু idempotent request-ই network error, timeout আর 408/429/5xx-এ jitter-সহ exponential backoff দিয়ে retry করো, আর offline অবস্থার জন্য NetInfo (সাথে TanStack Query-র `onlineManager`) ব্যবহার করো। Cached data দেখাও, আর request চলার সময় Retry disable রাখো।"
+  },
+  "commonMistakes": {
+   "en": "Retrying every error immediately in a tight loop, retrying non-idempotent POSTs, assuming `fetch` rejects on HTTP 500 (it resolves; you must check `res.ok`), and trusting `isConnected === true` to mean the API is reachable.",
+   "bn": "প্রতিটা error সাথে সাথে tight loop-এ retry করা, non-idempotent POST retry করা, ভাবা যে HTTP 500-এ `fetch` reject করে (আসলে resolve করে; `res.ok` check করতে হয়), আর `isConnected === true` মানেই API-তে পৌঁছানো যাবে বলে ধরে নেওয়া।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "export class HttpError extends Error {\n  status: number;\n  constructor(status: number) {\n    super(`HTTP ${status}`);\n    this.status = status;\n  }\n}\n\nconst RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);\nconst sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));\n\nexport async function fetchWithTimeout(url: string, init: RequestInit = {}, timeoutMs = 10_000) {\n  const controller = new AbortController();\n  const timer = setTimeout(() => controller.abort(), timeoutMs);\n  try {\n    const res = await fetch(url, { ...init, signal: controller.signal });\n    if (!res.ok) throw new HttpError(res.status);\n    return res;\n  } finally {\n    clearTimeout(timer);\n  }\n}\n\n// Only for idempotent requests (GET, PUT, or POST with an Idempotency-Key)\nexport async function fetchWithRetry(\n  url: string,\n  init: RequestInit = {},\n  { retries = 3, baseDelayMs = 500, timeoutMs = 10_000 } = {},\n) {\n  for (let attempt = 0; ; attempt++) {\n    try {\n      return await fetchWithTimeout(url, init, timeoutMs);\n    } catch (err) {\n      const retryable = !(err instanceof HttpError) || RETRYABLE_STATUS.has(err.status);\n      if (!retryable || attempt >= retries) throw err;\n      await sleep(Math.random() * baseDelayMs * 2 ** attempt); // exponential backoff, full jitter\n    }\n  }\n}"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "import NetInfo from '@react-native-community/netinfo';\nimport { focusManager, onlineManager } from '@tanstack/react-query';\nimport { AppState, Platform } from 'react-native';\n\n// Pause queries offline, refetch on reconnect\nonlineManager.setEventListener((setOnline) =>\n  NetInfo.addEventListener((state) => setOnline(!!state.isConnected)),\n);\n\n// Refetch stale queries when the app returns to the foreground\nAppState.addEventListener('change', (status) => {\n  if (Platform.OS !== 'web') focusManager.setFocused(status === 'active');\n});",
+    "label": {
+     "en": "Connectivity and focus wiring for TanStack Query",
+     "bn": "TanStack Query-র জন্য connectivity আর focus wiring"
+    }
+   }
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-030",
+  "subtopic": "Security",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 10,
+  "tags": [
+   "security",
+   "tokens",
+   "expo-secure-store",
+   "refresh-token",
+   "env-vars"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-secure-store), React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "A security review of your Expo app finds: the JWT and refresh token are saved in AsyncStorage, `.env` contains `EXPO_PUBLIC_PAYMENT_SECRET_KEY`, and when the access token expires, ten parallel requests each trigger their own refresh call. How do you fix token storage, the refresh flow and the secrets problem?",
+   "bn": "তোমার Expo app-এর security review-তে পাওয়া গেছে: JWT আর refresh token AsyncStorage-এ save করা, `.env`-এ আছে `EXPO_PUBLIC_PAYMENT_SECRET_KEY`, আর access token expire হলে দশটা parallel request প্রত্যেকে নিজের আলাদা refresh call চালায়। Token storage, refresh flow আর secret-এর সমস্যা তুমি কীভাবে ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**1. Token storage.** AsyncStorage is an unencrypted file in the app sandbox; it can be read on a rooted/jailbroken device and from some backups. Move the **refresh token** to `expo-secure-store` (Keychain / Android Keystore). Keep the short-lived **access token in memory** only; on cold start, get a new one with the refresh token. Read SecureStore once and cache the value in memory, since every read is an async native call.\n\n**2. Refresh flow.** Make refresh **single-flight**: the first 401 starts one refresh promise and every other request awaits that same promise, then retries once with the new token. The server should **rotate** refresh tokens (issue a new one each time, detect reuse) and support revocation. If refresh fails, sign out and clear SecureStore.\n\n**3. Secrets.** Anything in the JS bundle is public. `EXPO_PUBLIC_` variables are **inlined as plain text** into the bundle at build time, and Hermes bytecode is not encryption. A payment *secret* key must never ship in the app: **rotate it now** (assume it leaked), move the call that needs it to your backend, and give the app only a publishable key or a server-created session. `EXPO_PUBLIC_` is fine for non-secrets such as the API base URL.",
+   "bn": "**1. Token storage।** AsyncStorage হলো app sandbox-এর একটা unencrypted file; rooted/jailbroken device-এ আর কিছু backup থেকে এটা পড়া যায়। **Refresh token** `expo-secure-store`-এ (Keychain / Android Keystore) সরাও। স্বল্পমেয়াদি **access token শুধু memory-তে** রাখো; cold start-এ refresh token দিয়ে নতুন একটা নাও। SecureStore একবার পড়ে value memory-তে cache করো, কারণ প্রতিটা read একটা async native call।\n\n**2. Refresh flow।** Refresh-কে **single-flight** বানাও: প্রথম 401 একটা refresh promise শুরু করে, আর বাকি সব request সেই একই promise await করে, তারপর নতুন token দিয়ে একবার retry করে। Server-এর উচিত refresh token **rotate** করা (প্রতিবার নতুন একটা দেওয়া, পুরনোটা আবার ব্যবহার হলে ধরা) আর revoke করার সুবিধা রাখা। Refresh fail করলে sign out করে SecureStore clear করো।\n\n**3. Secret।** JS bundle-এ যা আছে সবই public। `EXPO_PUBLIC_` variable build-এর সময় bundle-এ **plain text হিসেবে বসে যায়**, আর Hermes bytecode কোনো encryption না। Payment-এর *secret* key কখনো app-এ ship করা যাবে না: **এখনই rotate করো** (ধরে নাও leak হয়ে গেছে), যে call-এ এটা লাগে সেটা backend-এ সরাও, আর app-কে শুধু publishable key বা server-এর তৈরি session দাও। API base URL-এর মতো non-secret-এর জন্য `EXPO_PUBLIC_` ঠিক আছে।"
+  },
+  "explanation": {
+   "en": "**Details that matter in review**\n- **SecureStore options:** `keychainAccessible: AFTER_FIRST_UNLOCK` lets background work read the token after the first unlock; the default `WHEN_UNLOCKED` is stricter. `requireAuthentication` puts a value behind biometrics (test on real devices; adding a new fingerprint invalidates such keys).\n- **iOS reinstall:** Keychain items can survive uninstall/reinstall on iOS. If that matters, keep a \"first run\" flag in normal storage and wipe SecureStore when the flag is missing.\n- **Performance:** the single-flight refresh turns N refresh calls into 1, which also avoids a race where parallel refreshes invalidate each other's rotated tokens. I tested the helper below with 10 parallel requests and an expired token: 10 × 200, exactly 1 refresh call.\n- **Don't leak tokens elsewhere:** no `console.log` of headers in release builds, scrub `Authorization` from crash-reporting breadcrumbs, and don't put tokens in URLs (they end up in logs).\n- **OAuth/social login:** use the authorization-code flow with PKCE (e.g. `expo-auth-session`); a mobile app is a public client and can't keep a client secret.\n- **Transport:** HTTPS only. Certificate pinning is optional extra hardening that needs a native module and a key-rotation plan.",
+   "bn": "**Review-এ যে details গুরুত্বপূর্ণ**\n- **SecureStore option:** `keychainAccessible: AFTER_FIRST_UNLOCK` দিলে প্রথম unlock-এর পরে background কাজও token পড়তে পারে; default `WHEN_UNLOCKED` আরও কড়া। `requireAuthentication` value-কে biometric-এর পেছনে রাখে (আসল device-এ test করো; নতুন fingerprint যোগ করলে এমন key invalid হয়ে যায়)।\n- **iOS reinstall:** iOS-এ uninstall/reinstall-এর পরেও Keychain item থেকে যেতে পারে। এটা গুরুত্বপূর্ণ হলে সাধারণ storage-এ একটা \"first run\" flag রাখো, আর flag না পেলে SecureStore মুছে দাও।\n- **Performance:** single-flight refresh N-টা refresh call-কে 1-এ নামিয়ে আনে, আর parallel refresh একে অপরের rotate করা token invalid করে দেওয়ার race-ও এড়ায়। নিচের helper আমি expired token-সহ 10টা parallel request দিয়ে test করেছি: 10 × 200, ঠিক 1টা refresh call।\n- **অন্য জায়গায় token leak কোরো না:** release build-এ header `console.log` করবে না, crash-reporting breadcrumb থেকে `Authorization` মুছে দাও, আর URL-এ token রাখবে না (log-এ চলে যায়)।\n- **OAuth/social login:** PKCE-সহ authorization-code flow ব্যবহার করো (যেমন `expo-auth-session`); mobile app একটা public client, client secret গোপন রাখতে পারে না।\n- **Transport:** শুধু HTTPS। Certificate pinning বাড়তি hardening, যেটার জন্য native module আর key-rotation plan লাগে।"
+  },
+  "interviewTip": {
+   "en": "Answer as three findings with severity: the leaked secret is critical (rotate today), token storage is high, the refresh stampede is a correctness/performance bug. Ranking them shows security judgement, not just API knowledge.",
+   "bn": "তিনটা finding severity-সহ বলো: leak হওয়া secret critical (আজই rotate করো), token storage high, আর refresh stampede একটা correctness/performance bug। এভাবে সাজালে শুধু API জ্ঞান না, security বিচারবুদ্ধিও বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "Expo docs — SecureStore",
+    "url": "https://docs.expo.dev/versions/latest/sdk/securestore/"
+   },
+   {
+    "title": "Expo docs — Environment variables",
+    "url": "https://docs.expo.dev/guides/environment-variables/"
+   },
+   {
+    "title": "React Native — Security",
+    "url": "https://reactnative.dev/docs/security"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "The refresh endpoint is called with a refresh token that was already rotated. What should the server do?",
+    "bn": "এমন একটা refresh token দিয়ে refresh endpoint call হলো যেটা আগেই rotate হয়ে গেছে। Server-এর কী করা উচিত?"
+   },
+   {
+    "en": "Your app needs a third-party maps API key. Is `EXPO_PUBLIC_` acceptable for it?",
+    "bn": "তোমার app-এর একটা third-party maps API key লাগবে। এর জন্য কি `EXPO_PUBLIC_` চলবে?"
+   }
+  ],
+  "related": [
+   "rn-021",
+   "rn-029"
+  ],
+  "quickAnswer": {
+   "en": "Keep the refresh token in `expo-secure-store` (Keychain/Keystore) and the access token in memory, never AsyncStorage. Make refresh single-flight with rotation, and treat everything in the bundle, including `EXPO_PUBLIC_` values, as public: rotate the leaked secret and move that call to the backend.",
+   "bn": "Refresh token `expo-secure-store`-এ (Keychain/Keystore) আর access token memory-তে রাখো, AsyncStorage-এ কখনো না। Rotation-সহ refresh single-flight বানাও, আর bundle-এর সব কিছু, `EXPO_PUBLIC_` value-সহ, public ধরে নাও: leak হওয়া secret rotate করে সেই call backend-এ সরাও।"
+  },
+  "commonMistakes": {
+   "en": "Thinking `.env` files or `EXPO_PUBLIC_` variables are hidden from users, \"encrypting\" a secret inside the JS bundle, storing tokens in Redux-persist/AsyncStorage, and refreshing tokens independently in every request.",
+   "bn": "ভাবা যে `.env` file বা `EXPO_PUBLIC_` variable user-দের কাছ থেকে লুকানো, JS bundle-এর ভেতরে secret \"encrypt\" করে রাখা, Redux-persist/AsyncStorage-এ token রাখা, আর প্রতিটা request-এ আলাদাভাবে token refresh করা।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "import * as SecureStore from 'expo-secure-store';\n\nconst API_URL = process.env.EXPO_PUBLIC_API_URL; // public on purpose: a URL is not a secret\nconst REFRESH_KEY = 'auth.refreshToken';\n\nlet accessToken: string | null = null; // short-lived, memory only\nlet refreshing: Promise<string> | null = null;\n\ntype Session = { accessToken: string; refreshToken: string };\n\nexport async function saveSession(s: Session) {\n  accessToken = s.accessToken;\n  await SecureStore.setItemAsync(REFRESH_KEY, s.refreshToken, {\n    keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,\n  });\n}\n\nexport async function signOut() {\n  accessToken = null;\n  await SecureStore.deleteItemAsync(REFRESH_KEY);\n}\n\nfunction refreshAccessToken(): Promise<string> {\n  // single-flight: ten parallel 401s share ONE refresh call\n  refreshing ??= (async () => {\n    try {\n      const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);\n      if (!refreshToken) throw new Error('Not signed in');\n      const res = await fetch(`${API_URL}/auth/refresh`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ refreshToken }),\n      });\n      if (!res.ok) {\n        await signOut(); // refresh token expired or revoked\n        throw new Error('Session expired');\n      }\n      const session: Session = await res.json(); // server rotates the refresh token\n      await saveSession(session);\n      return session.accessToken;\n    } finally {\n      refreshing = null;\n    }\n  })();\n  return refreshing;\n}\n\nexport async function authFetch(\n  path: string,\n  init: Omit<RequestInit, 'headers'> & { headers?: Record<string, string> } = {},\n) {\n  const send = (token: string) =>\n    fetch(`${API_URL}${path}`, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } });\n\n  let res = await send(accessToken ?? (await refreshAccessToken()));\n  if (res.status === 401) res = await send(await refreshAccessToken());\n  return res;\n}"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-031",
+  "subtopic": "expo-sqlite",
+  "difficulty": "hard",
+  "type": "security-performance",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 10,
+  "tags": [
+   "expo-sqlite",
+   "indexes",
+   "explain-query-plan",
+   "keyset-pagination",
+   "wal",
+   "performance"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-sqlite ~58), React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "A chat app keeps 200,000 messages in `expo-sqlite`. Opening a chat and scrolling back gets slower page by page, the UI freezes while it loads, and exporting a chat sometimes crashes low-memory phones. The screen uses `SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 50 OFFSET ?` and the export calls `getAllAsync` on the whole chat. How do you find and fix the problems?",
+   "bn": "একটা chat app `expo-sqlite`-এ 200,000টা message রাখে। একটা chat খুলে পেছনে scroll করলে প্রতি page-এ আরও ধীর হয়, load-এর সময় UI আটকে যায়, আর chat export করলে কম memory-র phone মাঝে মাঝে crash করে। Screen ব্যবহার করে `SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 50 OFFSET ?`, আর export পুরো chat-এর ওপর `getAllAsync` call করে। সমস্যাগুলো কীভাবে খুঁজে বের করবে আর ঠিক করবে?"
+  },
+  "answer": {
+   "en": "**Measure first with `EXPLAIN QUERY PLAN`.** For the current query SQLite reports `SCAN messages` + `USE TEMP B-TREE FOR ORDER BY`: it reads all 200k rows and sorts them on every page.\n\n**Fixes, in order of impact:**\n1. **Composite index matching the filter and the sort:** `CREATE INDEX idx_messages_chat_created ON messages (chat_id, created_at)`. The plan becomes `SEARCH ... USING INDEX (chat_id=?)` with no temp B-tree. `id` is the rowid, so it is already in the index and can break ties.\n2. **Keyset pagination instead of `OFFSET`.** `OFFSET 5000` still walks and discards 5,000 rows, so each page is slower than the last. Instead continue after the last row on screen: `WHERE chat_id = ? AND (created_at, id) < (?, ?) ORDER BY created_at DESC, id DESC LIMIT 50`. The plan is a direct index range search (`chat_id=? AND created_at<?`), so page 100 costs the same as page 1.\n3. **Select only needed columns** instead of `SELECT *` (attachments/blobs make rows heavy).\n4. **Stream big reads:** export with `getEachAsync`, which fetches one row at a time, and write the file in chunks instead of building a 200k-element array.\n5. **WAL mode** (`PRAGMA journal_mode = WAL`) so incoming-message writes don't block reads.\n6. **Keep the JS thread free:** query in an effect or query function, not during render; render with a virtualised list (FlatList/FlashList) and fetch the next page in `onEndReached`.\n\nSecurity side: cursor values and the chat id are bound parameters, never concatenated, and message bodies don't go into logs.",
+   "bn": "**আগে `EXPLAIN QUERY PLAN` দিয়ে মাপো।** বর্তমান query-র জন্য SQLite দেখায় `SCAN messages` + `USE TEMP B-TREE FOR ORDER BY`: প্রতিটা page-এ এটা 200k row পড়ে আর sort করে।\n\n**সমাধান, প্রভাব অনুযায়ী ক্রমে:**\n1. **Filter আর sort-এর সাথে মেলে এমন composite index:** `CREATE INDEX idx_messages_chat_created ON messages (chat_id, created_at)`। Plan হয়ে যায় `SEARCH ... USING INDEX (chat_id=?)`, কোনো temp B-tree ছাড়া। `id` হলো rowid, তাই এটা আগে থেকেই index-এ আছে আর tie ভাঙতে পারে।\n2. **`OFFSET`-এর বদলে keyset pagination।** `OFFSET 5000` তখনো 5,000টা row হেঁটে গিয়ে ফেলে দেয়, তাই প্রতিটা page আগেরটার চেয়ে ধীর। এর বদলে screen-এর শেষ row-এর পর থেকে চালাও: `WHERE chat_id = ? AND (created_at, id) < (?, ?) ORDER BY created_at DESC, id DESC LIMIT 50`। Plan হলো সরাসরি index range search (`chat_id=? AND created_at<?`), তাই page 100-এর খরচ page 1-এর সমান।\n3. `SELECT *`-এর বদলে **শুধু দরকারি column select করো** (attachment/blob থাকলে row ভারী হয়)।\n4. **বড় read stream করো:** `getEachAsync` দিয়ে export করো, যেটা একবারে একটা row আনে, আর 200k element-এর array না বানিয়ে file টুকরো টুকরো করে লেখো।\n5. **WAL mode** (`PRAGMA journal_mode = WAL`), যাতে নতুন message write হওয়ার সময় read আটকে না যায়।\n6. **JS thread খালি রাখো:** render-এর সময় না, effect বা query function-এ query চালাও; virtualised list (FlatList/FlashList) দিয়ে render করো আর `onEndReached`-এ পরের page আনো।\n\nSecurity-র দিক: cursor value আর chat id bound parameter, কখনো জোড়া লাগানো না, আর message body log-এ যায় না।"
+  },
+  "explanation": {
+   "en": "- **Verified plans:** I generated 200,000 rows in sqlite3 and ran each `EXPLAIN QUERY PLAN` shown in the code; the output block is the real result. I don't quote timings because desktop numbers say little about a low-end phone; measure on the device (log `performance.now()` around the query in a release build).\n- **Why `(created_at, id)` and not just `created_at`?** Two messages can share a timestamp. A cursor on `created_at` alone would skip or repeat rows at page boundaries; the row value `(created_at, id)` gives a strict total order.\n- **Substring search** (`body LIKE '%invoice%'`) can't use a B-tree index for the text part: the plan narrows by `chat_id` and then checks every message in that chat. For real search use an FTS5 virtual table (available on native; not in the default web build).\n- **Write side:** insert synced messages in batches inside one transaction; thousands of single auto-commit inserts are slow.\n- **Maintenance:** `PRAGMA optimize` (for example on app close or after big imports) keeps the planner's statistics useful.\n- **Too many indexes** slow down writes and grow the file; add the ones your real queries need, confirmed by the plan.",
+   "bn": "- **যাচাই করা plan:** আমি sqlite3-এ 200,000টা row তৈরি করে code-এর প্রতিটা `EXPLAIN QUERY PLAN` চালিয়েছি; output block-টা আসল ফলাফল। Timing উল্লেখ করছি না, কারণ desktop-এর সংখ্যা low-end phone সম্পর্কে তেমন কিছু বলে না; device-এই মাপো (release build-এ query-র চারপাশে `performance.now()` log করো)।\n- **শুধু `created_at` না, কেন `(created_at, id)`?** দুইটা message-এর timestamp একই হতে পারে। শুধু `created_at`-এর cursor হলে page-এর সীমানায় row বাদ পড়তে বা দুইবার আসতে পারে; row value `(created_at, id)` একটা কড়া পূর্ণ ক্রম দেয়।\n- **Substring search** (`body LIKE '%invoice%'`) text অংশের জন্য B-tree index ব্যবহার করতে পারে না: plan `chat_id` দিয়ে সংকুচিত করে তারপর ওই chat-এর প্রতিটা message check করে। আসল search-এর জন্য FTS5 virtual table ব্যবহার করো (native-এ আছে; default web build-এ নেই)।\n- **Write-এর দিক:** sync হওয়া message এক transaction-এর ভেতরে batch করে insert করো; হাজারটা আলাদা auto-commit insert ধীর।\n- **রক্ষণাবেক্ষণ:** `PRAGMA optimize` (যেমন app বন্ধের সময় বা বড় import-এর পরে) planner-এর statistics কাজের রাখে।\n- **বেশি index** write ধীর করে আর file বড় করে; শুধু আসল query-র দরকারি index যোগ করো, plan দিয়ে নিশ্চিত হয়ে।"
+  },
+  "interviewTip": {
+   "en": "Say \"I'd look at the query plan before touching code\", read the two plan lines out loud, then fix in order of impact. Interviewers like \"SCAN + TEMP B-TREE → SEARCH USING INDEX\" because it proves you measured instead of guessing.",
+   "bn": "বলো \"code ধরার আগে query plan দেখব\", plan-এর দুই লাইন জোরে পড়ো, তারপর প্রভাব অনুযায়ী ক্রমে ঠিক করো। \"SCAN + TEMP B-TREE → SEARCH USING INDEX\" interviewer পছন্দ করে, কারণ এতে প্রমাণ হয় তুমি অনুমান না করে মেপেছ।"
+  },
+  "references": [
+   {
+    "title": "SQLite — EXPLAIN QUERY PLAN",
+    "url": "https://www.sqlite.org/eqp.html"
+   },
+   {
+    "title": "SQLite — Row values",
+    "url": "https://www.sqlite.org/rowvalue.html"
+   },
+   {
+    "title": "Expo docs — SQLite (expo-sqlite)",
+    "url": "https://docs.expo.dev/versions/latest/sdk/sqlite/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why can't a cursor on `created_at` alone be used for pagination?",
+    "bn": "শুধু `created_at`-এর ওপর cursor দিয়ে pagination কেন করা যায় না?"
+   },
+   {
+    "en": "Users want to search all messages for a word. What would you build?",
+    "bn": "User-রা সব message-এ একটা শব্দ খুঁজতে চায়। কী বানাবে?"
+   }
+  ],
+  "related": [
+   "rn-022",
+   "rn-027",
+   "sql-026"
+  ],
+  "quickAnswer": {
+   "en": "`EXPLAIN QUERY PLAN` shows a full scan plus a temp B-tree sort. Add an index on `(chat_id, created_at)`, replace `OFFSET` with keyset pagination on `(created_at, id)`, select only needed columns, stream the export with `getEachAsync`, use WAL, and keep queries out of render.",
+   "bn": "`EXPLAIN QUERY PLAN` দেখায় full scan আর temp B-tree sort। `(chat_id, created_at)`-এ index দাও, `OFFSET`-এর বদলে `(created_at, id)`-এর ওপর keyset pagination করো, শুধু দরকারি column নাও, `getEachAsync` দিয়ে export stream করো, WAL ব্যবহার করো, আর render-এর বাইরে query চালাও।"
+  },
+  "commonMistakes": {
+   "en": "Adding separate single-column indexes on `chat_id` and `created_at` and expecting both to be used, keeping `OFFSET` for deep pages, loading a whole table with `getAllAsync`, and running heavy queries during render.",
+   "bn": "`chat_id` আর `created_at`-এ আলাদা আলাদা single-column index দিয়ে আশা করা যে দুইটাই ব্যবহার হবে, গভীর page-এর জন্য `OFFSET` রেখে দেওয়া, `getAllAsync` দিয়ে পুরো table load করা, আর render-এর সময় ভারী query চালানো।"
+  },
+  "code": {
+   "language": "sql",
+   "source": "-- 1) The current query (no index yet)\nEXPLAIN QUERY PLAN\nSELECT id, sender, body, created_at FROM messages\nWHERE chat_id = ? ORDER BY created_at DESC, id DESC LIMIT 50 OFFSET 300;\n\n-- 2) Composite index that matches WHERE + ORDER BY (id is the rowid, already in the index)\nCREATE INDEX IF NOT EXISTS idx_messages_chat_created ON messages (chat_id, created_at);\nEXPLAIN QUERY PLAN\nSELECT id, sender, body, created_at FROM messages\nWHERE chat_id = ? ORDER BY created_at DESC, id DESC LIMIT 50 OFFSET 300;\n\n-- 3) Keyset pagination: continue after the last row already on screen\nEXPLAIN QUERY PLAN\nSELECT id, sender, body, created_at FROM messages\nWHERE chat_id = ? AND (created_at, id) < (?, ?)\nORDER BY created_at DESC, id DESC LIMIT 50;\n\n-- 4) Substring search: the index only narrows by chat_id\nEXPLAIN QUERY PLAN\nSELECT id FROM messages WHERE chat_id = ? AND body LIKE '%' || ? || '%';",
+   "output": "-- 1)\nQUERY PLAN\n|--SCAN messages\n`--USE TEMP B-TREE FOR ORDER BY\n-- 2)\nQUERY PLAN\n`--SEARCH messages USING INDEX idx_messages_chat_created (chat_id=?)\n-- 3)\nQUERY PLAN\n`--SEARCH messages USING INDEX idx_messages_chat_created (chat_id=? AND created_at<?)\n-- 4)\nQUERY PLAN\n`--SEARCH messages USING INDEX idx_messages_chat_created (chat_id=?)"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "import type { SQLiteDatabase } from 'expo-sqlite';\n\ntype Message = { id: number; sender: string; body: string; created_at: number };\ntype Cursor = { createdAt: number; id: number } | null;\n\nexport async function loadMessages(db: SQLiteDatabase, chatId: number, cursor: Cursor, pageSize = 50) {\n  const rows = cursor\n    ? await db.getAllAsync<Message>(\n        `SELECT id, sender, body, created_at FROM messages\n          WHERE chat_id = ? AND (created_at, id) < (?, ?)\n          ORDER BY created_at DESC, id DESC LIMIT ?`,\n        chatId, cursor.createdAt, cursor.id, pageSize,\n      )\n    : await db.getAllAsync<Message>(\n        `SELECT id, sender, body, created_at FROM messages\n          WHERE chat_id = ?\n          ORDER BY created_at DESC, id DESC LIMIT ?`,\n        chatId, pageSize,\n      );\n  const last = rows.at(-1);\n  return { rows, next: last ? { createdAt: last.created_at, id: last.id } : null };\n}\n\n// Export a whole chat without holding every row in memory\nexport async function exportChat(db: SQLiteDatabase, chatId: number, write: (line: string) => Promise<void>) {\n  for await (const m of db.getEachAsync<Message>(\n    'SELECT id, sender, body, created_at FROM messages WHERE chat_id = ? ORDER BY created_at, id',\n    chatId,\n  )) {\n    await write(`${new Date(m.created_at).toISOString()} ${m.sender}: ${m.body}\\n`);\n  }\n}",
+    "label": {
+     "en": "Keyset pagination and streaming export (tested on 200k rows with node:sqlite)",
+     "bn": "Keyset pagination আর streaming export (node:sqlite-এ 200k row দিয়ে test করা)"
+    }
+   }
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-032",
+  "subtopic": "expo-sqlite",
+  "difficulty": "medium",
+  "type": "mcq",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 3,
+  "tags": [
+   "expo-sqlite",
+   "prepared-statements",
+   "finalizeasync",
+   "resource-leak"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-sqlite ~58), React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "This import works in testing. In production some contact lists contain a duplicate phone number, `executeAsync` throws a `UNIQUE constraint failed` error, and a code review flags a resource leak. Which change fixes the leak correctly?",
+   "bn": "এই import testing-এ ঠিকঠাক চলে। Production-এ কিছু contact list-এ duplicate phone number থাকে, `executeAsync` `UNIQUE constraint failed` error throw করে, আর code review-তে একটা resource leak ধরা পড়ে। কোন পরিবর্তনটা leak সঠিকভাবে ঠিক করে?"
+  },
+  "answer": {
+   "en": "When `executeAsync` throws, the function exits before the last line, so `finalizeAsync()` never runs and the native statement stays open. Putting `finalizeAsync()` in a `finally` block releases it on success **and** on error, which is the pattern the Expo docs use for prepared statements.",
+   "bn": "`executeAsync` throw করলে function শেষ line-এ পৌঁছানোর আগেই বেরিয়ে যায়, তাই `finalizeAsync()` কখনো চলে না আর native statement খোলা থেকে যায়। `finalizeAsync()` একটা `finally` block-এ রাখলে success **আর** error দুই ক্ষেত্রেই এটা ছেড়ে দেওয়া হয়, আর prepared statement-এর জন্য Expo docs ঠিক এই pattern-ই ব্যবহার করে।"
+  },
+  "explanation": {
+   "en": "The tempting wrong answer is **garbage collection**. A prepared statement holds native SQLite resources that the JS garbage collector doesn't manage; the docs say leftover statements are only finalized when the database is closed, and an app usually keeps its database open for its whole life. Finalizing **inside** the loop is wrong too: the next `executeAsync` would run on a finalized statement, which throws. A template string with `execAsync` removes the leak by removing the statement, but it brings back SQL injection and is slower.\n\nTwo improvements on top: run the import inside `withTransactionAsync` (or the exclusive variant) so 5,000 inserts are one commit instead of 5,000 and a failure rolls back the whole import, and decide what a duplicate should do (skip it with `INSERT ... ON CONFLICT (phone) DO NOTHING`, or report it). I tested the fixed version with a duplicate phone inside a transaction: the error propagates, the statement is finalized, and no rows are left behind.",
+   "bn": "সবচেয়ে লোভনীয় ভুল উত্তর হলো **garbage collection**। Prepared statement native SQLite resource ধরে রাখে, যেগুলো JS garbage collector manage করে না; docs বলে, বাকি থাকা statement শুধু database বন্ধ হলেই finalize হয়, আর app সাধারণত সারা জীবন database খোলা রাখে। Loop-এর **ভেতরে** finalize করাও ভুল: পরের `executeAsync` তখন finalize হয়ে যাওয়া statement-এ চলবে, যেটা throw করে। `execAsync`-এর সাথে template string statement-টাই সরিয়ে দিয়ে leak দূর করে, কিন্তু SQL injection ফিরিয়ে আনে আর ধীরও হয়।\n\nএর ওপর দুইটা উন্নতি: import-কে `withTransactionAsync` (বা exclusive variant)-এর ভেতরে চালাও, যাতে 5,000টা insert 5,000টা না হয়ে একটাই commit হয় আর fail করলে পুরো import rollback হয়; আর duplicate পেলে কী হবে ঠিক করো (`INSERT ... ON CONFLICT (phone) DO NOTHING` দিয়ে skip করো, অথবা report করো)। সংশোধিত version আমি transaction-এর ভেতরে duplicate phone দিয়ে test করেছি: error উপরে যায়, statement finalize হয়, আর কোনো row থেকে যায় না।"
+  },
+  "interviewTip": {
+   "en": "Say \"acquire, `try`, `finally` release\" as a general rule (it's the same for file handles and DB connections), then add the transaction tip; that's the senior touch.",
+   "bn": "\"Acquire, `try`, `finally`-তে release\" সাধারণ নিয়ম হিসেবে বলো (file handle আর DB connection-এর জন্যও একই), তারপর transaction-এর tip যোগ করো; এটাই senior-দের মতো ছোঁয়া।"
+  },
+  "references": [
+   {
+    "title": "Expo docs — SQLite (expo-sqlite)",
+    "url": "https://docs.expo.dev/versions/latest/sdk/sqlite/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is importing 5,000 rows much faster inside one transaction?",
+    "bn": "এক transaction-এর ভেতরে 5,000টা row import করা কেন অনেক দ্রুত?"
+   },
+   {
+    "en": "When is a prepared statement worth it compared with calling `runAsync` in a loop?",
+    "bn": "Loop-এ `runAsync` call করার তুলনায় prepared statement কখন লাভজনক?"
+   }
+  ],
+  "related": [
+   "rn-024",
+   "rn-025",
+   "rn-022"
+  ],
+  "quickAnswer": {
+   "en": "Wrap the loop in `try { … } finally { await statement.finalizeAsync(); }`. If `executeAsync` throws, the plain last-line `finalizeAsync()` is skipped and the native statement leaks; `finally` releases it on both success and error.",
+   "bn": "Loop-কে `try { … } finally { await statement.finalizeAsync(); }`-এ wrap করো। `executeAsync` throw করলে শেষ line-এর সাধারণ `finalizeAsync()` বাদ পড়ে আর native statement leak হয়; `finally` success আর error দুই ক্ষেত্রেই এটা ছেড়ে দেয়।"
+  },
+  "commonMistakes": {
+   "en": "Assuming JS objects that wrap native resources clean themselves up, and reading a statement's result twice without `resetAsync()` (the docs say that throws).",
+   "bn": "ধরে নেওয়া যে native resource wrap করা JS object নিজে নিজেই পরিষ্কার হয়, আর `resetAsync()` ছাড়া একটা statement-এর result দুইবার পড়া (docs অনুযায়ী এতে error হয়)।"
+  },
+  "code": {
+   "language": "typescript",
+   "source": "async function importContacts(db: SQLiteDatabase, contacts: { name: string; phone: string }[]) {\n  const statement = await db.prepareAsync(\n    'INSERT INTO contacts (name, phone) VALUES ($name, $phone)',\n  );\n  for (const c of contacts) {\n    await statement.executeAsync({ $name: c.name, $phone: c.phone });\n  }\n  await statement.finalizeAsync();\n}"
+  },
+  "extraCode": [
+   {
+    "language": "typescript",
+    "source": "async function importContacts(db: SQLiteDatabase, contacts: { name: string; phone: string }[]) {\n  const statement = await db.prepareAsync(\n    'INSERT INTO contacts (name, phone) VALUES ($name, $phone)',\n  );\n  try {\n    for (const c of contacts) {\n      await statement.executeAsync({ $name: c.name, $phone: c.phone });\n    }\n  } finally {\n    await statement.finalizeAsync();\n  }\n}\n\n// One commit for the whole import, and all-or-nothing on error\nawait db.withTransactionAsync(() => importContacts(db, contacts));",
+    "label": {
+     "en": "Fixed version",
+     "bn": "সংশোধিত version"
+    }
+   }
+  ],
+  "options": [
+   {
+    "en": "No change is needed: the statement is finalized automatically as soon as `statement` goes out of scope and is garbage-collected",
+    "bn": "কোনো পরিবর্তন লাগবে না: `statement` scope-এর বাইরে গিয়ে garbage-collect হলেই statement আপনা-আপনি finalize হয়ে যায়"
+   },
+   {
+    "en": "Call `await statement.finalizeAsync()` right after each `executeAsync()` inside the loop",
+    "bn": "Loop-এর ভেতরে প্রতিটা `executeAsync()`-এর ঠিক পরে `await statement.finalizeAsync()` call করো"
+   },
+   {
+    "en": "Drop the prepared statement and build each `INSERT` with a template string passed to `db.execAsync()`",
+    "bn": "Prepared statement বাদ দিয়ে প্রতিটা `INSERT` template string দিয়ে বানিয়ে `db.execAsync()`-এ পাঠাও"
+   },
+   {
+    "en": "Wrap the loop in `try { … } finally { await statement.finalizeAsync(); }`",
+    "bn": "Loop-কে `try { … } finally { await statement.finalizeAsync(); }`-এ wrap করো"
+   }
+  ],
+  "correctIndex": 3,
+  "technology": "reactnative"
+ }
+]

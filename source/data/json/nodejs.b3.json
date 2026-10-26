@@ -14,7 +14,7 @@
    "process-env",
    "twelve-factor"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; zod 4.x (example)",
+  "technologyVersion": "Node.js 26 LTS / 24; zod 4.x (example)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -61,6 +61,10 @@
   "related": [
    "node-003"
   ],
+  "quickAnswer": {
+   "en": "Read config from `process.env`; for local development Node loads a `.env` file itself with `--env-file=.env` or `process.loadEnvFile()`, so `dotenv` isn't needed anymore. Every value is a string, so parse and validate config once at startup, and never commit secrets (commit a `.env.example`).",
+   "bn": "Config `process.env` থেকে পড়ো; local development-এ Node নিজেই `--env-file=.env` বা `process.loadEnvFile()` দিয়ে `.env` file load করতে পারে, তাই এখন আর `dotenv` লাগে না। সব value string, তাই startup-এ একবার config parse ও validate করো, আর secret কখনো commit কোরো না (শুধু `.env.example` commit করো)।"
+  },
   "commonMistakes": {
    "en": "Writing `if (process.env.DEBUG)` and expecting `DEBUG=false` to disable it, or committing `.env` files with real credentials.",
    "bn": "`if (process.env.DEBUG)` লিখে আশা করা যে `DEBUG=false` দিলে এটা বন্ধ হবে, অথবা আসল credential সহ `.env` file commit করা।"
@@ -85,7 +89,7 @@
    "events",
    "crash"
   ],
-  "technologyVersion": "Version-independent (Node.js 24 LTS / 26)",
+  "technologyVersion": "Version-independent (Node.js 26 LTS / 24)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -113,6 +117,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`emit()` throws: `'error'` is a special event, and if no `'error'` listener is registered the EventEmitter throws the error, so the process crashes with exit code 1 and `after emit` never runs.",
+   "bn": "`emit()` নিজেই throw করে: `'error'` একটা বিশেষ event, আর কোনো `'error'` listener না থাকলে EventEmitter error-টা throw করে, ফলে process exit code 1 দিয়ে crash করে এবং `after emit` কখনো চলে না।"
+  },
   "code": {
    "language": "javascript",
    "source": "const { EventEmitter } = require('node:events');\n\nconst orders = new EventEmitter();\norders.on('created', (order) => console.log('created', order.id));\n\norders.emit('error', new Error('payment gateway timeout'));\nconsole.log('after emit');"
@@ -153,7 +161,7 @@
    "concurrency",
    "multi-core"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -201,6 +209,10 @@
    "node-018",
    "node-026"
   ],
+  "quickAnswer": {
+   "en": "`worker_threads` are extra threads in one process for CPU-heavy JavaScript; `cluster` forks several processes of the same server that share one port; `child_process` runs another program like `ffmpeg`. Rule: CPU-bound JS → workers, more cores for HTTP → cluster or containers, external tools → child processes.",
+   "bn": "`worker_threads` হলো একটা process-এর ভেতরে CPU-heavy JavaScript-এর জন্য বাড়তি thread; `cluster` একই server-এর কয়েকটা process fork করে, যারা একটা port share করে; `child_process` অন্য program চালায়, যেমন `ffmpeg`। নিয়ম: CPU-bound JS → worker, HTTP-র জন্য বেশি core → cluster বা container, বাইরের tool → child process।"
+  },
   "commonMistakes": {
    "en": "Using worker threads to \"speed up\" database calls, or assuming cluster workers share in-memory state such as sessions.",
    "bn": "Database call \"দ্রুত\" করতে worker thread ব্যবহার করা, অথবা ধরে নেওয়া যে cluster worker-রা session-এর মতো in-memory state share করে।"
@@ -226,7 +238,7 @@
    "job-queue",
    "event-loop"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; Express 5.x; Piscina 5 (example)",
+  "technologyVersion": "Node.js 26 LTS / 24; Express 5.x; Piscina 5 (example)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -275,6 +287,10 @@
    "node-006",
    "node-007"
   ],
+  "quickAnswer": {
+   "en": "The 3-second synchronous job blocks the event loop for everyone. First make the work cheaper (aggregate in the database, stream rows), then move generation to a worker-thread pool, or to a job queue that returns `202 Accepted` if reports are heavy or bursty; chunking with `setImmediate` is only a stop-gap.",
+   "bn": "৩ সেকেন্ডের synchronous কাজটা সবার জন্য event loop আটকে দেয়। আগে কাজটা হালকা করো (database-এ aggregate করো, row stream করো), তারপর report তৈরি worker-thread pool-এ সরাও, আর report ভারী বা হঠাৎ অনেক হলে job queue ব্যবহার করে `202 Accepted` return করো; `setImmediate` দিয়ে টুকরো করা শুধু সাময়িক সমাধান।"
+  },
   "commonMistakes": {
    "en": "Wrapping the CPU work in `async`/`Promise` and assuming it no longer blocks — an async function still runs its synchronous code on the main thread.",
    "bn": "CPU কাজকে `async`/`Promise`-এ মুড়ে দিয়ে ধরে নেওয়া যে এটা আর block করে না — async function-এর synchronous অংশ তখনও main thread-এই চলে।"
@@ -300,7 +316,7 @@
    "crypto",
    "performance"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (libuv default pool size 4)",
+  "technologyVersion": "Node.js 26 LTS / 24 (libuv default pool size 4)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -336,6 +352,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Four after about 1 s and two after about 2 s: async `crypto.pbkdf2` runs in libuv's thread pool, which has 4 threads by default, so the last two wait in its queue. The main thread stays free the whole time.",
+   "bn": "চারটা প্রায় 1 s পরে আর দুটো প্রায় 2 s পরে: async `crypto.pbkdf2` চলে libuv-এর thread pool-এ, যেখানে default 4টা thread, তাই শেষ দুটো queue-তে অপেক্ষা করে। পুরো সময় main thread কিন্তু free থাকে।"
+  },
   "code": {
    "language": "javascript",
    "source": "const crypto = require('node:crypto');\n\nconst start = Date.now();\nfor (let i = 1; i <= 6; i++) {\n  crypto.pbkdf2('secret', 'salt', 600_000, 64, 'sha512', () => {\n    console.log(`hash ${i}: ${Date.now() - start} ms`);\n  });\n}"
@@ -377,7 +397,7 @@
    "migrations",
    "kubernetes"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; Kubernetes + AWS ALB (example platform)",
+  "technologyVersion": "Node.js 26 LTS / 24; Kubernetes + AWS ALB (example platform)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -429,6 +449,10 @@
    "node-028",
    "node-026"
   ],
+  "quickAnswer": {
+   "en": "Zero downtime needs a rolling update that never removes capacity first, graceful `SIGTERM` handling (fail readiness, wait, `server.close()`), a `keepAliveTimeout` above the load balancer's idle timeout to stop 502s, and backward-compatible expand/contract migrations, plus canaries with automatic rollback.",
+   "bn": "Zero downtime-এর জন্য লাগে: এমন rolling update যেটা আগে capacity কমায় না, `SIGTERM`-এ graceful shutdown (readiness fail, একটু অপেক্ষা, `server.close()`), 502 ঠেকাতে load balancer-এর idle timeout-এর চেয়ে বড় `keepAliveTimeout`, আর backward-compatible expand/contract migration, সাথে canary ও automatic rollback।"
+  },
   "commonMistakes": {
    "en": "Calling `process.exit()` immediately on `SIGTERM`, leaving `keepAliveTimeout` at 5 s behind a 60 s idle-timeout load balancer, or running a destructive migration before the old pods are gone.",
    "bn": "`SIGTERM` পেয়েই সাথে সাথে `process.exit()` call করা, 60 s idle-timeout load balancer-এর পেছনে `keepAliveTimeout` 5 s রেখে দেওয়া, অথবা পুরনো pod চলে যাওয়ার আগেই destructive migration চালানো।"

@@ -34,6 +34,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Use a metadata filter for the hard constraint and vector search for the meaning. Embeddings capture "red saree" well but are unreliable for numeric conditions like "under 2000"; a structured `price < 2000` filter is exact.""",
         a_bn=r"""কঠোর শর্তের জন্য metadata filter আর অর্থের জন্য vector search ব্যবহার করো। Embedding "red saree" ভালোভাবে ধরে, কিন্তু "under 2000"-এর মতো সংখ্যাভিত্তিক শর্তে নির্ভরযোগ্য নয়; structured `price < 2000` filter নিখুঁত।""",
+        quick_en=r"""Turn "under 2000 taka" into a structured filter (`price < 2000`) and use "red saree" for the vector search, applied in the same query. Embeddings capture meaning well but are unreliable for numeric conditions, while a structured filter is exact.""",
+        quick_bn=r""""Under 2000 taka"-কে structured filter (`price < 2000`) বানাও আর "red saree" দিয়ে vector search করো, দুটোই একই query-তে। Embedding অর্থ ভালো ধরে, কিন্তু সংখ্যার শর্তে নির্ভরযোগ্য না; structured filter একদম exact।""",
         ex_en=r"""
             - **Option A** may rank a 5,000-taka saree first — embeddings don't do arithmetic.
             - **Option C** is **post-filtering** done badly: if 8 of the top 10 cost more than 2000, the shopper sees 2 results even though hundreds of matching sarees exist.
@@ -77,6 +79,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""About 6 KB: 1536 dimensions × 4 bytes = 6,144 bytes. pgvector documents `4 × dimensions + 8` bytes per vector, so 6,152 bytes.""",
         a_bn=r"""প্রায় 6 KB: 1536 dimension × 4 byte = 6,144 byte। pgvector-এর docs অনুযায়ী প্রতি vector-এ `4 × dimensions + 8` byte, অর্থাৎ 6,152 byte।""",
+        quick_en=r"""About 6 KB: 1536 dimensions × 4 bytes = 6,144 bytes, and pgvector stores `4 × dimensions + 8` bytes, so 6,152 bytes per vector.""",
+        quick_bn=r"""প্রায় 6 KB: 1536 dimension × 4 byte = 6,144 byte, আর pgvector প্রতি vector-এ `4 × dimensions + 8` byte রাখে, তাই 6,152 byte।""",
         ex_en=r"""
             Option A forgets that each dimension is a 4-byte float, not 1 byte; option C would be 64-bit doubles. This tiny calculation drives capacity planning:
             - **1 million** such vectors ≈ 6 GB for the vectors alone — and an HNSW index stores the vectors again plus graph links, ideally in RAM.
@@ -111,6 +115,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""Retrieve more, then rerank. The first-stage retriever (a bi-encoder plus ANN) is fast but coarse; a cross-encoder reads the query and each candidate **together** and scores relevance much more accurately, so the correct chunk can move from rank 14 into the top 5.""",
         a_bn=r"""বেশি retrieve করো, তারপর rerank করো। প্রথম ধাপের retriever (bi-encoder আর ANN) দ্রুত কিন্তু মোটা দাগের; cross-encoder query আর প্রতিটা candidate **একসাথে** পড়ে অনেক নিখুঁতভাবে relevance score দেয়, ফলে সঠিক chunk rank 14 থেকে top 5-এ উঠে আসতে পারে।""",
+        quick_en=r"""Retrieve a bigger candidate set (say the top 50, ideally hybrid) and rerank it with a cross-encoder, then pass the best 5 to the LLM. A cross-encoder reads the query and each chunk together, so it scores relevance far more accurately than the fast first-stage vector search.""",
+        quick_bn=r"""বড় candidate set আনো (ধরো top 50, পারলে hybrid), cross-encoder দিয়ে rerank করো, তারপর সেরা 5টা LLM-কে দাও। Cross-encoder query আর প্রতিটা chunk একসাথে পড়ে, তাই দ্রুত কিন্তু মোটা দাগের প্রথম ধাপের vector search-এর চেয়ে অনেক নিখুঁতভাবে relevance score করে।""",
         ex_en=r"""
             - **Why not D?** It's the tempting one and sometimes works, but it multiplies token cost and latency, adds noise, and LLMs tend to use information in the middle of long contexts less reliably. Reranking keeps the context small and relevant.
             - **Why not A?** Fine-tuning doesn't fix a ranking problem and makes facts harder to update and cite. **B** just makes answers more random.
@@ -160,6 +166,8 @@ QUESTIONS = [
 
             **কীভাবে সিদ্ধান্ত নিই:** data আগে থেকেই PostgreSQL-এ থাকলে আর scale মাঝারি হলে (লাখ থেকে কয়েক কোটি vector, যুক্তিসঙ্গত QPS) pgvector দিয়ে শুরু করি। মেপে যখন দেখা যায় এটা ছাড়িয়ে গেছি — আমার scale-এ memory/latency, ভারী filtered search, খুব বেশি QPS, বা সত্যিই দরকারি feature — তখন dedicated engine-এ যাই।
         """,
+        quick_en=r"""pgvector keeps vectors next to your relational data, with joins, filters, transactions, existing backups and no sync problem, but it scales like PostgreSQL. A dedicated vector DB scales out and has more vector features, but it's another system to run and keep in sync. Start with pgvector; switch when measurements say so.""",
+        quick_bn=r"""pgvector vector-কে relational data-র পাশেই রাখে: join, filter, transaction, আগের backup, আর sync-এর ঝামেলা নেই; তবে scale হয় PostgreSQL-এর মতো। Dedicated vector DB horizontally scale করে আর vector feature বেশি দেয়, কিন্তু আরেকটা system চালাতে আর sync রাখতে হয়। শুরু pgvector দিয়ে; মেপে দরকার দেখলে বদলাও।""",
         ex_en=r"""
             - **The sync problem is the hidden cost:** with a separate vector store, a deleted product can still appear in search until the deletion propagates — and for privacy deletions that delay matters.
             - **Hybrid search:** PostgreSQL gives you full-text (`tsvector`) next to pgvector; many dedicated engines provide built-in sparse+dense hybrid search and fusion.
@@ -207,6 +215,8 @@ QUESTIONS = [
             - **Deletion:** "আমার data মুছে দাও" request-এ source document, তার chunk আর vector, cached answer, আর text থাকা log — সব মুছতে হবে, আর backup একটা documented সময়সূচিতে মেয়াদোত্তীর্ণ হতে হবে।
             - **Poisoning আর injection:** শুধু বিশ্বস্ত source থেকে ingest করো; লুকানো text scan করো; retrieve হওয়া content-কে LLM-এর জন্য untrusted input হিসেবে দেখো।
         """,
+        quick_en=r"""Chunks can contain PII, hosted embedding/LLM APIs see your raw text, embeddings can be partly inverted back to text, and missing filters leak data across users. Mask PII before embedding, vet the provider or self-host, protect vectors like the source, filter by ACL in the query, and treat retrieved text as untrusted.""",
+        quick_bn=r"""Chunk-এ PII থাকতে পারে, hosted embedding/LLM API তোমার raw text দেখে, embedding থেকে আংশিকভাবে আসল text ফেরত বের করা যায়, আর filter না থাকলে এক user-এর data অন্যজনের কাছে যায়। Embed করার আগে PII mask করো, provider যাচাই করো বা self-host করো, vector-কে source-এর মতোই সুরক্ষিত রাখো, query-তে ACL filter দাও, আর retrieve করা text-কে untrusted ধরো।""",
         ex_en=r"""
             - **Performance side of security:** filtering by tenant/ACL inside ANN search can reduce recall or speed; plan for it (iterative scans, partitions per large tenant) instead of dropping the filter.
             - **Logging:** prompts and retrieved chunks in logs are a common leak path — redact them or restrict log access, and set retention.
@@ -278,6 +288,8 @@ QUESTIONS = [
 
             **5. সজীব রাখো।** Production-এর প্রতিটা ব্যর্থতা golden set-এ যোগ করো, আর document ও user-এর আচরণ বদলালে set-টা হালনাগাদ করো।
         """,
+        quick_en=r"""Keep a versioned golden set of real questions (per language, including no-answer cases), measure retrieval (recall@k, MRR, nDCG) and generation (faithfulness, correctness) separately, block merges in CI when a metric drops beyond a tolerance, roll out via canary, and add every production failure to the set.""",
+        quick_bn=r"""আসল প্রশ্নের একটা versioned golden set রাখো (ভাষা অনুযায়ী, উত্তর নেই এমন case-সহ), retrieval (recall@k, MRR, nDCG) আর generation (faithfulness, correctness) আলাদা করে মাপো, কোনো metric tolerance-এর বেশি কমলে CI-তে merge আটকাও, canary দিয়ে rollout করো, আর production-এর প্রতিটা failure set-এ যোগ করো।""",
         ex_en=r"""
             - **Why per-segment gates:** a new model can raise the English average while quietly breaking Bangla queries. Averages hide regressions in minority segments.
             - **LLM-as-judge pitfalls:** judges can prefer longer answers or their own style, and can be inconsistent. Use clear rubrics, fixed judge models/prompts, and periodic human spot checks.
@@ -359,6 +371,8 @@ QUESTIONS = [
             5. **Sensitive pattern থেকে সাবধান:** প্রশ্নে id, টাকার অঙ্ক বা তারিখ থাকলে cache এড়িয়ে যাও, অথবা একটা সস্তা check দিয়ে নিশ্চিত হও যে entity-গুলো মিলছে।
             6. **Monitor করো:** hit rate, cached বনাম নতুন উত্তরে user feedback, আর sample করে audit।
         """,
+        quick_en=r"""Similar questions can need different answers ("cancel my order" vs "cancel my subscription"), cached answers can leak across users or tenants, and they go stale. Scope it by tenant, language and permissions, try an exact-hash cache first, tune the threshold for precision, and invalidate on document changes.""",
+        quick_bn=r"""কাছাকাছি প্রশ্নের উত্তর আলাদা হতে পারে ("cancel my order" বনাম "cancel my subscription"), cached উত্তর এক user বা tenant থেকে অন্যের কাছে leak হতে পারে, আর পুরনো হয়ে যায়। Cache-কে tenant, language আর permission দিয়ে scope করো, আগে exact-hash cache দেখো, precision-এর জন্য threshold tune করো, আর document বদলালে invalidate করো।""",
         ex_en=r"""
             - **0.92 means nothing universal:** similarity scales differ between models; a threshold copied from a blog post can be far too loose or too strict for your model and languages.
             - **Where to store it:** a small table in pgvector, or Redis (its Query Engine vector indexes or Vector Sets) for very low latency — both work; what matters is the scoping and invalidation logic.
@@ -440,6 +454,8 @@ QUESTIONS = [
 
             **5. ঠিক করো আর প্রতিরোধ করো:** একটা নতুন index-এ পরিষ্কারভাবে rebuild করো, metric যাচাই করো, cut over করো; তারপর CI-তে evaluation gate, ingestion-এ data-quality check (model consistency, duplicate, chunk stats), feedback rate দেখে canary rollout যোগ করো, আর দ্রুত rollback-এর জন্য আগের index রেখে দাও।
         """,
+        quick_en=r"""Switch back to the previous index if it still exists, then run the golden set on old and new pipelines to see whether retrieval or generation broke. Check the data (mixed embedding models, changed library defaults, stale or duplicate chunks, bad chunker output), bisect each change, then rebuild cleanly and add evaluation gates.""",
+        quick_bn=r"""আগের index থাকলে আগে সেটায় ফিরে যাও, তারপর পুরনো আর নতুন pipeline-এ golden set চালিয়ে দেখো retrieval ভেঙেছে নাকি generation। Data দেখো (মিশে যাওয়া embedding model, library-র বদলানো default, পুরনো বা duplicate chunk, খারাপ chunker output), প্রতিটা change আলাদা করে bisect করো, তারপর পরিষ্কারভাবে rebuild করে evaluation gate যোগ করো।""",
         ex_en=r"""
             - **"No errors" is the norm for ML regressions:** dimension checks pass, queries return rows — quality silently drops. That's why data-quality assertions and evaluation gates matter as much as unit tests.
             - **Three changes in one deploy** made attribution hard. Ship pipeline changes separately, each behind its own evaluation.

@@ -77,6 +77,8 @@ QUESTIONS = [
             3. **NGINX-এ কোনো TLS server নেই**, আর `server_name _` সবকিছু ধরছে। সমাধান: `server_name shop.example.com` দাও, তারপর `certbot --nginx -d shop.example.com` চালাও। HTTP-01 challenge তখনই সফল হয় যখন DNS এই server-এ resolve করে, তাই আগে DNS ঠিক করো।
             4. **Elastic IP নেই।** Auto-assigned public IP stop/start করলে বদলে যায়, তখন A record নিঃশব্দে ভেঙে যাবে। সমাধান: Elastic IP নিয়ে record update করো (অথবা সামনে ALB বসিয়ে alias record ব্যবহার করো)।
         """,
+        quick_en=r"""Four problems: the registrar still delegates to its own nameservers instead of the Route 53 NS records, port 443 is closed in the security group, NGINX has no TLS server block (run certbot after DNS works), and there's no Elastic IP, so the IP changes on stop/start. Fix DNS delegation first.""",
+        quick_bn=r"""চারটা সমস্যা: registrar এখনো নিজের nameserver-এ delegate করছে, Route 53-এর NS record-এ না; security group-এ port 443 বন্ধ; NGINX-এ কোনো TLS server block নেই (DNS ঠিক হলে certbot চালাও); আর Elastic IP নেই, তাই stop/start-এ IP বদলে যায়। আগে DNS delegation ঠিক করো।""",
         ex_en=r"""
             - **How to read the clues:** `dig NS` shows who is authoritative. Querying a specific nameserver (`@ns-…awsdns…`) tests the hosted zone in isolation. When the direct query works but the public one doesn't, it's always a delegation problem.
             - Creating a hosted zone does *not* change anything at the registrar. That's a manual step, and it's often forgotten when the domain is registered outside AWS, as is common with local registrars.
@@ -161,6 +163,8 @@ QUESTIONS = [
 
             **Fargate** serverless: patch করার মতো কোনো EC2 instance নেই, task-এর vCPU/memory অনুযায়ী টাকা দাও, আর প্রতিটা task নিজের ENI আর security group পায় (`awsvpc` mode)। **EC2 launch type**-এ instance নিজে manage করতে হয় (Auto Scaling group, AMI patching)। বিনিময়ে পাও স্থির বেশি utilisation-এ সস্তা capacity, GPU বা নির্দিষ্ট instance type, আর host-level control বেশি। এই কারণগুলোর কোনোটা না থাকলে আমি default হিসেবে Fargate নিই (আর interrupt হলেও চলে এমন কাজের জন্য Fargate Spot)।
         """,
+        quick_en=r"""ECR stores images, a task definition is the versioned blueprint (image, CPU/memory, secrets, logs, task and execution roles), a task is a running copy, and a service keeps N tasks healthy behind an ALB. Default to Fargate (no servers to patch); pick the EC2 launch type for steady high utilisation, GPUs or host-level control.""",
+        quick_bn=r"""ECR image রাখে, task definition হলো versioned blueprint (image, CPU/memory, secret, log, task role আর execution role), task হলো তার চলমান copy, আর service ALB-এর পেছনে N-টা task সুস্থ রাখে। Default হিসেবে Fargate নাও (patch করার server নেই); টানা বেশি utilisation, GPU বা host-level control লাগলে EC2 launch type নাও।""",
         ex_en=r"""
             - **Task role vs execution role** is the most common confusion. If the *app* gets AccessDenied calling S3, fix the task role. If the task fails to *start* with errors pulling the image or reading secrets, fix the execution role.
             - Tasks in private subnets need a route to ECR: either a NAT Gateway, or VPC endpoints (`ecr.api`, `ecr.dkr`, an S3 gateway endpoint for image layers, and `logs`). Otherwise tasks fail with image-pull timeouts.
@@ -244,6 +248,8 @@ QUESTIONS = [
             - **Dashboard** প্রতিটা service-এর জন্য একটা shared view দেয়।
             - **Tracing:** OpenTelemetry (AWS Distro for OpenTelemetry) দিয়ে app instrument করে trace **X-Ray**-তে পাঠাই, যাতে বোঝা যায় কোন downstream call (DB query, external API) request ধীর করছে।
         """,
+        quick_en=r"""Use the built-in ALB and EC2 metrics plus the CloudWatch agent for memory, disk and logs (with a retention period), then alarm through SNS on target 5xx, p95/p99 `TargetResponseTime`, `UnHealthyHostCount`, CPU and disk. Add OpenTelemetry tracing to X-Ray to see which downstream call is slow.""",
+        quick_bn=r"""ALB আর EC2-এর built-in metric নাও, আর memory, disk ও log-এর জন্য CloudWatch agent বসাও (retention period-সহ); তারপর target 5xx, p95/p99 `TargetResponseTime`, `UnHealthyHostCount`, CPU আর disk-এর ওপর SNS-এ alarm দাও। কোন downstream call ধীর সেটা দেখতে OpenTelemetry দিয়ে X-Ray-তে trace পাঠাও।""",
         ex_en=r"""
             - **ELB 5xx vs target 5xx** tells you where the problem is. `HTTPCode_Target_5XX` means your app returned the error. `HTTPCode_ELB_5XX` (502/503/504) means the load balancer couldn't get a good response: no healthy targets, timeouts, or connections closed by the backend.
             - **A classic cause of random 502s with Node behind an ALB:** the ALB's idle timeout defaults to 60 s, but Node's `server.keepAliveTimeout` defaults to 5 s. Node closes idle keep-alive sockets the ALB still wants to reuse. Set Node's keep-alive timeout *higher* than the ALB idle timeout.
@@ -319,6 +325,8 @@ QUESTIONS = [
 
             **Failure scenario:** একটা AZ নষ্ট হলে ALB সেখানে routing বন্ধ করে, বাকি AZ-গুলোতে আগে থেকেই যথেষ্ট capacity আছে (static stability), আর RDS standby-তে failover করে। কোনো instance crash করলে health check fail করে replace হয়। খারাপ deploy হলে alarm বাজে আর rollback হয়। পুরো Region down হওয়া HA-র scope-এর বাইরে; সেটা DR design-এর কাজ।
         """,
+        quick_en=r"""Spread every tier across AZs: CloudFront with WAF in front of a private S3 bucket and an ALB, a stateless API in an Auto Scaling group or ECS service with health checks, and RDS Multi-AZ. Size capacity so the remaining AZs carry the load (static stability); a full-Region outage is a DR problem, not HA.""",
+        quick_bn=r"""প্রতিটা tier কয়েকটা AZ জুড়ে ছড়াও: private S3 bucket আর ALB-এর সামনে WAF-সহ CloudFront, health check-সহ Auto Scaling group বা ECS service-এ stateless API, আর RDS Multi-AZ। Capacity এমনভাবে রাখো যেন বাকি AZ-গুলো পুরো load নিতে পারে (static stability); পুরো Region down হওয়া DR-এর বিষয়, HA-র না।""",
         ex_en=r"""
             *Advanced material.* Points that separate senior answers:
             - **Static stability:** don't depend on scaling *during* an AZ failure, because capacity may be scarce exactly then. With three AZs, run each at no more than about two-thirds of what it could handle at peak, so two AZs can carry the full load. That's the cost of N+1.
@@ -424,6 +432,8 @@ QUESTIONS = [
 
             **সাধারণ পদ্ধতি:** পুরো error পড়ো, কারণ অনেক service এখন বলে দেয় কোন ধরনের policy request deny করেছে। *আসলে কোন principal* call করেছে সেটা নিশ্চিত হও (CloudTrail-এর `userIdentity`), কারণ ভুল credential খুবই common। তারপর evaluation chain ধরে এগোও: কোথাও explicit Deny আছে কি না (SCP/RCP, resource policy, identity policy, permissions boundary, session policy) → identity বা resource policy-তে Allow আছে কি না → SCP আর permissions boundary-ও allow করে কি না → KMS key policy → VPC endpoint policy। Fix test করো IAM policy simulator আর IAM Access Analyzer দিয়ে।
         """,
+        quick_en=r"""Three causes: `s3:PutObject` is granted on the bucket ARN instead of `bucket/*`, the bucket policy's `StringNotEquals` Deny fires because the encryption header is missing, and the role lacks `kms:GenerateDataKey`. To debug, confirm the caller in CloudTrail, then check explicit Deny, Allow, SCPs/boundaries and the key policy.""",
+        quick_bn=r"""তিনটা কারণ: `s3:PutObject` দেওয়া হয়েছে bucket ARN-এ, `bucket/*`-এ না; encryption header না থাকায় bucket policy-র `StringNotEquals` Deny লেগে যায়; আর role-এর `kms:GenerateDataKey` নেই। যেকোনো AccessDenied debug করতে আগে CloudTrail-এ আসল caller কে দেখো, তারপর explicit Deny, Allow, SCP/boundary আর key policy পরপর check করো।""",
         ex_en=r"""
             - **Evaluation order in one sentence:** default deny → any explicit Deny wins → otherwise you need an Allow, and every guardrail that applies (SCP, RCP, permissions boundary, session policy) must also allow the action.
             - **Same account vs cross-account:** in the same account, an Allow in *either* the identity policy or the resource policy is usually enough. Cross-account access needs an Allow on *both* sides.
@@ -525,6 +535,8 @@ QUESTIONS = [
 
             Network path-ও check করো: RDS security group-কে `sg-lambda` থেকে 5432 allow করতে হবে। না করলে শুধু load-এর সময় না, *প্রতিটা* call timeout হবে।
         """,
+        quick_en=r"""Each invocation opens a DB connection and never closes it, exhausting RDS: create one pool outside the handler, use RDS Proxy and cap reserved concurrency. A Lambda in private subnets has no internet route, so add a NAT Gateway (VPC endpoints for AWS services), and set client timeouts so calls fail fast.""",
+        quick_bn=r"""প্রতিটা invocation একটা DB connection খোলে আর বন্ধ করে না, ফলে RDS-এর connection শেষ হয়ে যায়: handler-এর বাইরে একটা pool বানাও, RDS Proxy ব্যবহার করো আর reserved concurrency দিয়ে cap দাও। Private subnet-এর Lambda-র internet route নেই, তাই NAT Gateway যোগ করো (AWS service-এর জন্য VPC endpoint), আর client timeout দাও যাতে call দ্রুত fail করে।""",
         ex_en=r"""
             - **Why testing didn't catch it:** with one or two warm environments, a few leaked connections are harmless. The bug only appears when concurrency multiplies the leak. Lambda scales out *environments*, and each one holds its own connection.
             - **How to diagnose:** RDS `DatabaseConnections` climbing in step with Lambda `ConcurrentExecutions`, Lambda `Duration` pinned at the timeout, and logs that stop right after `connect()` or `fetch()`. X-Ray or OpenTelemetry traces show which segment hangs.
@@ -619,6 +631,8 @@ QUESTIONS = [
 
             **4. প্রতিরোধ:** actual *আর* forecasted দুই ধরনের alert-সহ **AWS Budgets**, Slack বা email-এ anomaly alert, বাধ্যতামূলক cost-allocation tag, মাসিক cost review, আর guardrail (যেমন sandbox account-এ খুব বড় instance type আটকাতে SCP)।
         """,
+        quick_en=r"""Find the jump in Cost Explorer grouped by service, then usage type (often NAT Gateway bytes, data transfer, idle resources or logs), and fix it with gateway endpoints, cleanup, lifecycle rules and right-sizing. Prevent repeats with AWS Budgets, Cost Anomaly Detection, cost-allocation tags and Savings Plans for the baseline.""",
+        quick_bn=r"""Cost Explorer-এ service, তারপর usage type দিয়ে group করে বাড়তি খরচটা খুঁজে বের করো (প্রায়ই NAT Gateway bytes, data transfer, অলস resource বা log), তারপর gateway endpoint, cleanup, lifecycle rule আর right-sizing দিয়ে ঠিক করো। আবার যেন না হয়, সেজন্য AWS Budgets, Cost Anomaly Detection, cost-allocation tag, আর baseline-এর জন্য Savings Plans রাখো।""",
         ex_en=r"""
             *Advanced material.* A typical real story: a new image-processing feature runs in ECS tasks in private subnets. Each task downloads originals from S3 and uploads thumbnails, so terabytes flow through the NAT Gateway, and every GB pays NAT processing. The traffic count didn't change, but the *bytes per request* did. One S3 gateway endpoint removes that whole line item, because EC2-to-S3 traffic in the same Region has no data transfer charge.
 

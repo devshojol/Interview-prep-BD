@@ -43,6 +43,8 @@ QUESTIONS = [
 
             সংক্ষেপে: schema = নকশা, model = class/collection API, document = সেখান থেকে তৈরি একটা object।
         """,
+        quick_en=r"""A schema is the blueprint of your data (types, validators, defaults, hooks, virtuals) and exists only in your Node.js app. A model is the class compiled from it with `mongoose.model()`, bound to a collection and giving you `find`, `create` and `updateOne`; a document is one instance of the model, with `save()` and change tracking.""",
+        quick_bn=r"""Schema হলো data-র blueprint (type, validator, default, hook, virtual), যেটা শুধু তোমার Node.js app-এই থাকে। Model হলো `mongoose.model()` দিয়ে schema থেকে compile করা class, যেটা একটা collection-এর সাথে যুক্ত আর `find`, `create`, `updateOne`-এর মতো API দেয়; document হলো model-এর একটা instance, যার `save()` আর change tracking আছে।""",
         ex_en=r"""
             - **Compile once:** call `mongoose.model()` once per name. Re-compiling in hot-reload environments (e.g. Next.js dev) throws `OverwriteModelError`, which is why you often see `mongoose.models.User || mongoose.model("User", userSchema)`.
             - **Collection name:** override pluralisation with the third argument or the `collection` schema option.
@@ -110,6 +112,8 @@ QUESTIONS = [
 
             **Schema option** পুরো schema-তে apply হয় — `timestamps: true` দিলে `createdAt`/`updatedAt` যোগ হয়, আর `toJSON` serialisation নিয়ন্ত্রণ করে।
         """,
+        quick_en=r"""Common SchemaTypes are `String`, `Number`, `Boolean`, `Date`, `ObjectId` (for references), arrays, `Decimal128`, `Map`, `UUID` and `Mixed`. Common options are `required`, `default`, `validate`, `select`, `immutable` and `index`/`unique`, plus type-specific ones like `trim`, `lowercase`, `enum` and `min`/`max`.""",
+        quick_bn=r"""সাধারণ SchemaType হলো `String`, `Number`, `Boolean`, `Date`, `ObjectId` (reference-এর জন্য), array, `Decimal128`, `Map`, `UUID` আর `Mixed`। সাধারণ option হলো `required`, `default`, `validate`, `select`, `immutable` আর `index`/`unique`, সাথে type অনুযায়ী `trim`, `lowercase`, `enum`, `min`/`max`-এর মতো option।""",
         ex_en=r"""
             - **Casting:** Mongoose converts values to the declared type — `"42"` becomes `42` for a Number path; a value that can't be cast (e.g. `"abc"` for a Number) produces a `CastError`.
             - **`lowercase`/`trim` are setters**, not validators: they transform the value before saving (and when casting query filters for those paths).
@@ -180,6 +184,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`unique: true` is an **index helper, not a validator**. Mongoose asks MongoDB to create a unique index (via `autoIndex` or `syncIndexes()`), and it's the **server** that rejects a duplicate with an E11000 duplicate key error. If the index was never built — or failed to build because duplicates already existed — nothing stops duplicates.""",
         a_bn=r"""`unique: true` হলো একটা **index helper, validator না**। Mongoose MongoDB-কে একটা unique index বানাতে বলে (`autoIndex` বা `syncIndexes()` দিয়ে), আর duplicate reject করে **server** — E11000 duplicate key error দিয়ে। Index কখনো build না হলে — বা আগে থেকেই duplicate থাকায় build fail করলে — duplicate আটকানোর কিছুই থাকে না।""",
+        quick_en=r"""`unique` is not a validator: it only tells Mongoose to build a unique index, and MongoDB itself rejects duplicates with an E11000 error. If that index was never built, or failed to build because duplicates already existed, nothing stops duplicates.""",
+        quick_bn=r"""`unique` কোনো validator না: এটা শুধু Mongoose-কে একটা unique index বানাতে বলে, আর duplicate আটকায় MongoDB নিজে, E11000 error দিয়ে। Index কখনো build না হলে, বা আগে থেকেই duplicate থাকায় build fail করলে, duplicate আটকানোর কিছুই থাকে না।""",
         ex_en=r"""
             The tempting answer is A, because `unique` sits next to `required` and `min` in the schema. The Mongoose docs explicitly call this a common beginner gotcha.
 
@@ -222,6 +228,8 @@ QUESTIONS = [
 
             **`save()` বনাম `updateOne()`:** `save()` load করা document-এর ওপর কাজ করে — পুরো schema validation আর `save` middleware চালায়, তারপর শুধু বদলানো path পাঠায়। কিন্তু এটা read-modify-write, তাই দুইটা concurrent request একে অপরের পরিবর্তন overwrite করতে পারে। `updateOne()` document load না করেই একটা atomic command (যেমন `$inc`) পাঠায় — দ্রুত আর counter-এর জন্য নিরাপদ — কিন্তু `save` hook চলে না, আর `runValidators: true` না দিলে validator-ও চলে না (দিলেও শুধু `$set`/`$push`-এর মতো operator-এ চলে, `$inc`-এ না)।
         """,
+        quick_en=r"""Create with `create()`, read with `find`/`findOne`/`findById`, and update or delete with `updateOne`/`deleteOne` and their relatives. `save()` runs validation and save hooks but is read-modify-write; `updateOne()` is one atomic command that skips save hooks and validates only with `runValidators: true`.""",
+        quick_bn=r"""Create করো `create()` দিয়ে, read করো `find`/`findOne`/`findById` দিয়ে, আর update বা delete করো `updateOne`/`deleteOne` ও এদের মতো method দিয়ে। `save()` validation আর save hook চালায়, কিন্তু এটা read-modify-write; `updateOne()` একটা atomic command, save hook চালায় না, আর `runValidators: true` দিলে তবেই validate করে।""",
         ex_en=r"""
             - **Return values:** `find()` → array (empty if nothing matches); `findOne()`/`findById()` → document or `null`; `updateOne()` → `{ acknowledged, matchedCount, modifiedCount, ... }`; `deleteOne()` → `{ deletedCount }`.
             - **Returning the updated document:** `findOneAndUpdate(filter, update, { returnDocument: "after" })`. The old `{ new: true }` option still works but has been deprecated since Mongoose 9.2.
@@ -293,6 +301,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`findOne()` and `findById()` resolve to `null` when nothing matches; `find()` resolves to an empty array. Your code has to check for `null` — usually by returning a 404.""",
         a_bn=r"""কিছু match না করলে `findOne()` আর `findById()` `null` দেয়; `find()` দেয় একটা খালি array। তাই code-এ `null` check করতে হয় — সাধারণত 404 return করে।""",
+        quick_en=r"""It resolves to `null`. `findOne()` and `findById()` return `null` when nothing matches instead of throwing, while `find()` returns an empty array, so check for `null` and usually respond with a 404.""",
+        quick_bn=r"""এটা `null` দেয়। কিছু match না করলে `findOne()` আর `findById()` throw না করে `null` return করে, আর `find()` দেয় empty array; তাই `null` check করো, সাধারণত 404 পাঠাও।""",
         ex_en=r"""
             Option B is tempting because `DocumentNotFoundError` does exist — but it's only thrown when you opt in with `.orFail()` (or when `save()` can't find the document it's updating). `.orFail()` is handy in Express 5, where a thrown error in an async handler goes straight to your error middleware:
 
@@ -376,6 +386,8 @@ QUESTIONS = [
             3. **Document না থাকা:** ID না থাকলে `findByIdAndUpdate` `null` return করে, তাই API 404-এর বদলে `200 null` দেয়।
             4. `"abc"`-এর মতো invalid ID দিলে `CastError` throw হয় — error middleware-এ এটাকে 400 হিসেবে handle করো (Express 5 rejected promise automatically forward করে)।
         """,
+        quick_en=r"""Update validators are off by default, so `findByIdAndUpdate` never checks `min` and `enum`; pass `runValidators: true`. Also whitelist fields instead of passing `req.body` (mass assignment), use `returnDocument: "after"` instead of the deprecated `new: true`, and return 404 for `null` and 400 for a `CastError`.""",
+        quick_bn=r"""Update validator default-ভাবে বন্ধ, তাই `findByIdAndUpdate` কখনো `min` আর `enum` check করে না; `runValidators: true` দাও। সাথে `req.body` সরাসরি না দিয়ে field whitelist করো (mass assignment), deprecated `new: true`-এর বদলে `returnDocument: "after"` দাও, আর `null`-এ 404, `CastError`-এ 400 return করো।""",
         ex_en=r"""
             **How update validators differ from document validation:**
             - They only run on these operators: `$set`, `$unset`, `$push`, `$addToSet`, `$pull`, `$pullAll` — so a `$inc` that makes stock negative isn't caught by `min: 0`. Guard such cases in the filter instead (`{ stock: { $gte: qty } }`).
@@ -478,6 +490,8 @@ QUESTIONS = [
 
             `Order.create([doc], { session })` নিজে ঠিক আছে — `create()`-এ option দিতে হলে array form-ই লাগে।
         """,
+        quick_en=r"""Four bugs: `Product.updateOne` has no `{ session }` (it commits outside the transaction), `Promise.all` runs parallel operations on one session, `matchedCount` is never checked (overselling), and the SMS sits inside a callback that can re-run. Fix each one, and send the SMS only after commit.""",
+        quick_bn=r"""চারটা bug: `Product.updateOne`-এ `{ session }` নেই (তাই transaction-এর বাইরে commit হয়), `Promise.all` একই session-এ parallel operation চালায়, `matchedCount` কখনো check হয় না (oversell), আর SMS এমন callback-এর ভেতরে যেটা আবার চলতে পারে। প্রতিটা ঠিক করো, আর SMS পাঠাও শুধু commit-এর পরে।""",
         ex_en=r"""
             - **Why not rely on the return value?** The fixed version assigns `order` from inside the callback, so it doesn't depend on what `transaction()` resolves to, and each retry simply overwrites it.
             - **Document state on abort:** `connection.transaction()` also resets Mongoose's change tracking for documents saved in an aborted attempt, so a retry re-sends their changes — one advantage over calling `session.withTransaction()` directly.
@@ -545,6 +559,8 @@ QUESTIONS = [
 
             **Campaign-এর scale:** product page cache করো (Redis/CDN), cluster-এর connection limit অনুযায়ী প্রতিটি instance-এর `maxPoolSize` ঠিক করো, checkout rate-limit করো, আর flash deal-এর জন্য queue/waiting room ভাবো, যাতে database একটা নিয়ন্ত্রিত write rate দেখে।
         """,
+        quick_en=r"""Split the data into `Product`, a small `Inventory` document per SKU, a customer `Order`, one `SellerOrder` per seller, and `Payment` with discriminators per method. Checkout is one short transaction with a conditional `$inc` on inventory, side effects go through an outbox, and webhooks are idempotent via a unique transaction ID.""",
+        quick_bn=r"""Data ভাগ করো `Product`, প্রতি SKU-র জন্য ছোট একটা `Inventory` document, customer-এর `Order`, প্রতি seller-এর জন্য একটা `SellerOrder`, আর payment method অনুযায়ী discriminator সহ `Payment`-এ। Checkout হবে inventory-তে conditional `$inc` সহ একটা ছোট transaction, side effect যাবে outbox দিয়ে, আর unique transaction ID দিয়ে webhook idempotent থাকবে।""",
         ex_en=r"""
             **Trade-offs and failure scenarios:**
             - **Embedding vs separate `SellerOrder`:** embedding seller groups inside `Order` gives one-read order pages, but every seller update rewrites the shared document and seller dashboards need multikey queries. A separate collection isolates writes and indexes per seller.

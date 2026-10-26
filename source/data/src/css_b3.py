@@ -50,6 +50,8 @@ QUESTIONS = [
 
             **অন্যান্য কাজের feature:** `hover` আর `pointer` (touch device-এ hover-এর উপর ভরসা কোরো না), `prefers-reduced-motion`, `prefers-color-scheme`, আর কখনো কখনো `orientation`। আধুনিক range syntax — `@media (width >= 48rem)` — এখনকার সব browser-এ কাজ করে।
         """,
+        quick_en=r"""Mobile-first means the base styles target small screens and `min-width` queries add layout as space grows. Pick breakpoints where the content breaks, written in `rem`, not by device names, and also use features like `hover`, `pointer`, `prefers-reduced-motion` and `prefers-color-scheme`.""",
+        quick_bn=r"""Mobile-first মানে base style ছোট screen-এর জন্য, আর জায়গা বাড়লে `min-width` query দিয়ে layout বাড়ানো। Breakpoint ঠিক করো যেখানে content ভাঙে সেখানে, `rem`-এ লিখে, device-এর নাম দেখে নয়; সাথে `hover`, `pointer`, `prefers-reduced-motion` আর `prefers-color-scheme`-এর মতো feature-ও কাজে লাগে।""",
         ex_en=r"""
             - **The viewport meta tag is a prerequisite** — without `<meta name="viewport" content="width=device-width, initial-scale=1">`, phones report a desktop-like width and your media queries never match.
             - **`rem`/`em` in media queries** are based on the browser's default font size, not on a `font-size` you set on `html`, so they respect user settings.
@@ -129,6 +131,8 @@ QUESTIONS = [
         a_bn=r"""
             `::before` আর `::after` তখনই তৈরি হয়, যখন `content`-এর value `none`/`normal` ছাড়া অন্য কিছু হয়। শুধু সাজানোর জন্য একটা আকৃতি হলে `content: ""` দিলেই যথেষ্ট — তারপর বাকি style-গুলো তৈরি হওয়া box-এ প্রয়োগ হয়।
         """,
+        quick_en=r"""The `content` property is missing, so the pseudo-element is never generated. Add `content: ""` and the other styles apply to the generated box.""",
+        quick_bn=r"""`content` property নেই, তাই pseudo-element তৈরিই হয় না। `content: ""` যোগ করলে বাকি style-গুলো তৈরি হওয়া box-এ লাগবে।""",
         ex_en=r"""
             The tempting distractor is B, because there *is* a related rule: `::before`/`::after` don't render on **replaced or void elements** like `<img>` and `<input>`, which have no content box to insert into. A `<span>` is fine — and `display: inline-block` already takes care of `width`/`height` applying.
 
@@ -183,6 +187,8 @@ QUESTIONS = [
             - `.title` `--accent` খোঁজে: এটা set করেছে এমন সবচেয়ে কাছের ancestor হলো `.card` (green), যেটা `:root`-কে (blue) override করে। Fallback `red` তখনই ব্যবহার হয়, যখন property-টা একেবারেই define করা নেই — তাই heading **সবুজ (green)**।
             - `.note` চায় `--muted`, যেটা কোথাও define করা নেই, তাই fallback ব্যবহার হয় → **ধূসর (gray)**।
         """,
+        quick_en=r"""The heading is green and the note is gray. `--accent` is inherited from the nearest ancestor that sets it, `.card`, which overrides `:root`; the fallback is used only when the property isn't defined at all, as with `--muted`.""",
+        quick_bn=r"""Heading সবুজ আর note ধূসর। `--accent` নিকটতম যে ancestor সেটা set করেছে, অর্থাৎ `.card` থেকে inherit হয়, যেটা `:root`-কে override করে; fallback তখনই ব্যবহার হয় যখন property একদমই define করা নেই, যেমন `--muted`।""",
         ex_en=r"""
             - **Custom properties aren't global variables.** They're properties on elements that inherit like `color` does, which is why setting `--accent` on `.card` re-themes everything inside it — the basis of component theming and dark mode.
             - **The fallback is for "missing", not "wrong".** If `.card` set `--accent: 20px`, the heading would *not* turn red: `color: 20px` is invalid at computed-value time, so `color` behaves like `unset` and simply inherits the parent's text colour. If `--accent` were registered with `@property` and a `<color>` syntax, the bad declaration itself would be discarded: with `inherits: true` the heading would get the inherited `blue` from `:root`, and with `inherits: false` the declared `initial-value`.
@@ -230,6 +236,8 @@ QUESTIONS = [
 
             **Reduced motion:** কিছু user (যেমন vestibular disorder আছে এমন মানুষ) তাদের OS-এ "reduce motion" চালু রাখে। আমি `prefers-reduced-motion` মেনে চলি — বড় বা শুধু সাজসজ্জার motion **opt-in** করে: সেগুলো `@media (prefers-reduced-motion: no-preference)`-এর ভেতরে লিখি। জরুরি feedback থাকে, তবে slide, zoom বা parallax-এর বদলে fade বা তাৎক্ষণিক পরিবর্তন হিসেবে।
         """,
+        quick_en=r"""A transition animates between two states when a value changes, like hover or a class toggle; a `@keyframes` animation runs multi-step motion on its own, like a spinner. Animate `transform` and `opacity`, and put large motion inside `@media (prefers-reduced-motion: no-preference)`.""",
+        quick_bn=r"""Transition কোনো value বদলালে দুই state-এর মাঝে animate করে, যেমন hover বা class toggle; `@keyframes` animation নিজে থেকেই multi-step motion চালায়, যেমন spinner। `transform` আর `opacity` animate করো, আর বড় motion রাখো `@media (prefers-reduced-motion: no-preference)`-এর ভেতরে।""",
         ex_en=r"""
             - **Reduced ≠ none.** A subtle opacity fade is usually fine; what hurts is large movement, zooming, parallax and auto-playing motion.
             - **The "global kill switch"** (`animation-duration: 0.01ms !important` inside `prefers-reduced-motion: reduce`) is a quick safety net. It uses `0.01ms` rather than `0` because a zero-duration transition never starts, so `transitionend` would never fire for scripts that wait on it (zero-duration animations still fire `animationend`).
@@ -305,6 +313,8 @@ QUESTIONS = [
         a_bn=r"""
             `z-index: auto`-সহ `position: relative` stacking context তৈরি **করে না**। বাকি তিনটা করে: 1-এর কম `opacity`, `none` ছাড়া যেকোনো `transform` (এমনকি `translateZ(0)`-ও), আর `isolation: isolate` (যার একমাত্র কাজই একটা stacking context তৈরি করা)।
         """,
+        quick_en=r"""`position: relative; z-index: auto;` does not create a stacking context on its own. `opacity` below 1, any `transform` other than `none` (even `translateZ(0)`) and `isolation: isolate` all do.""",
+        quick_bn=r"""`position: relative; z-index: auto;` নিজে থেকে stacking context তৈরি করে না। 1-এর কম `opacity`, `none` ছাড়া যেকোনো `transform` (এমনকি `translateZ(0)`) আর `isolation: isolate`, এরা সবাই করে।""",
         ex_en=r"""
             **Why the dropdown is stuck:** `z-index` only competes **within the same stacking context**. If the header creates one (say, via `transform` from a scroll animation, or `opacity: 0.99`), then `z-index: 9999` means "9999 *inside the header*". The header as a whole is then compared with the hero — and if the hero comes later in the DOM at the same level, it paints on top. Fix it by giving the header a `z-index` higher than the hero, removing the accidental stacking context, or rendering the dropdown in the top layer (the `popover` attribute).
 
@@ -353,6 +363,8 @@ QUESTIONS = [
 
             JavaScript-এ এর সমতুল্য হলো `CSS.registerProperty()`। `@property` July 2024 থেকে Baseline newly available; পুরোনো browser-এ এটা সাধারণ custom property-তে নেমে আসে — animation শুধু লাফ দেয় — তাই এটাকে enhancement হিসেবে ব্যবহার করো।
         """,
+        quick_en=r"""`@property` registers a custom property with a type, an `inherits` flag and an `initial-value`, so the browser can animate it (for example a gradient angle), fall back on invalid values and compute it. Baseline newly available since July 2024; older browsers treat it as a normal custom property.""",
+        quick_bn=r"""`@property` একটা custom property-কে type, `inherits` flag আর `initial-value`-সহ register করে, ফলে browser সেটা animate করতে পারে (যেমন gradient-এর angle), ভুল value-তে fallback নেয় আর compute করে। July 2024 থেকে Baseline newly available; পুরোনো browser এটাকে সাধারণ custom property হিসেবে দেখে।""",
         ex_en=r"""
             **Rules that trip people up:**
             - `syntax` and `inherits` are required; `initial-value` is required unless `syntax` is `"*"`. A missing required descriptor makes the whole rule invalid and silently ignored.
@@ -447,6 +459,8 @@ QUESTIONS = [
 
             **4. উপসর্গ নয়, কারণ ঠিক করো:** `max-width: 100%`, `min-width: 0` / `minmax(0, 1fr)`, লম্বা string-এর জন্য `overflow-wrap: anywhere`, চওড়া table-কে scroll করা যায় এমন container-এ রাখা, আর off-canvas menu `position: fixed` দিয়ে বানানো (fixed box page-এর scroll করা যায় এমন এলাকা বাড়ায় না) অথবা বন্ধ অবস্থায় `display: none` করে দেওয়া। ঢালাও সমাধান হিসেবে আমি `body`/`html`-এ `overflow-x: hidden` এড়িয়ে চলি: এটা content লুকায়, কোনো wrapper-এ বা `html` আর `body` দুটোতেই দিলে `position: sticky` ভেঙে দেয় (শুধু `body`-তে দিলে সেটা viewport-এ চলে যায়), আর সব mobile browser-এ পাশে সরে যাওয়া নির্ভরযোগ্যভাবে থামায় না। সত্যিই clip করতে চাইলে নির্দিষ্ট wrapper-এ `overflow-x: clip` ব্যবহার করি।
         """,
+        quick_en=r"""Reproduce at 320–360px, then find the element that sticks out with an outline on everything, a script that lists boxes wider than the viewport, or by hiding sections. Fix the cause (fixed widths, `100vw`, long strings, `min-width: auto`, unconstrained media) rather than `overflow-x: hidden` on `body`.""",
+        quick_bn=r"""320–360px-এ reproduce করো, তারপর সব element-এ outline দিয়ে, viewport-এর চেয়ে চওড়া box খুঁজে বের করার script চালিয়ে, বা section লুকিয়ে লুকিয়ে বাইরে বেরোনো element খোঁজো। `body`-তে `overflow-x: hidden` না দিয়ে আসল কারণ ঠিক করো (fixed width, `100vw`, লম্বা string, `min-width: auto`, সীমাহীন media)।""",
         ex_en=r"""
             - **Why `100vw` bites:** on desktop browsers with classic scrollbars, `100vw` is the viewport *including* the scrollbar, so a "full-bleed" section is a few pixels wider than the page. Use `width: 100%` or let the element stretch naturally.
             - **`overflow: hidden` vs `overflow: clip`:** `hidden` turns the element into a scroll container (programmatically scrollable, and it becomes the reference for `position: sticky` descendants); `clip` just clips painting without creating a scroll container.
@@ -539,6 +553,8 @@ QUESTIONS = [
 
             **যাচাই:** একই device-এ আগে-পরে trace তুলনা করো, আর release-এর পর field INP আর scroll jank-এর metric নজরে রাখো।
         """,
+        quick_en=r"""This is advanced: profile on a real device, then remove `will-change` from every card, shrink the `backdrop-filter` blur, animate a pseudo-element's `opacity` instead of the shadow, drop per-image `drop-shadow()`, and scope the `:has()` rule to the listing. Verify with before/after traces.""",
+        quick_bn=r"""এটা advanced বিষয়: আসল device-এ profile করি, তারপর সব card থেকে `will-change` সরাই, `backdrop-filter`-এর blur কমাই, shadow-এর বদলে pseudo-element-এর `opacity` animate করি, প্রতিটা image-এর `drop-shadow()` বাদ দিই, আর `:has()` rule-কে listing-এর মধ্যে সীমিত করি। শেষে আগে-পরের trace মিলিয়ে দেখি।""",
         ex_en=r"""
             **Why mid-range Android suffers most:** less GPU memory and fill-rate, slower CPUs, and high-DPR screens mean every blurred or shadowed pixel costs more. A redesign that's smooth on a designer's laptop can be unusable on the devices most of your BD customers use.
 

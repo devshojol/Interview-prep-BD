@@ -57,6 +57,10 @@
    "express-004",
    "express-010"
   ],
+  "quickAnswer": {
+   "en": "Middleware is a function `(req, res, next)` that Express runs, in registration order, for each matching request. Each one can change `req`/`res`, end the response, or call `next()` (or `next(err)` to jump to error handlers); if it does neither, the request hangs.",
+   "bn": "Middleware হলো `(req, res, next)` signature-এর একটা function, যেটা Express প্রতিটা matching request-এ register করার ক্রম অনুযায়ী চালায়। প্রতিটা middleware `req`/`res` বদলাতে পারে, response শেষ করতে পারে, বা `next()` call করতে পারে (অথবা error handler-এ যেতে `next(err)`); কোনোটাই না করলে request ঝুলে থাকে।"
+  },
   "commonMistakes": {
    "en": "Calling `next()` after already sending a response, or thinking Express runs middleware in parallel.",
    "bn": "Response পাঠানোর পরেও `next()` call করা, অথবা মনে করা যে Express middleware parallel-এ চালায়।"
@@ -113,6 +117,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`app.get('/{*splat}', handler)`: Express 5 (path-to-regexp v8) requires a named wildcard like `*splat`, and the braces make it optional, so it also matches `/`. `'*'` and `'/*'` throw at startup, and `'/*splat'` doesn't match `/` itself.",
+   "bn": "`app.get('/{*splat}', handler)`: Express 5 (path-to-regexp v8)-এ wildcard-এর নাম লাগে, যেমন `*splat`, আর brace দিলে সেটা optional হয়, তাই `/`-ও match করে। `'*'` আর `'/*'` startup-এই throw করে, আর `'/*splat'` শুধু `/` match করে না।"
+  },
   "options": [
    {
     "en": "`app.get('*', handler)`",
@@ -193,6 +201,10 @@
    "express-012",
    "express-028"
   ],
+  "quickAnswer": {
+   "en": "`req.params` holds path values (`/users/:id`), `req.query` the parsed query string, and `req.body` the parsed body, which exists only if a parser like `express.json()` ran. In Express 5, `req.body` is `undefined` without a parser, `req.query` is a read-only getter with the simple parser, and `req.param()` is removed.",
+   "bn": "`req.params`-এ থাকে route path-এর value (`/users/:id`), `req.query`-তে parse করা query string, আর `req.body`-তে parse করা body, যেটা শুধু `express.json()`-এর মতো parser চললেই থাকে। Express 5-এ parser ছাড়া `req.body` হয় `undefined`, `req.query` simple parser-সহ read-only getter, আর `req.param()` বাদ দেওয়া হয়েছে।"
+  },
   "commonMistakes": {
    "en": "Treating `req.query.page` as a number, or writing validated values back into `req.query` in Express 5.",
    "bn": "`req.query.page`-কে number হিসেবে ব্যবহার করা, অথবা Express 5-এ validate করা value আবার `req.query`-তে লিখে দেওয়া।"
@@ -263,6 +275,10 @@
    "express-003",
    "express-010"
   ],
+  "quickAnswer": {
+   "en": "Both are middleware-order bugs: the router is mounted before `express.json()`, so `req.body` is still `undefined` (Express 5), and `authenticate` comes after the router, so it never runs for those routes. Register global middleware → body parser → auth → routes → 404 → error handler.",
+   "bn": "দুটোই middleware order-এর bug: router `express.json()`-এর আগে mount করা, তাই `req.body` তখনো `undefined` (Express 5), আর `authenticate` router-এর পরে, তাই ওই route-গুলোতে এটা কখনো চলেই না। Order হবে: global middleware → body parser → auth → route → 404 → error handler।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" the crash with `req.body ?? {}` in the handler, which hides the ordering bug, or adding auth checks inside every handler instead of fixing the order.",
    "bn": "Handler-এ `req.body ?? {}` দিয়ে crash \"ঠিক\" করা, যা ordering bug লুকিয়ে ফেলে, অথবা order ঠিক না করে প্রতিটি handler-এর ভেতরে auth check বসানো।"
@@ -329,6 +345,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Express 5 forwards it: when an `async` handler returns a rejected promise, Express calls `next(err)` with the rejection value, so the error-handling middleware sends the 500 JSON response instead of the request crashing or hanging.",
+   "bn": "Express 5 এটা forward করে: `async` handler rejected promise return করলে Express rejection-এর value দিয়ে `next(err)` call করে, তাই crash বা ঝুলে থাকার বদলে error-handling middleware 500 JSON response পাঠায়।"
+  },
   "code": {
    "language": "javascript",
    "source": "app.get('/users/:id', async (req, res) => {\n  const user = await db.users.findById(req.params.id);\n  res.json(user);\n});\n\napp.use((err, req, res, next) => {\n  res.status(500).json({ error: 'Internal Server Error' });\n});"
@@ -422,6 +442,10 @@
    "express-008",
    "express-012"
   ],
+  "quickAnswer": {
+   "en": "Throw a custom `AppError` (status, code, safe message) from handlers and handle everything in one 4-argument error middleware registered last, which also maps library errors (Zod → 400, duplicate key → 409). Express 5 forwards async errors, so no try/catch in handlers; unknown errors get a generic 500, details go to logs.",
+   "bn": "Handler থেকে একটা custom `AppError` (status, code, নিরাপদ message) throw করো, আর সবকিছু শেষে register করা একটা 4-argument error middleware-এ সামলাও, যেটা library error-ও map করে (Zod → 400, duplicate key → 409)। Express 5 async error নিজেই forward করে, তাই handler-এ try/catch লাগে না; অজানা error-এ generic 500 যায়, বিস্তারিত log-এ।"
+  },
   "commonMistakes": {
    "en": "Sending `err.message` and `err.stack` to clients for 500s, writing `try/catch` in every Express 5 handler, or registering the error handler before the routes.",
    "bn": "500-এর ক্ষেত্রে client-কে `err.message` আর `err.stack` পাঠানো, Express 5-এর প্রতিটি handler-এ `try/catch` লেখা, অথবা route-এর আগে error handler register করা।"
@@ -448,7 +472,7 @@
    "observability",
    "express-5"
   ],
-  "technologyVersion": "Express 5.x; Node.js 24 LTS / 26",
+  "technologyVersion": "Express 5.x; Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -501,6 +525,10 @@
    "express-014",
    "express-018"
   ],
+  "quickAnswer": {
+   "en": "A modular monolith (routes → controllers → services → repositories) built by an app factory, with an ordered middleware stack ending in auth, tenant resolution from the token, validation and errors. Isolate tenants with `tenant_id` scoping plus PostgreSQL RLS; scale with stateless containers, Redis, replicas and queues.",
+   "bn": "App factory দিয়ে তৈরি একটা modular monolith (route → controller → service → repository), যার middleware stack নির্দিষ্ট ক্রমে চলে এবং শেষ দিকে থাকে auth, token থেকে tenant resolve, validation আর central error handler। Tenant আলাদা রাখো `tenant_id` scoping আর PostgreSQL RLS দিয়ে; scale করো stateless container, Redis, read replica ও queue দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Starting with microservices for a small team, trusting an `X-Tenant-Id` header from the client, or keeping sessions/rate-limit counters in process memory while running many instances.",
    "bn": "ছোট team নিয়ে microservices দিয়ে শুরু করা, client-এর পাঠানো `X-Tenant-Id` header বিশ্বাস করা, অথবা অনেক instance চালিয়েও session/rate-limit counter process memory-তে রাখা।"

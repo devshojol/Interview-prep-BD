@@ -21,7 +21,7 @@ QUESTIONS = [
         id="node-021", sub="Buffers", diff="easy", type="output",
         prio="medium", market="bangladesh", mins=3,
         tags=["buffer", "utf-8", "encoding", "bytelength", "output"],
-        ver="Version-independent (Node.js 24 LTS / 26)", vs=False, status="stable",
+        ver="Version-independent (Node.js 26 LTS / 24)", vs=False, status="stable",
         q_en=r"""What does this script print? (The first string is the Bangla word `বাংলা`.)""",
         q_bn=r"""এই script কী print করবে? (প্রথম string-টি বাংলা শব্দ `বাংলা`।)""",
         a_en=r"""
@@ -34,6 +34,8 @@ QUESTIONS = [
 
             `word.length` UTF-16 code unit গোনে — `বাংলা`-তে পাঁচটি code point (`ব`, `া`, `ং`, `ল`, `া`), প্রতিটি একটি করে code unit। `Buffer.byteLength` UTF-8 encode করার পর byte গোনে, আর এই প্রতিটি বাংলা character-এ 3 byte লাগে, তাই 15। `Buffer.from('Hi!')` byte 0x48, 0x69, 0x21 রাখে, base64-এ যা `SGkh`, আর Buffer-এর `length` হলো byte-এ তার size (3)।
         """,
+        quick_en=r"""It prints `5`, `15`, `<Buffer 48 69 21>`, `SGkh`, `3`. A string's `length` counts UTF-16 code units (5), `Buffer.byteLength` counts UTF-8 bytes (3 per Bangla character, so 15), and `Hi!` is the bytes 48 69 21, which is `SGkh` in base64 and 3 bytes long.""",
+        quick_bn=r"""Print হবে `5`, `15`, `<Buffer 48 69 21>`, `SGkh`, `3`। String-এর `length` UTF-16 code unit গোনে (5), `Buffer.byteLength` UTF-8 byte গোনে (প্রতিটা বাংলা অক্ষর 3 byte, তাই 15), আর `Hi!` হলো byte 48 69 21, যেটা base64-এ `SGkh` এবং length 3 byte।""",
         ex_en=r"""
             - **What a Buffer is:** a fixed-size sequence of raw bytes (a `Uint8Array` subclass). Node uses it for files, sockets, crypto and compression — anything binary.
             - **Why it matters in real code:** the HTTP `Content-Length` header, database column limits and protocol frames are in **bytes**, not characters. Using `str.length` for Bangla, emoji or any non-ASCII text gives wrong sizes.
@@ -82,38 +84,44 @@ QUESTIONS = [
         id="node-022", sub="LTS Release Model", diff="easy", type="mcq",
         prio="medium", market="both", mins=2,
         tags=["lts", "release-schedule", "versions", "production"],
-        ver="Node.js release schedule as of 2026-10-12 (v24 Active LTS, v26 Current)", vs=True, status="version-specific",
-        q_en=r"""It is October 2026 and you are starting a new production API. Which Node.js release line should you choose by default?""",
-        q_bn=r"""এখন অক্টোবর 2026, তুমি একটি নতুন production API শুরু করছ। Default হিসেবে কোন Node.js release line বেছে নেবে?""",
+        ver="Node.js release schedule as of 2026-10-26 (v26 Active LTS from 2026-10-28, v24 Maintenance LTS)", vs=True, status="version-specific",
+        q_en=r"""It is November 2026 and you are starting a new production API. Which Node.js release line should you choose by default?""",
+        q_bn=r"""এখন নভেম্বর 2026, তুমি একটি নতুন production API শুরু করছ। Default হিসেবে কোন Node.js release line বেছে নেবে?""",
         options=[
-            ("Node.js 26, because it is the newest Current release with the latest features", "Node.js 26, কারণ এটা নতুন feature সহ সবচেয়ে নতুন Current release"),
-            ("Node.js 24 — the Active LTS line (or 26 once it enters LTS at the end of October 2026)", "Node.js 24 — Active LTS line (অথবা অক্টোবর 2026-এর শেষে LTS-এ ঢোকার পর 26)"),
+            ("Node.js 27, because its alpha has the newest features", "Node.js 27, কারণ এর alpha-তে সবচেয়ে নতুন feature আছে"),
+            ("Node.js 26, the Active LTS line", "Node.js 26, যেটা Active LTS line"),
             ("Node.js 25, because odd-numbered releases get the longest support", "Node.js 25, কারণ odd-numbered release সবচেয়ে বেশি দিন support পায়"),
             ("Node.js 20, because older LTS lines are the most battle-tested", "Node.js 20, কারণ পুরনো LTS line সবচেয়ে বেশি পরীক্ষিত"),
         ],
         correct=1,
         a_en=r"""
-            Node.js 24. The Node.js project says production applications should only use Active LTS or Maintenance LTS releases. As of 12 October 2026, v24 is Active LTS, and v26 is still Current until it is promoted to LTS on 28 October 2026 — after that, v26 is the natural choice for new projects.
+            **B**: Node.js 26. The Node.js project says production applications should only use Active LTS or Maintenance LTS releases. v26 was promoted to Active LTS on 28 October 2026, so it's the natural default for a new project: it gets fixes and backports for the longest time. v24 is still supported, but it entered Maintenance LTS on 20 October 2026 (security and critical fixes only, until 30 April 2028), so it suits existing apps rather than new ones.
         """,
         a_bn=r"""
-            Node.js 24। Node.js project-এর নির্দেশনা হলো production application-এ শুধু Active LTS বা Maintenance LTS release ব্যবহার করা। 12 অক্টোবর 2026 অনুযায়ী v24 হলো Active LTS, আর v26 এখনও Current — 28 অক্টোবর 2026-এ LTS-এ promote হওয়ার পর নতুন project-এর জন্য v26 স্বাভাবিক পছন্দ।
+            **B**: Node.js 26। Node.js project-এর নির্দেশনা হলো production application-এ শুধু Active LTS বা Maintenance LTS release ব্যবহার করা। v26 28 অক্টোবর 2026-এ Active LTS হয়েছে, তাই নতুন project-এর জন্য এটাই স্বাভাবিক default: এটা সবচেয়ে বেশি দিন fix আর backport পাবে। v24 এখনও supported, কিন্তু 20 অক্টোবর 2026-এ Maintenance LTS-এ চলে গেছে (30 এপ্রিল 2028 পর্যন্ত শুধু security আর critical fix), তাই এটা নতুন app-এর চেয়ে চালু app-এর জন্য বেশি মানানসই।
         """,
+        quick_en=r"""Node.js 26: it became Active LTS on 28 October 2026, and production apps should run only Active or Maintenance LTS lines. Node.js 24 is still supported but is in Maintenance LTS (security and critical fixes only), so it suits existing apps rather than new ones.""",
+        quick_bn=r"""Node.js 26: এটা 28 October 2026-এ Active LTS হয়েছে, আর production app-এ শুধু Active বা Maintenance LTS line চালানো উচিত। Node.js 24 এখনো supported, কিন্তু Maintenance LTS-এ আছে (শুধু security ও critical fix), তাই এটা নতুন নয়, পুরোনো app-এর জন্য মানানসই।""",
         ex_en=r"""
-            - **Current** lines get new features (and occasionally breaking changes) for about six months; libraries may not support them yet. That's why option A is tempting but wrong for production by default.
-            - Until Node 26, **odd-numbered releases never became LTS** — v25 is already end-of-life (option C is backwards).
-            - **v20 reached end-of-life on 30 April 2026**, so it no longer gets security fixes (option D). v22 is in Maintenance LTS until 30 April 2027 — fine for existing apps, not ideal for new ones.
+            - **Option A (Node 27)** is the most common wrong choice. Under the new release model, 27 starts as an **alpha** on 28 October 2026 and only ships as 27.0.0 in April 2027. Alpha and Current releases get new features (and occasionally breaking changes), and libraries may not support them yet, so they aren't a production default.
+            - Until Node 26, **odd-numbered releases never became LTS**: v25 is already end-of-life (option C is backwards).
+            - **v20 reached end-of-life on 30 April 2026**, so it no longer gets security fixes (option D). v22 is in Maintenance LTS until 30 April 2027, and v24 until 30 April 2028: fine for existing apps, not ideal for new ones.
             - **New model from Node 27:** one major release per year (April), an alpha phase before it, and *every* release becomes LTS in October. The even/odd rule disappears.
             - Practical habit: pin the major in `engines`, `.nvmrc` and your Docker image tag, and plan upgrades before a line leaves Maintenance.
         """,
         ex_bn=r"""
-            - **Current** line প্রায় ছয় মাস নতুন feature (আর মাঝে মাঝে breaking change) পায়; library-গুলো হয়তো তখনও support করে না। এজন্যই option A প্রলোভনের, কিন্তু default হিসেবে production-এর জন্য ভুল।
-            - Node 26 পর্যন্ত **odd-numbered release কখনো LTS হয়নি** — v25 ইতিমধ্যে end-of-life (option C উল্টো কথা)।
-            - **v20 30 এপ্রিল 2026-এ end-of-life** হয়েছে, তাই আর security fix পায় না (option D)। v22 30 এপ্রিল 2027 পর্যন্ত Maintenance LTS-এ — পুরনো app-এর জন্য ঠিক আছে, নতুন app-এর জন্য আদর্শ নয়।
+            - **Option A (Node 27)** হলো সবচেয়ে বেশি বেছে নেওয়া ভুল উত্তর। নতুন release model-এ 27 শুরু হয় **alpha** হিসেবে, 28 অক্টোবর 2026-এ, আর 27.0.0 হিসেবে আসে এপ্রিল 2027-এ। Alpha আর Current release নতুন feature (আর মাঝে মাঝে breaking change) পায়, library-গুলো হয়তো তখনও support করে না, তাই production-এর default হিসেবে এগুলো চলে না।
+            - Node 26 পর্যন্ত **odd-numbered release কখনো LTS হয়নি**: v25 ইতিমধ্যে end-of-life (option C উল্টো কথা)।
+            - **v20 30 এপ্রিল 2026-এ end-of-life** হয়েছে, তাই আর security fix পায় না (option D)। v22 30 এপ্রিল 2027 পর্যন্ত আর v24 30 এপ্রিল 2028 পর্যন্ত Maintenance LTS-এ: চালু app-এর জন্য ঠিক আছে, নতুন app-এর জন্য আদর্শ নয়।
             - **Node 27 থেকে নতুন model:** বছরে একটি major release (এপ্রিলে), তার আগে একটি alpha phase, আর *প্রতিটি* release অক্টোবরে LTS হবে। Even/odd নিয়ম আর থাকবে না।
             - বাস্তব অভ্যাস: `engines`, `.nvmrc` আর Docker image tag-এ major version pin করো, আর কোনো line Maintenance থেকে বের হওয়ার আগেই upgrade-এর পরিকল্পনা করো।
         """,
         tip_en=r"""Quote the rule ("production → Active or Maintenance LTS") and then show you know the calendar: which line is LTS now, and that the even/odd scheme ends with Node 27.""",
         tip_bn=r"""নিয়মটা বলো ("production → Active বা Maintenance LTS"), তারপর দেখাও তুমি calendar জানো: এখন কোন line LTS, আর Node 27 থেকে even/odd পদ্ধতি শেষ হচ্ছে।""",
+        follow=[
+            ("What's the difference between Active LTS and Maintenance LTS?", "Active LTS আর Maintenance LTS-এর মধ্যে পার্থক্য কী?"),
+            ("Your team runs Node.js 24 in production. When should you plan the upgrade to 26, and how?", "তোমার team production-এ Node.js 24 চালায়। 26-এ upgrade-এর পরিকল্পনা কখন আর কীভাবে করবে?"),
+        ],
         refs=[NODE_RELEASES],
     ),
     # ------------------------------------------------------------------ node-023
@@ -121,7 +129,7 @@ QUESTIONS = [
         id="node-023", sub="EventEmitter", diff="medium", type="debugging",
         prio="high", market="both", mins=6,
         tags=["eventemitter", "memory-leak", "sse", "listeners", "maxlisteners"],
-        ver="Node.js 24 LTS / 26; Express 5.x", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; Express 5.x", vs=False, status="stable",
         q_en=r"""This Server-Sent Events endpoint pushes price updates to browsers. After a few hours in production the logs show `MaxListenersExceededWarning: Possible EventEmitter memory leak detected`, memory keeps growing, and there are occasional "write after end" errors. What's wrong, and how do you fix it?""",
         q_bn=r"""এই Server-Sent Events endpoint browser-এ price update push করে। Production-এ কয়েক ঘণ্টা পর log-এ দেখা যায় `MaxListenersExceededWarning: Possible EventEmitter memory leak detected`, memory বাড়তেই থাকে, আর মাঝে মাঝে "write after end" error আসে। সমস্যা কী, আর কীভাবে ঠিক করবে?""",
         a_en=r"""
@@ -134,6 +142,8 @@ QUESTIONS = [
 
             Fix: handler-এর reference রাখো এবং response close হলে সেটা remove করো (`res.on('close', ...)` স্বাভাবিকভাবে শেষ হলে এবং client disconnect হলে — দুই ক্ষেত্রেই fire হয়)। Cleanup ঠিক হওয়ার পরেই, যদি সত্যিই অনেক subscriber একসাথে আশা করো, তবে `setMaxListeners()` দিয়ে limit বাড়াও।
         """,
+        quick_en=r"""Every request adds a `'price'` listener to a shared emitter and nothing removes it, so listeners of disconnected clients keep their `res` alive: memory grows, the warning fires past 10 listeners, and dead responses get written to. Fix: remove the listener in `res.on('close')`.""",
+        quick_bn=r"""প্রতিটা request shared emitter-এ একটা `'price'` listener যোগ করে কিন্তু কেউ সেটা সরায় না, তাই disconnect হওয়া client-এর listener তাদের `res` বাঁচিয়ে রাখে: memory বাড়ে, 10টার বেশি listener হলে warning আসে, আর বন্ধ response-এ write হয়। সমাধান: `res.on('close')`-এ listener সরাও।""",
         ex_en=r"""
             - **The warning is a hint, not the bug.** Calling `setMaxListeners(0)` first just hides the symptom while memory keeps leaking.
             - **Anonymous listeners can't be removed** — `off()` needs the same function reference, so store it in a variable.
@@ -203,7 +213,7 @@ QUESTIONS = [
         id="node-024", sub="Modules (ESM & CommonJS)", diff="medium", type="mcq",
         prio="medium", market="both", mins=3,
         tags=["typescript", "type-stripping", "erasable-syntax", "tooling"],
-        ver="Node.js 24.12+ LTS / 26 (type stripping stable)", vs=True, status="stable",
+        ver="Node.js 26 LTS / 24.12+ (type stripping stable)", vs=True, status="stable",
         q_en=r"""Node.js 24.12+ and 26 can run TypeScript files directly with built-in type stripping (`node app.ts`, no flags). Which of these files runs without a TypeScript-related error?""",
         q_bn=r"""Node.js 24.12+ ও 26 built-in type stripping দিয়ে সরাসরি TypeScript file চালাতে পারে (`node app.ts`, কোনো flag ছাড়া)। নিচের কোন file TypeScript-সংক্রান্ত কোনো error ছাড়া চলবে?""",
         options=[
@@ -219,6 +229,8 @@ QUESTIONS = [
         a_bn=r"""
             Interface, type annotation আর `import type` থাকা file-টি। Type stripping শুধু **erasable** syntax সরায় — type-গুলোকে whitespace দিয়ে replace করে বাকি JavaScript চালায়। Interface, type alias, annotation আর type-only import পরিষ্কারভাবে মুছে যায়, তাই ওই file চলে।
         """,
+        quick_en=r"""The file with interfaces, type annotations and `import type`: built-in type stripping only erases type-only syntax and runs the remaining JavaScript. Enums and parameter properties generate runtime code, so they fail, and Node never reads `tsconfig.json`, so `paths` aliases don't resolve.""",
+        quick_bn=r"""Interface, type annotation আর `import type` থাকা file-টা: built-in type stripping শুধু type-এর syntax মুছে দিয়ে বাকি JavaScript চালায়। Enum আর parameter property runtime code তৈরি করে, তাই সেগুলো fail করে, আর Node কখনো `tsconfig.json` পড়ে না, তাই `paths` alias resolve হয় না।""",
         ex_en=r"""
             - **Enums and parameter properties** (options A and C) generate runtime JavaScript, so they can't just be erased — Node throws `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` (verified). Same for namespaces with runtime code and import aliases. These options are tempting because NestJS-style code uses them everywhere — such projects still need a compiler or a tool like `tsx`.
             - **Node never reads `tsconfig.json`** (option D), so `paths` aliases don't resolve; use package.json subpath imports (`#utils/date.ts`) instead.
@@ -244,7 +256,7 @@ QUESTIONS = [
         id="node-025", sub="Security", diff="hard", type="security-performance",
         prio="high", market="both", mins=10,
         tags=["security", "supply-chain", "npm-audit", "permission-model", "prototype-pollution"],
-        ver="Node.js 24 LTS / 26 (permission model stable for fs since v23.5 / v22.13)", vs=True, status="stable",
+        ver="Node.js 26 LTS / 24 (permission model stable for fs since v23.5 / v22.13)", vs=True, status="stable",
         q_en=r"""How do you protect a Node.js service against its main runtime and supply-chain risks? Include what Node's permission model (`--permission`) does — and what it does not protect against.""",
         q_bn=r"""একটি Node.js service-কে তার প্রধান runtime ও supply-chain ঝুঁকি থেকে কীভাবে রক্ষা করবে? Node-এর permission model (`--permission`) কী করে — এবং কীসের বিরুদ্ধে রক্ষা করে না — সেটাও বলো।""",
         a_en=r"""
@@ -269,6 +281,8 @@ QUESTIONS = [
 
             **4. Seat belt হিসেবে permission model।** `node --permission --allow-fs-read=/app --allow-fs-write=/app/uploads server.js` file system access, child process, worker thread, native addon আর WASI সীমিত করে (আর Node 25+/26-এ `--allow-net` না দিলে network access-ও)। এটা *trusted* code-কে ভুলবশত অনাকাঙ্ক্ষিত জিনিস ছোঁয়া থেকে আটকায়। কিন্তু docs স্পষ্ট বলে: এটা **malicious code-এর বিরুদ্ধে রক্ষা করে না**, malicious code একে bypass করতে পারে। Untrusted code-এর আসল isolation-এর জন্য OS/container-level sandboxing লাগে।
         """,
+        quick_en=r"""Defend in layers: supply chain first (lockfile + `npm ci`, `npm audit` in CI, few vetted dependencies), then a patched LTS running as non-root, then safe code (validation, no `eval`, no prototype pollution). `--permission` restricts what trusted code can touch, but it does not protect against malicious code.""",
+        quick_bn=r"""কয়েকটা layer-এ সুরক্ষা দাও: আগে supply chain (lockfile + `npm ci`, CI-তে `npm audit`, অল্প আর যাচাই করা dependency), তারপর non-root হিসেবে চলা patched LTS, তারপর নিরাপদ code (validation, `eval` নয়, prototype pollution ঠেকানো)। `--permission` trusted code কী ছুঁতে পারবে তা সীমিত করে, কিন্তু malicious code থেকে রক্ষা করে না।""",
         ex_en=r"""
             - **Status details:** the permission model and the `--allow-fs-*` flags are stable since v23.5 / v22.13; `--allow-child-process`, `--allow-worker` and `--allow-net` (added in v25) are still marked "active development". On Node 24 there is no network restriction at all.
             - **`npm audit` limits:** it only knows published advisories, reports many unreachable issues, and can't detect a freshly compromised package. Pair it with lockfile review, provenance (`npm audit signatures`) and minimal dependencies.
@@ -338,7 +352,7 @@ QUESTIONS = [
         id="node-026", sub="Performance & Scalability", diff="hard", type="architecture",
         prio="high", market="both", mins=12,
         tags=["scalability", "cluster", "stateless", "load-balancing", "redis", "connection-pool"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""Your Node.js API runs as a single process on an 8-vCPU VM. At peak, one core sits at 100% while the others are idle, and latency climbs. How would you scale it — first across cores, then across machines — and what has to change in the application itself?""",
         q_bn=r"""তোমার Node.js API একটি 8-vCPU VM-এ একটি মাত্র process হিসেবে চলে। Peak সময়ে একটি core 100%-এ থাকে, বাকিগুলো অলস, আর latency বাড়তে থাকে। প্রথমে core-জুড়ে, তারপর machine-জুড়ে কীভাবে scale করবে — আর application-এর ভেতরে কী কী বদলাতে হবে?""",
         a_en=r"""
@@ -373,6 +387,8 @@ QUESTIONS = [
             - Upload → local disk নয়, object storage।
             - **Database connection:** pool size × process সংখ্যা DB-র connection limit-এর নিচে থাকতে হবে — per-process pool ছোট করো এবং PgBouncer/RDS Proxy যোগ করো।
         """,
+        quick_en=r"""First profile it to make sure it's real work, not a blocking bug. Then run one process per core (`node:cluster`, PM2 or containers) and stateless instances behind a load balancer, with sessions, caches, rate limits and scheduled jobs in shared stores like Redis, and DB connections kept under the limit.""",
+        quick_bn=r"""আগে profile করে নিশ্চিত হও যে এটা আসল কাজ, কোনো blocking bug নয়। তারপর প্রতি core-এ একটা process চালাও (`node:cluster`, PM2 বা container) আর load balancer-এর পেছনে stateless instance রাখো; session, cache, rate limit আর scheduled job Redis-এর মতো shared store-এ রাখো, আর DB connection limit-এর নিচে রাখো।""",
         ex_en=r"""
             **Trade-offs:**
             - **cluster/PM2 on one VM:** simple and cheap, but the VM is a single failure domain and deploys need care (`pm2 reload` for rolling restarts).

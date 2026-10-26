@@ -15,6 +15,28 @@ Components and JSX; props and state; functional components; hooks; useState; use
 ## nextjs — Next.js
 Next.js architecture; App Router; Pages Router; file-based routing; layouts; dynamic routes; route handlers; Server Components; Client Components; SSR; static generation; ISR; streaming; Suspense; hydration (and hydration errors); Server Actions; data fetching; caching and revalidation (Cache Components, 'use cache', cacheLife, cacheTag, revalidateTag(tag, profile), updateTag, refresh, revalidatePath; previous model labelled); middleware → proxy.ts conventions; authentication; metadata and SEO; image optimization; environment variables (NEXT_PUBLIC_); error handling (error.js, not-found, global-error); loading states (loading.js); deployment (Vercel, self-hosting, standalone output, Docker); performance; production problems.
 
+## reactnative — React Native (with Expo; 40 questions)
+What React Native is (native views, not a WebView) vs Flutter/native/PWA; New Architecture (Fabric, TurboModules, JSI,
+bridgeless; the old bridge as history); Hermes; core components (View, Text, Image, TextInput, Pressable, ScrollView) and why
+text must be inside `<Text>`; styling (StyleSheet, Flexbox defaults: column, `flex: 1`, no cascade), responsive layout
+(`useWindowDimensions`, safe areas, Android edge-to-edge); platform differences (`Platform.OS`, `.ios.tsx`/`.android.tsx`);
+lists (FlatList, SectionList, keys, `getItemLayout`, FlashList) and list performance; navigation (Expo Router file-based routing,
+stacks/tabs/modals, dynamic routes, React Navigation 7 underneath, deep linking, typed routes); state management (Context,
+Zustand/Redux Toolkit, server state with TanStack Query); forms and keyboard handling (`KeyboardAvoidingView`); networking
+(fetch, offline handling with NetInfo, retry); **local storage**: AsyncStorage vs `expo-secure-store` vs MMKV vs
+**expo-sqlite** (API, `SQLiteProvider`/`useSQLiteContext`, migrations with `PRAGMA user_version`, transactions, prepared
+statements, WAL, SQL injection, Drizzle with expo-sqlite); offline-first sync design; **Expo**: Expo Go vs development builds,
+CNG/prebuild and config plugins, `app.json`/`app.config.ts`, environment variables (`EXPO_PUBLIC_`), **EAS Build / Submit /
+Update** (OTA rules, runtimeVersion); permissions (camera, location, notifications); push notifications (expo-notifications,
+FCM/APNs); images and media (`expo-image`, `expo-audio`/`expo-video`); animations (Animated vs Reanimated 4 worklets, UI vs JS
+thread) and gestures; native modules (Expo Modules API, when you need native code); performance (JS thread blocking, re-renders,
+memo, Hermes profiling, startup time, bundle size); debugging (React Native DevTools, logs, crash reporting); security (secure
+storage, certificate pinning awareness, secrets in the bundle are public); testing (Jest + React Native Testing Library, E2E with
+Maestro/Detox); app store release basics (signing, versioning, store review); accessibility (`accessibilityLabel`, roles,
+dynamic font size); common production problems (keyboard covering inputs, slow lists, memory from large images, OTA update
+broke native compatibility). Legacy topics (`AsyncStorage` in core, Expo `expo-av`, legacy bridge, `react-native link`) only as
+labelled legacy.
+
 ## nodejs — Node.js
 Node.js runtime; V8 and libuv; event loop (phases, process.nextTick, setImmediate); non-blocking I/O; asynchronous programming; streams (backpressure, pipeline); Buffers; file system APIs (fs/promises); EventEmitter; modules (ESM/CJS, require(esm)); package management (npm, lockfiles, semver); processes and environment variables (--env-file); error handling (unhandledRejection, uncaughtException); worker threads; clustering; memory management (heap, leaks); CPU-intensive tasks; API design; security (permission model, dependency risk); logging; graceful shutdown; performance and scalability; LTS release model.
 

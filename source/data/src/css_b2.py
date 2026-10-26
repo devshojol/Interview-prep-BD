@@ -47,6 +47,8 @@ QUESTIONS = [
 
             সাধারণ উদাহরণ: product card-এর উপর "−20%" badge — card-এ `position: relative`, badge-এ `position: absolute; top: 8px; right: 8px`।
         """,
+        quick_en=r"""`static` is normal flow; `relative` stays in flow and can be nudged, often as the containing block; `absolute` leaves the flow and uses the nearest positioned ancestor; `fixed` uses the viewport; `sticky` acts like `relative` until a scroll threshold, then sticks.""",
+        quick_bn=r"""`static` সাধারণ flow; `relative` flow-তেই থাকে, একটু সরানো যায়, আর প্রায়ই containing block হয়; `absolute` flow থেকে বেরিয়ে নিকটতম positioned ancestor ধরে বসে; `fixed` বসে viewport ধরে; `sticky` scroll-এর একটা সীমা পর্যন্ত `relative`-এর মতো, তারপর আটকে যায়।""",
         ex_en=r"""
             - **The `fixed` gotcha:** if any ancestor has `transform`, `filter`, `perspective`, `contain: paint` or `will-change: transform`, that ancestor becomes the containing block. Your "fixed" header or modal then scrolls with that ancestor — a common bug when a page wrapper gets an animation.
             - **Sticky gotchas:** it needs an inset (`top`, `bottom`…), it stops working if an ancestor between it and the scrolling element has `overflow: hidden/auto`, and it can't stick beyond its parent's box.
@@ -113,6 +115,8 @@ QUESTIONS = [
         a_bn=r"""
             `flex: 1` মানে grow 1, shrink 1, **basis 0** (browser এটাকে `0%` হিসেবে দেখায়)। প্রতিটা item শূন্য থেকে শুরু করে বলে ফাঁকা জায়গা সমানভাবে ভাগ হয় — এজন্যই সব item-এ `flex: 1` দিলে সমান চওড়া column পাওয়া যায়।
         """,
+        quick_en=r"""`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`. Because every item starts from a zero basis, free space is shared equally, which is why `flex: 1` on all items gives equal-width columns.""",
+        quick_bn=r"""`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`। প্রতিটা item শূন্য basis থেকে শুরু করে বলে খালি জায়গা সমানভাবে ভাগ হয়, এজন্যই সব item-এ `flex: 1` দিলে সমান চওড়া column হয়।""",
         ex_en=r"""
             The tempting wrong answer is C — that's `flex: auto` (`1 1 auto`). With basis `auto`, each item starts at its content size and only the *leftover* space is shared, so items with longer text end up wider.
 
@@ -155,6 +159,8 @@ QUESTIONS = [
 
             **`fr`** হলো fixed-size track আর gap বাদ দেওয়ার পর grid container-এর **ফাঁকা জায়গার** একটা ভগ্নাংশ। `grid-template-columns: 200px 1fr 2fr` দিলে প্রথম column 200px পায়, আর বাকি জায়গা 1 : 2 অনুপাতে ভাগ হয়।
         """,
+        quick_en=r"""Flexbox is one-dimensional and content-driven, good for navbars, button rows and centring; Grid is two-dimensional, good for page layouts and galleries, and the two combine well. `fr` is a fraction of the grid's free space after fixed tracks and gaps.""",
+        quick_bn=r"""Flexbox এক-মাত্রিক আর content অনুযায়ী চলে, navbar, button-এর সারি বা centring-এর জন্য ভালো; Grid দুই-মাত্রিক, page layout আর gallery-র জন্য ভালো, আর দুটো একসাথে ভালো চলে। `fr` হলো fixed track আর gap বাদে grid-এর খালি জায়গার একটা ভাগ।""",
         ex_en=r"""
             - **Alignment across items:** in a wrapping flex row, each line is independent, so items in different lines don't align into columns. If you find yourself fighting that, you want Grid.
             - **`gap`** works in both Flexbox and Grid today, so margin hacks aren't needed.
@@ -222,6 +228,8 @@ QUESTIONS = [
 
             একটা row পূরণ করার মতো যথেষ্ট item থাকলে দুটো একই আচরণ করে। Card-এর মাপ একরকম রাখতে চাইলে আমি `auto-fill` ব্যবহার করি (product grid, যেখানে শেষের একা card হঠাৎ বিশাল হওয়া উচিত নয়), আর কয়েকটা item দিয়ে পুরো row ভরাতে চাইলে `auto-fit`।
         """,
+        quick_en=r"""Both create as many 200px-plus columns as fit, but `auto-fill` keeps empty tracks and `auto-fit` collapses them. With two cards in 1000px, `auto-fill` gives four 238px columns (two empty) and `auto-fit` stretches the two cards to 492px each.""",
+        quick_bn=r"""দুটোই যতগুলো কমপক্ষে 200px-এর column ধরে ততগুলো বানায়, কিন্তু `auto-fill` খালি track রেখে দেয় আর `auto-fit` সেগুলো collapse করে। 1000px-এ দুটো card থাকলে `auto-fill`-এ 238px-এর চারটা column হয় (দুটো খালি), আর `auto-fit`-এ দুটো card 492px করে ছড়িয়ে যায়।""",
         ex_en=r"""
             - **`minmax(200px, 1fr)`** means "never narrower than 200px, otherwise share the free space equally".
             - **Narrow containers:** on a 180px-wide container, a 200px minimum overflows. The robust version is `minmax(min(200px, 100%), 1fr)` — the minimum shrinks to the container width when needed.
@@ -287,6 +295,8 @@ QUESTIONS = [
 
             Size query Baseline widely available। **Style query** — `@container style(--variant: sale)`, যা কোনো custom property-র value-তে সাড়া দেয় — May 2026-এ Baseline newly available হয়েছে, তাই আপাতত আমি এটাকে progressive enhancement হিসেবে ব্যবহার করি।
         """,
+        quick_en=r"""Media queries respond to the viewport; container queries respond to the component's own slot. Set `container-type: inline-size` on a parent, then `@container (min-width: 420px)` styles the card inside it. Size queries are widely available; style queries only became newly available in May 2026.""",
+        quick_bn=r"""Media query viewport দেখে; container query দেখে component যে জায়গায় বসেছে সেটা। Parent-এ `container-type: inline-size` দাও, তারপর `@container (min-width: 420px)` ভেতরের card-কে style করে। Size query widely available; style query মাত্র May 2026-এ newly available হয়েছে।""",
         ex_en=r"""
             **Rules and pitfalls:**
             - **A container can't query itself.** `@container` rules style its descendants. Put `container-type` on a wrapper (the slot), not on the card you want to restyle.
@@ -360,6 +370,8 @@ QUESTIONS = [
 
             **Runtime-এ বা context অনুযায়ী যা বদলায়** — theme, dark mode, design token, component variant — তার জন্য আমি custom property ব্যবহার করি, আর project-এ Sass থাকলে build-time-এর কাজের জন্য (breakpoint constant, mixin) Sass।
         """,
+        quick_en=r"""Sass variables are compile-time constants the browser never sees; custom properties are runtime values that inherit, can be overridden per context and changed with JavaScript, but can't be used in media query conditions. I use custom properties for themes and tokens, Sass for build-time constants.""",
+        quick_bn=r"""Sass variable compile-time constant, browser এগুলো দেখেই না; custom property runtime value, inherit হয়, context অনুযায়ী override করা যায় আর JavaScript দিয়ে বদলানো যায়, তবে media query condition-এ চলে না। Theme আর token-এর জন্য আমি custom property, আর build-time constant-এর জন্য Sass ব্যবহার করি।""",
         ex_en=r"""
             - **Dark mode shows the difference best:** with Sass you'd compile two stylesheets or duplicate rules; with custom properties you override a handful of tokens under `[data-theme="dark"]` and every component updates instantly.
             - **Invalid values behave differently:** if `--gap: red` is used in `margin: var(--gap)`, the declaration becomes "invalid at computed-value time" and the property falls back to its inherited or initial value — not to the `var()` fallback. `@property` can register a type to make this stricter and enable animation.
@@ -444,6 +456,8 @@ QUESTIONS = [
 
             এটা কম ব্যবহার করো — animation শুরুর ঠিক আগে দাও, আর পরে সরিয়ে ফেলো।
         """,
+        quick_en=r"""Style → Layout → Paint → Composite: geometry changes like `width` or `top` trigger layout, visual ones like `color` trigger paint, and `transform`/`opacity` can be composite-only. `will-change` is misused when applied widely, because every layer costs GPU memory and creates a stacking context.""",
+        quick_bn=r"""Style → Layout → Paint → Composite: `width` বা `top`-এর মতো geometry বদলালে layout, `color`-এর মতো চেহারা বদলালে paint, আর `transform`/`opacity` শুধু composite-এই হতে পারে। `will-change` ঢালাওভাবে দিলে সমস্যা, কারণ প্রতিটা layer GPU memory খায় আর stacking context তৈরি করে।""",
         ex_en=r"""
             - **Layout thrashing:** reading layout (`offsetHeight`, `getBoundingClientRect()`) right after writing styles forces a synchronous layout. Doing that in a loop multiplies the cost — batch all reads, then all writes.
             - **"Cheap" isn't free:** a large blurred `box-shadow`, `filter: blur()` or `backdrop-filter` can make *paint* or *composite* expensive, especially on mobile GPUs.
@@ -518,6 +532,8 @@ QUESTIONS = [
 
             **Subgrid-এর আগে** মানুষ ব্যবহার করত title কেটে দিয়ে fixed height (content হারায়), resize-এ height সমান করা JavaScript (ভঙ্গুর, layout shift ঘটায়), অথবা button-এ `margin-top: auto`-সহ flex column (button মেলে, কিন্তু title বা দাম মেলে না)।
         """,
+        quick_en=r"""Use subgrid: the parent grid defines the columns, and each card spans four rows with `display: grid; grid-template-rows: subgrid`, so cards in the same row share track sizes and titles, prices and buttons line up. Subgrid is Baseline widely available.""",
+        quick_bn=r"""Subgrid ব্যবহার করো: parent grid column ঠিক করে, আর প্রতিটা card `display: grid; grid-template-rows: subgrid` দিয়ে চারটা row জুড়ে থাকে, তাই একই সারির card-গুলো একই track size পায় আর title, price, button এক লাইনে আসে। Subgrid Baseline widely available।""",
         ex_en=r"""
             - **Gaps:** a subgrid inherits the parent's gaps. If the parent uses a large `row-gap` between card rows, set a smaller `row-gap` on the card to override it inside the card.
             - **Count must match:** the `span` must equal the number of child rows. An extra element (e.g. a "Sale" badge) needs its own row, or must be positioned so it doesn't create a new track.

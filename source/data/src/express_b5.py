@@ -26,7 +26,7 @@ QUESTIONS = [
         id="express-027", sub="Logging", diff="easy", type="coding",
         prio="high", market="bangladesh", mins=5,
         tags=["middleware", "logging", "response-time", "finish-event", "coding"],
-        ver="Express 5.x; Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Express 5.x; Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""
             Write an Express middleware `requestTimer` that logs one line per request **when the response has been sent**: method, original URL, status code and duration in milliseconds — for example `GET /api/products?page=2 200 16.5ms`. If the client disconnects before the response is finished, log an "aborted" line instead.
         """,
@@ -49,6 +49,8 @@ QUESTIONS = [
 
             শুধু `next()` return করার পর সময় মাপা যায় না, কারণ route handler সাধারণত asynchronous — response পাঠানোর অনেক আগেই `next()` return করে। Middleware-টা সবার আগে register করি যাতে এর পরের সবকিছু মাপা হয়, আর `req.originalUrl` ব্যবহার করি কারণ mount করা path-এ router `req.url` বদলে দেয়।
         """,
+        quick_en=r"""Record `process.hrtime.bigint()` at the start, call `next()` immediately, and log on `res.on('finish')`, when status and duration are final. On `res.on('close')`, if `res.writableFinished` is still `false`, log the request as aborted; use `req.originalUrl` for the full path.""",
+        quick_bn=r"""শুরুতে `process.hrtime.bigint()` রেখে সাথে সাথে `next()` call করো, আর `res.on('finish')`-এ log করো, কারণ তখন status আর duration চূড়ান্ত। `res.on('close')`-এ যদি `res.writableFinished` তখনো `false` থাকে, request-টা aborted হিসেবে log করো; পুরো path-এর জন্য `req.originalUrl` ব্যবহার করো।""",
         ex_en=r"""
             - **Why `hrtime.bigint()` and not `Date.now()`:** it's monotonic and high-resolution, so clock adjustments (NTP) can't produce negative or wrong durations. `performance.now()` works too.
             - **`finish` then `close`:** for a normal response both events fire, in that order; checking `writableFinished` in `close` avoids double logging.
@@ -143,6 +145,8 @@ QUESTIONS = [
 
             তারপর page query (`LIMIT`/`OFFSET` parameter হিসেবে) আর একই filter সহ `count(*)` parallel-এ চালাই, এবং `totalPages` হিসাব করি।
         """,
+        quick_en=r"""Validate and coerce the query with zod (`limit` max 100, `sort` an enum), put filter values in placeholders (`$1`, `$2`), and map `sort` to a whitelisted `ORDER BY` fragment with `id` as tie-breaker. Run the page query and a `count(*)` in parallel to return `total` and `totalPages`.""",
+        quick_bn=r"""আগে zod দিয়ে query validate ও coerce করো (`limit` সর্বোচ্চ 100, `sort` একটা enum), filter-এর value placeholder-এ (`$1`, `$2`) দাও, আর `sort`-কে whitelist করা `ORDER BY` অংশে map করো, tie-breaker `id`। Page query আর `count(*)` parallel-এ চালিয়ে `total` আর `totalPages` দাও।""",
         ex_en=r"""
             - **Offset vs cursor (keyset) pagination:** `OFFSET 100000` makes the database read and discard 100k rows, and rows can be duplicated or skipped when data changes between page loads. For infinite scroll or large tables, use a cursor: `WHERE (created_at, id) < ($1, $2) ORDER BY created_at DESC, id DESC LIMIT $3`, returning the last row's values as `nextCursor`. Offset is fine for small admin tables where users jump to page N.
             - **`count(*)` can be expensive** on big tables; consider caching it, using an estimate, or dropping `total` with cursor pagination.
@@ -251,6 +255,8 @@ QUESTIONS = [
 
             **v1 বন্ধ করা:** একটি সময়সূচি ঘোষণা করা; `Deprecation` (RFC 9745) আর `Sunset` (RFC 8594) header, সাথে migration guide-এর `Link` পাঠানো; client/API key অনুযায়ী v1 traffic মাপা এবং বেশি ব্যবহারকারীদের সাথে যোগাযোগ করা; চাইলে অল্প সময়ের "brownout" চালানো; sunset তারিখের পর সহায়ক message সহ `410 Gone` return করা।
         """,
+        quick_en=r"""Version in the URL path (`/v1`, `/v2`), each version its own `express.Router()` sharing the same services, and bump only for breaking changes. To retire a version, announce a timeline, send `Deprecation` and `Sunset` headers, contact the remaining clients, then return `410 Gone`.""",
+        quick_bn=r"""URL path-এ version রাখো (`/v1`, `/v2`), প্রতিটা version আলাদা `express.Router()`, কিন্তু service একই; নতুন version শুধু breaking change-এর জন্য। পুরোনো version বন্ধ করতে timeline ঘোষণা করো, `Deprecation` আর `Sunset` header পাঠাও, বাকি client-দের সাথে যোগাযোগ করো, তারপর `410 Gone` দাও।""",
         ex_en=r"""
             - **Avoid versioning by default for internal APIs** consumed only by your own frontend that deploys together with the backend — evolve compatibly instead.
             - **Contract discipline:** an OpenAPI spec per version plus contract tests in CI catch accidental breaking changes before they ship.
@@ -320,6 +326,8 @@ QUESTIONS = [
         a_bn=r"""
             `res.sendStatus(404)` — এটা status set করে এবং body হিসেবে standard reason phrase ("Not Found") পাঠায়, ঠিক Express 4-এর মতোই। বাকি তিনটি এমন API-র উপর নির্ভর করে যা Express 5 সরিয়ে দিয়েছে বা বদলেছে।
         """,
+        quick_en=r"""`res.sendStatus(404)`: it still sets the status and sends "Not Found" as the body, exactly as in Express 4. `app.del` and `req.param()` were removed, and `res.send(404)` no longer sets the status.""",
+        quick_bn=r"""`res.sendStatus(404)`: এটা এখনো Express 4-এর মতোই status set করে আর body হিসেবে "Not Found" পাঠায়। `app.del` আর `req.param()` বাদ দেওয়া হয়েছে, আর `res.send(404)` এখন আর status set করে না।""",
         ex_en=r"""
             - **`app.del()`** was removed — use `app.delete()`. Calling it throws `TypeError: app.del is not a function` at startup.
             - **`req.param()`** was removed — read `req.params`, `req.query` or `req.body` explicitly.
@@ -343,11 +351,11 @@ QUESTIONS = [
         id="express-031", sub="Express 4 to 5 Migration", diff="hard", type="scenario",
         prio="high", market="both", mins=12,
         tags=["express-5", "migration", "path-to-regexp", "query-parser", "rollout"],
-        ver="Express 4.x → 5.x; Node.js 24 LTS", vs=True, status="stable",
+        ver="Express 4.x → 5.x; Node.js 26 LTS", vs=True, status="stable",
         q_en=r"""You own a large Express 4 codebase (about 150 routes, many third-party middlewares, still on Node 18). Plan the migration to Express 5 in production: what breaks, how do you find it, and how do you roll it out safely?""",
         q_bn=r"""তোমার দায়িত্বে একটি বড় Express 4 codebase (প্রায় 150টি route, অনেক third-party middleware, এখনও Node 18-এ)। Production-এ Express 5-এ migration-এর পরিকল্পনা করো: কী কী ভাঙবে, কীভাবে খুঁজে বের করবে, আর কীভাবে নিরাপদে rollout করবে?""",
         a_en=r"""
-            **0. Upgrade Node first, separately.** Node 18 is end-of-life; move to Node 24 LTS in its own release so you don't debug two upgrades at once. (Express 5 needs Node 18+, but you want a supported runtime.)
+            **0. Upgrade Node first, separately.** Node 18 is end-of-life; move to the current Active LTS (Node 26; Node 24 is in Maintenance) in its own release so you don't debug two upgrades at once. (Express 5 needs Node 18+, but you want a supported runtime.)
 
             **1. Inventory what breaks — loud vs silent:**
             - *Loud (crash at startup or on first call):* route syntax — `'*'` → `'/*splat'` or `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, regex characters in path strings; removed APIs such as `app.del`, `req.param`, `res.sendfile`.
@@ -359,7 +367,7 @@ QUESTIONS = [
             **3. Roll out safely:** deploy to staging and **replay real traffic** (or shadow it), diffing status codes and bodies between v4 and v5. Then canary 5% of production instances and watch per-route 404/400/500 rates and latency, with a fast rollback. Expand gradually.
         """,
         a_bn=r"""
-            **0. আগে Node upgrade, আলাদাভাবে।** Node 18 end-of-life; নিজস্ব একটি release-এ Node 24 LTS-এ যাও, যাতে একসাথে দুটো upgrade debug করতে না হয়। (Express 5-এর জন্য Node 18+ লাগে, কিন্তু তোমার দরকার supported runtime।)
+            **0. আগে Node upgrade, আলাদাভাবে।** Node 18 end-of-life; নিজস্ব একটি release-এ বর্তমান Active LTS-এ যাও (Node 26; Node 24 এখন Maintenance-এ), যাতে একসাথে দুটো upgrade debug করতে না হয়। (Express 5-এর জন্য Node 18+ লাগে, কিন্তু তোমার দরকার supported runtime।)
 
             **1. কী ভাঙবে তার তালিকা — জোরালো বনাম নীরব:**
             - *জোরালো (startup-এ বা প্রথম call-এ crash):* route syntax — `'*'` → `'/*splat'` বা `'/{*splat}'`, `'/users/:id?'` → `'/users{/:id}'`, path string-এ regex character; সরানো API যেমন `app.del`, `req.param`, `res.sendfile`।
@@ -370,6 +378,8 @@ QUESTIONS = [
 
             **3. নিরাপদ rollout:** staging-এ deploy করে **আসল traffic replay** করো (বা shadow করো), v4 আর v5-এর মধ্যে status code ও body-র diff দেখো। তারপর production instance-এর 5%-এ canary, route অনুযায়ী 404/400/500 rate আর latency দেখো, দ্রুত rollback-এর ব্যবস্থা রাখো। ধীরে ধীরে বাড়াও।
         """,
+        quick_en=r"""Upgrade Node to the current LTS first, in a separate release. Then find loud breaks (route syntax like `'*'`, removed APIs) and silent ones (`req.query` parser, `undefined` `req.body`, `res.send(status)`) with the official codemod and tests, and roll out via traffic replay on staging and a canary with fast rollback.""",
+        quick_bn=r"""আগে আলাদা release-এ Node-কে বর্তমান LTS-এ তোলো। তারপর official codemod আর test দিয়ে স্পষ্ট ভাঙন (`'*'`-এর মতো route syntax, বাদ পড়া API) আর নীরব ভাঙন (`req.query` parser, `undefined` `req.body`, `res.send(status)`) খুঁজে বের করো, আর staging-এ traffic replay ও দ্রুত rollback-সহ canary দিয়ে rollout করো।""",
         ex_en=r"""
             - **Why separate "loud" from "silent":** startup crashes are found by any test run; silent changes only show up as wrong responses, so they need targeted tests and traffic diffing.
             - **Query parser decision:** if clients send nested filters, either keep compatibility with `app.set('query parser', 'extended')` (and validate strictly) or migrate clients first. Decide before the rollout, not after a spike of 400s.
@@ -457,6 +467,8 @@ QUESTIONS = [
 
             **Scope-এর নিয়ম:** key user প্রতি (ভিন্ন user-এর মধ্যে collision নেই); key claim করার *আগেই* request validate করা হয়, ফলে validation failure বা concurrency conflict-এর কোনো ফলাফল রাখা হয় না; `5xx` হলে key ছেড়ে দেওয়া হয় যাতে client retry করতে পারে (নিরাপদ, কারণ provider একই key দিয়ে deduplicate করে); একটি cleanup job দিয়ে পুরনো key expire করা হয়।
         """,
+        quick_en=r"""Require an `Idempotency-Key` per logical payment and claim it atomically in PostgreSQL (`INSERT … ON CONFLICT DO NOTHING` on user + key) with a request fingerprint. The winner charges, passing the same key to the payment provider, and stores the response; retries get `409` while in progress or the stored response afterwards.""",
+        quick_bn=r"""প্রতিটা logical payment-এর জন্য একটা `Idempotency-Key` বাধ্যতামূলক করো আর PostgreSQL-এ request fingerprint-সহ atomically claim করো (user + key-এর উপর `INSERT … ON CONFLICT DO NOTHING`)। যে জেতে সে charge করে, payment provider-কেও একই key দেয়, আর response save করে; চলাকালীন retry পায় `409`, পরে পায় save করা response।""",
         ex_en=r"""
             - **Why a database and not just Redis `SET NX`:** Redis works for the lock, but the idempotency record should be as durable as the payment itself; writing the payment row and marking the key `completed` in the same PostgreSQL transaction keeps them consistent. Redis is fine as a fast front-check if you accept that trade-off.
             - **Exactly-once is an illusion across a network:** you get *effectively-once* by combining at-least-once retries with deduplication at every hop (your API and the payment provider).

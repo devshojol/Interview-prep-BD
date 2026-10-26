@@ -54,6 +54,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "JSX is HTML-like syntax inside JavaScript that a compiler (Babel, SWC, TypeScript) turns into function calls like `jsx(\"h1\", props)` from `react/jsx-runtime`. Each call returns a React element, a plain object that describes the UI, not a real DOM node.",
+   "bn": "JSX হলো JavaScript-এর ভেতরে HTML-এর মতো syntax, যেটাকে compiler (Babel, SWC, TypeScript) `react/jsx-runtime`-এর `jsx(\"h1\", props)`-এর মতো function call-এ বদলে দেয়। প্রতিটা call একটা React element return করে, যেটা UI-এর বর্ণনা দেওয়া একটা সাধারণ object, আসল DOM node না।"
+  },
   "commonMistakes": {
    "en": "Saying JSX is \"HTML inside JavaScript\" or that it creates DOM nodes directly. JSX creates element objects; React DOM creates and updates the real nodes.",
    "bn": "JSX-কে \"JavaScript-এর ভেতরে HTML\" বলা, বা বলা যে এটা সরাসরি DOM node তৈরি করে। আসলে JSX element object তৈরি করে; আসল node তৈরি ও update করে React DOM।"
@@ -123,6 +127,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Props are read-only inputs a parent passes to a child, like function arguments. State is data a component owns and changes with its setter, and changing it re-renders the component. Data flows down through props; a child changes parent data through a callback prop.",
+   "bn": "Props হলো parent থেকে child-এ পাঠানো read-only input, অনেকটা function argument-এর মতো। State হলো component-এর নিজের data, setter দিয়ে বদলায়, আর বদলালে component re-render হয়। Data props দিয়ে নিচে নামে; child-কে parent-এর data বদলাতে হলে callback prop ব্যবহার করে।"
+  },
   "commonMistakes": {
    "en": "Storing derived data (e.g. `fullName`, filtered lists) in state and syncing it with effects, which causes extra renders and out-of-sync bugs.",
    "bn": "Derived data (যেমন `fullName` বা filter করা list) state-এ রেখে effect দিয়ে sync করা — এতে বাড়তি render হয় আর data মিলিয়ে না যাওয়ার bug তৈরি হয়।"
@@ -188,6 +196,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "It logs `render: 0`, `clicked: 0`, `render: 2`, and the button shows 2. `count` is a snapshot (0), so both `setCount(count + 1)` queue 1, the updater turns that into 2, and React batches all three into one re-render.",
+   "bn": "Log হবে `render: 0`, `clicked: 0`, `render: 2`, আর button-এ দেখাবে 2। `count` একটা snapshot (0), তাই দুইটা `setCount(count + 1)`-ই 1 queue করে, updater সেটাকে 2 বানায়, আর React তিনটা update মিলিয়ে একবারই re-render করে।"
+  },
   "commonMistakes": {
    "en": "Answering 3 (assuming each call sees the updated value), or expecting `clicked:` to print the new value immediately after calling the setter.",
    "bn": "উত্তর 3 বলা (ভাবা যে প্রতিটা call update হওয়া value দেখে), অথবা setter call করার সাথে সাথে `clicked:` নতুন value print করবে বলে আশা করা।"
@@ -244,6 +256,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Use a stable unique id from the data, `key={todo.id}`. Keys tell React which item is which between renders, so state, focus and DOM nodes stay with the right item when items are added, deleted or reordered.",
+   "bn": "Data থেকে আসা স্থায়ী unique id ব্যবহার করো, `key={todo.id}`। Key দিয়ে React বোঝে কোন item কোনটা, তাই item যোগ, delete বা reorder হলেও state, focus আর DOM node ঠিক item-এর সাথেই থাকে।"
+  },
   "options": [
    {
     "en": "The array index: `key={index}`",
@@ -326,6 +342,10 @@
   "related": [
    "react-003"
   ],
+  "quickAnswer": {
+   "en": "It logs `tick 0` three times and the screen stays at 1. The effect runs once, so the interval closes over the first render where `count` is 0 and keeps setting 1; fix it with the updater `setCount(c => c + 1)`.",
+   "bn": "`tick 0` তিনবার log হয় আর screen-এ 1-ই থেকে যায়। Effect একবারই চলে, তাই interval প্রথম render-এর closure ধরে রাখে যেখানে `count` 0, আর বারবার 1 set করে; সমাধান হলো updater `setCount(c => c + 1)`।"
+  },
   "commonMistakes": {
    "en": "Silencing the exhaustive-deps lint rule instead of fixing the closure, or thinking the screen keeps counting up because the interval keeps firing.",
    "bn": "Closure ঠিক না করে exhaustive-deps lint rule বন্ধ করে দেওয়া, অথবা ভাবা যে interval চলছে বলে স্ক্রিনের সংখ্যা বাড়তেই থাকবে।"
@@ -408,6 +428,10 @@
   "related": [
    "react-012"
   ],
+  "quickAnswer": {
+   "en": "In development with StrictMode: `render Rahim` twice, then `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`; in production just one render and one subscribe. StrictMode double-renders and re-runs effects in dev only, to expose impure renders and missing cleanups.",
+   "bn": "Development-এ StrictMode থাকলে: `render Rahim` দুইবার, তারপর `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`; production-এ শুধু একবার render আর একবার subscribe। StrictMode শুধু dev-এ দুইবার render করে আর effect আবার চালায়, যাতে impure render আর missing cleanup ধরা পড়ে।"
+  },
   "commonMistakes": {
    "en": "Removing StrictMode to \"fix\" double effects, or believing the effect runs twice in production too.",
    "bn": "Double effect \"ঠিক\" করতে StrictMode সরিয়ে দেওয়া, অথবা ভাবা যে production-এও effect দুইবার চলে।"
@@ -467,6 +491,10 @@
   "related": [
    "react-004"
   ],
+  "quickAnswer": {
+   "en": "It shows `Admin: 3`. React keeps state based on element type and position in the tree, and both branches render a `<Counter>` in the same spot, so the state is kept and only `label` changes.",
+   "bn": "দেখাবে `Admin: 3`। React state রাখে element-এর type আর tree-তে তার position দেখে, আর দুই branch-ই একই জায়গায় `<Counter>` render করে, তাই state থেকে যায়, শুধু `label` বদলায়।"
+  },
   "code": {
    "language": "jsx",
    "source": "import { useState } from 'react';\n\nfunction Counter({ label }) {\n  const [count, setCount] = useState(0);\n  return (\n    <button onClick={() => setCount(count + 1)}>\n      {label}: {count}\n    </button>\n  );\n}\n\nexport default function App() {\n  const [isAdmin, setIsAdmin] = useState(false);\n  return (\n    <div>\n      {isAdmin ? <Counter label=\"Admin\" /> : <Counter label=\"Guest\" />}\n      <label>\n        <input\n          type=\"checkbox\"\n          checked={isAdmin}\n          onChange={(e) => setIsAdmin(e.target.checked)}\n        />\n        Admin mode\n      </label>\n    </div>\n  );\n}"
@@ -558,6 +586,10 @@
   "related": [
    "react-002"
   ],
+  "quickAnswer": {
+   "en": "Use compound components with Context, support both controlled and uncontrolled modes, behave like the native element (spread props, `ref` as a prop) and build accessibility in. Ship `'use client'` only on interactive entries, style with CSS variables, tree-shakeable ESM and semver with codemods.",
+   "bn": "Context-সহ compound component ব্যবহার করো, controlled আর uncontrolled দুই mode-ই support করো, native element-এর মতো আচরণ করো (props spread, `ref` prop হিসেবে), আর accessibility শুরু থেকেই রাখো। শুধু interactive entry-তে `'use client'`, styling-এ CSS variable, tree-shake করা যায় এমন ESM, আর codemod-সহ semver।"
+  },
   "commonMistakes": {
    "en": "Designing a single mega-component with 40 boolean props, forgetting keyboard and screen-reader support, or marking the whole library entry `'use client'` so nothing can render on the server.",
    "bn": "৪০টা boolean prop-সহ একটা বিশাল component বানানো, keyboard আর screen-reader support ভুলে যাওয়া, অথবা পুরো library-র entry-তে `'use client'` দিয়ে দেওয়া, ফলে কিছুই server-এ render হতে পারে না।"

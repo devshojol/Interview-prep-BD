@@ -58,6 +58,10 @@
    "sql-009",
    "sql-007"
   ],
+  "quickAnswer": {
+   "en": "`GROUP BY LOWER(email) HAVING COUNT(*) > 1` finds the duplicates, and `MIN(id)` picks the oldest row to keep. Then delete every row whose id isn't a keeper, after running it as a `SELECT` first, inside a transaction, with related rows re-pointed.",
+   "bn": "`GROUP BY LOWER(email) HAVING COUNT(*) > 1` duplicate খুঁজে বের করে, আর `MIN(id)` রাখার জন্য সবচেয়ে পুরোনো row বাছে। তারপর যেসব row-এর id keeper নয় সেগুলো delete করো, তবে আগে `SELECT` হিসেবে চালিয়ে দেখো, transaction-এর ভেতরে করো, আর related row-গুলো রাখা account-এ সরিয়ে নাও।"
+  },
   "commonMistakes": {
    "en": "Grouping by the raw `email` (misses case variants), deleting without a transaction or preview, or deleting duplicates that still own orders.",
    "bn": "কাঁচা `email` দিয়ে group করা (case-এর ভিন্নতা ধরা পড়ে না), transaction বা preview ছাড়া delete করা, অথবা এমন duplicate মুছে ফেলা যাদের নামে এখনো order আছে।"
@@ -142,6 +146,10 @@
    "sql-004",
    "sql-024"
   ],
+  "quickAnswer": {
+   "en": "Conditional aggregation: `GROUP BY category` with one `SUM(CASE WHEN month = ... THEN amount ELSE 0 END)` per month. `SUM(...) FILTER (WHERE ...)` reads better, but returns NULL instead of 0 when no rows match, so wrap it in `COALESCE`.",
+   "bn": "Conditional aggregation: `GROUP BY category`, আর প্রতিটা মাসের জন্য একটা করে `SUM(CASE WHEN month = ... THEN amount ELSE 0 END)`। `SUM(...) FILTER (WHERE ...)` পড়তে সহজ, কিন্তু কোনো row না মিললে 0-এর বদলে NULL দেয়, তাই `COALESCE` দিয়ে মুড়ে দাও।"
+  },
   "commonMistakes": {
    "en": "Counting matches with `COUNT(CASE WHEN ... THEN 1 ELSE 0 END)` — it counts every row, because 0 is not NULL (use `SUM`, or drop the `ELSE`) — or also grouping by `sale_month`, which undoes the pivot.",
    "bn": "Match গুনতে `COUNT(CASE WHEN ... THEN 1 ELSE 0 END)` ব্যবহার করা — এটা প্রতিটা row গোনে, কারণ 0 তো NULL নয় (`SUM` ব্যবহার করো, বা `ELSE` বাদ দাও) — অথবা `sale_month` দিয়েও group করা, যাতে pivot-টাই নষ্ট হয়ে যায়।"
@@ -216,6 +224,10 @@
    "sql-002",
    "sql-016"
   ],
+  "quickAnswer": {
+   "en": "4 rows. Rahim matches two orders, Karim one, and Nadia has none, so LEFT JOIN keeps her once with a NULL `order_id`; the order with no customer is dropped because only unmatched left rows are kept.",
+   "bn": "4টা row। Rahim দুটো order-এর সাথে মেলে, Karim একটার সাথে, আর Nadia-র কোনো order নেই, তাই LEFT JOIN তাকে NULL `order_id`-সহ একবার রাখে; customer ছাড়া order-টা বাদ যায়, কারণ শুধু বাঁ দিকের না-মেলা row রাখা হয়।"
+  },
   "code": {
    "language": "sql",
    "source": "CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(50) NOT NULL);\nCREATE TABLE orders    (id INT PRIMARY KEY, customer_id INT);\n\nINSERT INTO customers (id, name) VALUES (1, 'Rahim'), (2, 'Karim'), (3, 'Nadia');\nINSERT INTO orders (id, customer_id) VALUES (10, 1), (11, 1), (12, 2), (13, NULL);\n\nSELECT c.name, o.id AS order_id\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id;",
@@ -305,6 +317,10 @@
    "sql-026",
    "sql-031"
   ],
+  "quickAnswer": {
+   "en": "All three predicates aren't sargable: a function on the indexed column, a search on only the second column of a composite index, and a leading-wildcard `LIKE`. Fix them with a half-open range on the bare column, an index on `first_name`, and a reversed-value or trigram index.",
+   "bn": "তিনটা predicate-ই sargable নয়: indexed column-এর ওপর function, composite index-এর শুধু দ্বিতীয় column দিয়ে search, আর শুরুতে wildcard-সহ `LIKE`। Fix: খালি column-এর ওপর half-open range, `first_name`-এ index, আর reverse করা value বা trigram index।"
+  },
   "commonMistakes": {
    "en": "Adding more indexes without rewriting the predicates, using `BETWEEN ... '2025-12-31'` on timestamps, or assuming a composite index helps any query that mentions any of its columns.",
    "bn": "Predicate না বদলে শুধু আরও index যোগ করা, timestamp-এ `BETWEEN ... '2025-12-31'` ব্যবহার করা, অথবা ধরে নেওয়া যে composite index তার যেকোনো column উল্লেখ করা query-কেই সাহায্য করবে।"
@@ -340,7 +356,7 @@
    "security",
    "owasp"
   ],
-  "technologyVersion": "node-postgres 8.x on Node.js 24 LTS; Express 5.x",
+  "technologyVersion": "node-postgres 8.x on Node.js 26 LTS; Express 5.x",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -387,6 +403,10 @@
   "related": [
    "sql-028"
   ],
+  "quickAnswer": {
+   "en": "Pasting input into SQL lets an attacker change the query: `' OR 1=1 --` returns every row, and `sort` can leak data. Use parameterized queries with `$1` placeholders for values, and an allowlist for identifiers like the sort column, which can't be parameters.",
+   "bn": "Input সরাসরি SQL-এ বসালে attacker query বদলে দিতে পারে: `' OR 1=1 --` সব row ফেরত দেয়, আর `sort` দিয়ে data ফাঁস হতে পারে। Value-র জন্য `$1` placeholder-সহ parameterized query ব্যবহার করো, আর sort column-এর মতো identifier, যেগুলো parameter হতে পারে না, সেগুলোর জন্য allowlist।"
+  },
   "commonMistakes": {
    "en": "Trying to pass the `ORDER BY` column as `$2` (it becomes a constant, so sorting silently does nothing), escaping quotes manually, or trusting \"frontend validation\".",
    "bn": "`ORDER BY` column-কে `$2` হিসেবে পাঠানোর চেষ্টা করা (তখন এটা constant হয়ে যায়, sort নীরবে কিছুই করে না), হাতে quote escape করা, অথবা \"frontend validation\"-এর উপর ভরসা করা।"
@@ -466,6 +486,10 @@
    "sql-010",
    "sql-028"
   ],
+  "quickAnswer": {
+   "en": "`UPDATE products SET price = ROUND(price * 1.10, 2) WHERE category_id IN (SELECT id FROM categories WHERE name = 'Electronics')`. The subquery form is portable; PostgreSQL also has `UPDATE ... FROM` and MySQL `UPDATE ... JOIN`.",
+   "bn": "`UPDATE products SET price = ROUND(price * 1.10, 2) WHERE category_id IN (SELECT id FROM categories WHERE name = 'Electronics')`। Subquery-র রূপটা সব database-এ চলে; PostgreSQL-এ `UPDATE ... FROM` আর MySQL-এ `UPDATE ... JOIN`-ও আছে।"
+  },
   "commonMistakes": {
    "en": "Using `= (SELECT id ...)` when the subquery can return several rows (runtime error), or forgetting the `WHERE` and updating every product.",
    "bn": "Subquery একাধিক row দিতে পারলেও `= (SELECT id ...)` ব্যবহার করা (runtime error), অথবা `WHERE` ভুলে গিয়ে সব product update করে ফেলা।"
@@ -548,6 +572,10 @@
   "related": [
    "sql-008"
   ],
+  "quickAnswer": {
+   "en": "Use `WITH RECURSIVE`: the anchor selects Mitu at depth 0, and the recursive member joins employees whose `manager_id` matches the previous level, adding `depth + 1` and extending the path. It stops when a level returns no rows.",
+   "bn": "`WITH RECURSIVE` ব্যবহার করো: anchor depth 0-তে Mitu-কে নেয়, আর recursive অংশ আগের level-এর সাথে `manager_id` মেলে এমন employee join করে, `depth + 1` আর path বাড়িয়ে। কোনো level-এ row না এলে recursion থেমে যায়।"
+  },
   "commonMistakes": {
    "en": "Using `UNION` instead of `UNION ALL` without understanding the deduplication cost, reversing the join direction, or forgetting cycle protection on user-editable hierarchies.",
    "bn": "Deduplication-এর খরচ না বুঝে `UNION ALL`-এর বদলে `UNION` ব্যবহার করা, join-এর দিক উল্টে ফেলা, অথবা user-এর edit করা hierarchy-তে cycle protection ভুলে যাওয়া।"
@@ -622,6 +650,10 @@
    "sql-014",
    "sql-018"
   ],
+  "quickAnswer": {
+   "en": "Aggregate revenue per month in a CTE, read last month with `LAG(revenue) OVER (ORDER BY month)`, and compute `100.0 * (revenue - prev) / NULLIF(prev, 0)`. `NULLIF` turns a zero denominator into NULL instead of an error, and `100.0` avoids integer division.",
+   "bn": "CTE-তে মাস অনুযায়ী revenue যোগ করো, `LAG(revenue) OVER (ORDER BY month)` দিয়ে আগের মাসেরটা পড়ো, আর হিসাব করো `100.0 * (revenue - prev) / NULLIF(prev, 0)`। `NULLIF` শূন্য denominator-কে error-এর বদলে NULL বানায়, আর `100.0` integer division ঠেকায়।"
+  },
   "commonMistakes": {
    "en": "Dividing without `NULLIF` (division-by-zero error), integer division (`100 * x / y` truncating), or assuming `LAG` handles gaps in the calendar.",
    "bn": "`NULLIF` ছাড়া ভাগ করা (division-by-zero error), integer division (`100 * x / y` কেটে ছোট হয়ে যাওয়া), অথবা ধরে নেওয়া যে `LAG` calendar-এর ফাঁক সামলায়।"

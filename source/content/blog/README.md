@@ -56,3 +56,5 @@ SITE_URL=https://your-domain python3 tools/build_blog.py     # production build
 ```
 
 Without `SITE_URL` (or `origin` in `content/site.json`) the build is a preview: every page is `noindex`, and there is no canonical, JSON-LD, sitemap, robots.txt or feed.
+
+`404.html` can be served at any depth, so it uses absolute links. In a preview build they start with `basePath` from `content/site.json` (or the `BASE_PATH` environment variable), which is `/Interview-prep-BD/` for the GitHub Pages project site. With an origin, the origin's path is used instead.

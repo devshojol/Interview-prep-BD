@@ -14,7 +14,7 @@
    "bytelength",
    "output"
   ],
-  "technologyVersion": "Version-independent (Node.js 24 LTS / 26)",
+  "technologyVersion": "Version-independent (Node.js 26 LTS / 24)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -53,6 +53,10 @@
   "related": [
    "node-005"
   ],
+  "quickAnswer": {
+   "en": "It prints `5`, `15`, `<Buffer 48 69 21>`, `SGkh`, `3`. A string's `length` counts UTF-16 code units (5), `Buffer.byteLength` counts UTF-8 bytes (3 per Bangla character, so 15), and `Hi!` is the bytes 48 69 21, which is `SGkh` in base64 and 3 bytes long.",
+   "bn": "Print হবে `5`, `15`, `<Buffer 48 69 21>`, `SGkh`, `3`। String-এর `length` UTF-16 code unit গোনে (5), `Buffer.byteLength` UTF-8 byte গোনে (প্রতিটা বাংলা অক্ষর 3 byte, তাই 15), আর `Hi!` হলো byte 48 69 21, যেটা base64-এ `SGkh` এবং length 3 byte।"
+  },
   "commonMistakes": {
    "en": "Assuming one character equals one byte, or computing `Content-Length` with `body.length` for a string body.",
    "bn": "এক character মানে এক byte ধরে নেওয়া, অথবা string body-র জন্য `body.length` দিয়ে `Content-Length` হিসাব করা।"
@@ -78,21 +82,21 @@
    "versions",
    "production"
   ],
-  "technologyVersion": "Node.js release schedule as of 2026-10-12 (v24 Active LTS, v26 Current)",
+  "technologyVersion": "Node.js release schedule as of 2026-10-26 (v26 Active LTS from 2026-10-28, v24 Maintenance LTS)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "version-specific",
   "question": {
-   "en": "It is October 2026 and you are starting a new production API. Which Node.js release line should you choose by default?",
-   "bn": "এখন অক্টোবর 2026, তুমি একটি নতুন production API শুরু করছ। Default হিসেবে কোন Node.js release line বেছে নেবে?"
+   "en": "It is November 2026 and you are starting a new production API. Which Node.js release line should you choose by default?",
+   "bn": "এখন নভেম্বর 2026, তুমি একটি নতুন production API শুরু করছ। Default হিসেবে কোন Node.js release line বেছে নেবে?"
   },
   "answer": {
-   "en": "Node.js 24. The Node.js project says production applications should only use Active LTS or Maintenance LTS releases. As of 12 October 2026, v24 is Active LTS, and v26 is still Current until it is promoted to LTS on 28 October 2026 — after that, v26 is the natural choice for new projects.",
-   "bn": "Node.js 24। Node.js project-এর নির্দেশনা হলো production application-এ শুধু Active LTS বা Maintenance LTS release ব্যবহার করা। 12 অক্টোবর 2026 অনুযায়ী v24 হলো Active LTS, আর v26 এখনও Current — 28 অক্টোবর 2026-এ LTS-এ promote হওয়ার পর নতুন project-এর জন্য v26 স্বাভাবিক পছন্দ।"
+   "en": "**B**: Node.js 26. The Node.js project says production applications should only use Active LTS or Maintenance LTS releases. v26 was promoted to Active LTS on 28 October 2026, so it's the natural default for a new project: it gets fixes and backports for the longest time. v24 is still supported, but it entered Maintenance LTS on 20 October 2026 (security and critical fixes only, until 30 April 2028), so it suits existing apps rather than new ones.",
+   "bn": "**B**: Node.js 26। Node.js project-এর নির্দেশনা হলো production application-এ শুধু Active LTS বা Maintenance LTS release ব্যবহার করা। v26 28 অক্টোবর 2026-এ Active LTS হয়েছে, তাই নতুন project-এর জন্য এটাই স্বাভাবিক default: এটা সবচেয়ে বেশি দিন fix আর backport পাবে। v24 এখনও supported, কিন্তু 20 অক্টোবর 2026-এ Maintenance LTS-এ চলে গেছে (30 এপ্রিল 2028 পর্যন্ত শুধু security আর critical fix), তাই এটা নতুন app-এর চেয়ে চালু app-এর জন্য বেশি মানানসই।"
   },
   "explanation": {
-   "en": "- **Current** lines get new features (and occasionally breaking changes) for about six months; libraries may not support them yet. That's why option A is tempting but wrong for production by default.\n- Until Node 26, **odd-numbered releases never became LTS** — v25 is already end-of-life (option C is backwards).\n- **v20 reached end-of-life on 30 April 2026**, so it no longer gets security fixes (option D). v22 is in Maintenance LTS until 30 April 2027 — fine for existing apps, not ideal for new ones.\n- **New model from Node 27:** one major release per year (April), an alpha phase before it, and *every* release becomes LTS in October. The even/odd rule disappears.\n- Practical habit: pin the major in `engines`, `.nvmrc` and your Docker image tag, and plan upgrades before a line leaves Maintenance.",
-   "bn": "- **Current** line প্রায় ছয় মাস নতুন feature (আর মাঝে মাঝে breaking change) পায়; library-গুলো হয়তো তখনও support করে না। এজন্যই option A প্রলোভনের, কিন্তু default হিসেবে production-এর জন্য ভুল।\n- Node 26 পর্যন্ত **odd-numbered release কখনো LTS হয়নি** — v25 ইতিমধ্যে end-of-life (option C উল্টো কথা)।\n- **v20 30 এপ্রিল 2026-এ end-of-life** হয়েছে, তাই আর security fix পায় না (option D)। v22 30 এপ্রিল 2027 পর্যন্ত Maintenance LTS-এ — পুরনো app-এর জন্য ঠিক আছে, নতুন app-এর জন্য আদর্শ নয়।\n- **Node 27 থেকে নতুন model:** বছরে একটি major release (এপ্রিলে), তার আগে একটি alpha phase, আর *প্রতিটি* release অক্টোবরে LTS হবে। Even/odd নিয়ম আর থাকবে না।\n- বাস্তব অভ্যাস: `engines`, `.nvmrc` আর Docker image tag-এ major version pin করো, আর কোনো line Maintenance থেকে বের হওয়ার আগেই upgrade-এর পরিকল্পনা করো।"
+   "en": "- **Option A (Node 27)** is the most common wrong choice. Under the new release model, 27 starts as an **alpha** on 28 October 2026 and only ships as 27.0.0 in April 2027. Alpha and Current releases get new features (and occasionally breaking changes), and libraries may not support them yet, so they aren't a production default.\n- Until Node 26, **odd-numbered releases never became LTS**: v25 is already end-of-life (option C is backwards).\n- **v20 reached end-of-life on 30 April 2026**, so it no longer gets security fixes (option D). v22 is in Maintenance LTS until 30 April 2027, and v24 until 30 April 2028: fine for existing apps, not ideal for new ones.\n- **New model from Node 27:** one major release per year (April), an alpha phase before it, and *every* release becomes LTS in October. The even/odd rule disappears.\n- Practical habit: pin the major in `engines`, `.nvmrc` and your Docker image tag, and plan upgrades before a line leaves Maintenance.",
+   "bn": "- **Option A (Node 27)** হলো সবচেয়ে বেশি বেছে নেওয়া ভুল উত্তর। নতুন release model-এ 27 শুরু হয় **alpha** হিসেবে, 28 অক্টোবর 2026-এ, আর 27.0.0 হিসেবে আসে এপ্রিল 2027-এ। Alpha আর Current release নতুন feature (আর মাঝে মাঝে breaking change) পায়, library-গুলো হয়তো তখনও support করে না, তাই production-এর default হিসেবে এগুলো চলে না।\n- Node 26 পর্যন্ত **odd-numbered release কখনো LTS হয়নি**: v25 ইতিমধ্যে end-of-life (option C উল্টো কথা)।\n- **v20 30 এপ্রিল 2026-এ end-of-life** হয়েছে, তাই আর security fix পায় না (option D)। v22 30 এপ্রিল 2027 পর্যন্ত আর v24 30 এপ্রিল 2028 পর্যন্ত Maintenance LTS-এ: চালু app-এর জন্য ঠিক আছে, নতুন app-এর জন্য আদর্শ নয়।\n- **Node 27 থেকে নতুন model:** বছরে একটি major release (এপ্রিলে), তার আগে একটি alpha phase, আর *প্রতিটি* release অক্টোবরে LTS হবে। Even/odd নিয়ম আর থাকবে না।\n- বাস্তব অভ্যাস: `engines`, `.nvmrc` আর Docker image tag-এ major version pin করো, আর কোনো line Maintenance থেকে বের হওয়ার আগেই upgrade-এর পরিকল্পনা করো।"
   },
   "interviewTip": {
    "en": "Quote the rule (\"production → Active or Maintenance LTS\") and then show you know the calendar: which line is LTS now, and that the even/odd scheme ends with Node 27.",
@@ -104,16 +108,29 @@
     "url": "https://nodejs.org/en/about/previous-releases"
    }
   ],
-  "followUps": [],
-  "related": [],
-  "options": [
+  "followUps": [
    {
-    "en": "Node.js 26, because it is the newest Current release with the latest features",
-    "bn": "Node.js 26, কারণ এটা নতুন feature সহ সবচেয়ে নতুন Current release"
+    "en": "What's the difference between Active LTS and Maintenance LTS?",
+    "bn": "Active LTS আর Maintenance LTS-এর মধ্যে পার্থক্য কী?"
    },
    {
-    "en": "Node.js 24 — the Active LTS line (or 26 once it enters LTS at the end of October 2026)",
-    "bn": "Node.js 24 — Active LTS line (অথবা অক্টোবর 2026-এর শেষে LTS-এ ঢোকার পর 26)"
+    "en": "Your team runs Node.js 24 in production. When should you plan the upgrade to 26, and how?",
+    "bn": "তোমার team production-এ Node.js 24 চালায়। 26-এ upgrade-এর পরিকল্পনা কখন আর কীভাবে করবে?"
+   }
+  ],
+  "related": [],
+  "quickAnswer": {
+   "en": "Node.js 26: it became Active LTS on 28 October 2026, and production apps should run only Active or Maintenance LTS lines. Node.js 24 is still supported but is in Maintenance LTS (security and critical fixes only), so it suits existing apps rather than new ones.",
+   "bn": "Node.js 26: এটা 28 October 2026-এ Active LTS হয়েছে, আর production app-এ শুধু Active বা Maintenance LTS line চালানো উচিত। Node.js 24 এখনো supported, কিন্তু Maintenance LTS-এ আছে (শুধু security ও critical fix), তাই এটা নতুন নয়, পুরোনো app-এর জন্য মানানসই।"
+  },
+  "options": [
+   {
+    "en": "Node.js 27, because its alpha has the newest features",
+    "bn": "Node.js 27, কারণ এর alpha-তে সবচেয়ে নতুন feature আছে"
+   },
+   {
+    "en": "Node.js 26, the Active LTS line",
+    "bn": "Node.js 26, যেটা Active LTS line"
    },
    {
     "en": "Node.js 25, because odd-numbered releases get the longest support",
@@ -142,7 +159,7 @@
    "listeners",
    "maxlisteners"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; Express 5.x",
+  "technologyVersion": "Node.js 26 LTS / 24; Express 5.x",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -186,6 +203,10 @@
    "node-014",
    "node-016"
   ],
+  "quickAnswer": {
+   "en": "Every request adds a `'price'` listener to a shared emitter and nothing removes it, so listeners of disconnected clients keep their `res` alive: memory grows, the warning fires past 10 listeners, and dead responses get written to. Fix: remove the listener in `res.on('close')`.",
+   "bn": "প্রতিটা request shared emitter-এ একটা `'price'` listener যোগ করে কিন্তু কেউ সেটা সরায় না, তাই disconnect হওয়া client-এর listener তাদের `res` বাঁচিয়ে রাখে: memory বাড়ে, 10টার বেশি listener হলে warning আসে, আর বন্ধ response-এ write হয়। সমাধান: `res.on('close')`-এ listener সরাও।"
+  },
   "commonMistakes": {
    "en": "Silencing the warning with `setMaxListeners(0)` or `process.removeAllListeners('warning')` instead of removing listeners on disconnect.",
    "bn": "Disconnect-এ listener remove না করে `setMaxListeners(0)` বা `process.removeAllListeners('warning')` দিয়ে warning চুপ করিয়ে দেওয়া।"
@@ -220,7 +241,7 @@
    "erasable-syntax",
    "tooling"
   ],
-  "technologyVersion": "Node.js 24.12+ LTS / 26 (type stripping stable)",
+  "technologyVersion": "Node.js 26 LTS / 24.12+ (type stripping stable)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -248,6 +269,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The file with interfaces, type annotations and `import type`: built-in type stripping only erases type-only syntax and runs the remaining JavaScript. Enums and parameter properties generate runtime code, so they fail, and Node never reads `tsconfig.json`, so `paths` aliases don't resolve.",
+   "bn": "Interface, type annotation আর `import type` থাকা file-টা: built-in type stripping শুধু type-এর syntax মুছে দিয়ে বাকি JavaScript চালায়। Enum আর parameter property runtime code তৈরি করে, তাই সেগুলো fail করে, আর Node কখনো `tsconfig.json` পড়ে না, তাই `paths` alias resolve হয় না।"
+  },
   "options": [
    {
     "en": "A file that declares `enum Role { Admin, User }` and uses `Role.Admin`",
@@ -284,7 +309,7 @@
    "permission-model",
    "prototype-pollution"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (permission model stable for fs since v23.5 / v22.13)",
+  "technologyVersion": "Node.js 26 LTS / 24 (permission model stable for fs since v23.5 / v22.13)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -332,6 +357,10 @@
    "node-010",
    "node-017"
   ],
+  "quickAnswer": {
+   "en": "Defend in layers: supply chain first (lockfile + `npm ci`, `npm audit` in CI, few vetted dependencies), then a patched LTS running as non-root, then safe code (validation, no `eval`, no prototype pollution). `--permission` restricts what trusted code can touch, but it does not protect against malicious code.",
+   "bn": "কয়েকটা layer-এ সুরক্ষা দাও: আগে supply chain (lockfile + `npm ci`, CI-তে `npm audit`, অল্প আর যাচাই করা dependency), তারপর non-root হিসেবে চলা patched LTS, তারপর নিরাপদ code (validation, `eval` নয়, prototype pollution ঠেকানো)। `--permission` trusted code কী ছুঁতে পারবে তা সীমিত করে, কিন্তু malicious code থেকে রক্ষা করে না।"
+  },
   "commonMistakes": {
    "en": "Treating `--permission` as a sandbox for untrusted plugins, or treating a clean `npm audit` as proof that dependencies are safe.",
    "bn": "Untrusted plugin-এর জন্য `--permission`-কে sandbox মনে করা, অথবা `npm audit` পরিষ্কার এলে dependency নিরাপদ বলে ধরে নেওয়া।"
@@ -368,7 +397,7 @@
    "redis",
    "connection-pool"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -413,6 +442,10 @@
    "node-006",
    "node-020"
   ],
+  "quickAnswer": {
+   "en": "First profile it to make sure it's real work, not a blocking bug. Then run one process per core (`node:cluster`, PM2 or containers) and stateless instances behind a load balancer, with sessions, caches, rate limits and scheduled jobs in shared stores like Redis, and DB connections kept under the limit.",
+   "bn": "আগে profile করে নিশ্চিত হও যে এটা আসল কাজ, কোনো blocking bug নয়। তারপর প্রতি core-এ একটা process চালাও (`node:cluster`, PM2 বা container) আর load balancer-এর পেছনে stateless instance রাখো; session, cache, rate limit আর scheduled job Redis-এর মতো shared store-এ রাখো, আর DB connection limit-এর নিচে রাখো।"
+  },
   "commonMistakes": {
    "en": "Scaling out while keeping in-memory sessions or rate-limit counters, or running the same cron job in every instance (duplicate emails, double charges).",
    "bn": "In-memory session বা rate-limit counter রেখেই scale out করা, অথবা প্রতিটি instance-এ একই cron job চালানো (duplicate email, দুবার charge)।"

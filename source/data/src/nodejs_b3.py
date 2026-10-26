@@ -24,7 +24,7 @@ QUESTIONS = [
         id="node-015", sub="Processes & Environment Variables", diff="easy", type="conceptual",
         prio="high", market="both", mins=3,
         tags=["env-vars", "env-file", "configuration", "process-env", "twelve-factor"],
-        ver="Node.js 24 LTS / 26; zod 4.x (example)", vs=True, status="stable",
+        ver="Node.js 26 LTS / 24; zod 4.x (example)", vs=True, status="stable",
         q_en=r"""How do you manage environment variables and configuration in a Node.js 24 application? Do you still need the `dotenv` package?""",
         q_bn=r"""Node.js 24 application-এ environment variable আর configuration কীভাবে manage করো? এখনও কি `dotenv` package লাগে?""",
         a_en=r"""
@@ -47,6 +47,8 @@ QUESTIONS = [
             - **আসল environment variable** `.env` file-এর value-এর উপর জয়ী হয়, ফলে platform local default override করতে পারে।
             - **কখনো secret commit করি না।** একটি `.env.example` commit করি; production-এ image-এর ভেতরে `.env` না রেখে platform বা secrets manager থেকে value inject করি।
         """,
+        quick_en=r"""Read config from `process.env`; for local development Node loads a `.env` file itself with `--env-file=.env` or `process.loadEnvFile()`, so `dotenv` isn't needed anymore. Every value is a string, so parse and validate config once at startup, and never commit secrets (commit a `.env.example`).""",
+        quick_bn=r"""Config `process.env` থেকে পড়ো; local development-এ Node নিজেই `--env-file=.env` বা `process.loadEnvFile()` দিয়ে `.env` file load করতে পারে, তাই এখন আর `dotenv` লাগে না। সব value string, তাই startup-এ একবার config parse ও validate করো, আর secret কখনো commit কোরো না (শুধু `.env.example` commit করো)।""",
         ex_en=r"""
             - `--env-file` and `--env-file-if-exists` stopped being experimental in v24.10 / v22.21; the `.env` utilities are documented as stable in current docs. Multi-line values are supported.
             - **Fail fast:** a missing `DATABASE_URL` should crash at boot with a clear message, not at 3 a.m. on the first query.
@@ -99,7 +101,7 @@ QUESTIONS = [
         id="node-016", sub="EventEmitter", diff="easy", type="mcq",
         prio="high", market="bangladesh", mins=2,
         tags=["eventemitter", "error-event", "events", "crash"],
-        ver="Version-independent (Node.js 24 LTS / 26)", vs=False, status="stable",
+        ver="Version-independent (Node.js 26 LTS / 24)", vs=False, status="stable",
         q_en=r"""What happens when this code runs?""",
         q_bn=r"""এই code চালালে কী হবে?""",
         code=r"""
@@ -125,6 +127,8 @@ QUESTIONS = [
         a_bn=r"""
             `emit()` throw করবে। `'error'` একটি বিশেষ event: এটা emit হলে এবং কোনো `'error'` listener না থাকলে EventEmitter error-টি throw করে, ফলে process crash করে (exit code 1) এবং `after emit` কখনো চলে না।
         """,
+        quick_en=r"""`emit()` throws: `'error'` is a special event, and if no `'error'` listener is registered the EventEmitter throws the error, so the process crashes with exit code 1 and `after emit` never runs.""",
+        quick_bn=r"""`emit()` নিজেই throw করে: `'error'` একটা বিশেষ event, আর কোনো `'error'` listener না থাকলে EventEmitter error-টা throw করে, ফলে process exit code 1 দিয়ে crash করে এবং `after emit` কখনো চলে না।""",
         ex_en=r"""
             Option A is tempting because that *is* what happens for every other event name — emitting an event nobody listens to just returns `false`. Only `'error'` gets this "throw if unhandled" treatment, so failures can't be silently lost.
 
@@ -152,7 +156,7 @@ QUESTIONS = [
         id="node-017", sub="Worker Threads & Clustering", diff="medium", type="comparison",
         prio="high", market="both", mins=6,
         tags=["worker-threads", "cluster", "child-process", "concurrency", "multi-core"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""Compare `worker_threads`, `cluster` and `child_process`. When would you use each one?""",
         q_bn=r"""`worker_threads`, `cluster` আর `child_process`-এর তুলনা করো। কোনটা কখন ব্যবহার করবে?""",
         a_en=r"""
@@ -169,6 +173,8 @@ QUESTIONS = [
 
             মোটা দাগে: CPU-bound JS → worker thread; core থেকে বেশি throughput → cluster বা বেশি container; external binary → child process।
         """,
+        quick_en=r"""`worker_threads` are extra threads in one process for CPU-heavy JavaScript; `cluster` forks several processes of the same server that share one port; `child_process` runs another program like `ffmpeg`. Rule: CPU-bound JS → workers, more cores for HTTP → cluster or containers, external tools → child processes.""",
+        quick_bn=r"""`worker_threads` হলো একটা process-এর ভেতরে CPU-heavy JavaScript-এর জন্য বাড়তি thread; `cluster` একই server-এর কয়েকটা process fork করে, যারা একটা port share করে; `child_process` অন্য program চালায়, যেমন `ffmpeg`। নিয়ম: CPU-bound JS → worker, HTTP-র জন্য বেশি core → cluster বা container, বাইরের tool → child process।""",
         ex_en=r"""
             - **Workers don't speed up I/O.** The Node docs say it plainly: built-in async I/O is more efficient than workers can be.
             - **Messages are copied** with the structured clone algorithm unless you transfer them; sending huge objects back and forth can cost more than the work itself.
@@ -226,7 +232,7 @@ QUESTIONS = [
         id="node-018", sub="CPU-Intensive Tasks", diff="medium", type="scenario",
         prio="high", market="both", mins=6,
         tags=["cpu-bound", "worker-pool", "piscina", "job-queue", "event-loop"],
-        ver="Node.js 24 LTS / 26; Express 5.x; Piscina 5 (example)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; Express 5.x; Piscina 5 (example)", vs=False, status="stable",
         q_en=r"""An Express endpoint `POST /reports` builds a PDF report from about 200k rows. While one report is being generated (around 3 seconds), every other request on that instance — even `/health` — stalls. What are your options, and which would you choose?""",
         q_bn=r"""একটি Express endpoint `POST /reports` প্রায় 200k row থেকে PDF report বানায়। একটি report তৈরি হওয়ার সময় (প্রায় ৩ সেকেন্ড) ওই instance-এর বাকি সব request — এমনকি `/health`-ও — আটকে থাকে। তোমার কাছে কী কী option আছে, আর কোনটা বেছে নেবে?""",
         a_en=r"""
@@ -249,6 +255,8 @@ QUESTIONS = [
 
             আমার পছন্দ: আগে data access ঠিক করা (DB aggregation + streaming), তারপর সাধারণ report-এর জন্য bounded queue সহ worker pool, আর report বড় বা ঘন ঘন হলে job-queue design-এ যাওয়া। সব ক্ষেত্রেই per-user rate limit আর timeout যোগ করব।
         """,
+        quick_en=r"""The 3-second synchronous job blocks the event loop for everyone. First make the work cheaper (aggregate in the database, stream rows), then move generation to a worker-thread pool, or to a job queue that returns `202 Accepted` if reports are heavy or bursty; chunking with `setImmediate` is only a stop-gap.""",
+        quick_bn=r"""৩ সেকেন্ডের synchronous কাজটা সবার জন্য event loop আটকে দেয়। আগে কাজটা হালকা করো (database-এ aggregate করো, row stream করো), তারপর report তৈরি worker-thread pool-এ সরাও, আর report ভারী বা হঠাৎ অনেক হলে job queue ব্যবহার করে `202 Accepted` return করো; `setImmediate` দিয়ে টুকরো করা শুধু সাময়িক সমাধান।""",
         ex_en=r"""
             - **What does *not* help:** raising `UV_THREADPOOL_SIZE` (your JavaScript doesn't run in the libuv pool) or `cluster` alone (each process still blocks its own requests during a report).
             - **Bounded queues matter:** `maxQueue` in the pool means overload is rejected quickly (return `503` or `429`) instead of piling up memory and latency.
@@ -307,7 +315,7 @@ QUESTIONS = [
         id="node-019", sub="V8 & libuv", diff="hard", type="mcq",
         prio="medium", market="both", mins=3,
         tags=["libuv", "thread-pool", "uv-threadpool-size", "crypto", "performance"],
-        ver="Node.js 24 LTS / 26 (libuv default pool size 4)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24 (libuv default pool size 4)", vs=False, status="stable",
         q_en=r"""On an 8-core server with default settings, this code starts six `crypto.pbkdf2` calls at once. A single call takes about 1 second when run alone. Roughly when do the six callbacks fire?""",
         q_bn=r"""Default setting সহ একটি 8-core server-এ এই code একসাথে ছয়টি `crypto.pbkdf2` call শুরু করে। একা চালালে একটি call প্রায় ১ সেকেন্ড নেয়। ছয়টি callback মোটামুটি কখন fire হবে?""",
         code=r"""
@@ -334,6 +342,8 @@ QUESTIONS = [
         a_bn=r"""
             চারটি ~১ সেকেন্ডে, দুটি ~২ সেকেন্ডে। Async `crypto.pbkdf2` চলে libuv-এর thread pool-এ, যেখানে **default 4টি thread**। প্রথম চারটি hash একসাথে চলে; বাকি দুটি thread খালি না হওয়া পর্যন্ত pool-এর queue-তে অপেক্ষা করে। পুরো সময় main thread মুক্ত থাকে।
         """,
+        quick_en=r"""Four after about 1 s and two after about 2 s: async `crypto.pbkdf2` runs in libuv's thread pool, which has 4 threads by default, so the last two wait in its queue. The main thread stays free the whole time.""",
+        quick_bn=r"""চারটা প্রায় 1 s পরে আর দুটো প্রায় 2 s পরে: async `crypto.pbkdf2` চলে libuv-এর thread pool-এ, যেখানে default 4টা thread, তাই শেষ দুটো queue-তে অপেক্ষা করে। পুরো সময় main thread কিন্তু free থাকে।""",
         ex_en=r"""
             Option C is the tempting wrong answer — it's what `pbkdf2Sync` would do: six sequential hashes on the main thread, blocking the event loop for ~6 s. The async version is parallel, but only up to the pool size.
 
@@ -361,7 +371,7 @@ QUESTIONS = [
         id="node-020", sub="Graceful Shutdown", diff="extreme", type="scenario",
         prio="high", market="international", mins=18,
         tags=["zero-downtime", "deployment", "keep-alive", "graceful-shutdown", "migrations", "kubernetes"],
-        ver="Node.js 24 LTS / 26; Kubernetes + AWS ALB (example platform)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; Kubernetes + AWS ALB (example platform)", vs=False, status="stable",
         q_en=r"""Your Node.js API runs as several containers behind a load balancer (for example Kubernetes with an AWS ALB). Every deploy causes a burst of 502 errors and a few failed requests, and occasionally errors right after a database migration. How do you achieve truly zero-downtime deployments?""",
         q_bn=r"""তোমার Node.js API একটি load balancer-এর পেছনে কয়েকটি container হিসেবে চলে (যেমন AWS ALB সহ Kubernetes)। প্রতিটি deploy-তে একঝাঁক 502 error আর কিছু failed request দেখা যায়, আর মাঝে মাঝে database migration-এর ঠিক পরে error হয়। সত্যিকারের zero-downtime deployment কীভাবে নিশ্চিত করবে?""",
         a_en=r"""
@@ -382,6 +392,8 @@ QUESTIONS = [
             4. **Backward-compatible পরিবর্তন:** rollout-এর সময় পুরনো ও নতুন version একই database-এর সাথে একসাথে চলে। Expand/contract migration ব্যবহার করো: আগে নতুন column (nullable) যোগ, তারপর এমন code deploy যা দুটোতেই লেখে আর নতুনটা পড়ে, backfill, আর পরের release-এ পুরনো column drop। API contract আর queue message format-এর ক্ষেত্রেও একই নীতি; ঝুঁকিপূর্ণ আচরণের জন্য feature flag।
             5. **যাচাই ও স্বয়ংক্রিয় rollback:** error rate আর latency check সহ canary বা blue/green, সাথে smoke test।
         """,
+        quick_en=r"""Zero downtime needs a rolling update that never removes capacity first, graceful `SIGTERM` handling (fail readiness, wait, `server.close()`), a `keepAliveTimeout` above the load balancer's idle timeout to stop 502s, and backward-compatible expand/contract migrations, plus canaries with automatic rollback.""",
+        quick_bn=r"""Zero downtime-এর জন্য লাগে: এমন rolling update যেটা আগে capacity কমায় না, `SIGTERM`-এ graceful shutdown (readiness fail, একটু অপেক্ষা, `server.close()`), 502 ঠেকাতে load balancer-এর idle timeout-এর চেয়ে বড় `keepAliveTimeout`, আর backward-compatible expand/contract migration, সাথে canary ও automatic rollback।""",
         ex_en=r"""
             - **Why the readiness delay:** `SIGTERM` and endpoint removal happen in parallel in Kubernetes. If the app closes its listener immediately, requests that were already routed to it get connection errors. A short sleep (or a `preStop` hook) closes that gap.
             - **Since Node 19, `server.close()` also closes idle keep-alive connections** — but only those idle at that moment. A socket that is still serving a request stays open for `keepAliveTimeout` (65 s here) after its response, so the close callback would wait until the hard deadline. Send `Connection: close` while draining and call `server.closeIdleConnections()` repeatedly; `server.closeAllConnections()` force-closes the rest at the deadline.

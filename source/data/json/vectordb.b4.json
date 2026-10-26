@@ -52,6 +52,10 @@
    "vec-025",
    "vec-030"
   ],
+  "quickAnswer": {
+   "en": "Turn \"under 2000 taka\" into a structured filter (`price < 2000`) and use \"red saree\" for the vector search, applied in the same query. Embeddings capture meaning well but are unreliable for numeric conditions, while a structured filter is exact.",
+   "bn": "\"Under 2000 taka\"-কে structured filter (`price < 2000`) বানাও আর \"red saree\" দিয়ে vector search করো, দুটোই একই query-তে। Embedding অর্থ ভালো ধরে, কিন্তু সংখ্যার শর্তে নির্ভরযোগ্য না; structured filter একদম exact।"
+  },
   "extraCode": [
    {
     "language": "sql",
@@ -128,6 +132,10 @@
    "vec-002",
    "vec-027"
   ],
+  "quickAnswer": {
+   "en": "About 6 KB: 1536 dimensions × 4 bytes = 6,144 bytes, and pgvector stores `4 × dimensions + 8` bytes, so 6,152 bytes per vector.",
+   "bn": "প্রায় 6 KB: 1536 dimension × 4 byte = 6,144 byte, আর pgvector প্রতি vector-এ `4 × dimensions + 8` byte রাখে, তাই 6,152 byte।"
+  },
   "options": [
    {
     "en": "About 1.5 KB",
@@ -199,6 +207,10 @@
    "vec-008",
    "vec-016"
   ],
+  "quickAnswer": {
+   "en": "Retrieve a bigger candidate set (say the top 50, ideally hybrid) and rerank it with a cross-encoder, then pass the best 5 to the LLM. A cross-encoder reads the query and each chunk together, so it scores relevance far more accurately than the fast first-stage vector search.",
+   "bn": "বড় candidate set আনো (ধরো top 50, পারলে hybrid), cross-encoder দিয়ে rerank করো, তারপর সেরা 5টা LLM-কে দাও। Cross-encoder query আর প্রতিটা chunk একসাথে পড়ে, তাই দ্রুত কিন্তু মোটা দাগের প্রথম ধাপের vector search-এর চেয়ে অনেক নিখুঁতভাবে relevance score করে।"
+  },
   "options": [
    {
     "en": "Fine-tune the LLM on all the company documents",
@@ -283,6 +295,10 @@
    "vec-009",
    "vec-027"
   ],
+  "quickAnswer": {
+   "en": "pgvector keeps vectors next to your relational data, with joins, filters, transactions, existing backups and no sync problem, but it scales like PostgreSQL. A dedicated vector DB scales out and has more vector features, but it's another system to run and keep in sync. Start with pgvector; switch when measurements say so.",
+   "bn": "pgvector vector-কে relational data-র পাশেই রাখে: join, filter, transaction, আগের backup, আর sync-এর ঝামেলা নেই; তবে scale হয় PostgreSQL-এর মতো। Dedicated vector DB horizontally scale করে আর vector feature বেশি দেয়, কিন্তু আরেকটা system চালাতে আর sync রাখতে হয়। শুরু pgvector দিয়ে; মেপে দরকার দেখলে বদলাও।"
+  },
   "commonMistakes": {
    "en": "Claiming PostgreSQL \"can't do vectors\", or picking a vector DB by hype without considering how it stays in sync with the source of truth.",
    "bn": "দাবি করা যে PostgreSQL \"vector সামলাতে পারে না\", অথবা source of truth-এর সাথে কীভাবে sync থাকবে না ভেবেই hype দেখে vector DB বেছে নেওয়া।"
@@ -349,6 +365,10 @@
    "vec-031",
    "vec-019"
   ],
+  "quickAnswer": {
+   "en": "Chunks can contain PII, hosted embedding/LLM APIs see your raw text, embeddings can be partly inverted back to text, and missing filters leak data across users. Mask PII before embedding, vet the provider or self-host, protect vectors like the source, filter by ACL in the query, and treat retrieved text as untrusted.",
+   "bn": "Chunk-এ PII থাকতে পারে, hosted embedding/LLM API তোমার raw text দেখে, embedding থেকে আংশিকভাবে আসল text ফেরত বের করা যায়, আর filter না থাকলে এক user-এর data অন্যজনের কাছে যায়। Embed করার আগে PII mask করো, provider যাচাই করো বা self-host করো, vector-কে source-এর মতোই সুরক্ষিত রাখো, query-তে ACL filter দাও, আর retrieve করা text-কে untrusted ধরো।"
+  },
   "commonMistakes": {
    "en": "Calling embeddings \"anonymised data\", relying on the LLM prompt to hide restricted content, or deleting the source document but leaving its vectors searchable.",
    "bn": "Embedding-কে \"anonymised data\" বলা, restricted content লুকাতে LLM prompt-এর ওপর ভরসা করা, অথবা source document মুছে ফেলে তার vector search-যোগ্য রেখে দেওয়া।"
@@ -419,6 +439,10 @@
    "vec-032",
    "vec-024"
   ],
+  "quickAnswer": {
+   "en": "Keep a versioned golden set of real questions (per language, including no-answer cases), measure retrieval (recall@k, MRR, nDCG) and generation (faithfulness, correctness) separately, block merges in CI when a metric drops beyond a tolerance, roll out via canary, and add every production failure to the set.",
+   "bn": "আসল প্রশ্নের একটা versioned golden set রাখো (ভাষা অনুযায়ী, উত্তর নেই এমন case-সহ), retrieval (recall@k, MRR, nDCG) আর generation (faithfulness, correctness) আলাদা করে মাপো, কোনো metric tolerance-এর বেশি কমলে CI-তে merge আটকাও, canary দিয়ে rollout করো, আর production-এর প্রতিটা failure set-এ যোগ করো।"
+  },
   "commonMistakes": {
    "en": "Evaluating only end-to-end answers (you can't tell whether retrieval or generation broke), trusting an uncalibrated LLM judge, or letting the golden set go stale.",
    "bn": "শুধু end-to-end উত্তর মূল্যায়ন করা (retrieval না generation ভাঙল বোঝা যায় না), calibrate না করা LLM judge-কে বিশ্বাস করা, অথবা golden set-কে পুরনো হতে দেওয়া।"
@@ -488,6 +512,10 @@
    "vec-017",
    "vec-031"
   ],
+  "quickAnswer": {
+   "en": "Similar questions can need different answers (\"cancel my order\" vs \"cancel my subscription\"), cached answers can leak across users or tenants, and they go stale. Scope it by tenant, language and permissions, try an exact-hash cache first, tune the threshold for precision, and invalidate on document changes.",
+   "bn": "কাছাকাছি প্রশ্নের উত্তর আলাদা হতে পারে (\"cancel my order\" বনাম \"cancel my subscription\"), cached উত্তর এক user বা tenant থেকে অন্যের কাছে leak হতে পারে, আর পুরনো হয়ে যায়। Cache-কে tenant, language আর permission দিয়ে scope করো, আগে exact-hash cache দেখো, precision-এর জন্য threshold tune করো, আর document বদলালে invalidate করো।"
+  },
   "commonMistakes": {
    "en": "Using a single global cache across tenants, picking the threshold by intuition, or caching answers without tracking which documents they came from.",
    "bn": "সব tenant-এর জন্য একটাই global cache ব্যবহার করা, অনুমানে threshold বেছে নেওয়া, অথবা কোন document থেকে উত্তর এসেছে সেটা track না করেই cache করা।"
@@ -568,6 +596,10 @@
    "vec-015",
    "vec-018"
   ],
+  "quickAnswer": {
+   "en": "Switch back to the previous index if it still exists, then run the golden set on old and new pipelines to see whether retrieval or generation broke. Check the data (mixed embedding models, changed library defaults, stale or duplicate chunks, bad chunker output), bisect each change, then rebuild cleanly and add evaluation gates.",
+   "bn": "আগের index থাকলে আগে সেটায় ফিরে যাও, তারপর পুরনো আর নতুন pipeline-এ golden set চালিয়ে দেখো retrieval ভেঙেছে নাকি generation। Data দেখো (মিশে যাওয়া embedding model, library-র বদলানো default, পুরনো বা duplicate chunk, খারাপ chunker output), প্রতিটা change আলাদা করে bisect করো, তারপর পরিষ্কারভাবে rebuild করে evaluation gate যোগ করো।"
+  },
   "commonMistakes": {
    "en": "Blaming the LLM and tweaking prompts first, rolling forward with more changes before measuring, or re-ingesting into the same live index without a rollback path.",
    "bn": "আগে LLM-কে দোষ দিয়ে prompt নিয়ে টানাটানি করা, না মেপেই আরও পরিবর্তন নিয়ে এগিয়ে যাওয়া, অথবা rollback-এর পথ না রেখে একই live index-এ আবার ingest করা।"

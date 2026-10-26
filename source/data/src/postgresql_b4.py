@@ -55,6 +55,8 @@ QUESTIONS = [
             5. Foreign key প্রথমে `NOT VALID` হিসেবে যোগ করো (অল্প সময়ের lock, শুধু নতুন write check করে), তারপর `VALIDATE CONSTRAINT` — এটা `SHARE UPDATE EXCLUSIVE` lock নিয়ে scan করে, যা read বা write block করে না।
             6. `NOT NULL`-এর জন্য: `CHECK (merchant_id IS NOT NULL) NOT VALID` যোগ করো, validate করো, তারপর `SET NOT NULL` — valid check প্রমাণ করে NULL নেই, তাই PostgreSQL পুরো scan বাদ দেয়। এরপর helper check-টা drop করো। (PG18-এ সরাসরি `NOT NULL` constraint-ও `NOT VALID` হিসেবে যোগ করা যায়।)
         """,
+        quick_en=r"""The real danger is `ACCESS EXCLUSIVE` locks queueing behind long queries, so run every DDL step with a short `lock_timeout` and retry. Expand, backfill, enforce: add a nullable column, backfill in batches, `CREATE INDEX CONCURRENTLY`, add the FK and `NOT NULL` check as `NOT VALID`, then `VALIDATE`.""",
+        quick_bn=r"""আসল বিপদ হলো long query-র পেছনে `ACCESS EXCLUSIVE` lock-এর queue, তাই প্রতিটা DDL step ছোট `lock_timeout` দিয়ে চালাও আর retry করো। Expand, backfill, enforce: nullable column যোগ করো, batch-এ backfill, `CREATE INDEX CONCURRENTLY`, FK আর `NOT NULL` check `NOT VALID` হিসেবে যোগ করো, তারপর `VALIDATE`।""",
         ex_en=r"""
             - Since PostgreSQL 11, `ADD COLUMN ... DEFAULT <constant>` is also metadata-only; a **volatile** default (e.g. `DEFAULT random()`) or a type change such as `int → bigint` still rewrites the whole table under `ACCESS EXCLUSIVE`. For type changes, use a new column + backfill + swap.
             - Batch backfills keep each transaction short (small lock footprint, less replication lag, autovacuum can keep up). One giant `UPDATE` creates 300M dead tuples and one huge transaction.
@@ -149,6 +151,8 @@ QUESTIONS = [
             4. **Row-গুলো ফেরত কপি করো:** recovered instance থেকে শুধু `orders` dump করো (`pg_dump -t orders --data-only`) বা `postgres_fdw` দিয়ে যুক্ত করো, আর production-এ হারানো row-গুলো insert করো (`INSERT ... SELECT ... WHERE NOT EXISTS`)। ১৪:৩২-এর পরে তৈরি নতুন order অক্ষত থাকে।
             5. **Post-mortem আর প্রতিরোধ:** least privilege (মানুষের production-এ ad-hoc write access থাকা উচিত না), manual SQL-এর জন্য বাধ্যতামূলক review, গুরুত্বপূর্ণ data-র জন্য soft delete, দ্রুত recovery-র জন্য একটা **delayed replica** (`recovery_min_apply_delay = '1h'`), আর RPO/RTO প্রমাণ করতে নিয়মিত restore drill।
         """,
+        quick_en=r"""Don't roll production back, because that loses 38 minutes of other writes. Restore the last base backup on a separate server, replay WAL to just before the `DELETE` (ideally `recovery_target_xid`), pause and verify, then copy the missing orders back into production.""",
+        quick_bn=r"""Production-কে পিছিয়ে নিয়ো না, তাতে অন্য table-এর 38 মিনিটের write হারিয়ে যাবে। আলাদা server-এ শেষ base backup restore করো, `DELETE`-এর ঠিক আগ পর্যন্ত WAL replay করো (সম্ভব হলে `recovery_target_xid` দিয়ে), pause করে যাচাই করো, তারপর হারানো order-গুলো production-এ ফেরত copy করো।""",
         ex_en=r"""
             - **Why `pg_dump` alone fails here:** last night's dump would lose every order between the dump and 14:32. PITR replays WAL up to any moment, so the only loss is what you choose to exclude.
             - The recovery target must be later than the end of the base backup; you can't stop in the middle of a backup.
@@ -216,6 +220,8 @@ QUESTIONS = [
 
             **Lag:** replica সাধারণত asynchronous, তাই যে user এইমাত্র profile update করেছে সে replica থেকে পুরনো data পড়তে পারে। সমাধান: write-এর পর কিছুক্ষণ সেই user-এর read primary-তে পাঠাও; অথবা replica write-এর LSN replay না করা পর্যন্ত অপেক্ষা করো; অথবা যে data-তে দরকার সেখানে synchronous replication ব্যবহার করো (write latency-র বিনিময়ে)। আর `pg_stat_replication` দিয়ে lag monitor করো।
         """,
+        quick_en=r"""Physical streaming replication copies the whole cluster block for block, read-only and same major version, for HA and read scaling. Logical replication publishes chosen tables to a writable subscriber that can run another major version, for upgrades and CDC. Replicas lag, so read-your-writes needs routing to the primary.""",
+        quick_bn=r"""Physical streaming replication পুরো cluster block ধরে ধরে copy করে, read-only আর একই major version, HA আর read scaling-এর জন্য। Logical replication বাছাই করা table একটা writable subscriber-এ পাঠায়, যেটা অন্য major version-এও চলতে পারে, upgrade আর CDC-র জন্য। Replica পিছিয়ে থাকে, তাই নিজের write পড়তে হলে primary-তে route করো।""",
         ex_en=r"""
             - **Logical replication limits:** DDL isn't replicated (apply schema changes on both sides), sequence values aren't replicated as of PG18 (bump them before cutover), and `UPDATE`/`DELETE` need a replica identity — usually the primary key. A conflicting row on the subscriber (e.g. a duplicate key) stops replication until fixed.
             - **Replication slots** stop the primary from removing WAL a consumer still needs. An abandoned slot can fill the primary's disk — cap it with `max_slot_wal_keep_size`; PG18 adds `idle_replication_slot_timeout` to invalidate inactive slots.
@@ -279,6 +285,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""**Skip scan** (new in PostgreSQL 18) lets a multicolumn B-tree be used even without a condition on the leading column. Internally it repeats the search for each distinct `tenant_id` (`tenant_id = N AND created_at >= ...`), skipping the rest of the index. With only 12 tenants that's about 12 small descents, so the planner may well pick it.""",
         a_bn=r"""**Skip scan** (PostgreSQL 18-এ নতুন) প্রথম column-এ কোনো condition না থাকলেও multicolumn B-tree ব্যবহার করতে দেয়। ভেতরে ভেতরে এটা প্রতিটা distinct `tenant_id`-এর জন্য search আবার চালায় (`tenant_id = N AND created_at >= ...`), index-এর বাকি অংশ লাফিয়ে পার হয়ে। মাত্র ১২টা tenant হলে সেটা প্রায় ১২টা ছোট descent, তাই planner এটা বেছে নিতেই পারে।""",
+        quick_en=r"""PG18's B-tree skip scan can use the `(tenant_id, created_at)` index without a `tenant_id` filter by doing one `created_at` range search per distinct tenant. With only 12 tenants that's about 12 small descents, so the planner may pick it without a new index.""",
+        quick_bn=r"""PG18-এর B-tree skip scan `tenant_id` filter ছাড়াও `(tenant_id, created_at)` index ব্যবহার করতে পারে, প্রতিটা আলাদা tenant-এর জন্য একবার করে `created_at` range search করে। মাত্র 12টা tenant হলে এটা প্রায় 12টা ছোট search, তাই নতুন index ছাড়াই planner এটা বেছে নিতে পারে।""",
         ex_en=r"""
             - Option A was essentially the rule **before PG18** (at best a full index scan), which is why it's tempting. "Leading column first" is still the right default when designing indexes.
             - Option D is backwards: skip scan pays off only when the skipped column has **few** distinct values. With millions of distinct leading values, the planner prefers a sequential scan or a different index.
@@ -322,6 +330,8 @@ QUESTIONS = [
 
             সমাধান: blocker খুঁজে সরাও; table অনুযায়ী autovacuum tune করো (`autovacuum_vacuum_scale_factor` কমাও, cost limit বাড়াও); হাতে একবার `VACUUM (VERBOSE)` চালাও; আর disk ফেরত পেতে `pg_repack` (online) বা `VACUUM FULL` (exclusive lock — maintenance window লাগে) ব্যবহার করো। `fillfactor` কমাও যাতে বেশি update HOT হয়।
         """,
+        quick_en=r"""It's MVCC bloat plus missed freezing: dead row versions aren't being vacuumed. First find what holds back the xmin horizon (long or idle-in-transaction sessions, abandoned replication slots), then tune autovacuum per table and reclaim space with `pg_repack` or `VACUUM FULL`.""",
+        quick_bn=r"""এটা MVCC bloat, সাথে freezing-ও হচ্ছে না: dead row version-গুলো vacuum হচ্ছে না। আগে খুঁজে বের করো xmin horizon কে আটকে রাখছে (long বা idle-in-transaction session, পরিত্যক্ত replication slot), তারপর table অনুযায়ী autovacuum tune করো আর `pg_repack` বা `VACUUM FULL` দিয়ে জায়গা ফেরত নাও।""",
         ex_en=r"""
             - **Plain `VACUUM`** marks dead space reusable but rarely shrinks the file; **`VACUUM FULL`** rewrites the table compactly but holds an `ACCESS EXCLUSIVE` lock for the whole run. `pg_repack` (an extension) rebuilds online with only brief locks.
             - **Wraparound:** transaction IDs are 32-bit and compared modulo 2³², so rows must be frozen before they look like they're "from the future". Autovacuum launches aggressive anti-wraparound vacuums when a table's XID age passes `autovacuum_freeze_max_age` (200 million by default) — don't cancel them. If freezing keeps failing, PostgreSQL eventually stops assigning new transaction IDs to protect data: an outage for all writes.
@@ -414,6 +424,8 @@ QUESTIONS = [
 
             **Operations:** ভবিষ্যতের partition আগেই তৈরি করো (pg_partman বা cron job) আর কালকের partition না থাকলে alert দাও; batch-এ ingest করো (`COPY` / multi-row `INSERT`); replica আর autovacuum সুস্থ রাখো।
         """,
+        quick_en=r"""Range-partition `events` by `created_at`, one partition per day, so retention is a cheap detach-and-drop and time filters prune partitions. Keys must include the partition key, keep indexes few, serve dashboards from an hourly rollup table, and create future partitions ahead of time.""",
+        quick_bn=r"""`events`-কে `created_at` দিয়ে দিনে একটা করে range partition করো, তাহলে পুরোনো data সরানো মানে সস্তা detach আর drop, আর time filter দিলে partition pruning হয়। Key-তে partition key রাখতেই হবে, index কম রাখো, dashboard চালাও hourly rollup table থেকে, আর ভবিষ্যতের partition আগে থেকেই বানিয়ে রাখো।""",
         ex_en=r"""
             **What can go wrong**
             - **Missing future partition** → inserts fail ("no partition of relation found for row"). A `DEFAULT` partition catches strays but makes creating new partitions slower (PostgreSQL must check the default for rows that belong to the new range) and blocks `DETACH ... CONCURRENTLY` — keep it empty or avoid it.
@@ -515,6 +527,8 @@ QUESTIONS = [
 
             **4. "কিছুই deploy হয়নি" অবস্থার সাধারণ কারণ:** auto-analyze বা data বেড়ে কোনো সীমা পার হওয়ায় plan flip; prepared statement generic plan-এ চলে যাওয়া; cache (যেমন Redis) outage-এ thundering herd; বড় ad-hoc query বা lock-এর জন্য অপেক্ষমাণ `ALTER TABLE`; ব্যস্ত table-এ anti-wraparound vacuum; bloat; replica lag-এর কারণে read primary-তে চলে আসা।
         """,
+        quick_en=r"""Stabilise first, then find the cause: check `pg_stat_activity` for wait events and lock chains, and `pg_stat_statements` for a query whose time or call count jumped. Cancel runaway queries, contain the source with a flag or `statement_timeout`, then fix the plan, index or statistics.""",
+        quick_bn=r"""আগে system স্থির করো, তারপর কারণ খোঁজো: `pg_stat_activity`-তে wait event আর lock chain দেখো, আর `pg_stat_statements`-এ দেখো কোন query-র সময় বা call সংখ্যা হঠাৎ বেড়েছে। লাগামছাড়া query cancel করো, flag বা `statement_timeout` দিয়ে উৎস আটকাও, তারপর plan, index বা statistics ঠিক করো।""",
         ex_en=r"""
             **Afterwards (prevention)**
             - Enable `pg_stat_statements` and `auto_explain` (`auto_explain.log_min_duration`) permanently so the next incident has evidence; keep snapshots of query stats to diff against.
@@ -606,6 +620,8 @@ QUESTIONS = [
             - App role superuser নয়, table owner নয়, আর এর `BYPASSRLS` নেই। Admin/migration role আলাদা।
             - প্রতিটা endpoint-এ cross-tenant read আর write-এর চেষ্টা করে এমন automated test।
         """,
+        quick_en=r"""A hybrid: a shared schema with `tenant_id` and row-level security for the many small tenants, and dedicated databases for the few enterprises. Enforce isolation with `tenant_id` in keys, `FORCE ROW LEVEL SECURITY`, a transaction-local `app.tenant_id` setting, and an app role that isn't the owner or superuser.""",
+        quick_bn=r"""একটা hybrid: অনেকগুলো ছোট tenant-এর জন্য `tenant_id` আর row-level security-সহ shared schema, আর অল্প কয়েকটা enterprise-এর জন্য আলাদা database। Isolation নিশ্চিত করো key-তে `tenant_id`, `FORCE ROW LEVEL SECURITY`, transaction-local `app.tenant_id` setting আর এমন app role দিয়ে যেটা owner বা superuser নয়।""",
         ex_en=r"""
             - **Fail closed:** if the app forgets to set `app.tenant_id`, `current_setting('app.tenant_id')` raises "unrecognized configuration parameter" (or, later in the same session, the empty string fails the `::bigint` cast) — the query errors instead of returning other tenants' rows.
             - **Performance:** the policy predicate is added to every query; with `tenant_id` leading your indexes, it becomes an index condition. Check plans with `EXPLAIN`. Functions used in policies should be simple; non-`LEAKPROOF` functions can prevent some optimisations.

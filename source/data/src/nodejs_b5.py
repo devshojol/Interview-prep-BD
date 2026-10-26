@@ -25,7 +25,7 @@ QUESTIONS = [
         id="node-027", sub="File System (fs/promises)", diff="easy", type="debugging",
         prio="high", market="bangladesh", mins=4,
         tags=["fs-promises", "callbacks", "async-await", "error-handling", "try-catch"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""`readConfig` should return the parsed JSON config, or `{}` if the file is missing or invalid. Instead it always logs `undefined`, and when the file is missing the whole process crashes. Explain both bugs and fix the function.""",
         q_bn=r"""`readConfig`-এর কাজ parse করা JSON config return করা, আর file না থাকলে বা invalid হলে `{}` return করা। কিন্তু এটা সবসময় `undefined` log করে, আর file না থাকলে পুরো process crash করে। দুটো bug ব্যাখ্যা করো এবং function-টি ঠিক করো।""",
         a_en=r"""
@@ -44,6 +44,8 @@ QUESTIONS = [
 
             Fix: `async`/`await` সহ `node:fs/promises`-এর promise-based API ব্যবহার করা। এখন `await` read শেষ না হওয়া পর্যন্ত function-কে থামিয়ে রাখে, rejected promise `try/catch`-এ ধরা পড়ে, আর caller ফলাফলের জন্য `await` করে।
         """,
+        quick_en=r"""`fs.readFile` is asynchronous, so `readConfig` returns `undefined` before the callback runs, and the `return` inside the callback goes nowhere. The `throw` in the callback happens later, outside `try/catch`, so it crashes the process; fix it with `node:fs/promises` and `async`/`await`.""",
+        quick_bn=r"""`fs.readFile` asynchronous, তাই callback চলার আগেই `readConfig` `undefined` return করে দেয়, আর callback-এর ভেতরের `return` কারো কাছে পৌঁছায় না। Callback-এর `throw` পরে ঘটে, `try/catch`-এর বাইরে, তাই process crash করে; সমাধান হলো `node:fs/promises` আর `async`/`await`।""",
         ex_en=r"""
             - The `try/catch` now catches both `ENOENT` (missing file) and the `SyntaxError` from `JSON.parse` (invalid JSON).
             - The caller must also be async (`await readConfig(...)`), or use top-level `await` in an ES module.
@@ -115,7 +117,7 @@ QUESTIONS = [
         id="node-028", sub="Graceful Shutdown", diff="medium", type="coding",
         prio="high", market="both", mins=8,
         tags=["graceful-shutdown", "sigterm", "http-server", "readiness", "deployment"],
-        ver="Node.js 19+ semantics for server.close() (current: 24 LTS / 26)", vs=True, status="stable",
+        ver="Node.js 19+ semantics for server.close() (current: 26 LTS / 24)", vs=True, status="stable",
         q_en=r"""
             Implement graceful shutdown for a plain `node:http` server (no framework). On `SIGTERM` or `SIGINT` it must:
 
@@ -150,6 +152,8 @@ QUESTIONS = [
             - Callback-এ DB/Redis/queue resource বন্ধ করি এবং `process.exit()` call না করে `process.exitCode` set করি, যাতে বাকি log write flush হয় এবং process স্বাভাবিকভাবে শেষ হয়।
             - একটি (unref করা) `setTimeout` draining বেশি সময় নিলে `server.closeAllConnections()` দিয়ে সব জোর করে বন্ধ করে `1` দিয়ে exit করে।
         """,
+        quick_en=r"""Set a `shuttingDown` flag so readiness returns `503`, wait briefly for the load balancer, then `server.close()` (closing idle keep-alive sockets), and in its callback close DB/Redis/queues and set `process.exitCode`. An unref'd `setTimeout` force-closes connections and exits with `1` if draining is too slow.""",
+        quick_bn=r"""একটা `shuttingDown` flag set করো যাতে readiness `503` দেয়, load balancer-এর জন্য একটু অপেক্ষা করো, তারপর `server.close()` (idle keep-alive socket বন্ধ করে), আর তার callback-এ DB/Redis/queue বন্ধ করে `process.exitCode` set করো। Unref করা একটা `setTimeout` drain বেশি সময় নিলে connection জোর করে বন্ধ করে `1` দিয়ে exit করে।""",
         ex_en=r"""
             - **Why `unref()` the force timer:** if everything shuts down cleanly, an active timer would otherwise keep the event loop alive for the full 10 seconds.
             - **Why not `process.exit(0)` right away:** it kills in-flight requests and can truncate asynchronous stdout/stderr writes (lost logs).
@@ -248,7 +252,7 @@ QUESTIONS = [
         id="node-029", sub="Logging", diff="medium", type="conceptual",
         prio="high", market="both", mins=5,
         tags=["logging", "pino", "asynclocalstorage", "request-id", "observability"],
-        ver="Node.js 24 LTS / 26; pino 10 / Express 5.x (example)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; pino 10 / Express 5.x (example)", vs=False, status="stable",
         q_en=r"""How do you implement structured logging in a Node.js API so that every log line written during a request carries the same request ID — without passing a `requestId` argument through every function?""",
         q_bn=r"""Node.js API-তে structured logging কীভাবে implement করবে, যাতে একটি request চলাকালীন লেখা প্রতিটি log line-এ একই request ID থাকে — অথচ প্রতিটি function-এ `requestId` argument পাঠাতে না হয়?""",
         a_en=r"""
@@ -267,6 +271,8 @@ QUESTIONS = [
 
             আমি ID-টা response header-এও ফেরত দিই, যাতে support টিম user-এর অভিযোগ log-এর সাথে মেলাতে পারে, আর downstream service-এও forward করি।
         """,
+        quick_en=r"""Use a structured JSON logger such as pino plus `AsyncLocalStorage` from `node:async_hooks`: a middleware reads or generates a request ID, creates a child logger and calls `als.run(store, next)`. Any code in that request, even after `await`s, gets the same logger with `als.getStore()`.""",
+        quick_bn=r"""pino-র মতো structured JSON logger আর `node:async_hooks`-এর `AsyncLocalStorage` ব্যবহার করো: একটা middleware request ID পড়ে বা তৈরি করে, child logger বানায় আর `als.run(store, next)` call করে। ওই request-এর যেকোনো code, `await`-এর পরেও, `als.getStore()` দিয়ে একই logger পায়।""",
         ex_en=r"""
             - **Why pino:** it's fast (logs are serialised cheaply and can be written by a worker-thread transport), outputs JSON by default, and has built-in `redact` paths so passwords and `Authorization` headers never reach the logs. `pino-http` adds automatic request/response logs with timing.
             - **How ALS works:** Node tracks async resources (promises, timers, I/O callbacks) and carries the store along the async call chain started by `run()`. It's stable and much simpler than the old continuation-local-storage libraries.
@@ -331,7 +337,7 @@ QUESTIONS = [
         id="node-030", sub="API Design", diff="medium", type="conceptual",
         prio="medium", market="both", mins=6,
         tags=["api-design", "async-iterators", "eventemitter", "abortsignal", "promises"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""Node.js offers callbacks, Promises/async-await, EventEmitters, streams and async iterators for asynchronous work. When you design a module's public API — for example a client for a payment provider or a paginated data exporter — how do you choose which style to expose, and how do you support cancellation?""",
         q_bn=r"""Asynchronous কাজের জন্য Node.js-এ আছে callback, Promise/async-await, EventEmitter, stream আর async iterator। একটি module-এর public API design করার সময় — যেমন payment provider-এর client বা paginated data exporter — কোন style expose করবে কীভাবে ঠিক করো, আর cancellation কীভাবে support করো?""",
         a_en=r"""
@@ -352,6 +358,8 @@ QUESTIONS = [
 
             **Cancellation ও timeout**-এর জন্য আমি `signal` (একটি `AbortSignal`) সহ একটি options object নিই। এটা Node-এর প্রায় সবকিছুর সাথে মিলে যায় — `fetch`, `timers/promises`, `stream/promises`-এর `pipeline`, `events.once` — আর caller `AbortSignal.timeout(ms)` ব্যবহার করতে পারে বা `AbortSignal.any()` দিয়ে signal জোড়া লাগাতে পারে।
         """,
+        quick_en=r"""Match the style to the shape of the result: one result → a Promise (an `async` function), many events over time → an EventEmitter, a large sequence the consumer should pace → a Readable stream or `async function*`. For cancellation and timeouts, accept an `AbortSignal` as `signal` in the options.""",
+        quick_bn=r"""Result-এর ধরন দেখে style বেছে নাও: একটা result → Promise (`async` function), সময়ের সাথে অনেক event → EventEmitter, বড় sequence যার গতি consumer ঠিক করবে → Readable stream বা `async function*`। Cancellation আর timeout-এর জন্য options-এ `signal` হিসেবে একটা `AbortSignal` নাও।""",
         ex_en=r"""
             - **Don't release Zalgo:** a function must be *always* async or *always* sync. Calling a callback synchronously in one branch (e.g. a cache hit) and asynchronously in another causes ordering bugs that are hard to reproduce.
             - **Don't offer two styles in one function** (return a promise *and* accept a callback) — it doubles the surface and the error paths.
@@ -407,7 +415,7 @@ QUESTIONS = [
         id="node-031", sub="Asynchronous Programming", diff="hard", type="coding",
         prio="high", market="both", mins=10,
         tags=["concurrency-limit", "promises", "async-await", "worker-pool", "coding"],
-        ver="Node.js 24 LTS / 26 (ES2017+ async/await)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24 (ES2017+ async/await)", vs=False, status="stable",
         q_en=r"""
             Write `mapWithConcurrency(items, limit, fn)` that calls the async function `fn(item, index)` for every item, with **at most `limit` calls in flight at once**, and resolves to the results **in input order**. If any call rejects, the returned promise must reject and no new items may be started. No libraries.
 
@@ -432,6 +440,8 @@ QUESTIONS = [
 
             Lock ছাড়াই এটা নিরাপদ, কারণ JavaScript একবারে একটি callback চালায় — `nextIndex++` দুটো `await`-এর মাঝে synchronously ঘটে, তাই দুটো worker কখনো একই index নিতে পারে না।
         """,
+        quick_en=r"""Use a worker pool: start `min(limit, items.length)` async workers that each claim the next index, await `fn`, store the result at that index and loop; `Promise.all` waits for them. Writing by index keeps input order, and a shared `failed` flag stops new work after a rejection; O(n) time and space.""",
+        quick_bn=r"""Worker pool ব্যবহার করো: `min(limit, items.length)`টা async worker চালু করো, প্রত্যেকে পরের index নেয়, `fn` await করে, result সেই index-এ রাখে আর আবার ঘোরে; `Promise.all` সবগুলোর জন্য অপেক্ষা করে। Index ধরে লেখায় input order ঠিক থাকে, আর shared `failed` flag rejection-এর পরে নতুন কাজ থামায়; time আর space O(n)।""",
         ex_en=r"""
             - **Why not `Promise.all(items.map(fn))`:** it starts all 10,000 calls immediately — thousands of sockets, rate-limit bans, memory spikes, and `EMFILE`/timeouts.
             - **Why not fixed batches** (`Promise.all` on chunks of 5): each batch waits for its slowest item, so slots sit idle. The pool keeps all `limit` slots busy.
@@ -503,7 +513,7 @@ QUESTIONS = [
         id="node-032", sub="Streams", diff="extreme", type="architecture",
         prio="high", market="international", mins=20,
         tags=["file-upload", "backpressure", "streams", "s3", "presigned-url", "memory"],
-        ver="Node.js 24 LTS / 26; Express 5.x; AWS SDK for JavaScript v3 (example)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; Express 5.x; AWS SDK for JavaScript v3 (example)", vs=False, status="stable",
         q_en=r"""Incident: your Node.js API accepts video uploads (up to 2 GB) and forwards them to object storage (S3). Under load — around 20 concurrent uploads — memory spikes, containers get OOM-killed, and unrelated API requests time out. The current handler uses `multer.memoryStorage()` and then calls `PutObject` with the whole buffer. Explain the root cause and redesign the upload path.""",
         q_bn=r"""Incident: তোমার Node.js API video upload (সর্বোচ্চ 2 GB) নেয় এবং object storage-এ (S3) পাঠায়। Load-এর সময় — প্রায় 20টি concurrent upload হলে — memory হঠাৎ বেড়ে যায়, container OOM-kill হয়, আর সম্পর্কহীন API request-ও timeout হয়। বর্তমান handler `multer.memoryStorage()` ব্যবহার করে, তারপর পুরো buffer দিয়ে `PutObject` call করে। মূল কারণ ব্যাখ্যা করো এবং upload path নতুন করে design করো।""",
         a_en=r"""
@@ -524,6 +534,8 @@ QUESTIONS = [
             2. **API-কে যদি byte proxy করতেই হয়** (compliance, encryption, inspection): **backpressure সহ stream করো।** Memory storage নয়; request stream-কে একটি byte-limit `Transform`-এর মধ্য দিয়ে এমন multipart uploader-এ pipe করো যার memory সীমিত (`queueSize × partSize`, যেমন 4 × 8 MiB ≈ upload প্রতি 32 MiB)। S3 ধীর হলে `pipeline()` client socket থেকে পড়া থামিয়ে দেয়, যা TCP flow control-এর মাধ্যমে client-কেও ধীর করে।
             3. **Service রক্ষা করো:** instance প্রতি concurrent upload সীমিত করো (ভরে গেলে `503`/`429`), সর্বোচ্চ size আগেই (`Content-Length` check) এবং stream চলাকালীনও enforce করো, ধীর client-এর জন্য timeout দাও, upload-কে dedicated instance-এ চালাও যাতে main API-কে বঞ্চিত না করে, আর failure-এ multipart upload abort করো (সাথে অসম্পূর্ণ upload পরিষ্কারের জন্য S3 lifecycle rule)।
         """,
+        quick_en=r"""Root cause: `multer.memoryStorage()` buffers each whole file (up to 2 GB) in memory with no backpressure, so concurrent uploads exhaust RAM and stall the event loop. Best fix: presigned direct-to-S3 uploads; if the API must proxy, stream with `pipeline()` into a bounded multipart upload and cap concurrent uploads.""",
+        quick_bn=r"""Root cause: `multer.memoryStorage()` প্রতিটা পুরো file (2 GB পর্যন্ত) কোনো backpressure ছাড়াই memory-তে রাখে, তাই একসাথে অনেক upload হলে RAM শেষ হয় আর event loop আটকে যায়। সেরা সমাধান: presigned URL দিয়ে সরাসরি S3-তে upload; API-কে proxy করতেই হলে `pipeline()` দিয়ে সীমিত-memory-র multipart upload-এ stream করো আর একসাথে upload-এর সংখ্যা সীমিত রাখো।""",
         ex_en=r"""
             - **Why other requests time out:** huge Buffers live outside the V8 heap but still trigger GC work and memory pressure; copying and concatenating them is synchronous CPU work on the main thread. One endpoint's design flaw becomes a whole-service outage.
             - **Memory budget math:** with streaming, memory ≈ concurrent uploads × (stream buffers + `queueSize × partSize`). 20 uploads × ~32 MiB ≈ 640 MiB — predictable, and tunable with the concurrency cap.

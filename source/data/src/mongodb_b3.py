@@ -40,6 +40,8 @@ QUESTIONS = [
 
             প্রতিটি collection-এ `_id`-এর ওপর একটা unique index automatically থাকে। খরচ: প্রতিটি index disk আর আদর্শভাবে RAM ব্যবহার করে; আর **প্রতিটি insert, update ও delete-এ সব index-ও update করতে হয়** — তাই বেশি index write slow করে। আমি app যেসব query আসলে চালায় সেগুলোর জন্য index বানাই, প্রতিটি field-এর জন্য না।
         """,
+        quick_en=r"""An index is a separate sorted B-tree of field values that point to documents, so MongoDB can do an `IXSCAN` instead of reading every document (`COLLSCAN`) and can return results already sorted. The cost is disk and RAM, plus slower writes, because every insert, update and delete must update every index.""",
+        quick_bn=r"""Index হলো field value-এর একটা আলাদা sorted B-tree, যেটা document-গুলোকে point করে; তাই MongoDB সব document না পড়ে (`COLLSCAN`) সরাসরি `IXSCAN` করতে পারে, আর result আগে থেকেই sorted দিতে পারে। খরচ হলো disk আর RAM, আর write ধীর হয়, কারণ প্রতিটি insert, update, delete-এ সব index update করতে হয়।""",
         ex_en=r"""
             **Common index types and properties:**
             - **Single field** and **compound** (order of fields matters — see the ESR guideline).
@@ -106,6 +108,8 @@ QUESTIONS = [
 
             Relationship-এর আকার অনুযায়ী: one-to-few → embed; one-to-many → reference-এর array বা child থেকে parent-এর reference; one-to-"squillions" → সবসময় child-এ parent-এর ID রাখো।
         """,
+        quick_en=r"""Store together what is read together: embed child data that belongs to the parent, is read with it and stays bounded (order items, a user's few addresses). Reference it by `_id` when it is large or unbounded, shared by many parents, or updated on its own (comments, chat messages, author profiles).""",
+        quick_bn=r"""যে data একসাথে read হয়, সেটা একসাথে রাখো: child data parent-এর অংশ হলে, parent-এর সাথে read হলে আর bounded থাকলে embed করো (order-এর item, user-এর কয়েকটা address)। Data বড় বা unbounded হলে, অনেক parent share করলে, বা আলাদাভাবে update হলে `_id` দিয়ে reference করো (comment, chat message, author profile)।""",
         ex_en=r"""
             - **Why bounded matters:** documents are capped at 16 MB, and a growing array makes every update rewrite a larger document and bloats indexes on that array.
             - **Duplication is sometimes correct:** an order should embed a *snapshot* of the product name and price at purchase time, even though products also live in their own collection — that's historical truth, not a normalisation bug.
@@ -162,6 +166,8 @@ QUESTIONS = [
 
             Member-রা একে অপরকে heartbeat পাঠায়। Election timeout-এর (default 10 second) বেশি সময় primary-কে পাওয়া না গেলে একটা eligible secondary **election** শুরু করে; যে member majority-র vote পায় — সাধারণত সবচেয়ে up-to-date member — সে নতুন primary হয়। Driver-রা automatically নতুন primary খুঁজে নেয় আর write retry করে। সাধারণ production setup হলো ভিন্ন availability zone-এ তিনটা data-bearing member।
         """,
+        quick_en=r"""A replica set is a group of `mongod` servers with the same data: the primary takes all writes and logs them in the oplog, and secondaries replay that oplog asynchronously. If the primary is unreachable for over 10 seconds (the default), a secondary wins a majority election and drivers switch to it automatically.""",
+        quick_bn=r"""Replica set হলো একই data রাখা কয়েকটা `mongod` server-এর group: primary সব write নেয় আর oplog-এ লিখে রাখে, secondary-গুলো asynchronously সেই oplog apply করে। Primary 10 second-এর (default) বেশি unreachable থাকলে একটা secondary majority vote পেয়ে নতুন primary হয়, আর driver নিজে থেকেই সেটার সাথে যুক্ত হয়।""",
         ex_en=r"""
             - **Why an odd number / majority:** a primary needs a majority of voting members to be elected and to stay primary. This prevents two primaries during a network split (split brain). A set can have up to 50 members, but at most 7 voting members.
             - **Replication is not a backup:** an accidental `deleteMany` replicates to every secondary within milliseconds. You still need backups.
@@ -217,6 +223,8 @@ QUESTIONS = [
 
             আরও: field-টা আসল BSON `Date` হতে হবে (string কখনো expire হয় না), আর আমি OTP hash করে রাখব, attempt সীমিত করব, এবং সফলভাবে ব্যবহারের পর delete করব।
         """,
+        quick_en=r"""Put a TTL index on a `Date` field (`createdAt` with `expireAfterSeconds: 300`) so MongoDB deletes old OTPs automatically. But the TTL monitor runs about every 60 seconds and can lag, so the verify query must still check the 5-minute window itself; TTL is clean-up, not the security check.""",
+        quick_bn=r"""একটা `Date` field-এ TTL index দাও (`createdAt`, `expireAfterSeconds: 300`), তাহলে MongoDB পুরনো OTP নিজে থেকেই delete করবে। কিন্তু TTL monitor প্রায় প্রতি 60 second-এ চলে আর দেরিও হতে পারে, তাই verify করার query-তে 5 মিনিটের সময়টা নিজে check করতে হবে; TTL শুধু clean-up, security check না।""",
         ex_en=r"""
             - **Per-document expiry:** store `expiresAt` and create the index with `expireAfterSeconds: 0` — each document then expires at its own clock time (useful when different OTP types live for different durations).
             - **Restrictions:** TTL works only on single-field indexes (compound indexes ignore the option), not on `_id`, and documents without the field (or with a non-date value) never expire. With an array of dates, the earliest one is used.
@@ -274,6 +282,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""A unique index stores `null` for documents that lack the field, so only **one** document may be missing it. The second phone-only signup fails with an E11000 duplicate key error. A **partial** unique index that only includes documents where `username` is a string enforces uniqueness for real usernames and ignores the rest.""",
         a_bn=r"""Unique index-এ field না থাকা document-এর জন্য `null` store হয়, তাই শুধু **একটা** document-এ field missing থাকতে পারে। দ্বিতীয় phone-only signup E11000 duplicate key error দিয়ে fail করে। একটা **partial** unique index, যেটা শুধু `username` string থাকা document-গুলো নেয়, আসল username-এর uniqueness enforce করে আর বাকিগুলো ignore করে।""",
+        quick_en=r"""The insert fails with E11000, because a unique index stores a missing `username` as `null`, so only one document may lack it. The fix is a partial unique index with `partialFilterExpression: { username: { $type: "string" } }`.""",
+        quick_bn=r"""Insert E11000 error দিয়ে fail করে, কারণ unique index-এ missing `username` `null` হিসেবে থাকে, তাই কেবল একটা document-এই field-টা না থাকতে পারে। সমাধান হলো `partialFilterExpression: { username: { $type: "string" } }` দিয়ে একটা partial unique index।""",
         ex_en=r"""
             Option B is the tempting one, especially for people coming from PostgreSQL, where multiple NULLs are allowed in a unique column by default. MongoDB behaves differently.
 
@@ -341,6 +351,8 @@ QUESTIONS = [
 
             **Stock:** conditional atomic update দিয়ে কমাও (`stock: { $gte: qty }` + `$inc`); একাধিক item-এর checkout-এ transaction বা reservation step ব্যবহার করো।
         """,
+        quick_en=r"""Embed the order items in the order document, each with `productId` plus a snapshot of name, SKU, unit price, quantity and discount at purchase time, along with an address snapshot and computed totals. An order is a historical record, so copying the price is correct, and items are bounded, so one read shows the whole order.""",
+        quick_bn=r"""Order document-এর ভেতরেই item-গুলো embed করো, প্রতিটিতে `productId`-এর সাথে কেনার সময়ের name, SKU, unit price, quantity আর discount-এর snapshot, সাথে address snapshot আর হিসাব করা total। Order একটা ঐতিহাসিক record, তাই price copy করে রাখাই ঠিক; আর item সংখ্যা bounded, তাই এক read-এই পুরো order দেখানো যায়।""",
         ex_en=r"""
             - **Don't embed orders in the customer document** — a loyal customer's order list is unbounded.
             - **Don't reference the live product price** from the order — after the next price change, old invoices would show the wrong amount (a legal/accounting problem, not just a UI bug).
@@ -460,6 +472,8 @@ QUESTIONS = [
             - **Stage 2**-এ আলাদা sort order লাগে (amount descending), আর প্রতিটি stage-এ একটাই `sortBy` থাকে, তাই দ্বিতীয় একটা stage `$rank` হিসাব করে → A: 700 → 1, 500 → 2, 300 → 3; B: 900 → 1, 200 → 2।
             - `$sort` আবার shop/day order-এ সাজায়, আর `$project` date format করে output-এর shape ঠিক করে।
         """,
+        quick_en=r"""Use `$setWindowFields` twice: first partition by shop, sort by day and `$sum` the amount over a window from the first document to the current one (running total); then sort by amount descending and add `$rank`. Unlike `$group` it keeps every document; finish with `$sort` and a `$project` that formats the day.""",
+        quick_bn=r"""দুইবার `$setWindowFields` ব্যবহার করো: প্রথমবার shop অনুযায়ী partition, day অনুযায়ী sort, আর প্রথম document থেকে current document পর্যন্ত window-তে amount-এর `$sum` (running total); দ্বিতীয়বার amount উল্টো ক্রমে sort করে `$rank`। `$group`-এর মতো এটা document কমায় না; শেষে `$sort` আর day format করার জন্য `$project`।""",
         ex_en=r"""
             - **The explicit window matters:** with `sortBy` but no `window`, `$sum` covers the whole partition — every row would show the shop's grand total (1500 or 1100) instead of a running total.
             - **Ties:** `$rank` gives tied values the same rank and leaves gaps (1, 1, 3); `$denseRank` doesn't leave gaps (1, 1, 2); `$documentNumber` always increments.
@@ -519,6 +533,8 @@ QUESTIONS = [
 
             **5. প্রতিরোধ:** dry-run count সহ review করা migration, empty filter reject করার guard, least-privilege role (app user ad-hoc admin script চালাতে পারবে না), production-এ মানুষের স্থায়ী write access না রাখা, আর business-critical data-র জন্য soft delete।
         """,
+        quick_en=r"""Don't restore over production: in a separate cluster, restore the 02:00 dump and replay the oplog up to just before the delete (`--oplogLimit`), then `mongorestore` the missing orders back (it only inserts). Prevent it with point-in-time backups, restore drills, least privilege and guards against empty filters.""",
+        quick_bn=r"""Production-এর ওপর restore করবে না: আলাদা একটা cluster-এ 02:00-এর dump restore করো, delete-এর ঠিক আগ পর্যন্ত oplog replay করো (`--oplogLimit`), তারপর হারানো order-গুলো `mongorestore` দিয়ে ফেরত আনো (এটা শুধু insert করে)। ভবিষ্যতের জন্য point-in-time backup, নিয়মিত restore drill, least privilege আর empty filter আটকানোর guard রাখো।""",
         ex_en=r"""
             - **Why `mongodump` alone is weak at this size:** the docs position `mongodump`/`mongorestore` for small deployments; dumps are logical (indexes are rebuilt on restore, which takes hours for 400 GB) and have no point-in-time capability on their own. Filesystem/cloud snapshots restore much faster, and oplog-based continuous backup provides PITR.
             - **Finding the bad operation:** a `deleteMany` writes one delete op (`op: "d"`) per document, but since MongoDB 6.1 multi-document deletes are **batched**, so those ops are grouped inside `applyOps` entries (`op: "c"`, `ns: "admin.$cmd"`). Search for both shapes; the first matching entry for `shop.orders` after 14:05 gives the cut-off timestamp. Oplog entries also carry a `wall` clock time — remember 14:05 in Dhaka is 08:05 UTC.

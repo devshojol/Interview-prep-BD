@@ -58,6 +58,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "The clickable `<div>` isn't focusable or announced as a button, the inputs have no labels, the image has no `alt`, and there's no `<form>`. Fix it with a real `<button type=\"submit\">`, `<label htmlFor>` for each input, proper `alt` and a wrapping `<form>`.",
+   "bn": "Click করার `<div>`-টা focus হয় না, button হিসেবেও announce হয় না; input-এ label নেই, image-এ `alt` নেই, আর কোনো `<form>` নেই। সমাধান: আসল `<button type=\"submit\">`, প্রতিটা input-এ `<label htmlFor>`, ঠিকঠাক `alt`, আর সবকিছু একটা `<form>`-এ রাখা।"
+  },
   "commonMistakes": {
    "en": "Adding `role=\"button\"` to the `<div>` and stopping there (still not focusable or keyboard-operable), or treating placeholders as labels.",
    "bn": "`<div>`-এ শুধু `role=\"button\"` যোগ করে থেমে যাওয়া (তবুও focus বা keyboard দিয়ে চালানো যায় না), অথবা placeholder-কে label মনে করা।"
@@ -135,6 +139,10 @@
   "related": [
    "react-011"
   ],
+  "quickAnswer": {
+   "en": "RTL tests behaviour the way a user sees it: render, find elements with `getByRole` first (`getByTestId` last), interact with `user-event`, and assert on the screen. Use `findBy...` to wait for async UI and `queryBy...` to check something is absent.",
+   "bn": "RTL user যেভাবে দেখে সেভাবে behaviour test করে: render করো, element খোঁজো আগে `getByRole` দিয়ে (`getByTestId` সবশেষে), `user-event` দিয়ে interact করো, আর screen-এ যা আছে তা assert করো। Async UI-র জন্য অপেক্ষা করতে `findBy...`, আর কিছু নেই সেটা দেখতে `queryBy...`।"
+  },
   "commonMistakes": {
    "en": "Using `getByTestId` everywhere, asserting on component state, forgetting to `await` user-event calls, or using `getBy…` to check that something is *not* rendered (it throws).",
    "bn": "সব জায়গায় `getByTestId` ব্যবহার করা, component state-এর উপর assert করা, user-event call `await` করতে ভুলে যাওয়া, অথবা কিছু render *হয়নি* তা যাচাই করতে `getBy…` ব্যবহার করা (এটা throw করে)।"
@@ -203,6 +211,10 @@
    "react-004",
    "react-023"
   ],
+  "quickAnswer": {
+   "en": "The list uses the array index as `key`, so after deleting the first item, key 0 now means Call Karim and React keeps the first row's input with \"urgent\". Use `key={todo.id}` and delete by id.",
+   "bn": "List-এ array index-কে `key` বানানো হয়েছে, তাই প্রথম item delete করার পর key 0 মানে Call Karim, আর React প্রথম row-এর \"urgent\" লেখা input রেখে দেয়। `key={todo.id}` ব্যবহার করো আর id দিয়ে delete করো।"
+  },
   "commonMistakes": {
    "en": "Thinking the bug is in the `filter` logic, or \"fixing\" it by making the input controlled while still using index keys (row components with their own state would still mix up).",
    "bn": "ভাবা যে bug-টা `filter` logic-এ, অথবা index key রেখেই input controlled করে \"ঠিক\" করা (নিজস্ব state-ওয়ালা row component তখনো এলোমেলো হবে)।"
@@ -269,6 +281,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "An inline handler like `onSelect={(id) => ...}` can't be passed, because props are serialised across the server-to-client boundary. Plain objects, promises and JSX children are fine; the only functions allowed are Server Functions marked `'use server'`.",
+   "bn": "`onSelect={(id) => ...}`-এর মতো inline handler পাঠানো যায় না, কারণ server থেকে client-এ যাওয়ার সময় props serialise হয়। সাধারণ object, promise আর JSX children চলে; function-এর মধ্যে শুধু `'use server'` দেওয়া Server Function পাঠানো যায়।"
+  },
   "options": [
    {
     "en": "A plain object like `{ id: 1, name: 'Rahim', joinedAt: new Date() }`",
@@ -352,6 +368,10 @@
    "react-012",
    "react-013"
   ],
+  "quickAnswer": {
+   "en": "`<Activity mode=\"hidden\">` hides UI without unmounting it: state is kept, but effects are cleaned up and updates deferred. `useEffectEvent` reads the latest props/state inside an effect without being a dependency; call it only from effects and give hidden Activity content proper cleanups.",
+   "bn": "`<Activity mode=\"hidden\">` unmount না করেই UI লুকায়: state থাকে, কিন্তু effect cleanup হয় আর update পিছিয়ে যায়। `useEffectEvent` dependency না হয়েই effect-এর ভেতরে সর্বশেষ props/state পড়ে; এটাকে শুধু effect থেকে call করো, আর লুকানো Activity-র effect-এ ঠিকঠাক cleanup রাখো।"
+  },
   "commonMistakes": {
    "en": "Thinking effects keep running inside a hidden Activity, or calling an Effect Event from an event handler or during render.",
    "bn": "ভাবা যে hidden Activity-র ভেতরে effect চলতেই থাকে, অথবা event handler থেকে বা render-এর সময় Effect Event call করা।"
@@ -415,6 +435,10 @@
    "react-024",
    "react-027"
   ],
+  "quickAnswer": {
+   "en": "`<ViewTransition>` only animates non-urgent updates (a Transition, a `useDeferredValue` update or a Suspense reveal), and a plain `setState` is urgent. Wrap the update: `startTransition(() => setIndex(...))`.",
+   "bn": "`<ViewTransition>` শুধু non-urgent update animate করে (Transition, `useDeferredValue` update বা Suspense reveal), আর সাধারণ `setState` urgent। Update-টা wrap করো: `startTransition(() => setIndex(...))`।"
+  },
   "code": {
    "language": "jsx",
    "source": "import { useState, ViewTransition } from 'react';\n\nexport default function Gallery({ photos }) {\n  const [index, setIndex] = useState(0);\n  const photo = photos[index];\n\n  return (\n    <>\n      <ViewTransition key={photo.id}>\n        <img src={photo.url} alt={photo.alt} />\n      </ViewTransition>\n      <button onClick={() => setIndex((i) => (i + 1) % photos.length)}>\n        Next\n      </button>\n    </>\n  );\n}"
@@ -502,6 +526,10 @@
    "react-024",
    "react-026"
   ],
+  "quickAnswer": {
+   "en": "The bottleneck is DOM size, so virtualise the table and render only the visible rows. Then keep rows cheap (stable keys, memoized rows, sort/filter once), keep search responsive with `useDeferredValue`, and move huge datasets to server-side pagination.",
+   "bn": "আসল সমস্যা DOM-এর size, তাই table virtualise করে শুধু দেখা যাওয়া row-গুলো render করো। তারপর row হালকা রাখো (stable key, memoized row, sort/filter একবারই), `useDeferredValue` দিয়ে search responsive রাখো, আর খুব বড় data হলে server-side pagination করো।"
+  },
   "commonMistakes": {
    "en": "Answering only \"use `React.memo`/`useMemo`\", which doesn't reduce the number of DOM nodes, or virtualising without stable keys.",
    "bn": "শুধু \"`React.memo`/`useMemo` ব্যবহার করো\" বলা, যেটা DOM node-এর সংখ্যা কমায় না, অথবা stable key ছাড়া virtualise করা।"
@@ -580,6 +608,10 @@
    "react-026",
    "react-025"
   ],
+  "quickAnswer": {
+   "en": "Keep the WebSocket and data outside React: a manager that reconnects and drops out-of-order messages, and an external store that coalesces updates and flushes once per frame. Components subscribe per row with `useSyncExternalStore`, the table is virtualised and history buffers are bounded.",
+   "bn": "WebSocket আর data React-এর বাইরে রাখো: একটা manager যেটা reconnect করে আর out-of-order message বাদ দেয়, আর একটা external store যেটা update জমিয়ে প্রতি frame-এ একবার flush করে। Component `useSyncExternalStore` দিয়ে row ধরে subscribe করে, table virtualise করা থাকে, আর history buffer-এর size সীমিত থাকে।"
+  },
   "commonMistakes": {
    "en": "Putting the socket inside a component effect without cleanup (duplicate connections), storing every message in a Context (whole app re-renders 50 times a second), or throttling with `setTimeout` per message instead of coalescing.",
    "bn": "Cleanup ছাড়া component-এর effect-এর ভেতরে socket রাখা (duplicate connection), প্রতিটা message Context-এ রাখা (পুরো app প্রতি সেকেন্ডে ৫০ বার re-render), অথবা coalesce না করে প্রতি message-এ `setTimeout` দিয়ে throttle করা।"

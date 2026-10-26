@@ -57,6 +57,8 @@ QUESTIONS = [
             - `TransientTransactionError` / `UnknownTransactionCommitResult`-এ **retry** করো — driver-এর `withTransaction()` এটা নিজেই করে।
             - `w: "majority"` দিয়ে commit করো।
         """,
+        quick_en=r"""Single-document writes are always atomic, so first try to keep the invariant in one document and use a conditional `$inc`. Use a transaction only when several documents must change together (a wallet transfer, order + stock + ledger); it needs a replica set, must stay short and should retry on transient errors.""",
+        quick_bn=r"""একটা document-এর write সবসময় atomic, তাই প্রথমে চেষ্টা করো invariant-টা এক document-এ রাখতে আর conditional `$inc` ব্যবহার করতে। কয়েকটা document একসাথে বদলাতেই হলে (wallet transfer, order + stock + ledger) তবেই transaction; এর জন্য replica set লাগে, transaction ছোট রাখতে হয়, আর transient error-এ retry করতে হয়।""",
         ex_en=r"""
             - **Cost:** transactions add latency and coordination (especially across shards), and conflicting writes abort with `WriteConflict` and get retried. They're a tool, not a default.
             - **Size:** there's no hard document limit, but MongoDB recommends modifying no more than about 1,000 documents per transaction; break up bulk jobs.
@@ -115,6 +117,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`w: "majority"` waits until a majority of the data-bearing voting members have applied (and, by default, journaled) the write. Any newly elected primary must come from that majority, so the write survives failover and won't be rolled back.""",
         a_bn=r"""`w: "majority"` ততক্ষণ অপেক্ষা করে যতক্ষণ না data-bearing voting member-দের majority write-টা apply (আর default-ভাবে journal) করে। নতুন যে primary-ই elect হোক, তাকে ওই majority থেকেই আসতে হবে — তাই write failover-এর পরও টিকে থাকে, rollback হয় না।""",
+        quick_en=r"""The write is durable on a majority of the data-bearing voting members, so any newly elected primary has it and it won't be rolled back after a failover. It does not mean every secondary has it, or that any secondary read will see it immediately.""",
+        quick_bn=r"""Write-টা data রাখা voting member-দের majority-তে durable হয়েছে, তাই নতুন যে primary-ই নির্বাচিত হোক তার কাছে write-টা থাকবে, failover-এর পর rollback হবে না। এর মানে এই না যে সব secondary-তে পৌঁছে গেছে, বা যেকোনো secondary read সাথে সাথে এটা দেখবে।""",
         ex_en=r"""
             Option D is the tempting one: majority acknowledgement says nothing about **which** secondaries have the write. A lagging secondary outside that majority can still return stale data. For read-your-writes you read from the primary, or use `readConcern: "majority"` with a causally consistent session.
 
@@ -155,6 +159,8 @@ QUESTIONS = [
 
             Customer-facing search box-এর জন্য আমি **`$search`** বেছে নেব — user "wirless earbud" লিখলেও result আশা করে। Atlas-এ থাকলে এটাই স্বাভাবিক পছন্দ। Self-managed হলে নিজে `mongot` চালানো আর আগে থেকে চালানো কোনো dedicated engine-এর (OpenSearch/Elasticsearch, Meilisearch) মধ্যে তুলনা করব; typo tolerance, autocomplete আর facet দরকার না হলেই কেবল text index যথেষ্ট।
         """,
+        quick_en=r"""`$regex` is simple, but a case-insensitive "contains" search can't use an index well and has no ranking; a text index adds stemming and `textScore` ranking but no typo tolerance or autocomplete. For a customer search box I'd choose Atlas Search (`$search`) for fuzzy matching, autocomplete, synonyms and facets.""",
+        quick_bn=r"""`$regex` সহজ, কিন্তু case-insensitive "contains" search index ভালোভাবে ব্যবহার করতে পারে না আর কোনো ranking নেই; text index stemming আর `textScore` ranking দেয়, কিন্তু typo tolerance বা autocomplete নেই। Customer-এর search box-এর জন্য আমি Atlas Search (`$search`) নেব: fuzzy matching, autocomplete, synonym আর facet সব পাওয়া যায়।""",
         ex_en=r"""
             - **Banglish & Bangla text:** many local users search in romanised Bangla ("chal", "dal") or Bangla script. The built-in text index has no Bangla stemming, so you'd use language `"none"` (exact tokens) — another argument for a configurable analyzer or synonyms.
             - **Regex safety:** build regexes from user input only after escaping special characters (otherwise `.*` patterns or catastrophic backtracking can hurt the server), and cap the input length.
@@ -230,6 +236,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`findOneAndUpdate` returns the **pre-update** document by default (`returnDocument: "before"`). On an upsert there was no document before, so it returns `null` even though a cart was inserted. Pass `{ upsert: true, returnDocument: "after" }` to get the new document.""",
         a_bn=r"""`findOneAndUpdate` default-ভাবে **update-এর আগের** document return করে (`returnDocument: "before"`)। Upsert-এর ক্ষেত্রে আগে কোনো document ছিল না, তাই cart insert হলেও `null` return করে। নতুন document পেতে `{ upsert: true, returnDocument: "after" }` দাও।""",
+        quick_en=r"""It logs `null`. `findOneAndUpdate` returns the document as it was **before** the update by default, and on an upsert there was no document before, even though the cart was inserted. Pass `{ upsert: true, returnDocument: "after" }` to get the new cart.""",
+        quick_bn=r"""`null` log হয়। `findOneAndUpdate` default-ভাবে update-এর **আগের** document return করে, আর upsert-এর ক্ষেত্রে আগে কোনো document ছিলই না, যদিও cart-টা insert হয়েছে। নতুন cart পেতে `{ upsert: true, returnDocument: "after" }` দাও।""",
         ex_en=r"""
             Option C is the tempting one if you learned the driver before v6: older drivers returned a `ModifyResult` wrapper (`{ value, ok, lastErrorObject }`). Since driver v6 the method returns the document (or `null`) directly, unless you pass `includeResultMetadata: true`.
 
@@ -288,6 +296,8 @@ QUESTIONS = [
 
             **Plan:** driver/ODM compatibility check করো (Node driver 7.x, Mongoose 9.10.4+), staging-এ 9.0-এর বিরুদ্ধে test আর ভারী aggregation চালাও, rolling upgrade করো, stable না হওয়া পর্যন্ত FCV 8.0-তে রাখো (যাতে downgrade করা যায়), তারপর FCV 9.0 set করো।
         """,
+        quick_en=r"""The main app risk is the new per-operation memory limit (the greater of 1 GB or 20% of RAM), so test heavy aggregations; also use Mongoose 9.10.4+ because of a `syncIndexes()` issue. Self-managed now gets majors plus an annual X.5 release, so do a rolling upgrade and keep FCV at 8.0 until stable.""",
+        quick_bn=r"""App-এর জন্য সবচেয়ে বড় ঝুঁকি নতুন per-operation memory limit (1 GB অথবা RAM-এর 20%, যেটা বড়), তাই heavy aggregation test করো; আর `syncIndexes()` সমস্যার কারণে Mongoose 9.10.4+ ব্যবহার করো। Self-managed এখন major আর বছরে একটা X.5 release পায়, তাই rolling upgrade করো আর stable না হওয়া পর্যন্ত FCV 8.0-তে রাখো।""",
         ex_en=r"""
             - **FCV (featureCompatibilityVersion)** controls which new on-disk features are enabled. Upgrading binaries with FCV still at the old version keeps a downgrade path; raising it (`setFeatureCompatibilityVersion` with `confirm: true`) enables 9.0 features and makes downgrading harder.
             - **Rolling upgrade order:** secondaries first, then step down the primary and upgrade it — the application sees only a short election.
@@ -411,6 +421,8 @@ Example: Rahim has 500 and Karim has 100. Transferring 200 → Rahim 300, Karim 
             - **Idempotency:** `ledger.requestId`-এ unique index। Client HTTP request retry করলে duplicate insert E11000 দিয়ে fail করে, transaction abort হয়, আর আমি দুইবার টাকা না সরিয়ে "already processed" জানাই।
             - Floating-point error এড়াতে amount integer (পয়সা) হিসেবে রাখা।
         """,
+        quick_en=r"""Run the debit, credit and ledger insert inside `withTransaction()`, passing `{ session }` to each, with a conditional debit (`balance: { $gte: amount }` + `$inc`) that throws if `matchedCount` is 0. A unique index on `ledger.requestId` makes retries idempotent, and the callback must contain only database work because it may re-run.""",
+        quick_bn=r"""Debit, credit আর ledger insert `withTransaction()`-এর ভেতরে চালাও, প্রতিটিতে `{ session }` দিয়ে; debit হবে conditional (`balance: { $gte: amount }` + `$inc`), আর `matchedCount` 0 হলে throw করো। `ledger.requestId`-এ unique index দিলে retry idempotent হয়, আর callback আবার চলতে পারে বলে এর ভেতরে শুধু database-এর কাজ রাখো।""",
         ex_en=r"""
             - **Edge cases:** zero/negative/non-integer amounts, self-transfer, missing receiver (throwing after the debit is fine — the abort undoes it), and the duplicate `requestId`.
             - **Concurrency:** MongoDB doesn't use lock-wait deadlocks for this; conflicting transactions get a `WriteConflict` and one is retried. Hot wallets (e.g. a merchant receiving thousands of payments) can see many retries — batching or a per-merchant ledger with periodic settlement helps.
@@ -541,6 +553,8 @@ Example: Rahim has 500 and Karim has 100. Transferring 200 → Rahim 300, Karim 
 
             **Hardening:** authentication (SCRAM) আর প্রতিটি service-এর জন্য least-privilege role সহ **RBAC** চালু করো (একটা DB-তে `readWrite`); private interface-এ bind করো আর firewall/VPC দিয়ে port সীমিত করো; সব connection-এ **TLS**; encryption at rest; secret repo-তে না রেখে secret manager-এ; auditing; MongoDB patch করা রাখো (9.0.1-এ একটা security fix ছিল); আর test করা backup।
         """,
+        quick_en=r"""The login filter allows operator injection (a password of `{ "$ne": null }` bypasses login) and compares plain-text passwords: validate strings, query by email only and compare a bcrypt hash. The public, auth-less `0.0.0.0:27017` and the `root` app user need authentication, least-privilege RBAC, a firewall or private network, and TLS.""",
+        quick_bn=r"""Login filter-এ operator injection সম্ভব (password হিসেবে `{ "$ne": null }` পাঠালেই login bypass), আর password plain text-এ compare হচ্ছে: input string কিনা validate করো, শুধু email দিয়ে query করো, bcrypt hash compare করো। Public, auth ছাড়া `0.0.0.0:27017` আর `root` app user-এর জন্য দরকার authentication, least-privilege RBAC, firewall বা private network, আর TLS।""",
         ex_en=r"""
             - **Where injection comes from:** any place user-controlled objects reach a filter — `req.body`, and `req.query` when a parser builds nested objects (`?email[$ne]=x`). Express 5's default `'simple'` query parser doesn't build nested objects, but don't rely on that; validate everything.
             - **Server-side JavaScript:** never build `$where`, `$function` or `$accumulator` code from user input — that's code injection, not just operator injection.
@@ -604,6 +618,8 @@ Example: Rahim has 500 and Karim has 100. Transferring 200 → Rahim 300, Karim 
 
             **Migration:** background job দিয়ে array থেকে edge backfill করো, transition-এর সময় dual-write করো, read switch করো, তারপর পুরনো array `$unset` করো।
         """,
+        quick_en=r"""The `followers`/`likes` arrays are unbounded: celebrity documents approach the 16 MB limit, every follow rewrites a huge document, and one document becomes a hotspot. Store each edge in its own `follows`/`likes` collection with unique indexes, and keep `followerCount` up to date with `$inc`.""",
+        quick_bn=r"""`followers`/`likes` array-গুলো unbounded: celebrity-র document 16 MB limit-এর কাছে চলে যায়, প্রতিটি follow-এ একটা বিশাল document আবার লিখতে হয়, আর একটা document hotspot হয়ে যায়। প্রতিটি edge আলাদা `follows`/`likes` collection-এ unique index সহ রাখো, আর `followerCount` `$inc` দিয়ে update রাখো।""",
         ex_en=r"""
             - **Counter consistency:** insert the edge first (the unique index rejects double-follows/likes) and only `$inc` if the insert succeeded. Update counters in the same transaction, or asynchronously via a queue/change stream and accept brief drift; a periodic job can reconcile.
             - **Hot counters:** a celebrity post can receive thousands of likes per second on one document. Options: buffer increments in Redis and flush periodically, or split the counter into N sub-documents and sum them when reading.

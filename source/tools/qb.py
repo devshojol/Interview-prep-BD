@@ -27,15 +27,19 @@ JSON_DIR = os.path.join(ROOT, "data", "json")
 VERIFIED_AT = "2026-10-12"
 
 TECHS = [
-    "html", "css", "javascript", "react", "nextjs", "nodejs", "express", "nestjs",
+    "html", "css", "javascript", "react", "nextjs", "reactnative", "nodejs", "express", "nestjs",
     "mongodb", "mongoose", "postgresql", "sql", "drizzle", "redis", "vectordb",
-    "docker", "nginx", "aws",
+    "docker", "nginx", "aws", "behavioral",
 ]
 DIFFS = ["easy", "medium", "hard", "extreme"]
 TYPES = [
     "conceptual", "output", "coding", "debugging", "scenario", "comparison",
     "system-design", "query", "architecture", "security-performance", "mcq",
+    "quick", "behavioral",
 ]
+# Types that are short-format by design: they are left out of the per-category difficulty and
+# type-mix targets, and their `answer` is already the short answer (no separate quickAnswer).
+SHORT_TYPES = ["quick", "behavioral"]
 MARKETS = ["both", "bangladesh", "international"]
 PRIORITIES = ["high", "medium", "low"]
 STATUSES = ["stable", "legacy", "deprecated", "experimental", "preview", "version-specific"]
@@ -81,6 +85,7 @@ def Q(
     follow=None, related=None,
     options=None, correct=None,
     time=None, space=None,
+    quick_en=None, quick_bn=None,
 ):
     """Build one question record.
 
@@ -88,6 +93,8 @@ def Q(
     follow:  list of (en, bn) follow-up questions an interviewer may ask
     options: list of 4 (en, bn) tuples (MCQ only); correct = index 0..3
     extra:   list of dicts {lang, src, label_en, label_bn} for additional code blocks
+    quick_*: the 1-3 sentence "quick answer" shown above the full answer (not used for
+             type="quick" / "behavioral", whose `a_*` is already short)
     """
     rec = {
         "id": id,
@@ -110,6 +117,8 @@ def Q(
         "followUps": [_bi(e, b) for (e, b) in (follow or [])],
         "related": list(related or []),
     }
+    if quick_en or quick_bn:
+        rec["quickAnswer"] = _bi(quick_en, quick_bn)
     if mist_en or mist_bn:
         rec["commonMistakes"] = _bi(mist_en, mist_bn)
     if code is not None:

@@ -60,6 +60,8 @@ QUESTIONS = [
 
             আমার setup: iterate করার সময় শুধু local DB-তে `push`, schema স্থির হলে `generate`; CI একটা fresh database-এ `migrate` চালিয়ে প্রমাণ করে migration apply হয়; production-এ আলাদা release step হিসেবে `migrate`।
         """,
+        quick_en=r"""Configure it with `defineConfig({ dialect, schema, out, dbCredentials })` in `drizzle.config.ts`. `generate` + `migrate` produces reviewed, versioned SQL files and suits CI and production; `push` syncs the schema straight to a database with no files or history, so keep it for local prototyping.""",
+        quick_bn=r"""`drizzle.config.ts`-এ `defineConfig({ dialect, schema, out, dbCredentials })` দিয়ে configure করি। `generate` + `migrate` review করা, versioned SQL file বানায় — CI আর production-এর জন্য এটাই; `push` কোনো file বা history ছাড়াই schema সরাসরি database-এ বসিয়ে দেয়, তাই এটা শুধু local prototyping-এর জন্য।""",
         ex_en=r"""
             - **Atomic batch:** Drizzle's PostgreSQL migrator applies all pending migrations of a run inside **one transaction** — if one statement fails, the whole run rolls back. Great for safety, but it means statements that can't run in a transaction (`CREATE INDEX CONCURRENTLY`) must be handled outside the migrator.
             - **Teams:** two branches can generate conflicting migrations; `drizzle-kit check` validates the history, and you regenerate after rebasing.
@@ -147,6 +149,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""PostgreSQL rejects the statement with SQLSTATE `42P10` ("there is no unique or exclusion constraint matching the ON CONFLICT specification"), wrapped by Drizzle in a `DrizzleQueryError`. `ON CONFLICT (label)` needs an arbiter: a unique index or constraint on exactly that column set.""",
         a_bn=r"""PostgreSQL SQLSTATE `42P10` ("there is no unique or exclusion constraint matching the ON CONFLICT specification") দিয়ে statement reject করে, যেটা Drizzle একটা `DrizzleQueryError`-এ wrap করে। `ON CONFLICT (label)`-এর একটা arbiter লাগে: ঠিক সেই column set-এর উপর একটা unique index বা constraint।""",
+        quick_en=r"""PostgreSQL rejects it with `42P10` (no unique or exclusion constraint matching the ON CONFLICT specification), wrapped in a `DrizzleQueryError`, because `ON CONFLICT (label)` needs a unique index or constraint on exactly that column.""",
+        quick_bn=r"""PostgreSQL `42P10` error দিয়ে statement reject করে (ON CONFLICT-এর সাথে মেলে এমন unique বা exclusion constraint নেই), আর Drizzle সেটা `DrizzleQueryError`-এ wrap করে; কারণ `ON CONFLICT (label)`-এর জন্য ঠিক ওই column-এ unique index বা constraint লাগে।""",
         ex_en=r"""
             - Option A is tempting ("no constraint, so no conflict"), but PostgreSQL validates the `ON CONFLICT` target at planning time and refuses the statement — verified on PostgreSQL.
             - **Fix:** `label: text().notNull().unique()` (or a `uniqueIndex` in the third `pgTable` argument), generate and apply the migration. Then the same code works: three runs return `usageCount` 1, 2, 3.
@@ -227,6 +231,8 @@ QUESTIONS = [
 
             সমাধান: আগে unwrap করো — `const e = err instanceof DrizzleQueryError ? err.cause : err` — তারপর `e.code === '23505'` check করো। আমি `e.constraint`-ও check করি (এখানে generated নাম `users_email_unique`), যাতে অন্য column-এর unique violation-কে "email taken" বলা না হয়। এটা একটা ছোট helper-এ রাখলে সব caller ঠিক থাকে, আর পরের upgrade-এ এক লাইনের পরিবর্তনেই কাজ হয়।
         """,
+        quick_en=r"""Since Drizzle 0.44, driver errors are wrapped in `DrizzleQueryError`, so `err.code` is undefined and the `23505` check never matches. Unwrap `err.cause` first, then check `code === '23505'` (and the constraint name) in one shared helper.""",
+        quick_bn=r"""Drizzle 0.44 থেকে driver error `DrizzleQueryError`-এ wrap হয়ে আসে, তাই `err.code` এখন undefined আর `23505` check কখনো মেলে না। আগে `err.cause` unwrap করি, তারপর একটা shared helper-এ `code === '23505'` (আর constraint-এর নাম) check করি।""",
         ex_en=r"""
             - **Why a status-code test didn't catch it:** most tests used a mocked repository; only an integration test against real PostgreSQL would have shown the new error shape. Add one for each mapped error.
             - **Useful SQLSTATEs:** `23505` unique violation, `23503` foreign-key violation, `23502` not-null violation, `23514` check violation, `40001` serialization failure (retry), `40P01` deadlock (retry).
@@ -276,6 +282,8 @@ QUESTIONS = [
 
             **আমি কীভাবে বেছে নিই:** SQL-এ স্বচ্ছন্দ team যারা সূক্ষ্ম control, serverless-friendly footprint আর PostgreSQL-specific feature চায় → Drizzle। যে team polished high-level API, nested write আর Prisma-র ecosystem (Studio, docs, ব্যাপক ব্যবহার) মূল্য দেয় → Prisma। দুটোই ভালো; কোনটা বাছলে তার চেয়ে codebase-এ consistency বেশি গুরুত্বপূর্ণ।
         """,
+        quick_en=r"""Prisma has its own schema language, a generated client and a high-level object API with nested writes; Drizzle schemas are plain TypeScript, types are inferred without a generate step, and queries stay close to SQL. Pick Drizzle for SQL control, Prisma for a polished high-level API.""",
+        quick_bn=r"""Prisma-র নিজস্ব schema language, generate করা client আর nested write-সহ high-level object API আছে; Drizzle-এর schema সাধারণ TypeScript, generate step ছাড়াই type infer হয়, আর query SQL-এর কাছাকাছি থাকে। SQL-এর উপর control চাইলে Drizzle, polished high-level API চাইলে Prisma।""",
         ex_en=r"""
             - **Raw SQL:** Prisma has `$queryRaw` (tagged template, parameterised) and typed SQL files; Drizzle has the `sql` tag that composes inside typed queries.
             - **Transactions:** Prisma's nested writes and `$transaction` cover many cases implicitly; in Drizzle you write `db.transaction(async (tx) => ...)` explicitly.
@@ -352,6 +360,8 @@ QUESTIONS = [
 
             এটা performance tool, security feature না — সাধারণ Drizzle query আগে থেকেই parameterised।
         """,
+        quick_en=r"""A prepared statement is built once with `sql.placeholder()` and `.prepare()`, then run many times with `.execute({ ... })`. Drizzle skips rebuilding the query, and with node-postgres the server reuses the named statement per connection; it's a performance tool, not a security feature.""",
+        quick_bn=r"""Prepared statement একবার `sql.placeholder()` আর `.prepare()` দিয়ে বানানো হয়, তারপর `.execute({ ... })` দিয়ে বারবার চালানো হয়। Drizzle-কে প্রতিবার query নতুন করে বানাতে হয় না, আর node-postgres-এ server প্রতিটা connection-এ named statement reuse করে; এটা performance-এর tool, security-র নয়।""",
         ex_en=r"""
             - **Per connection:** prepared statements live in a single PostgreSQL session. With a pool, each connection prepares the statement the first time it runs it there.
             - **Unique names:** two different queries prepared with the same name on one connection conflict. Use descriptive, unique names.
@@ -433,6 +443,8 @@ QUESTIONS = [
 
             Reusable building block-এর জন্য (যেমন একটা generic `withPagination(qb)` helper), Drizzle-এর `.$dynamic()` query builder-কে function-এ pass করে chain চালিয়ে যেতে দেয়।
         """,
+        quick_en=r"""Collect optional `SQL` filters in an array and pass `and(...filters)`, since `undefined` is ignored. Paginate with `WHERE id < cursor ORDER BY id DESC LIMIT limit + 1`, using the extra row to set `nextCursor`, select only the needed fields with an `innerJoin`, and cap `limit` at 100.""",
+        quick_bn=r"""Optional `SQL` filter-গুলো একটা array-তে জমিয়ে `and(...filters)` দিই, কারণ `undefined` ignore হয়। Pagination করি `WHERE id < cursor ORDER BY id DESC LIMIT limit + 1` দিয়ে — বাড়তি row-টা দেখে `nextCursor` ঠিক করি, `innerJoin`-সহ শুধু দরকারি field select করি, আর `limit` 100-এ আটকে রাখি।""",
         ex_en=r"""
             - **Why keyset over OFFSET:** `OFFSET 100000` makes PostgreSQL read and discard 100k rows, and results shift when new posts arrive. Keyset uses the index on `id` and stays fast at any depth.
             - **Sorting by non-unique columns** (e.g. `publishedAt`) needs a tie-breaker: cursor on `(published_at, id)` and compare both columns.
@@ -532,6 +544,8 @@ QUESTIONS = [
             4. **অথবা HTTP/WebSocket serverless driver ব্যবহার করো** (যেমন `drizzle-orm/neon-http`): দীর্ঘস্থায়ী TCP connection-ই নেই। Trade-off: HTTP driver interactive transaction support করে না (Drizzle throw করে "No transactions support in neon-http driver"); atomic multi-statement write-এর জন্য `db.batch([...])`, আর `db.transaction()` লাগলে WebSocket driver ব্যবহার করো।
             5. **Edge runtime** raw TCP socket খুলতে পারে না — HTTP/WebSocket driver লাগে।
         """,
+        quick_en=r"""Every serverless instance opens its own pool, so a spike multiplies connections past PostgreSQL's limit. Create `db` at module scope, cap each pool at 1–2 connections and put a pooler (PgBouncer, RDS Proxy or a pooled endpoint) in front, or use an HTTP driver, which can't run interactive transactions.""",
+        quick_bn=r"""প্রতিটা serverless instance নিজের pool খোলে, তাই traffic spike-এ connection সংখ্যা PostgreSQL-এর limit ছাড়িয়ে যায়। `db` module scope-এ বানাই, প্রতি pool-এ 1–2 connection রাখি আর সামনে pooler (PgBouncer, RDS Proxy বা pooled endpoint) বসাই, অথবা HTTP driver নিই — যদিও সেটা interactive transaction চালাতে পারে না।""",
         ex_en=r"""
             - **Capacity math:** max concurrent instances × pool size must stay below what the pooler/database accepts, with headroom for migrations, admin tools and replicas.
             - **Timeouts:** set `connectionTimeoutMillis` so requests fail fast instead of hanging when the pool is exhausted, and `statement_timeout` on the database role so runaway queries don't hold connections.
@@ -601,6 +615,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`prepare: false`. In transaction pooling, each transaction may run on a different server connection, but prepared statements belong to the server connection that created them. postgres.js prepares statements by default, so a later execution can land on a connection where that statement doesn't exist.""",
         a_bn=r"""`prepare: false`। Transaction pooling-এ প্রতিটা transaction আলাদা server connection-এ চলতে পারে, কিন্তু prepared statement থাকে যে server connection সেটা বানিয়েছে তার কাছে। postgres.js default-এ statement prepare করে, তাই পরের execution এমন connection-এ পড়তে পারে যেখানে ওই statement নেই।""",
+        quick_en=r"""Create the client with `postgres(url, { prepare: false })`. In transaction pooling each transaction can land on a different server connection, but a prepared statement only exists on the connection that created it.""",
+        quick_bn=r"""Client বানাই `postgres(url, { prepare: false })` দিয়ে। Transaction pooling-এ প্রতিটা transaction আলাদা server connection-এ যেতে পারে, কিন্তু prepared statement থাকে শুধু যে connection তাকে বানিয়েছে সেখানেই।""",
         ex_en=r"""
             - Option B is tempting: a transaction does stay on one server connection, but only for its duration — the next transaction gets another connection, and wrapping everything adds latency and lock time. It treats the symptom.
             - Option A misunderstands pooling: the point of transaction mode is *sharing* server connections.

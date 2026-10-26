@@ -52,6 +52,8 @@ QUESTIONS = [
 
             একটা component সবসময় তার উপরের **সবচেয়ে কাছের** provider থেকে পড়ে, তাই কোনো subtree-র জন্য value override করা যায়।
         """,
+        quick_en=r"""Context fixes prop drilling: passing data like theme or user through many components that don't need it. Create it with `createContext(default)`, provide it in React 19 with `<ThemeContext value={...}>`, and read the nearest value with `useContext` or `use`.""",
+        quick_bn=r"""Context prop drilling-এর সমস্যা মেটায়: theme বা user-এর মতো data এমন অনেক component-এর ভেতর দিয়ে পাঠানো, যাদের সেটা লাগে না। `createContext(default)` দিয়ে বানাও, React 19-এ `<ThemeContext value={...}>` দিয়ে provide করো, আর `useContext` বা `use` দিয়ে সবচেয়ে কাছের value পড়ো।""",
         ex_en=r"""
             - **Context is transport, not state management.** It just delivers a value; the state usually lives in `useState`/`useReducer` in the provider component.
             - **Re-renders:** when the provider's `value` changes (by `Object.is`), every component reading that context re-renders, even if it's wrapped in `memo`. Passing a new object literal every render therefore re-renders all consumers — memoize the value or split contexts.
@@ -119,6 +121,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Since React 19, function components receive `ref` as a normal prop. `function TextInput({ ref, ...props }) { return <input ref={ref} {...props} />; }` is enough — no `forwardRef` wrapper needed.""",
         a_bn=r"""React 19 থেকে function component `ref`-কে সাধারণ prop হিসেবে পায়। `function TextInput({ ref, ...props }) { return <input ref={ref} {...props} />; }` লিখলেই চলে — `forwardRef` wrapper লাগে না।""",
+        quick_en=r"""Accept `ref` as a regular prop and pass it to the `<input>`: since React 19, function components receive `ref` like any other prop, so `forwardRef` is no longer needed.""",
+        quick_bn=r"""`ref`-কে সাধারণ prop হিসেবে নিয়ে `<input>`-এ পাঠিয়ে দাও: React 19 থেকে function component অন্য prop-এর মতোই `ref` পায়, তাই `forwardRef` আর লাগে না।""",
         ex_en=r"""
             The tempting answer is `forwardRef`, because that was required for years and you'll still see it everywhere. It still works in React 19, but it's no longer needed for function components and React plans to deprecate it; you only keep it if your library must support React 18.
 
@@ -150,6 +154,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""`lazy` expects a function returning a promise for a module with a **default export** that is a component. While the code downloads, the component suspends, and the nearest `<Suspense fallback={...}>` above it shows the fallback.""",
         a_bn=r"""`lazy` এমন একটা function চায়, যেটা এমন module-এর promise return করে যার **default export** একটা component। Code download হওয়ার সময় component-টা suspend করে, আর তার উপরের সবচেয়ে কাছের `<Suspense fallback={...}>` fallback দেখায়।""",
+        quick_en=r"""`./Chart` must have a default export, and a `<Suspense>` boundary above `<Chart />` shows a fallback while its code downloads. `lazy` expects a promise for a module whose default export is a component.""",
+        quick_bn=r"""`./Chart`-এ একটা default export থাকতে হবে, আর code download হওয়ার সময় `<Chart />`-এর উপরের `<Suspense>` boundary fallback দেখায়। `lazy` এমন একটা module-এর promise চায় যার default export একটা component।""",
         ex_en=r"""
             The most tempting wrong option is "no Suspense needed" — without a boundary above, the suspension has nowhere to show a fallback, so React suspends a much larger part of the tree (or the root), which is rarely what you want.
 
@@ -196,6 +202,8 @@ QUESTIONS = [
 
             App-এর দূরবর্তী অংশগুলোর মধ্যে অনেক client state share হলে আর ঘন ঘন বদলালে (cart, editor, জটিল filter), আর team DevTools/time-travel ও একটা কঠোর pattern থেকে উপকার পেলে আমি RTK বেছে নিই। Server data-র জন্য RTK Query বা TanStack Query; theme-এর মতো সাধারণ, কম বদলানো value-র জন্য Context-ই যথেষ্ট।
         """,
+        quick_en=r"""RTK is the official way to write Redux: `configureStore` creates the store, `createSlice` generates reducers and actions (with Immer), and components use `useSelector`/`useDispatch`. Use it for large, often-changing shared client state; RTK Query or TanStack Query for server data; Context for theme.""",
+        quick_bn=r"""RTK হলো Redux লেখার official উপায়: `configureStore` store বানায়, `createSlice` (Immer-সহ) reducer আর action তৈরি করে, আর component `useSelector`/`useDispatch` ব্যবহার করে। বড়, ঘনঘন বদলানো shared client state-এর জন্য এটা নিই; server data-র জন্য RTK Query বা TanStack Query, আর theme-এর মতো সহজ value-র জন্য Context।""",
         ex_en=r"""
             - **Immer only works inside `createSlice`/`createReducer`.** Mutating state anywhere else (components, selectors) is still a bug.
             - **Selector pitfalls:** `useSelector(s => s.items.filter(...))` returns a new array every time and re-renders on every store update. Use `createSelector` (Reselect, re-exported by RTK) for derived data.
@@ -292,6 +300,8 @@ QUESTIONS = [
 
             সমাধান হলো **primitive value**-এর উপর নির্ভর করা। আমি effect-এর ভেতরেই query তৈরি করি আর শুধু `category`-র উপর নির্ভর করি। সাথে একটা `AbortController` cleanup যোগ করি, যাতে category বদলালে ধীর পুরনো response নতুনটাকে overwrite করতে না পারে।
         """,
+        quick_en=r"""It's an infinite effect loop: `filters` is a new object every render, so the dependency always changes, the fetch sets state, and that renders again. Build the query inside the effect, depend on the primitive `category`, and abort the old request in the cleanup.""",
+        quick_bn=r"""এটা একটা infinite effect loop: প্রতি render-এ `filters` নতুন object, তাই dependency সবসময় বদলায়, fetch state set করে, আর আবার render হয়। Query-টা effect-এর ভেতরে বানাও, শুধু primitive `category`-র উপর depend করো, আর cleanup-এ পুরনো request abort করো।""",
         ex_en=r"""
             Other common infinite-loop patterns:
             - An effect with **no dependency array** that sets state.
@@ -382,6 +392,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Error boundaries catch errors thrown **while rendering** the tree below them (and in their lifecycle/effects), then show a fallback UI instead of unmounting the whole app.""",
         a_bn=r"""Error boundary তার নিচের tree **render হওয়ার সময়** (আর তাদের lifecycle/effect-এ) throw হওয়া error ধরে, তারপর পুরো app unmount না করে একটা fallback UI দেখায়।""",
+        quick_en=r"""An error thrown while a child component is rendering. Error boundaries catch errors during rendering (and in lifecycles/effects) of the tree below them, not in event handlers, `setTimeout` callbacks or their own fallback.""",
+        quick_bn=r"""Child component render হওয়ার সময় throw হওয়া error। Error boundary নিচের tree-র rendering (আর lifecycle/effect)-এর error ধরে; event handler, `setTimeout` callback বা নিজের fallback-এর error ধরে না।""",
         ex_en=r"""
             The tempting wrong answer is the `onClick` error. Event handlers run outside rendering, so React doesn't need a fallback to keep the UI consistent — you handle those with `try/catch` and state. The same applies to async code such as `setTimeout` or promise callbacks. An error inside the boundary itself (including its fallback) propagates to the next boundary above.
 
@@ -436,6 +448,8 @@ QUESTIONS = [
 
             এরপর একটা keystroke-এ শুধু search UI re-render হয়, আর theme আসলেই বদলালে তবেই `ProductCard` re-render হয়।
         """,
+        quick_en=r"""One context holds everything and its value is a new object every render, so each keystroke re-renders every consumer. Move `searchText` into `SearchBox`, split contexts by concern, and memoize each value (or use a store with selectors).""",
+        quick_bn=r"""একটা context-এ সবকিছু রাখা, আর প্রতি render-এ তার value নতুন object, তাই প্রতি keystroke-এ সব consumer re-render হয়। `searchText`-কে `SearchBox`-এ নিয়ে যাও, concern অনুযায়ী context ভাগ করো, আর প্রতিটা value memoize করো (বা selector-সহ store ব্যবহার করো)।""",
         ex_en=r"""
             **Why `children` aren't the problem:** `AppProvider` receives `children` as an element created by its parent, so a state change inside `AppProvider` doesn't re-create them. The re-renders come purely from *context consumers* — that's why splitting/memoizing the value fixes it.
 
@@ -565,6 +579,8 @@ QUESTIONS = [
             5. **কারণ অনুযায়ী সমাধান:** state নিচে নামানো বা context ভাগ করা, memoize করা (বা React Compiler চালু করা), filter update-কে transition হিসেবে চিহ্নিত করা যাতে click responsive থাকে, table virtualise করা, ভারী aggregation Web Worker বা server-এ সরানো।
             6. **যাচাই** একই throttled profile দিয়ে, তারপর পরের release-এর পর RUM-এ INP পর্যবেক্ষণ।
         """,
+        quick_en=r"""Treat it as an INP problem: reproduce with CPU throttling, profile the interaction in the Performance panel and React Profiler, then fix the real cause. Typical fixes are splitting context, memoizing, a transition for the filter, virtualising the table or moving heavy work off the main thread.""",
+        quick_bn=r"""এটাকে INP সমস্যা হিসেবে দেখো: CPU throttling দিয়ে reproduce করো, Performance panel আর React Profiler-এ interaction profile করো, তারপর আসল কারণ ঠিক করো। সাধারণ সমাধান: context ভাগ করা, memoize করা, filter-কে transition-এ রাখা, table virtualise করা, বা ভারী কাজ main thread থেকে সরানো।""",
         ex_en=r"""
             **Builds matter:** React's profiling instrumentation is disabled in normal production builds. Performance Tracks are available in development and profiling builds; to profile something close to production, alias `react-dom/client` to `react-dom/profiling` in a dedicated build. In a profiling build only the Scheduler tracks are on by default, and the Components track covers subtrees wrapped in `<Profiler>` (or all components if React DevTools is installed).
 

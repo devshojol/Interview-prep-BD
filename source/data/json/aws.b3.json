@@ -66,6 +66,10 @@
    "aws-015",
    "aws-007"
   ],
+  "quickAnswer": {
+   "en": "The server validates the type and size, builds the key under `uploads/<userId>/` itself and signs a `PutObjectCommand` with `getSignedUrl` (`expiresIn: 300`, Content-Type signed); the browser then PUTs straight to S3. A presigned PUT can't enforce size, so verify after upload or use a presigned POST.",
+   "bn": "Server type আর size validate করে, `uploads/<userId>/`-এর নিচে key নিজেই বানায়, আর `getSignedUrl` দিয়ে একটা `PutObjectCommand` sign করে (`expiresIn: 300`, Content-Type signed); তারপর browser সরাসরি S3-তে PUT করে। Presigned PUT size enforce করতে পারে না, তাই upload-এর পরে verify করো বা presigned POST ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Uploading the file through Express with multer and then to S3 (double bandwidth), embedding access keys in the frontend, letting the client pick the key, or forgetting CORS and then debugging a \"network error\".",
    "bn": "File আগে multer দিয়ে Express-এ নিয়ে তারপর S3-এ পাঠানো (bandwidth দ্বিগুণ), frontend-এ access key বসিয়ে দেওয়া, client-কে key বাছতে দেওয়া, বা CORS ভুলে গিয়ে পরে \"network error\" debug করা।"
@@ -162,6 +166,10 @@
    "aws-014",
    "aws-024"
   ],
+  "quickAnswer": {
+   "en": "Use two statements: `s3:ListBucket` on the bucket ARN with an `s3:prefix` condition for `uploads/`, and `s3:GetObject`, `s3:PutObject` and `s3:DeleteObject` on `arn:aws:s3:::acme-media/uploads/*`. Everything else is implicitly denied; with SSE-KMS the role also needs `kms:GenerateDataKey` and `kms:Decrypt`.",
+   "bn": "দুটো statement লাগে: bucket ARN-এ `s3:ListBucket`, সাথে `uploads/`-এর জন্য `s3:prefix` condition; আর `arn:aws:s3:::acme-media/uploads/*`-এ `s3:GetObject`, `s3:PutObject` ও `s3:DeleteObject`। বাকি সব নিজে থেকেই deny; SSE-KMS থাকলে role-এর `kms:GenerateDataKey` আর `kms:Decrypt`-ও লাগবে।"
+  },
   "commonMistakes": {
    "en": "Using `\"Action\": \"s3:*\"` with `\"Resource\": \"*\"`, forgetting the KMS permissions on an SSE-KMS bucket, or thinking a `Deny` is needed to block other prefixes (they're already implicitly denied).",
    "bn": "`\"Resource\": \"*\"`-সহ `\"Action\": \"s3:*\"` দেওয়া, SSE-KMS bucket-এ KMS permission ভুলে যাওয়া, বা ভাবা যে অন্য prefix আটকাতে `Deny` লাগবে (এগুলো তো আগে থেকেই implicitly deny)।"
@@ -239,6 +247,10 @@
    "aws-012",
    "aws-021"
   ],
+  "quickAnswer": {
+   "en": "Keep secrets out of `.env` files, images and user data: store them in a managed service, give the app's IAM role read access, and load them at startup. Secrets Manager has built-in rotation and replication but costs per secret; Parameter Store `SecureString` is cheap hierarchical config with no built-in rotation.",
+   "bn": "Secret কখনো `.env`, image বা user data-তে রেখো না: managed service-এ রাখো, app-এর IAM role-কে read access দাও, আর startup-এ load করো। Secrets Manager-এ built-in rotation আর replication আছে কিন্তু প্রতি secret-এ খরচ; Parameter Store-এর `SecureString` সস্তা hierarchical config, কিন্তু built-in rotation নেই।"
+  },
   "commonMistakes": {
    "en": "Committing `.env` files, logging the loaded config (secrets end up in CloudWatch Logs), or assuming Parameter Store rotates secrets automatically.",
    "bn": "`.env` file commit করা, load করা config log করা (secret CloudWatch Logs-এ চলে যায়), বা ভাবা যে Parameter Store নিজে থেকে secret rotate করে।"
@@ -313,6 +325,10 @@
    "aws-023",
    "aws-026"
   ],
+  "quickAnswer": {
+   "en": "A subnet is public only because its route table sends `0.0.0.0/0` to an Internet Gateway; private subnets reach out through a NAT Gateway and reach AWS services privately through VPC endpoints. Put the ALB in public subnets, and app servers and RDS in private subnets across at least two AZs.",
+   "bn": "Subnet public হয় শুধু তখনই, যখন তার route table `0.0.0.0/0`-কে Internet Gateway-তে পাঠায়; private subnet বাইরে যায় NAT Gateway দিয়ে, আর AWS service-এ private-ভাবে যায় VPC endpoint দিয়ে। ALB রাখো public subnet-এ, আর app server ও RDS রাখো অন্তত দুটো AZ জুড়ে private subnet-এ।"
+  },
   "commonMistakes": {
    "en": "Saying a subnet is public because \"it has public IPs\", putting RDS in a public subnet, or using a single zonal NAT Gateway for all AZs and calling it highly available.",
    "bn": "\"Public IP আছে বলে subnet public\" বলা, RDS public subnet-এ রাখা, বা সব AZ-এর জন্য একটা zonal NAT Gateway রেখে সেটাকে highly available বলা।"
@@ -377,6 +393,10 @@
    "aws-023",
    "aws-030"
   ],
+  "quickAnswer": {
+   "en": "Enable Multi-AZ: it keeps a synchronously replicated standby in another AZ and fails over automatically behind the same endpoint, so committed transactions aren't lost. An RDS read replica is asynchronous and promoting it is manual, and a point-in-time restore creates a new instance.",
+   "bn": "Multi-AZ চালু করো: এটা অন্য AZ-এ synchronous-ভাবে replicate হওয়া একটা standby রাখে আর একই endpoint-এর পেছনে নিজে থেকে failover করে, তাই committed transaction হারায় না। RDS read replica asynchronous আর তাকে promote করতে হয় হাতে, আর point-in-time restore নতুন instance বানায়।"
+  },
   "options": [
    {
     "en": "Create a read replica in another AZ; RDS promotes it automatically when the primary fails",
@@ -452,6 +472,10 @@
    "aws-023",
    "aws-022"
   ],
+  "quickAnswer": {
+   "en": "An Application Load Balancer with an HTTPS listener (ACM certificate) and path-based rules: `/api/*` goes to the Express target group, everything else to Next.js, each with its own health check. An NLB works at layer 4, so it can't route by path.",
+   "bn": "HTTPS listener (ACM certificate) আর path-based rule-সহ একটা Application Load Balancer: `/api/*` যাবে Express target group-এ, বাকি সব Next.js-এ, আর প্রতিটা group-এর নিজস্ব health check থাকবে। NLB layer 4-এ কাজ করে, তাই path দেখে route করতে পারে না।"
+  },
   "options": [
    {
     "en": "A Network Load Balancer with two TCP listeners, one per service",

@@ -90,6 +90,8 @@ QUESTIONS = [
 
             Script শেষে microtask queue হলো `[M1, M3, A1]` — `M2` তখনও নেই, কারণ chained `.then` queue হয় কেবল আগের callback শেষ হলে। `M1` চলার সময় timer `T3` register করে আর queue-এর শেষে `M2` যোগ করে: তারপর `M3`, `A1` (যেটা চতুর্থ একটা timer register করে), `M2`। এরপর task: `T1` চলে আর `T1-micro` queue করে, যেটা `T2`-এর **আগেই** চলে, কারণ প্রতিটি task-এর পর microtask খালি করা হয়। তারপর `T2`, `T3`, আর শেষে `A1`-এর তৈরি timer fire করে awaited promise resolve করে, ফলে ঠিক তার পরেই microtask হিসেবে `A2` চলে।
         """,
+        quick_en=r"""`S1 S2 M1 M3 A1 M2 T1 T1-micro T2 T3 A2`. Sync code runs first, the whole microtask queue (including microtasks added while draining) empties after the script and after every task, and timers run in the order they were queued, so `T1-micro` beats `T2` and `A2` waits for the last timer.""",
+        quick_bn=r"""`S1 S2 M1 M3 A1 M2 T1 T1-micro T2 T3 A2`। আগে sync code চলে; script-এর পরে আর প্রতিটা task-এর পরে পুরো microtask queue খালি হয় (চলার সময় নতুন যোগ হওয়া microtask-সহ); আর timer চলে queue-তে ঢোকার order-এ, তাই `T1-micro` `T2`-এর আগে চলে আর `A2` শেষ timer-এর জন্য অপেক্ষা করে।""",
         ex_en=r"""
             Full trace:
 
@@ -183,6 +185,8 @@ QUESTIONS = [
 
             সমাধান: শুধু **নিজস্ব** key ঘোরো (`Object.keys`), `__proto__`, `constructor` আর `prototype` বাদ দাও, শুধু plain object-এ recurse করো, আর সবচেয়ে গুরুত্বপূর্ণ — body-কে একটা schema দিয়ে validate করো, যাতে অজানা key কখনো merge পর্যন্ত না পৌঁছায়।
         """,
+        quick_en=r"""It's prototype pollution: `JSON.parse` creates an own `__proto__` key, `for...in` visits it, and `target['__proto__']` returns `Object.prototype`, so `merge` writes `isAdmin` onto the prototype all objects inherit. Fix: merge only own keys, skip `__proto__`, `constructor` and `prototype`, and validate the body with a schema.""",
+        quick_bn=r"""এটা prototype pollution: `JSON.parse` একটা নিজস্ব `__proto__` key তৈরি করে, `for...in` সেটা পায়, আর `target['__proto__']` `Object.prototype` return করে, তাই `merge` এমন prototype-এ `isAdmin` লিখে দেয় যেখান থেকে সব object inherit করে। Fix: শুধু own key merge করো, `__proto__`, `constructor` আর `prototype` বাদ দাও, আর body schema দিয়ে validate করো।""",
         ex_en=r"""
             Defence in depth (OWASP's recommendations plus practice):
 
@@ -280,6 +284,8 @@ QUESTIONS = [
             5. **Trusted Types** (CSP-তে `require-trusted-types-for 'script'`) বিপজ্জনক sink-কে সাধারণ string নিতে দেয় না। এটা February 2026-এ Baseline newly available হয়েছে।
             6. **ক্ষতির পরিধি কমাও:** session cookie-তে `HttpOnly`, `Secure`, `SameSite`, আর এমন `localStorage`-এ token নয় যেটা XSS পড়তে পারে।
         """,
+        quick_en=r"""It's DOM-based XSS: the URL's `q` goes into `innerHTML`, so a link containing an `<img onerror>` payload runs attacker code in your origin. Defend in layers: `textContent`/`createElement` for user data, only `http(s)` links, DOMPurify for required HTML, plus a nonce-based CSP, Trusted Types and `HttpOnly` cookies.""",
+        quick_bn=r"""এটা DOM-based XSS: URL-এর `q` সরাসরি `innerHTML`-এ যায়, তাই `<img onerror>` payload-ওয়ালা একটা link তোমার origin-এ attacker-এর code চালিয়ে দেয়। কয়েক স্তরে রক্ষা করো: user data-র জন্য `textContent`/`createElement`, link-এ শুধু `http(s)` URL, HTML লাগলে DOMPurify-র মতো sanitizer, সাথে nonce-based CSP, Trusted Types আর `HttpOnly` cookie।""",
         ex_en=r"""
             - **Dangerous sinks to grep for:** `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `new Function`, `setTimeout('string')`, `element.setAttribute('on…')`, `location = userInput`, `iframe.srcdoc`.
             - **Escaping is context-specific:** HTML-escaping is correct for element text, but not enough inside a `<script>` block, a URL, or a CSS value. That's why "use the right DOM API" beats manual escaping.
@@ -363,6 +369,8 @@ QUESTIONS = [
 
             **সমাধান:** প্রতিটি mount-এর সাথে মিলিয়ে cleanup (listener remove, timer clear, unsubscribe, observer `disconnect()`)। `{ signal }` হিসেবে একটা `AbortController` দিলে একসাথে অনেক listener remove হয়। Cache-এর সীমা দাও (LRU/TTL), আর object বা DOM node-কে key ধরে metadata রাখতে `WeakMap` ব্যবহার করো, যাতে key মরে গেলে entry-ও চলে যায়।
         """,
+        quick_en=r"""GC is mark-and-sweep: whatever is reachable from roots (globals, the stack, listeners, timers) stays, so a leak is memory still reachable but no longer needed. I compare heap snapshots and follow retainers (usually listeners, intervals or subscriptions), then give every mount a cleanup and bound my caches.""",
+        quick_bn=r"""GC mark-and-sweep পদ্ধতিতে কাজ করে: root (global, stack, listener, timer) থেকে যা reach করা যায় তা থেকে যায়, তাই leak মানে এমন memory যা এখনও reachable কিন্তু আর দরকার নেই। Heap snapshot compare করে retainer ধরে আমি কারণ খুঁজি (সাধারণত listener, interval বা subscription), তারপর প্রতিটা mount-এর জন্য cleanup রাখি আর cache-এর size সীমিত করি।""",
         ex_en=r"""
             - **Clarify first:** is it the JS heap, DOM nodes, or something else (images, canvas, WebSocket buffers)? Does it happen for all agents or only with a specific widget? That narrows the search quickly.
             - **Closures retain scopes:** a tiny listener that closes over a component's scope can keep a large array or a whole detached DOM subtree alive.
@@ -464,6 +472,8 @@ QUESTIONS = [
 
             Time O(retries) সংখ্যক attempt; বাড়তি space O(1)।
         """,
+        quick_en=r"""In a loop, run the task; on failure, stop if retries are used up or `shouldRetry(err)` is false, else wait a random delay up to `min(maxDelay, baseDelay * 2 ** attempt)` (full jitter). Pass one `AbortSignal` to the task and to an abortable `sleep`, with `AbortSignal.timeout` for an overall limit.""",
+        quick_bn=r"""একটা loop-এ task চালাই; fail করলে, retry শেষ হয়ে গেলে বা `shouldRetry(err)` false হলে থেমে যাই, নইলে `min(maxDelay, baseDelay * 2 ** attempt)` পর্যন্ত একটা random delay (full jitter) অপেক্ষা করে আবার চেষ্টা করি। একই `AbortSignal` task আর abortable `sleep` দুটোকেই দিই, আর পুরো কাজের সীমা দিতে `AbortSignal.timeout` যোগ করি।""",
         ex_en=r"""
             - **Idempotency:** only retry operations that are safe to repeat. A retried `POST /payments` can charge twice — use an idempotency key that the server de-duplicates, or don't retry.
             - **Respect the server:** for 429/503, honour a `Retry-After` header when present instead of your own delay.
@@ -590,6 +600,8 @@ QUESTIONS = [
 
             Node.js-এও recursive `process.nextTick` বা promise loop-এ একই starvation হয় — এগুলো I/O callback আটকে দেয়। `setImmediate` দিয়ে yield করো বা কাজ `worker_threads`-এ সরাও।
         """,
+        quick_en=r"""The browser drains the whole microtask queue before it can render, handle input or run timers, so microtasks that keep queuing microtasks block the page like one long synchronous loop. Work in time-boxed chunks and yield to the task queue (`setTimeout`, or `scheduler.yield()` where supported), or use a Web Worker.""",
+        quick_bn=r"""Browser render, input handle বা timer চালানোর আগে পুরো microtask queue খালি করে, তাই microtask যদি একের পর এক নতুন microtask যোগ করতে থাকে, page একটা লম্বা synchronous loop-এর মতোই আটকে যায়। কাজকে ছোট time-boxed chunk-এ ভাগ করে মাঝে মাঝে task queue-তে yield করো (`setTimeout`, বা যেখানে support আছে `scheduler.yield()`), অথবা Web Worker ব্যবহার করো।""",
         ex_en=r"""
             - **Why microtasks can't help:** a microtask is just "run this right after the current job". It's meant for short follow-ups (promise reactions), not for scheduling large work. Rendering and input are tasks/steps that only happen once the microtask queue is empty.
             - **Long tasks:** anything blocking the main thread for over 50 ms counts as a long task and hurts Interaction to Next Paint (INP), a Core Web Vital. Aim for chunks well under that.

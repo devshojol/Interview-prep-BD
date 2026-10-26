@@ -1,0 +1,552 @@
+[
+ {
+  "id": "docker-q01",
+  "subtopic": "Images and Containers",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "docker",
+   "containers",
+   "basics"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Docker, and what problem does it solve?",
+   "bn": "Docker কী, আর এটা কোন সমস্যার সমাধান করে?"
+  },
+  "answer": {
+   "en": "Docker is a platform for packaging an app together with its runtime, libraries and config into an **image**, and running that image as an isolated **container**. The same image runs the same way on a laptop, CI and a server, which removes most \"works on my machine\" problems.",
+   "bn": "Docker হলো এমন একটা platform, যেটা app-কে তার runtime, library আর config-সহ একটা **image**-এ package করে, আর সেই image-কে isolated **container** হিসেবে চালায়। একই image laptop, CI আর server-এ একইভাবে চলে, তাই \"আমার machine-এ তো চলে\" ধরনের সমস্যা প্রায় চলে যায়।"
+  },
+  "explanation": {
+   "en": "A container is not a VM: it's a normal Linux process isolated by the host kernel, so it starts in seconds or less and doesn't boot its own OS.",
+   "bn": "Container কোনো VM না: এটা host kernel দিয়ে isolate করা একটা সাধারণ Linux process, তাই নিজের OS boot না করেই খুব দ্রুত start হয়।"
+  },
+  "interviewTip": {
+   "en": "Say \"package once as an image, run it anywhere as a container\", then give the \"works on my machine\" example.",
+   "bn": "বলো \"একবার image হিসেবে package করো, যেকোনো জায়গায় container হিসেবে চালাও\", তারপর \"আমার machine-এ চলে\" উদাহরণটা দাও।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — What is Docker?",
+    "url": "https://docs.docker.com/get-started/docker-overview/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is a container different from a virtual machine?",
+    "bn": "Container আর virtual machine-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "docker-001",
+   "docker-002"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "docker run -d -p 8080:80 nginx:1.30-alpine   # pull (if needed) + create + start\ndocker ps                                    # list running containers"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q02",
+  "subtopic": "Images and Containers",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "dockerfile",
+   "image",
+   "container",
+   "build",
+   "run"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How are a Dockerfile, an image and a container related?",
+   "bn": "Dockerfile, image আর container-এর মধ্যে সম্পর্ক কী?"
+  },
+  "answer": {
+   "en": "A **Dockerfile** is the recipe, `docker build` turns it into a read-only **image**, and `docker run` starts a **container** from that image. You can run many containers from one image, like many objects from one class.",
+   "bn": "**Dockerfile** হলো recipe, `docker build` সেটা থেকে একটা read-only **image** বানায়, আর `docker run` সেই image থেকে একটা **container** চালায়। একটা image থেকে অনেকগুলো container চালানো যায়, যেমন একটা class থেকে অনেক object।"
+  },
+  "explanation": {
+   "en": "Each container gets its own thin writable layer on top of the image; the image itself never changes, and that layer is deleted with `docker rm`.",
+   "bn": "প্রতিটা container image-এর উপর নিজস্ব একটা পাতলা writable layer পায়; image নিজে কখনো বদলায় না, আর `docker rm` করলে ওই layer মুছে যায়।"
+  },
+  "interviewTip": {
+   "en": "Walk the chain out loud: \"Dockerfile → build → image → run → container\".",
+   "bn": "ধাপগুলো মুখে বলো: \"Dockerfile → build → image → run → container\"।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — What is an image?",
+    "url": "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to data written inside a container when you remove it?",
+    "bn": "Container remove করলে তার ভেতরে লেখা data-র কী হয়?"
+   }
+  ],
+  "related": [
+   "docker-002"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "docker build -t myapp:1.0 .          # Dockerfile -> image\ndocker run -d --name app1 myapp:1.0  # image -> container\ndocker run -d --name app2 myapp:1.0  # a second container, same image\ndocker images                        # images (templates)\ndocker ps -a                         # containers (instances)"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q03",
+  "subtopic": "Containers vs VMs",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "containers",
+   "virtual-machines",
+   "kernel"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Why does a container start much faster and use less memory than a virtual machine?",
+   "bn": "Virtual machine-এর চেয়ে container কেন অনেক দ্রুত start হয় আর কম memory নেয়?"
+  },
+  "answer": {
+   "en": "A VM boots a full guest operating system with its own kernel on virtual hardware. A container shares the host's kernel and is just an isolated process, so there's no OS to boot; the trade-off is weaker isolation than a VM.",
+   "bn": "VM virtual hardware-এর উপর নিজস্ব kernel-সহ পুরো একটা guest operating system boot করে। Container host-এর kernel share করে, এটা শুধু একটা isolated process, তাই কোনো OS boot করতে হয় না; বিনিময়ে isolation VM-এর চেয়ে দুর্বল।"
+  },
+  "explanation": {
+   "en": "Because the kernel is shared, a Linux container needs a Linux kernel; Docker Desktop on macOS and Windows runs a small Linux VM for that.",
+   "bn": "Kernel share হয় বলে Linux container-এর Linux kernel লাগে; তাই macOS আর Windows-এ Docker Desktop একটা ছোট Linux VM চালায়।"
+  },
+  "interviewTip": {
+   "en": "Use the one-liner \"VMs virtualise hardware, containers virtualise the OS\", then name the trade-off.",
+   "bn": "এক লাইনে বলো \"VM hardware virtualize করে, container OS virtualize করে\", তারপর trade-off-টা বলো।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — What is a container?",
+    "url": "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which Linux features does Docker use to isolate a container?",
+    "bn": "Container isolate করতে Docker Linux-এর কোন feature ব্যবহার করে?"
+   }
+  ],
+  "related": [
+   "docker-001"
+  ],
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q04",
+  "subtopic": "Dockerfiles",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "dockerfile",
+   "from",
+   "run",
+   "cmd",
+   "workdir"
+  ],
+  "technologyVersion": "Dockerfile syntax 1.x (Docker Engine 29), Node.js 24/26 LTS",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What do `FROM`, `WORKDIR`, `COPY`, `RUN` and `CMD` do in a Dockerfile?",
+   "bn": "Dockerfile-এ `FROM`, `WORKDIR`, `COPY`, `RUN` আর `CMD` কী কাজ করে?"
+  },
+  "answer": {
+   "en": "`FROM` picks the base image, `WORKDIR` sets the working directory and `COPY` copies files from the build context. `RUN` executes a command **at build time** and saves the result as a layer, while `CMD` is the default command run **when a container starts**.",
+   "bn": "`FROM` base image ঠিক করে, `WORKDIR` working directory set করে, আর `COPY` build context থেকে file copy করে। `RUN` **build-এর সময়** command চালিয়ে ফলাফল একটা layer হিসেবে রাখে, আর `CMD` হলো **container start হওয়ার সময়** চলা default command।"
+  },
+  "explanation": {
+   "en": "Only the last `CMD` counts, and it can be overridden with `docker run myapp <command>`. Write it in exec form (JSON array) so Node is PID 1 and receives SIGTERM.",
+   "bn": "শুধু শেষ `CMD`-টাই কাজ করে, আর `docker run myapp <command>` দিয়ে override করা যায়। এটা exec form (JSON array)-এ লেখো, যাতে Node PID 1 হয় আর SIGTERM পায়।"
+  },
+  "interviewTip": {
+   "en": "Stress the build-time vs start-time difference between `RUN` and `CMD`; that's what the question is really testing.",
+   "bn": "`RUN` আর `CMD`-এর build-time বনাম start-time পার্থক্যটা জোর দিয়ে বলো; প্রশ্নটা আসলে এটাই যাচাই করে।"
+  },
+  "references": [
+   {
+    "title": "Dockerfile reference",
+    "url": "https://docs.docker.com/reference/dockerfile/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why copy `package.json` before the rest of the source?",
+    "bn": "বাকি source-এর আগে `package.json` কেন copy করা হয়?"
+   }
+  ],
+  "related": [
+   "docker-012",
+   "docker-013"
+  ],
+  "code": {
+   "language": "dockerfile",
+   "source": "FROM node:24-alpine\nWORKDIR /app\nCOPY package.json package-lock.json ./\nRUN npm ci --omit=dev          # runs once, during docker build\nCOPY . .\nCMD [\"node\", \"server.js\"]      # runs every time a container starts"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q05",
+  "subtopic": "Dockerfiles",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "cmd",
+   "entrypoint",
+   "dockerfile"
+  ],
+  "technologyVersion": "Dockerfile syntax 1.x (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `CMD` and `ENTRYPOINT`?",
+   "bn": "`CMD` আর `ENTRYPOINT`-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`ENTRYPOINT` is the fixed executable the container always runs, and `CMD` gives default arguments (or the whole default command when there's no entrypoint). Arguments after the image name in `docker run` replace `CMD`; replacing the entrypoint needs `--entrypoint`.",
+   "bn": "`ENTRYPOINT` হলো নির্দিষ্ট executable, যেটা container সবসময় চালায়; আর `CMD` default argument দেয় (entrypoint না থাকলে পুরো default command)। `docker run`-এ image name-এর পরের argument `CMD`-কে replace করে; entrypoint বদলাতে `--entrypoint` লাগে।"
+  },
+  "explanation": {
+   "en": "Use exec form for both. With shell-form `ENTRYPOINT`, `CMD` and run arguments are ignored and `/bin/sh` becomes PID 1.",
+   "bn": "দুটোই exec form-এ লেখো। Shell-form `ENTRYPOINT` দিলে `CMD` আর run argument ignore হয়, আর `/bin/sh` PID 1 হয়ে যায়।"
+  },
+  "interviewTip": {
+   "en": "Say \"ENTRYPOINT is the verb, CMD is the default object\" and show the two `docker run` lines.",
+   "bn": "বলো \"ENTRYPOINT হলো verb, CMD হলো default object\", তারপর দুটো `docker run` line দেখাও।"
+  },
+  "references": [
+   {
+    "title": "Dockerfile reference",
+    "url": "https://docs.docker.com/reference/dockerfile/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why is exec form preferred over shell form?",
+    "bn": "Shell form-এর বদলে exec form কেন ভালো?"
+   }
+  ],
+  "related": [
+   "docker-013",
+   "docker-014"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "# Dockerfile: ENTRYPOINT [\"node\"]  +  CMD [\"server.js\"]\ndocker run myapp               # → node server.js\ndocker run myapp worker.js     # → node worker.js"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q06",
+  "subtopic": "Volumes and Bind Mounts",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "volumes",
+   "bind-mounts",
+   "persistence"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you keep a database's data when its container is removed? Volume or bind mount?",
+   "bn": "Container remove করলেও database-এর data কীভাবে রাখবে? Volume না bind mount?"
+  },
+  "answer": {
+   "en": "Mount a **named volume** on the data directory: Docker manages it and it survives `docker rm` and `docker compose down`. A **bind mount** maps a specific host folder instead, which is handy for live-editing source code in development.",
+   "bn": "Data directory-তে একটা **named volume** mount করো: এটা Docker manage করে, আর `docker rm` বা `docker compose down`-এর পরেও থেকে যায়। **Bind mount** এর বদলে host-এর একটা নির্দিষ্ট folder map করে, যেটা development-এ source code live edit করার জন্য সুবিধাজনক।"
+  },
+  "explanation": {
+   "en": "`docker compose down -v` deletes named volumes too, so don't add `-v` unless you mean to wipe the data.",
+   "bn": "`docker compose down -v` named volume-ও মুছে দেয়, তাই data মুছতে না চাইলে `-v` দিও না।"
+  },
+  "interviewTip": {
+   "en": "Answer \"volume for data, bind mount for dev code\" and mention that data in the container's own layer dies with it.",
+   "bn": "উত্তর দাও \"data-র জন্য volume, dev code-এর জন্য bind mount\", আর বলো যে container-এর নিজের layer-এর data container-এর সাথেই মুছে যায়।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — Volumes",
+    "url": "https://docs.docker.com/engine/storage/volumes/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is a tmpfs mount used for?",
+    "bn": "tmpfs mount কী কাজে লাগে?"
+   }
+  ],
+  "related": [
+   "docker-006",
+   "docker-020"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "# named volume (managed by Docker)\ndocker run -d -v pgdata:/var/lib/postgresql -e POSTGRES_PASSWORD=dev postgres:18\n# bind mount (a host folder)\ndocker run -d -v \"$(pwd)/src:/app/src\" myapp:dev"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q07",
+  "subtopic": "Port Mapping",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "ports",
+   "publish",
+   "networking"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `-p 8080:3000` mean in `docker run`?",
+   "bn": "`docker run`-এ `-p 8080:3000` মানে কী?"
+  },
+  "answer": {
+   "en": "It publishes the container's port 3000 on the host's port 8080, in `host:container` order, so `http://localhost:8080` reaches the app. Without `-p`, the app isn't reachable from the host, and the app inside must listen on `0.0.0.0`, not `127.0.0.1`.",
+   "bn": "এটা container-এর port 3000-কে host-এর port 8080-এ publish করে (`host:container` ক্রমে), তাই `http://localhost:8080` দিয়ে app-এ পৌঁছানো যায়। `-p` ছাড়া host থেকে app-এ পৌঁছানো যায় না, আর ভেতরের app-কে `127.0.0.1` না, `0.0.0.0`-এ listen করতে হবে।"
+  },
+  "explanation": {
+   "en": "`EXPOSE` in a Dockerfile publishes nothing; it's only documentation. Containers on the same network talk directly on the container port, no `-p` needed.",
+   "bn": "Dockerfile-এর `EXPOSE` কিছুই publish করে না, এটা শুধু documentation। একই network-এর container-রা `-p` ছাড়াই সরাসরি container port-এ কথা বলে।"
+  },
+  "interviewTip": {
+   "en": "Say \"host first, container second\" and mention binding to `127.0.0.1` when NGINX sits in front.",
+   "bn": "বলো \"আগে host, পরে container\", আর সামনে NGINX থাকলে `127.0.0.1`-এ bind করার কথা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — Networking overview",
+    "url": "https://docs.docker.com/engine/network/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `EXPOSE` publish a port?",
+    "bn": "`EXPOSE` কি port publish করে?"
+   }
+  ],
+  "related": [
+   "docker-004",
+   "docker-005"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "docker run -d -p 8080:3000 myapp             # public on all host interfaces\ndocker run -d -p 127.0.0.1:8080:3000 myapp   # only reachable from the host itself"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q08",
+  "subtopic": "Docker Compose",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "compose",
+   "multi-container",
+   "cli"
+  ],
+  "technologyVersion": "Docker Compose v5 (Compose Specification)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is Docker Compose, and which commands do you use every day?",
+   "bn": "Docker Compose কী, আর প্রতিদিন কোন command-গুলো ব্যবহার করো?"
+  },
+  "answer": {
+   "en": "Compose describes a multi-container app (API, database, cache) in one `compose.yaml`, with the services sharing a network where they reach each other by service name. `docker compose up -d` starts everything, `ps` and `logs -f` show status and logs, and `down` stops and removes the containers.",
+   "bn": "Compose একটা `compose.yaml` file-এ multi-container app (API, database, cache) বর্ণনা করে; service-গুলো একটা network share করে, আর service name দিয়ে একে অপরকে খুঁজে পায়। `docker compose up -d` সব চালু করে, `ps` আর `logs -f` status ও log দেখায়, আর `down` container-গুলো বন্ধ করে মুছে দেয়।"
+  },
+  "explanation": {
+   "en": "Use `docker compose` (the CLI plugin); the old Python `docker-compose` v1 is end-of-life, and the top-level `version:` key is obsolete.",
+   "bn": "`docker compose` (CLI plugin) ব্যবহার করো; পুরনো Python `docker-compose` v1 end-of-life, আর top-level `version:` key এখন obsolete।"
+  },
+  "interviewTip": {
+   "en": "Mention that services find each other by name (`db:5432`), not `localhost`; that's the follow-up interviewers usually probe.",
+   "bn": "উল্লেখ করো যে service-রা `localhost` না, নাম দিয়ে (`db:5432`) একে অপরকে খুঁজে পায়; interviewer সাধারণত এটাই পরের প্রশ্নে ধরে।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — Docker Compose",
+    "url": "https://docs.docker.com/compose/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `depends_on` wait until the database is ready?",
+    "bn": "`depends_on` কি database ready হওয়া পর্যন্ত অপেক্ষা করে?"
+   }
+  ],
+  "related": [
+   "docker-009",
+   "docker-010",
+   "docker-016"
+  ],
+  "code": {
+   "language": "yaml",
+   "source": "# compose.yaml\nservices:\n  api:\n    build: .\n    ports: [\"3000:3000\"]\n    environment:\n      DATABASE_URL: postgres://app:dev@db:5432/app\n  db:\n    image: postgres:18\n    environment:\n      POSTGRES_PASSWORD: dev"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q09",
+  "subtopic": "Container Debugging",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "debugging",
+   "exec",
+   "logs",
+   "inspect"
+  ],
+  "technologyVersion": "Docker Engine 29 CLI",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "A container misbehaves. Which basic Docker commands do you use to debug it?",
+   "bn": "একটা container ঠিকমতো চলছে না। Debug করতে কোন basic Docker command-গুলো ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "Start with `docker ps -a` for status and exit code, then `docker logs` for the app's output. `docker exec -it <name> sh` opens a shell inside a running container, and `docker inspect` shows its config, IP, mounts and state (exit code, `OOMKilled`).",
+   "bn": "শুরু করো `docker ps -a` দিয়ে status আর exit code দেখতে, তারপর `docker logs` দিয়ে app-এর output। `docker exec -it <name> sh` চলমান container-এর ভেতরে shell খোলে, আর `docker inspect` তার config, IP, mount আর state (exit code, `OOMKilled`) দেখায়।"
+  },
+  "explanation": {
+   "en": "`exec` works only on a running container and needs a shell in the image (distroless has none). For a container that keeps crashing, rely on `logs` and `inspect`. With Compose, use `docker compose logs api` and `docker compose exec api sh`.",
+   "bn": "`exec` শুধু চলমান container-এ কাজ করে, আর image-এ shell থাকতে হয় (distroless-এ নেই)। বারবার crash করা container-এর জন্য `logs` আর `inspect`-এর উপর ভরসা করো। Compose-এ `docker compose logs api` আর `docker compose exec api sh` ব্যবহার করো।"
+  },
+  "interviewTip": {
+   "en": "Give it as an order: status → logs → inspect → exec; it shows you debug systematically.",
+   "bn": "এটা একটা ক্রম হিসেবে বলো: status → logs → inspect → exec; এতে বোঝা যায় তুমি গুছিয়ে debug করো।"
+  },
+  "references": [
+   {
+    "title": "Docker CLI — docker container exec",
+    "url": "https://docs.docker.com/reference/cli/docker/container/exec/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does exit code 137 tell you?",
+    "bn": "Exit code 137 থেকে কী বোঝা যায়?"
+   }
+  ],
+  "related": [
+   "docker-024",
+   "docker-011"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "docker ps -a                                   # status, exit code\ndocker logs --tail 100 -f api                  # app output (stdout/stderr)\ndocker exec -it api sh                         # shell inside (if the image has one)\ndocker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}}' api\ndocker cp api:/app/config.json ./config.json   # copy a file out\ndocker stats                                   # live CPU/memory usage"
+  },
+  "technology": "docker"
+ },
+ {
+  "id": "docker-q10",
+  "subtopic": "Build Context and .dockerignore",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "dockerignore",
+   "build-context",
+   "security"
+  ],
+  "technologyVersion": "Version-independent concept (Docker Engine 29 / BuildKit)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What do you put in a `.dockerignore` for a Node.js project, and why?",
+   "bn": "Node.js project-এর `.dockerignore`-এ কী রাখো, আর কেন?"
+  },
+  "answer": {
+   "en": "Anything the image shouldn't contain or the build doesn't need: `node_modules`, `.git`, build output, logs and `.env` files. It keeps the build context small and fast, stops the host's `node_modules` overwriting the container's, and keeps secrets out of the image.",
+   "bn": "যা image-এ থাকা উচিত না বা build-এ লাগে না: `node_modules`, `.git`, build output, log আর `.env` file। এতে build context ছোট আর দ্রুত হয়, host-এর `node_modules` container-এরটাকে overwrite করে না, আর secret image-এর বাইরে থাকে।"
+  },
+  "explanation": {
+   "en": "It works like `.gitignore` but applies to the build context: ignored files never reach the builder, so `COPY . .` can't pick them up.",
+   "bn": "এটা `.gitignore`-এর মতো, কিন্তু build context-এর জন্য: ignore করা file builder-এ পৌঁছায়ই না, তাই `COPY . .` সেগুলো তুলতে পারে না।"
+  },
+  "interviewTip": {
+   "en": "Name the three reasons in one breath: speed, correct builds and no leaked secrets.",
+   "bn": "তিনটা কারণ এক নিঃশ্বাসে বলো: speed, সঠিক build আর secret leak না হওয়া।"
+  },
+  "references": [
+   {
+    "title": "Docker Docs — Build context (.dockerignore)",
+    "url": "https://docs.docker.com/build/concepts/context/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the build context?",
+    "bn": "Build context কী?"
+   }
+  ],
+  "related": [
+   "docker-007",
+   "docker-012"
+  ],
+  "code": {
+   "language": "text",
+   "source": "# .dockerignore\nnode_modules\n.git\ndist\nnpm-debug.log*\n.env*"
+  },
+  "technology": "docker"
+ }
+]

@@ -48,6 +48,10 @@
   "related": [
    "sql-004"
   ],
+  "quickAnswer": {
+   "en": "`FROM` (with joins) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`, then `LIMIT`. We write `SELECT` first, but it is evaluated after rows are filtered and grouped, which is why a `SELECT` alias can't be used in `WHERE`.",
+   "bn": "`FROM` (join-সহ) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`, তারপর `LIMIT`। আমরা `SELECT` আগে লিখি, কিন্তু row filter আর group হওয়ার পরে এটা evaluate হয়; এজন্যই `SELECT`-এর alias `WHERE`-এ ব্যবহার করা যায় না।"
+  },
   "options": [
    {
     "en": "`SELECT` → `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `ORDER BY`",
@@ -128,6 +132,10 @@
    "sql-019",
    "sql-008"
   ],
+  "quickAnswer": {
+   "en": "INNER JOIN returns only matching rows; LEFT JOIN keeps every left row with NULLs where nothing matches (RIGHT is the mirror). FULL OUTER keeps unmatched rows from both sides, CROSS JOIN makes every combination, and a SELF JOIN joins a table to itself, like employees to their managers.",
+   "bn": "INNER JOIN শুধু দুই দিকে মেলে এমন row দেয়; LEFT JOIN বাঁ দিকের সব row রাখে, না মিললে NULL বসায় (RIGHT এর উল্টো)। FULL OUTER দুই দিকের না-মেলা row-ও রাখে, CROSS JOIN সব combination বানায়, আর SELF JOIN একটা table-কে নিজের সাথেই join করে, যেমন employee আর তার manager।"
+  },
   "commonMistakes": {
    "en": "Expecting a LEFT JOIN to return exactly one row per left-table row (it returns one per match), or filtering the right table in `WHERE` and losing unmatched rows.",
    "bn": "ধরে নেওয়া যে LEFT JOIN বাম table-এর প্রতিটা row-এর জন্য ঠিক একটা row দেয় (আসলে প্রতিটা match-এর জন্য একটা দেয়), অথবা `WHERE`-এ ডান table filter করে unmatched row হারিয়ে ফেলা।"
@@ -197,6 +205,10 @@
    "sql-004",
    "sql-002"
   ],
+  "quickAnswer": {
+   "en": "Join `customers` to `orders`, filter `WHERE status = 'delivered'` before grouping, `GROUP BY c.id, c.name` with `COUNT(*)` and `SUM(amount)`, then `ORDER BY total_spent DESC`. The inner join and the `WHERE` filter already drop customers with no delivered orders.",
+   "bn": "`customers`-কে `orders`-এর সাথে join করো, group করার আগে `WHERE status = 'delivered'` দিয়ে filter করো, `COUNT(*)` আর `SUM(amount)`-সহ `GROUP BY c.id, c.name`, তারপর `ORDER BY total_spent DESC`। Inner join আর `WHERE` filter মিলেই delivered order ছাড়া customer-দের বাদ দিয়ে দেয়।"
+  },
   "commonMistakes": {
    "en": "Grouping only by `name` (merges different customers with the same name), or filtering status in `HAVING` instead of `WHERE`.",
    "bn": "শুধু `name` দিয়ে group করা (একই নামের আলাদা customer মিশে যায়), অথবা status filter `WHERE`-এর বদলে `HAVING`-এ দেওয়া।"
@@ -270,6 +282,10 @@
    "sql-001",
    "sql-003"
   ],
+  "quickAnswer": {
+   "en": "`WHERE salary > 50000` filters individual rows first, `GROUP BY dept` groups them, and `HAVING COUNT(*) >= 2` filters the groups. Rule: row conditions go in `WHERE`, conditions on aggregates go in `HAVING`.",
+   "bn": "আগে `WHERE salary > 50000` প্রতিটা row filter করে, তারপর `GROUP BY dept` group বানায়, আর `HAVING COUNT(*) >= 2` group filter করে। নিয়ম: row-এর condition `WHERE`-এ, aggregate-এর condition `HAVING`-এ।"
+  },
   "commonMistakes": {
    "en": "Writing `HAVING salary > 50000` (wrong question / error), or using `WHERE COUNT(*) >= 2`.",
    "bn": "`HAVING salary > 50000` লেখা (ভুল প্রশ্ন / error), অথবা `WHERE COUNT(*) >= 2` ব্যবহার করা।"
@@ -334,6 +350,10 @@
   "related": [
    "sql-006"
   ],
+  "quickAnswer": {
+   "en": "`5 | 3 | 2 | 433.33`. `COUNT(*)` counts all rows, `COUNT(bonus)` skips NULLs, `COUNT(DISTINCT bonus)` counts distinct non-NULL values, and `AVG` ignores NULLs, so it is 1300 / 3.",
+   "bn": "`5 | 3 | 2 | 433.33`। `COUNT(*)` সব row গোনে, `COUNT(bonus)` NULL বাদ দেয়, `COUNT(DISTINCT bonus)` আলাদা non-NULL value গোনে, আর `AVG` NULL উপেক্ষা করে, তাই হিসাবটা 1300 / 3।"
+  },
   "code": {
    "language": "sql",
    "source": "CREATE TABLE bonuses (emp_id INT PRIMARY KEY, bonus INT);\nINSERT INTO bonuses (emp_id, bonus) VALUES\n  (1, 500), (2, NULL), (3, 500), (4, NULL), (5, 300);\n\nSELECT COUNT(*)              AS all_rows,\n       COUNT(bonus)          AS with_bonus,\n       COUNT(DISTINCT bonus) AS distinct_bonus,\n       ROUND(AVG(bonus), 2)  AS avg_bonus\nFROM bonuses;",
@@ -405,6 +425,10 @@
    "sql-005",
    "sql-016"
   ],
+  "quickAnswer": {
+   "en": "1, only Karim. For the rows where city is NULL, `NULL <> 'Dhaka'` is UNKNOWN, not TRUE, and `WHERE` keeps only rows where the condition is TRUE.",
+   "bn": "1, শুধু Karim। যেসব row-এ city NULL, সেখানে `NULL <> 'Dhaka'` হয় UNKNOWN, TRUE নয়, আর `WHERE` শুধু সেই row রাখে যেখানে condition TRUE।"
+  },
   "code": {
    "language": "sql",
    "source": "CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(50), city VARCHAR(50));\nINSERT INTO customers (id, name, city) VALUES\n  (1, 'Rahim',  'Dhaka'),\n  (2, 'Karim',  'Sylhet'),\n  (3, 'Nadia',  NULL),\n  (4, 'Sumi',   'Dhaka'),\n  (5, 'Tanvir', NULL);\n\nSELECT COUNT(*) AS cnt FROM customers WHERE city <> 'Dhaka';",
@@ -486,6 +510,10 @@
    "sql-011",
    "sql-032"
   ],
+  "quickAnswer": {
+   "en": "A primary key uniquely identifies each row (unique and not null), a foreign key must match a key in another table, and `UNIQUE`, `NOT NULL`, `CHECK` and `DEFAULT` add more rules. A candidate key is any minimal unique column set; a natural key is a real-world value, a surrogate key a generated id.",
+   "bn": "Primary key প্রতিটা row-কে আলাদাভাবে চেনায় (unique আর not null), foreign key-কে অন্য table-এর একটা key-এর সাথে মিলতে হয়, আর `UNIQUE`, `NOT NULL`, `CHECK`, `DEFAULT` আরও নিয়ম যোগ করে। Candidate key হলো যেকোনো ন্যূনতম unique column set; natural key বাস্তব জগতের value, surrogate key generate করা id।"
+  },
   "commonMistakes": {
    "en": "Confusing a candidate key with a foreign key, or relying only on application validation for uniqueness.",
    "bn": "Candidate key আর foreign key গুলিয়ে ফেলা, অথবা uniqueness-এর জন্য শুধু application validation-এর উপর ভরসা করা।"
@@ -554,6 +582,10 @@
    "sql-002",
    "sql-023"
   ],
+  "quickAnswer": {
+   "en": "Join `employees` to itself with two aliases, `e` for the employee and `m` for the manager, on `m.id = e.manager_id`, then filter `WHERE e.salary > m.salary`. The inner join drops anyone without a manager, which is correct here.",
+   "bn": "`employees` table-কে দুটো alias দিয়ে নিজের সাথে join করো, employee-র জন্য `e` আর manager-এর জন্য `m`, শর্ত `m.id = e.manager_id`, তারপর `WHERE e.salary > m.salary` দিয়ে filter। Inner join manager ছাড়া কাউকে বাদ দেয়, এখানে সেটাই ঠিক।"
+  },
   "commonMistakes": {
    "en": "Reversing the join condition (`e.id = m.manager_id`), which compares managers with their reports the wrong way around.",
    "bn": "Join condition উল্টে দেওয়া (`e.id = m.manager_id`), যাতে manager আর তার অধীনস্থদের তুলনা উল্টো দিক থেকে হয়।"

@@ -47,6 +47,8 @@ QUESTIONS = [
 
             আমি সবসময় `width` আর `height` দিই, যাতে browser জায়গা রেখে দেয় আর lazy image আসার সময় page লাফিয়ে না ওঠে (CLS)।
         """,
+        quick_en=r"""`loading="lazy"` delays fetching an image or iframe until it's near the viewport, saving data on content further down. Never use it on above-the-fold or LCP images, because it delays them; give the hero `fetchpriority="high"` and always set `width`/`height`.""",
+        quick_bn=r"""`loading="lazy"` image বা iframe-এর fetch পিছিয়ে দেয় যতক্ষণ না সেটা viewport-এর কাছে আসে, ফলে নিচের content-এ data বাঁচে। Above-the-fold বা LCP image-এ কখনো দিও না, কারণ তাতে সেটা দেরিতে আসে; hero-তে `fetchpriority="high"` দাও আর সবসময় `width`/`height` দাও।""",
         ex_en=r"""
             - **Distance thresholds are browser-defined** and typically larger on slow connections, so images usually finish loading before the user scrolls to them.
             - **Privacy rule:** the HTML Standard disables lazy loading when scripting is disabled, because otherwise scroll position could be tracked through image requests without JavaScript.
@@ -136,6 +138,8 @@ QUESTIONS = [
             6. **Spacing-এর জন্য `<br>`:** layout-এর জায়গা CSS (`margin`/`gap`)।
             7. **Duplicate `id="price"`:** ID অবশ্যই unique হতে হবে; নইলে `getElementById`, `<label for>` আর ARIA reference ভেঙে যায়। Class ব্যবহার করো।
         """,
+        quick_en=r"""It's div soup with fake controls: no landmarks, a clickable `<div>` logo without `alt`, an `<a>` without `href`, a skipped heading level, a button inside a link, `<br>` for spacing and duplicate `id`s. Fix it with landmarks, real `<a href>`/`<button>`, `<h2>`, CSS spacing and classes.""",
+        quick_bn=r"""এটা নকল control-ভরা div soup: landmark নেই, `alt` ছাড়া clickable `<div>` logo, `href` ছাড়া `<a>`, heading level লাফানো, link-এর ভেতরে button, spacing-এর জন্য `<br>`, আর duplicate `id`। Landmark, আসল `<a href>`/`<button>`, `<h2>`, CSS spacing আর class দিয়ে ঠিক করো।""",
         ex_en=r"""
             Why these matter in practice:
             - Keyboard users can't reach the logo or the cart at all — they literally can't check out if the cart is only reachable through that `<a>` without `href`.
@@ -223,6 +227,8 @@ QUESTIONS = [
             2. **API data দিয়ে stored XSS:** product-এর `name` (প্রায়ই user বা seller-এর লেখা) আর `url` একটা HTML string-এ বসানো হচ্ছে। `<img onerror=…>`-এর মতো নাম বা `javascript:…` url থাকলে সেটা execute হবে। সমাধান: `createElement` + `textContent` দিয়ে element বানাও, আর `href`-এ শুধু `http:`/`https:` URL অনুমোদন করো।
             3. **Encode না করা query string:** `?q=${q}` `&`, `#` বা `+` পেলে ভেঙে যায়, আর user বাড়তি parameter ঢুকিয়ে দিতে পারে। সমাধান: `new URLSearchParams({ q })`।
         """,
+        quick_en=r"""The URL's `q` and the API's `name`/`url` go into `innerHTML`, so `onerror` handlers run (reflected and stored XSS), and `q` isn't encoded in the fetch URL. Fix: `textContent` and `createElement`, only `http:`/`https:` links, and `URLSearchParams` for the query.""",
+        quick_bn=r"""URL-এর `q` আর API-র `name`/`url` সরাসরি `innerHTML`-এ যায়, তাই `onerror` handler চলে (reflected আর stored XSS), আর fetch URL-এ `q` encode করা হয় না। সমাধান: `textContent` আর `createElement`, শুধু `http:`/`https:` link, আর query-র জন্য `URLSearchParams`।""",
         ex_en=r"""
             - **Rule of thumb:** data goes into the DOM as *text* (`textContent`, `setAttribute` on safe attributes, `createElement`), never as *markup*. If you truly need user-provided HTML (rich-text descriptions), sanitize it with a maintained library like DOMPurify.
             - **`href` is a special sink:** `textContent` escaping doesn't help if the attribute value itself is `javascript:alert(1)`. Validate the protocol with the `URL` parser.
@@ -300,6 +306,8 @@ QUESTIONS = [
         a_bn=r"""
             `as="image"`-সহ `rel="preload"`। এটা image-এর URL HTML-এ রাখে, যেখানে preload scanner সঙ্গে সঙ্গে দেখতে পায়; ফলে fetch `main.css`-এর পরে নয়, তার সাথে সমান্তরালে শুরু হয়। `fetchpriority="high"` এর priority বাড়ায়, আর `type="image/avif"` থাকলে যে browser AVIF support করে না সে এটা বাদ দেয়।
         """,
+        quick_en=r"""`<link rel="preload" as="image" type="image/avif" … fetchpriority="high">`. It puts the CSS background's URL into the HTML, so the preload scanner starts the fetch in parallel with `main.css`; preconnect only warms the connection and still waits for the CSS.""",
+        quick_bn=r"""`<link rel="preload" as="image" type="image/avif" … fetchpriority="high">`। এটা CSS background-এর URL HTML-এ নিয়ে আসে, তাই preload scanner `main.css`-এর সাথে parallel-এ fetch শুরু করে; preconnect শুধু connection আগে খোলে, ছবির জন্য তবু CSS-এর অপেক্ষা করতে হয়।""",
         ex_en=r"""
             The tempting wrong answer is **preconnect**: it does help — DNS, TCP and TLS to the CDN happen early — but the browser still doesn't know *which* image to request until the CSS is parsed. Preconnect saves a connection setup; preload removes the discovery delay. (A cross-origin preload opens the connection anyway, so preconnect adds little here; it's most useful when you know the origin but not the exact URL.)
 
@@ -350,6 +358,8 @@ QUESTIONS = [
             - **Live update:** "Added to cart"-এর জন্য `role="status"` / `aria-live`।
             - **HTML-এ নেই এমন custom widget:** tab, tree view, combobox — আর তখন পুরো keyboard pattern-ও তোমাকে implement করতে হবে।
         """,
+        quick_en=r"""If a native element already has the semantics and behaviour you need, use it instead of ARIA, because ARIA only changes what assistive tech is told and adds no behaviour. ARIA is for states, relationships, live updates and custom widgets HTML doesn't have.""",
+        quick_bn=r"""যে native element-এ দরকারি semantics আর behaviour আগে থেকেই আছে, ARIA-র বদলে সেটাই ব্যবহার করো, কারণ ARIA শুধু assistive tech-কে কী বলা হবে সেটা বদলায়, কোনো behaviour যোগ করে না। ARIA দরকার state, relationship, live update আর HTML-এ নেই এমন custom widget-এর জন্য।""",
         ex_en=r"""
             Common misuse and its effect:
             - **`aria-hidden="true"` on something focusable** — keyboard users land on an element the screen reader says nothing about.
@@ -451,6 +461,8 @@ QUESTIONS = [
         a_bn=r"""
             `form.submit()` হলো low-level "শুধু পাঠিয়ে দাও" ধরনের call: এটা **constraint validation চালায় না** এবং **`submit` event dispatch করে না**। তাই `required` check বাদ পড়ে, `fetch` handler কখনো চলে না, আর browser সাধারণ form submission করে — `method`/`action` না থাকায় সেটা বর্তমান URL-এ একটা GET। `form.requestSubmit()` submit button-এ click করার মতো আচরণ করে: validation, `submit` event, তারপর prevent না করা হলেই কেবল submission।
         """,
+        quick_en=r"""`form.submit()` skips constraint validation and doesn't fire the `submit` event, so the `fetch` handler never runs and the browser does a normal GET submission. Use `form.requestSubmit()`, which behaves like clicking the submit button.""",
+        quick_bn=r"""`form.submit()` constraint validation বাদ দেয় আর `submit` event fire করে না, তাই `fetch` handler চলেই না, browser একটা সাধারণ GET submission করে ফেলে। `form.requestSubmit()` ব্যবহার করো, এটা submit button click করার মতোই কাজ করে।""",
         ex_en=r"""
             The tempting option is C, because it *feels* like keyboard vs mouse is the difference — but the real difference is which API triggers the submission. Pressing Enter in a text field (implicit submission) also goes through validation and the `submit` event, just like a click.
 
@@ -507,6 +519,8 @@ QUESTIONS = [
             - শেষের `</p>`-এর বন্ধ করার মতো কোনো খোলা `<p>` নেই। Spec বলে তখন **একটা খালি `<p>` insert করে** সেটা বন্ধ করতে — তাই `<p></p>` আর মোট তিনটা child।
             - Table-এর context-এ parse করা tree-তে `<tr>` সরাসরি `<table>`-এর child হতে পারে না, তাই parser **নিজে থেকে একটা `<tbody>` তৈরি করে**।
         """,
+        quick_en=r"""`<p>Hello</p><div>World</div><p></p>`, `3`, then `<tbody><tr><td>1</td></tr></tbody>`. The parser closes the open `<p>` when it meets `<div>`, turns the stray `</p>` into an empty `<p></p>`, and adds an implicit `<tbody>` for the `<tr>`.""",
+        quick_bn=r"""Output: `<p>Hello</p><div>World</div><p></p>`, `3`, তারপর `<tbody><tr><td>1</td></tr></tbody>`। `<div>` পেলে parser খোলা `<p>` বন্ধ করে দেয়, বাড়তি `</p>`-কে একটা খালি `<p></p>` বানায়, আর `<tr>`-এর জন্য implicit `<tbody>` যোগ করে।""",
         ex_en=r"""
             Step by step for the first string, using the fragment parser in "in body" mode:
             1. `<p>` → open `p`; `Hello` → text inside it.
@@ -584,6 +598,8 @@ QUESTIONS = [
             5. **বাকি যা থাকে তার rendering সস্তা করো।** `table-layout: fixed`, যাতে column-এর মাপ ঠিক করতে browser-কে প্রতিটা cell মাপতে না হয়। List যদি block বা grid box হিসেবে render হয় (যেমন tablet-এ card view), তাহলে প্রতিটা group-এ `contain-intrinsic-size`-সহ `content-visibility: auto` দিলে screen-এর বাইরের group layout আর paint এড়িয়ে যায়। এটা containment-এর উপর নির্ভর করে, আর `<tbody>`, `<tr>`-এর মতো internal table box-এ containment কাজ করে না — তাই সাধারণ table-এ এটা কোনো উপকার করবে না।
             6. **Layout thrashing এড়াও।** DOM read (যেমন `offsetHeight`) আগে একসাথে করো, তারপর write; একই loop-এ layout পড়া আর লেখা কখনো মিশিও না।
         """,
+        quick_en=r"""This is advanced: the page renders far more DOM than anyone can see. Profile on a throttled CPU, then stop rendering it all with server-side filtering and pagination or virtualization, plus debounced filtering, slimmer rows, one delegated listener and `table-layout: fixed`.""",
+        quick_bn=r"""এটা advanced বিষয়: page-টা দেখার চেয়ে অনেক বেশি DOM render করছে। Throttled CPU-তে profile করি, তারপর server-side filtering আর pagination বা virtualization দিয়ে সব render করা বন্ধ করি; সাথে debounced filtering, হালকা row, একটা delegated listener আর `table-layout: fixed`।""",
         ex_en=r"""
             **Why big DOMs hurt:** every node costs memory (plus its accessibility-tree counterpart), style recalculation and layout work grow with the number of affected nodes, and a filter keystroke that re-renders 15,000 rows becomes one huge main-thread task. Low-end devices have less memory and slower CPUs, so the same page that's "sluggish" on a laptop crashes on a tablet.
 

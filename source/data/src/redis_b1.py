@@ -45,6 +45,8 @@ QUESTIONS = [
 
             Node.js project-এ আমি Redis ব্যবহার করি caching, session, rate limiting, queue আর leaderboard-এর জন্য — সাধারণত primary database-এর পাশাপাশি, তার বদলে নয়।
         """,
+        quick_en=r"""Redis is an in-memory data structure server: you store strings, hashes, lists, sets, sorted sets and more under keys. It's fast because the data lives in RAM, its structures are purpose-built, and commands run one at a time on a single thread, so there are no locks and every command is atomic.""",
+        quick_bn=r"""Redis হলো একটা in-memory data structure server: key-এর অধীনে string, hash, list, set, sorted set ইত্যাদি রাখা যায়। এটা দ্রুত কারণ data RAM-এ থাকে, data structure-গুলো কাজ অনুযায়ী বানানো, আর command-গুলো একটা thread-এ একটার পর একটা চলে, তাই lock লাগে না আর প্রতিটা command atomic।""",
         ex_en=r"""
             - **RAM is the limit:** the dataset must fit in memory (`maxmemory`), so you plan eviction policies and TTLs. RAM also costs more than disk.
             - **The single-thread trade-off:** one slow command — `KEYS *` on millions of keys, deleting a huge key with `DEL`, a long Lua script — blocks every other client for that duration.
@@ -98,6 +100,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""The value will be `12`. Redis executes commands one at a time, and `INCR` is a single atomic read-modify-write on the server, so neither increment can be lost.""",
         a_bn=r"""Value হবে `12`। Redis একবারে একটা করে command execute করে, আর `INCR` server-এর ভেতরে একটাই atomic read-modify-write, তাই কোনো increment হারায় না।""",
+        quick_en=r"""`12`: Redis runs commands one at a time, and `INCR` is a single atomic read-modify-write on the server, so neither increment is lost and no `MULTI` is needed.""",
+        quick_bn=r"""`12`: Redis একবারে একটা command চালায়, আর `INCR` server-এ একটাই atomic read-modify-write, তাই কোনো increment হারায় না, `MULTI`-ও লাগে না।""",
         ex_en=r"""
             Option C is the tempting one: it *would* be true if the app did `GET`, added 1 in JavaScript, then `SET` the result — two clients could both read `10` and both write `11` (a lost update). `INCR` avoids that because the read and the write happen inside one command on the single command-execution thread. You don't need `MULTI` for a single command; `MULTI`/`EXEC` or Lua is for making *several* commands atomic together. A missing key is treated as `0`, and `INCR` works on 64-bit signed integers.
         """,
@@ -135,6 +139,8 @@ QUESTIONS = [
 
             সঠিক type বেছে নেওয়া জরুরি, কারণ এটাই ঠিক করে server-এ কোন operation atomic আর সস্তা হবে।
         """,
+        quick_en=r"""Strings hold text, numbers or JSON (cache, counters); hashes are field-value maps (a user profile); lists are ordered push/pop sequences (simple queues, latest items); sets hold unique members (tags, likes); sorted sets order members by score (leaderboards). The type decides which operations are atomic and cheap.""",
+        quick_bn=r"""String-এ text, number বা JSON থাকে (cache, counter); hash হলো field-value map (user profile); list হলো ordered push/pop sequence (সহজ queue, latest item); set-এ unique member থাকে (tag, like); sorted set score অনুযায়ী সাজানো (leaderboard)। কোন type নেবে সেটাই ঠিক করে কোন operation atomic আর সস্তা।""",
         ex_en=r"""
             - **Hash vs JSON string:** a JSON string must be read and rewritten entirely to change one field; a hash lets you `HSET` or `HINCRBY` one field atomically. Since Redis 7.4 you can even expire individual hash fields (`HEXPIRE`).
             - **Complexities to remember:** `LPUSH`/`RPOP` are O(1), but `LRANGE` on a huge list or `SMEMBERS` on a huge set is O(N) — avoid unbounded collections ("big keys").
@@ -185,6 +191,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`-1`. A successful `SET` without an expiry option discards the key's previous TTL, so the OTP now lives forever — a real security bug for OTPs and sessions.""",
         a_bn=r"""`-1`। Expiry option ছাড়া সফল `SET` key-এর আগের TTL মুছে দেয়, ফলে OTP-টা এখন চিরকাল থেকে যাবে — OTP বা session-এর জন্য এটা সত্যিকারের security bug।""",
+        quick_en=r"""`-1`: a successful `SET` without an expiry option discards the old TTL, so the OTP now never expires, a real security bug. Pass the expiry again (`EX 120`), or use `KEEPTTL` if you want to keep the remaining time.""",
+        quick_bn=r"""`-1`: expiry option ছাড়া সফল `SET` আগের TTL মুছে দেয়, ফলে OTP-টা এখন আর কখনো expire হবে না, এটা সত্যিকারের security bug। আবার expiry দাও (`EX 120`), অথবা বাকি সময়টা রাখতে চাইলে `KEEPTTL` ব্যবহার করো।""",
         ex_en=r"""
             Option A is the trap: many people assume the countdown survives an overwrite. It doesn't — the docs state that any previous TTL is discarded on a successful `SET`. Fix it by passing the expiry again (`SET ... EX 120`) or, if you really want to keep the remaining time, `SET ... KEEPTTL` (Redis 6.0+).
 
@@ -248,6 +256,8 @@ QUESTIONS = [
 
             সাধারণ public API-তে Redis unavailable হলে আমি **fail open** করি (log করে request যেতে দিই), কারণ সব traffic আটকে দেওয়া কিছুক্ষণ rate limiting না থাকার চেয়ে খারাপ। Login বা OTP-এর মতো security-sensitive endpoint-এ **fail closed** করব।
         """,
+        quick_en=r"""Build the key from the client id plus the current window number, and send `INCR` and `EXPIRE key window NX` together in one `MULTI`, so counts are atomic and no key is left without a TTL. Over the limit, return `429` with `Retry-After`; fail open for general APIs and closed for login/OTP, at O(1) per request.""",
+        quick_bn=r"""Client id আর বর্তমান window number মিলিয়ে key বানাও, তারপর `INCR` আর `EXPIRE key window NX` একসাথে একটা `MULTI`-তে পাঠাও, তাতে count atomic থাকে আর কোনো key TTL ছাড়া থাকে না। Limit পার হলে `Retry-After`-সহ `429` দাও; সাধারণ API-তে fail open আর login/OTP-তে fail closed, প্রতি request-এ O(1)।""",
         ex_en=r"""
             - **Why not plain `INCR` then `EXPIRE` as two awaits?** If the process dies between them, the key never expires and that client is blocked forever. The INCR docs call out exactly this race. `MULTI`/`EXEC` or a Lua script fixes it.
             - **Fixed-window weakness:** a client can send 100 requests at 12:00:59 and 100 more at 12:01:00 — 200 in two seconds. If that matters, use a sliding window (sorted set + Lua) or a token bucket.
@@ -355,6 +365,8 @@ QUESTIONS = [
 
             সমাধান: hit হলে parse করো, TTL দাও (একটু jitter সহ), miss অল্প সময়ের জন্য cache করো, সফল DB update-এর পর key delete করো, আর cache call-গুলো এমনভাবে wrap করো যাতে Redis একটা optimisation থাকে, dependency না হয়ে যায়।
         """,
+        quick_en=r"""Five bugs: no TTL, no invalidation on write, a hit returns the raw string, a missing product is cached forever as `"null"`, and a Redis error breaks the page. Fix: parse on hit, set a TTL with jitter, cache misses briefly, `DEL` after the DB update, and fall back to the DB on Redis errors.""",
+        quick_bn=r"""পাঁচটা bug: TTL নেই, write-এর পর invalidation নেই, hit হলে raw string return হয়, missing product `"null"` হয়ে চিরকাল cache-এ থাকে, আর Redis error হলে page ভেঙে যায়। Fix: hit-এ parse করো, jitter-সহ TTL দাও, miss অল্প সময় cache করো, DB update-এর পর `DEL` করো, আর Redis error হলে DB-তে fallback করো।""",
         ex_en=r"""
             - **Delete, don't update, on writes:** deleting the key after the DB commit is simpler and safer than writing the new value into the cache — two concurrent writers could otherwise leave the older value cached.
             - **Remaining race:** a reader can load the old row, the writer updates and deletes, then the reader writes the old value back. The TTL bounds how long that can last; for stricter needs use versioned keys or a delayed second delete.
@@ -468,6 +480,8 @@ QUESTIONS = [
 
             **Cache avalanche:** অনেক key একই মুহূর্তে expire হয়, অথবা Redis খালি অবস্থায় restart হয়। সমাধান: TTL-এ random jitter যোগ করো, deploy-এর সময় জরুরি key warm করো, Redis-কে highly available রাখো, আর circuit breaker বা connection-pool limit দিয়ে DB concurrency সীমিত রাখো যাতে DB ভেঙে না পড়ে ধীরে ধীরে degrade করে।
         """,
+        quick_en=r"""Stampede: a hot key expires and many requests rebuild it at once; fix with a lock (single-flight), serve-stale or early refresh. Penetration: lookups for keys that exist nowhere always hit the DB; cache "not found" briefly or use a Bloom filter. Avalanche: many keys expire together; add TTL jitter and warm keys.""",
+        quick_bn=r"""Stampede: hot key expire হলে অনেক request একসাথে সেটা rebuild করে; lock (single-flight), stale serve বা আগেভাগে refresh দিয়ে ঠেকাও। Penetration: কোথাও নেই এমন key-এর request সবসময় DB-তে যায়; "not found" অল্প সময় cache করো বা Bloom filter দাও। Avalanche: অনেক key একসাথে expire হয়; TTL-এ jitter দাও আর key warm করো।""",
         ex_en=r"""
             - **Diagnosing your symptom:** a CPU spike exactly every TTL period, correlated with a burst of identical slow queries, is the stampede signature. Check slow-query logs and cache hit ratio around expiry time.
             - **Lock details:** give the lock a short TTL (longer than the typical rebuild), release it with compare-and-delete so you never delete someone else's lock, and bound the wait — after a few hundred ms, fall back to stale data or the DB rather than hanging requests.
@@ -577,6 +591,8 @@ QUESTIONS = [
             - Protected resource check করতে পারলে **fencing token**: lock-এর সাথে atomically একটা ক্রমবর্ধমান number দাও, আর storage যেন পুরনো token-ওয়ালা write reject করে।
             - Lock release করো compare-and-delete দিয়ে (Redis 8.4+-এ `DELEX key IFEQ token`, নইলে Lua script)।
         """,
+        quick_en=r"""A Redis lock is only a lease: a pause past the TTL, a failover that loses the lock, or an unsafe `DEL` can let two workers charge. Redlock still depends on timing, so it isn't a correctness guarantee. Enforce correctness where the side effect happens: an idempotency key, conditional DB updates and fencing tokens.""",
+        quick_bn=r"""Redis lock আসলে একটা lease: TTL পেরিয়ে যাওয়া pause, failover-এ lock হারানো বা unsafe `DEL`-এর কারণে দুটো worker charge করে ফেলতে পারে। Redlock-ও timing-এর ওপর নির্ভর করে, তাই correctness guarantee দেয় না। Correctness নিশ্চিত করো যেখানে side effect হয় সেখানে: idempotency key, conditional DB update আর fencing token দিয়ে।""",
         ex_en=r"""
             - **Why fencing works:** the storage, not the client, decides. If A (token 33) resumes after B (token 34) has written, the storage has already seen 34 and rejects 33. Note the token must be issued atomically with acquisition — if A paused between acquiring and `INCR`, it could get the *newer* token. Hence the Lua script below.
             - **The limit of fencing:** external APIs (a card network, SMS gateway) can't check your tokens. That's why idempotency keys at the provider are the real protection for payments.

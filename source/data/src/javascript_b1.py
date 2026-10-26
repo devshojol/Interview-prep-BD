@@ -50,6 +50,8 @@ QUESTIONS = [
 
             `typeof null` দেয় `"object"` — এটা JavaScript-এর একদম প্রথম implementation-এর একটা bug, যেটা ঠিক করলে পুরনো website ভেঙে যাবে বলে আর fix করা হয়নি। Array আসলে সাধারণ object, তাই `typeof []` হলো `"object"`। Function-ও object, কিন্তু `typeof` এদের জন্য আলাদা করে `"function"` দেয়। আর `NaN` ("not a number") নাম শুনে অদ্ভুত লাগলেও এটা `number` type-এরই একটা value।
         """,
+        quick_en=r"""It prints `object object function number undefined`. `typeof null` is `"object"` because of an old bug kept for compatibility, arrays are ordinary objects, functions get the special `"function"` result, and `NaN` is still a `number`.""",
+        quick_bn=r"""Output হলো `object object function number undefined`। `typeof null` `"object"` দেয় একটা পুরনো bug-এর কারণে, যেটা compatibility-র জন্য রেখে দেওয়া হয়েছে; array সাধারণ object, function-এর জন্য আলাদা `"function"` আসে, আর `NaN`-ও `number` type-এরই value।""",
         ex_en=r"""
             JavaScript has **8 data types**: 7 primitives (`string`, `number`, `bigint`, `boolean`, `undefined`, `symbol`, `null`) and `object` (which includes arrays, functions, dates, maps, etc.).
 
@@ -126,6 +128,8 @@ QUESTIONS = [
 
             তাই `add(2, 3)` শুরুতেই কাজ করে (`5`), `typeof multiply` হয় `"undefined"`, `total` হয় `undefined`, আর assignment-এর আগে `multiply` call করলে `TypeError` ("multiply is not a function") throw হয়। শেষে দুটো assignment-ই হয়ে গেছে, তাই output `6 10`।
         """,
+        quick_en=r"""Output: `5`, `undefined`, `undefined`, `TypeError`, `6 10`. The function declaration `add` is hoisted with its body, but `var total` and `var multiply` are hoisted as `undefined`, so calling `multiply` before its assignment throws a `TypeError`.""",
+        quick_bn=r"""Output: `5`, `undefined`, `undefined`, `TypeError`, `6 10`। Function declaration `add` body-সহ hoist হয়, কিন্তু `var total` আর `var multiply` hoist হয় `undefined` হিসেবে, তাই assignment-এর আগে `multiply` call করলে `TypeError` হয়।""",
         ex_en=r"""
             Step by step:
 
@@ -199,6 +203,8 @@ QUESTIONS = [
 
             প্রতিটি arrow function একটা **closure** — সে variable-টাকে মনে রাখে, value-র কোনো snapshot নয়। `var` হলে পুরো function scope-এ `i` মাত্র **একটা**, আর callback-গুলো চলে loop শেষ হওয়ার পরে (setTimeout একটা task schedule করে), তখন `i` ইতিমধ্যে `3`। `let` হলে loop **প্রতিটি iteration-এর জন্য নতুন binding** তৈরি করে, তাই প্রতিটি callback নিজের আলাদা `j` ধরে রাখে।
         """,
+        quick_en=r"""The `var` loop prints `var 3` three times and the `let` loop prints `let 0`, `let 1`, `let 2`. The callbacks run after the loop and close over the variable, not its value: `var` has one shared `i` (already `3`), while `let` creates a new `j` for every iteration.""",
+        quick_bn=r"""`var` loop তিনবার `var 3` print করে, আর `let` loop print করে `let 0`, `let 1`, `let 2`। Callback-গুলো loop শেষ হওয়ার পরে চলে এবং value নয়, variable-টাকেই মনে রাখে: `var`-এ পুরো loop-এ একটাই `i` (তখন `3`), আর `let` প্রতিটা iteration-এ নতুন `j` তৈরি করে।""",
         ex_en=r"""
             - The loop body runs synchronously and only *schedules* six callbacks. They run later, in order, after the call stack is empty.
             - `var i` is function-scoped (or global here), so all three closures share it. After the last `i++`, the condition `i < 3` fails with `i === 3`.
@@ -255,6 +261,8 @@ QUESTIONS = [
 
             বাস্তবে সবচেয়ে common ব্যবহার হলো private state রাখা। উদাহরণে `count` বাইরে থেকে access করা যায় না — শুধু `createCounter`-এর return করা function-গুলোর মাধ্যমে। নাম না নিয়েও আমি প্রতিদিন closure ব্যবহার করি: component-এর variable ব্যবহার করা event handler, timer বা cache ধরে রাখা `debounce`/`memoize` helper, আর `makeLogger('auth')`-এর মতো factory function।
         """,
+        quick_en=r"""A closure is a function that keeps access to the variables of the scope it was created in, even after that outer function has returned. That's how a returned counter function can keep its own private `count`.""",
+        quick_bn=r"""Closure হলো এমন একটা function, যেটা যে scope-এ তৈরি হয়েছে সেই scope-এর variable-গুলো outer function return করার পরেও ব্যবহার করতে পারে। এজন্যই return করা একটা counter function নিজের private `count` মনে রাখতে পারে।""",
         ex_en=r"""
             - **Lexical scoping:** what a function can see is decided by *where it is written*, not where it is called. Each function object keeps a hidden link (`[[Environment]]`) to its outer lexical environment.
             - **Live, not copied:** a closure sees the current value of the variable. Two closures created in the same call share the same variables (`increment` and `reset` below share `count`).
@@ -344,6 +352,8 @@ QUESTIONS = [
 
             তাই `1 + '2'` হয় `'12'`, `'5' - 2` হয় `3`, `'5' * '2'` হয় `10`, `true + 1` হয় `2`। Object string হয়ে যায়: `[]` → `''`, `{}` → `'[object Object]'`, `[1, 2]` → `'1,2'`। `null == undefined` একটা special case, ফল `true`। `NaN` কখনো নিজের সমান নয়, কিন্তু `Object.is` এটাকে একই value ধরে। শেষে `'0' == false` হয় `true` (দুটোই `0` হয়ে যায়), যদিও `'0'` নিজে truthy।
         """,
+        quick_en=r"""Output: `12`, `3`, `10`, `2`, `[object Object]`, `1,23`, `true false`, `false true`, `true true`. `+` concatenates as soon as one side becomes a string, other arithmetic converts to numbers, and `==` converts types before comparing while `===` doesn't.""",
+        quick_bn=r"""Output: `12`, `3`, `10`, `2`, `[object Object]`, `1,23`, `true false`, `false true`, `true true`। একদিকে string পেলেই `+` জোড়া লাগায়, বাকি arithmetic operator number-এ convert করে, আর `==` compare করার আগে type convert করে, `===` করে না।""",
         ex_en=r"""
             Line by line:
 
@@ -415,6 +425,8 @@ QUESTIONS = [
 
             যেসব object method বা prototype/class method-এ call site থেকে `this` দরকার, constructor-এ, বা যে DOM handler-এ `this` হিসেবে element চাই — সেখানে আমি arrow ব্যবহার করি না। কিন্তু method-এর ভেতরের callback-এ (`map`, `then`, `setTimeout`) arrow ব্যবহার করি, কারণ সেখানে lexical `this`-ই দরকার।
         """,
+        quick_en=r"""An arrow function has no own `this` (it uses the `this` of the surrounding scope), no `arguments`, and can't be used with `new`. So I avoid arrows for object or class methods that need the caller's `this`, for constructors and for DOM handlers that use `this`, but I use them for callbacks inside methods.""",
+        quick_bn=r"""Arrow function-এর নিজের `this` নেই (চারপাশের scope-এর `this` ব্যবহার করে), `arguments` নেই, আর `new` দিয়ে চালানো যায় না। তাই caller-এর `this` লাগে এমন object/class method, constructor বা `this` ব্যবহার করা DOM handler-এ আমি arrow লিখি না, কিন্তু method-এর ভেতরের callback-এ arrow-ই ব্যবহার করি।""",
         ex_en=r"""
             Regular function vs arrow function, point by point:
 
@@ -507,6 +519,8 @@ QUESTIONS = [
 
             এখানে দুটো জিনিস যাচাই হচ্ছে। প্রথমত, compare function না দিলে `sort`/`toSorted` element-গুলোকে **string হিসেবে** compare করে, তাই `"100"` আসে `"40"`-এর আগে। দ্বিতীয়ত, `toSorted()` (ES2023) একটা **নতুন** array return করে এবং `scores`-কে বদলায় না, কিন্তু `reverse()` `scores`-কে সরাসরি **mutate** করে।
         """,
+        quick_en=r"""`[1, 100, 40, 5]` and `[5, 1, 100, 40]`. Without a compare function `toSorted()` compares elements as strings and returns a new array, while `reverse()` mutates `scores` in place.""",
+        quick_bn=r"""`[1, 100, 40, 5]` আর `[5, 1, 100, 40]`। Compare function না দিলে `toSorted()` element-গুলোকে string হিসেবে compare করে এবং নতুন array return করে, আর `reverse()` `scores`-কেই বদলে দেয়।""",
         ex_en=r"""
             - The tempting option A assumes numeric sorting. For numbers always pass a comparator: `scores.toSorted((a, b) => a - b)` → `[1, 5, 40, 100]`.
             - Options C/D assume `reverse()` returns a copy. It doesn't — `sort`, `reverse`, `splice`, `fill`, `copyWithin`, `push/pop/shift/unshift` all mutate.

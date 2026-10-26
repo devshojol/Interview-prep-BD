@@ -44,6 +44,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`params` is a **Promise** in the App Router, so the page is `async` and does `const { slug } = await params`. The same applies to `searchParams`, `cookies()`, `headers()` and `draftMode()` — all request APIs are async-only in Next.js 16.""",
         a_bn=r"""App Router-এ `params` একটা **Promise**, তাই page-টা `async` হয় আর `const { slug } = await params` করে। `searchParams`, `cookies()`, `headers()` আর `draftMode()`-এর ক্ষেত্রেও একই কথা — Next.js 16-এ সব request API শুধু async।""",
+        quick_en=r"""Make the page `async` and write `const { slug } = await params`. In Next.js 16 `params` is a Promise, like `searchParams`, `cookies()` and `headers()`; `useRouter().query` and `getServerSideProps` are legacy Pages Router APIs.""",
+        quick_bn=r"""Page-কে `async` করো আর লেখো `const { slug } = await params`। Next.js 16-এ `params` একটা Promise, `searchParams`, `cookies()` আর `headers()`-এর মতোই; `useRouter().query` আর `getServerSideProps` হলো legacy Pages Router API।""",
         ex_en=r"""
             The tempting answer is the synchronous `params.slug`. That's how Next.js 13/14 worked; Next.js 15 made these APIs async but kept temporary synchronous access with warnings, and **Next.js 16 removed synchronous access**. The `next-async-request-api` codemod migrates most code.
 
@@ -86,6 +88,8 @@ QUESTIONS = [
             - **`not-found.tsx`** render হয় যখন তুমি `next/navigation` থেকে `notFound()` call করো (যেমন product id নেই), আর root স্তরে থাকলে যেকোনো না মেলা URL-এর জন্যও।
             - **`global-error.tsx`** root layout-এর নিজের error ধরে। এটা root layout-কে replace করে, তাই একে নিজের `<html>` আর `<body>` render করতে হয়।
         """,
+        quick_en=r"""`loading.tsx` is a Suspense fallback for the segment, `error.tsx` is a client error boundary with a `retry` function, `not-found.tsx` renders for `notFound()` and unmatched URLs, and `global-error.tsx` catches root-layout errors and renders its own `<html>` and `<body>`.""",
+        quick_bn=r"""`loading.tsx` segment-এর Suspense fallback, `error.tsx` হলো `retry` function-সহ একটা client error boundary, `not-found.tsx` দেখায় `notFound()` call বা মেলে না এমন URL-এ, আর `global-error.tsx` root layout-এর error ধরে এবং নিজের `<html>` ও `<body>` render করে।""",
         ex_en=r"""
             **Nesting order inside a segment:** `layout` → `template` → `error` → `loading` → `not-found` → `page`. Because the error boundary sits *inside* the layout, an error thrown by a segment's own `layout.tsx` is handled by the parent segment's `error.tsx`.
 
@@ -163,6 +167,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""By default environment variables are **server-only**. To use one in browser code it must be named `NEXT_PUBLIC_API_URL`; during `next build` Next.js replaces each `process.env.NEXT_PUBLIC_*` reference with the literal value.""",
         a_bn=r"""Default-ভাবে environment variable **শুধু server-এর জন্য**। Browser code-এ ব্যবহার করতে হলে নাম হতে হবে `NEXT_PUBLIC_API_URL`; `next build`-এর সময় Next.js প্রতিটা `process.env.NEXT_PUBLIC_*` reference আসল value দিয়ে বদলে দেয়।""",
+        quick_en=r"""Only variables prefixed with `NEXT_PUBLIC_` reach the browser; everything else is server-only. At `next build` each `process.env.NEXT_PUBLIC_*` is replaced with its literal value, so rename it to `NEXT_PUBLIC_API_URL` and rebuild.""",
+        quick_bn=r"""শুধু `NEXT_PUBLIC_` prefix দেওয়া variable browser-এ যায়; বাকি সব server-only। `next build`-এর সময় প্রতিটা `process.env.NEXT_PUBLIC_*` আসল value দিয়ে বদলে যায়, তাই নাম `NEXT_PUBLIC_API_URL` করে আবার build করো।""",
         ex_en=r"""
             The server-only default is a security feature: database URLs and API secrets never end up in the bundle. The flip side is that **anything with `NEXT_PUBLIC_` is public** — never put secrets there.
 
@@ -215,6 +221,8 @@ QUESTIONS = [
 
             **আগের model**-এ (flag বন্ধ থাকলে এখনো এটাই চলে) caching route বা fetch অনুযায়ী configure করা হতো: `export const revalidate = 60`, `export const dynamic = 'force-dynamic'`, `fetch(url, { next: { revalidate, tags } })` আর `unstable_cache`। Next.js 15 থেকে সেখানেও `fetch` default-ভাবে cache হয় না।
         """,
+        quick_en=r"""With Cache Components (`cacheComponents: true`) everything is dynamic and caching is opt-in: `'use cache'` caches a function or component, `cacheLife` sets how long and `cacheTag` labels it for invalidation. The previous model used route/fetch options like `revalidate` and `dynamic`.""",
+        quick_bn=r"""Cache Components (`cacheComponents: true`)-এ সবকিছু dynamic, আর caching নিজে চালু করতে হয়: `'use cache'` function বা component cache করে, `cacheLife` ঠিক করে কতক্ষণ, আর `cacheTag` invalidate করার জন্য label দেয়। আগের model-এ route/fetch-এর `revalidate` আর `dynamic`-এর মতো option ব্যবহার হতো।""",
         ex_en=r"""
             - **No request data inside a cache scope:** calling `cookies()`/`headers()` inside `'use cache'` is an error. Read them outside and pass the *values* as arguments (they become part of the key). `'use cache: private'` exists for rare cases that must read runtime data directly; `'use cache: remote'` stores entries in a shared cache handler.
             - **Runtime storage:** by default entries live in an in-memory LRU per server instance. On serverless they often don't survive between requests; self-hosted multi-instance setups need a shared `cacheHandlers` implementation.
@@ -300,6 +308,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`updateTag('user-42')`. It can only be called in Server Actions and **expires the tag immediately**, so the next request waits for fresh data instead of serving the stale entry — designed for read-your-own-writes.""",
         a_bn=r"""`updateTag('user-42')`। এটা শুধু Server Action-এ call করা যায় আর **tag সাথে সাথে expire করে**, ফলে পরের request পুরনো entry না দেখিয়ে fresh data-র জন্য অপেক্ষা করে — read-your-own-writes-এর জন্যই এটা তৈরি।""",
+        quick_en=r"""`updateTag('user-42')`. It works only in Server Actions and expires the tag immediately, so the next request waits for fresh data (read-your-own-writes), while `revalidateTag(tag, 'max')` would still serve the stale entry once.""",
+        quick_bn=r"""`updateTag('user-42')`। এটা শুধু Server Action-এ চলে আর tag সাথে সাথে expire করে, তাই পরের request fresh data-র জন্য অপেক্ষা করে (read-your-own-writes); `revalidateTag(tag, 'max')` হলে একবার পুরনো entry দেখাত।""",
         ex_en=r"""
             The tempting wrong answer is `revalidateTag('user-42', 'max')`. It marks the data stale with **stale-while-revalidate** semantics: the next request is still served the cached (old) name while fresh data loads in the background. That's ideal for content where a short delay is fine — e.g. a CMS webhook calling a Route Handler (where `updateTag` isn't allowed) — but wrong for "I just changed it".
 
@@ -351,6 +361,8 @@ QUESTIONS = [
 
             ফলাফল: user প্রায় সাথে সাথে product দেখে; review পরে আসে, কোনো কিছু আটকে না রেখে।
         """,
+        quick_en=r"""Fix the waterfall and the all-or-nothing render: split the page into independent async components so fetches run in parallel, wrap slow ones in `<Suspense>` to stream them, and cache shareable data with `'use cache'`. The product shows almost at once and reviews arrive later.""",
+        quick_bn=r"""Waterfall আর all-or-nothing render দুটোই ঠিক করো: page-কে আলাদা async component-এ ভাগ করো যাতে fetch parallel-এ চলে, ধীরগুলো `<Suspense>`-এ রেখে stream করো, আর share করা যায় এমন data `'use cache'` দিয়ে cache করো। Product প্রায় সাথে সাথে দেখা যায়, review পরে আসে।""",
         ex_en=r"""
             **Why the page doesn't await `params` itself:** with Cache Components, awaiting runtime data (like `params` without `generateStaticParams`) outside `<Suspense>` blocks prerendering. Passing the `params` promise down and awaiting it inside each Suspense boundary keeps the shell static.
 
@@ -455,6 +467,8 @@ QUESTIONS = [
 
             প্রতিটা instance-এ সরাসরি request পাঠিয়ে যাচাই করো, staging-এ `NEXT_PRIVATE_DEBUG_CACHE=1` দিয়ে। আর টাকার ব্যাপারে checkout Server Action-কে সবসময় database থেকে দাম আবার পড়তে হবে — cache কখনো source of truth না।
         """,
+        quick_en=r"""Walk the cache layers with evidence: browser, CDN headers, whether the data has a tag the webhook invalidates, then `'max'` stale-while-revalidate semantics. The likely culprit is three instances with separate caches, so add a shared cache handler and use `{ expire: 0 }` for prices.""",
+        quick_bn=r"""Evidence দেখে cache layer-গুলো একে একে দেখো: browser, CDN header, data-তে এমন tag আছে কিনা যা webhook invalidate করে, তারপর `'max'`-এর stale-while-revalidate আচরণ। সম্ভাব্য কারণ তিনটা instance-এর আলাদা cache, তাই shared cache handler যোগ করো আর price-এর জন্য `{ expire: 0 }` ব্যবহার করো।""",
         ex_en=r"""
             **Common root causes, in order of how often I'd expect them:** tag mismatch (`product:42` vs `product-42`), webhook never reaching the app (wrong URL, failing secret check, firewall), per-instance caches, CDN caching HTML longer than the app's revalidation window, and SWR semantics misunderstood as "immediate".
 
@@ -557,6 +571,8 @@ QUESTIONS = [
 
             **Rollout-এর নিরাপত্তা:** প্রতি route-এ Playwright test, canary release, আর SEO check (status code, canonical URL, sitemap, structured data)। প্রতিটা migrate হওয়া route-এর Core Web Vitals আর conversion পর্যবেক্ষণ।
         """,
+        quick_en=r"""Migrate incrementally, since `pages/` and `app/` can coexist: upgrade to Next.js 16 in place (`middleware.ts` to `proxy.ts`), build the `app/` foundation, then move routes from lowest to highest risk. Replace `getServerSideProps` with async Server Components and `getStaticProps` with `'use cache'`.""",
+        quick_bn=r"""ধীরে ধীরে migrate করো, কারণ `pages/` আর `app/` একসাথে চলতে পারে: আগে জায়গায় থেকেই Next.js 16-এ upgrade (`middleware.ts` থেকে `proxy.ts`), তারপর `app/`-এর ভিত্তি তৈরি, তারপর কম ঝুঁকি থেকে বেশি ঝুঁকির route সরাও। `getServerSideProps`-এর বদলে async Server Component, আর `getStaticProps`-এর বদলে `'use cache'`।""",
         ex_en=r"""
             **Risks and how I'd handle them**
             - **Hard navigations between routers:** moving from a `pages/` route to an `app/` route is a full page load. Migrate tightly linked routes (category ↔ product) in the same release to avoid a "flickery" experience.

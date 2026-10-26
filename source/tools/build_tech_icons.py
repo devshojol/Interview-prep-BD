@@ -38,6 +38,12 @@ GENERIC = {
     # Three vectors from an origin: no single vector database owns a logo.
     'vectordb': {'viewBox': '0 0 24 24', 'stroke': True, 'title': 'Vector databases (generic vector symbol)',
                  'd': 'M4 20 19 5 M19 5h-5 M19 5v5 M4 20h16 M20 20l-3-3 M20 20l-3 3 M4 20 9 7 M9 7l-3.4 1.2 M9 7l1 3.4'},
+    # Phone outline: React Native shares React's logo, so a device symbol keeps the two apart.
+    'reactnative': {'viewBox': '0 0 24 24', 'stroke': True, 'title': 'React Native (generic mobile symbol)',
+                    'd': 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z M11 18h2'},
+    # Speech bubble: the behavioural/project category is about how you talk through your work.
+    'behavioral': {'viewBox': '0 0 24 24', 'stroke': True, 'title': 'Behavioural & projects (generic speech symbol)',
+                   'd': 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 9h8 M8 13h5'},
 }
 SURFACE = {'dark': (0x15, 0x1E, 0x33), 'light': (0xFF, 0xFF, 0xFF)}
 
@@ -99,8 +105,8 @@ def main(si_dir, dv_dir):
     for tid, ic in out.items():
         ic['dark'] = themed(ic['brand'], 'dark') if ic['brand'] else None
         ic['light'] = themed(ic['brand'], 'light') if ic['brand'] else None
-    order = ['html', 'css', 'javascript', 'react', 'nextjs', 'nodejs', 'express', 'nestjs', 'mongodb', 'mongoose',
-             'postgresql', 'sql', 'drizzle', 'redis', 'vectordb', 'docker', 'nginx', 'aws']
+    order = ['html', 'css', 'javascript', 'react', 'nextjs', 'reactnative', 'nodejs', 'express', 'nestjs', 'mongodb', 'mongoose',
+             'postgresql', 'sql', 'drizzle', 'redis', 'vectordb', 'docker', 'nginx', 'aws', 'behavioral']
     assert sorted(order) == sorted(out), 'tech id mismatch'
     data = {tid: out[tid] for tid in order}
     with open(os.path.join(ROOT, 'data', 'tech-icons.json'), 'w', encoding='utf-8') as f:

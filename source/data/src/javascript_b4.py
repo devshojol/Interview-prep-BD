@@ -60,6 +60,8 @@ QUESTIONS = [
 
             Memoization কেবল **pure function**-এর জন্য নিরাপদ — একই input-এ সবসময় একই output, কোনো side effect নেই (network call নেই, `Date.now()` পড়া নেই, argument mutate করা নেই)। এটাই FP-এর মূল ধারণা: pure function referentially transparent, তাই একটা call-কে তার result দিয়ে বদলে দেওয়া যায়। Memoize, debounce, compose, curry — সবই closure-এর উপর তৈরি higher-order function-এর উদাহরণ।
         """,
+        quick_en=r"""Return a function that closes over a `Map`: build a key, return the cached value on a hit, otherwise call `fn.apply(this, args)` and store the result. For LRU, delete and re-insert the key on a hit and evict the first key when the size passes `maxSize`; memoize only pure functions.""",
+        quick_bn=r"""এমন একটা function return করি যেটা একটা `Map`-এর উপর closure রাখে: key বানাই, cache-এ থাকলে সেটা return করি, না থাকলে `fn.apply(this, args)` call করে result রেখে দিই। LRU-র জন্য hit হলে key delete করে আবার insert করি, আর size `maxSize` ছাড়ালে প্রথম key বাদ দিই; memoize শুধু pure function-এর জন্য নিরাপদ।""",
         ex_en=r"""
             - **Key pitfalls:** `JSON.stringify` treats `{a:1,b:2}` and `{b:2,a:1}` as different keys, turns `undefined` and functions into `null` inside arrays (so two different callback arguments produce the same key), drops them from objects, and throws on cycles/BigInt. For a single object argument, key by identity with a `WeakMap` — entries disappear when the object is garbage-collected.
             - **Recursion:** `fib` must call the *memoized* version, otherwise only the top-level call is cached.
@@ -178,6 +180,8 @@ QUESTIONS = [
         a_bn=r"""
             `rejected: User 7 not found`। `return fetchUser(id)` promise-টাকে **await না করেই** return করে। (তখনও pending) promise return হওয়ার মুহূর্তেই `try` block সফলভাবে শেষ হয়ে যায়, তাই `catch` কখনো চলে না। Rejection ঘটে তার পরে, আর `getUserName`-এর promise সেটাই গ্রহণ করে। সমাধান হলো `return await fetchUser(id);` — তাহলে rejection `try`-এর ভেতরেই throw হয় এবং catch হয়।
         """,
+        quick_en=r"""`rejected: User 7 not found`. `return fetchUser(id)` returns the pending promise without awaiting it, so the `try` block finishes before the rejection happens and the `catch` never runs; `return await fetchUser(id)` fixes it.""",
+        quick_bn=r"""`rejected: User 7 not found`। `return fetchUser(id)` promise-টা await না করেই return করে, তাই rejection ঘটার আগেই `try` block শেষ হয়ে যায় আর `catch` কখনো চলে না; `return await fetchUser(id)` লিখলে ঠিক হয়।""",
         ex_en=r"""
             - **Option A** is what the author intended — and the reason this bug survives code review.
             - **Option D** is wrong because an async function never throws synchronously: any error inside it becomes a rejection of its returned promise.
@@ -250,6 +254,8 @@ QUESTIONS = [
 
             হাজার হাজার order হলে সব একসাথে না পাঠিয়ে concurrency limit যোগ করব।
         """,
+        quick_en=r"""`forEach` ignores the promises its `async` callback returns, so nothing awaits the saves: the log and `return` run while `saved` is still `0`, and failed saves become unhandled rejections. Use `for...of` with `await` for sequential saves, or `await Promise.all(orders.map(...))` for parallel ones.""",
+        quick_bn=r"""`forEach` তার `async` callback-এর return করা promise-গুলো ফেলে দেয়, তাই কেউ save-গুলোর জন্য অপেক্ষা করে না: `saved` তখনও `0` থাকতেই log আর `return` চলে যায়, আর fail করা save unhandled rejection হয়ে যায়। একটার পর একটা save করতে `for...of` + `await`, আর parallel-এ করতে `await Promise.all(orders.map(...))` ব্যবহার করো।""",
         ex_en=r"""
             - The same trap exists with `map` used without `Promise.all`, with `filter(async ...)` (an async predicate always returns a truthy promise, so nothing is filtered), and with `reduce(async ...)` unless you await the accumulator.
             - `for...of` + `await` is O(n) round-trips in series — simple but slow. `Promise.all` overlaps them but is fail-fast: the first rejection rejects the whole call while other saves keep running.
@@ -321,6 +327,8 @@ QUESTIONS = [
 
             Outer reference নেওয়া হয় function যেখানে **define** করা হয়েছে সেখান থেকে, যেখানে call হচ্ছে সেখান থেকে নয় (lexical scoping)। Function object ওই environment-টা সংরক্ষণ করে, তাই function যদি তার parent call-এর চেয়ে বেশি দিন বাঁচে, parent-এর environment-ও বেঁচে থাকে — এটাই closure। `this`-ও context থেকেই ঠিক হয়।
         """,
+        quick_en=r"""Each function call creates an execution context, pushed onto the call stack (LIFO) and popped on return. Its lexical environment holds its variables plus a link to the outer environment where the function was defined; lookups walk that scope chain, and a function that outlives its parent keeps that environment alive (a closure).""",
+        quick_bn=r"""প্রতিটা function call একটা execution context তৈরি করে, যেটা call stack-এ (LIFO) push হয় আর return করলে pop হয়। তার lexical environment-এ থাকে নিজের variable আর function যেখানে define হয়েছে সেই outer environment-এর reference; variable খোঁজা হয় এই scope chain ধরে, আর function তার parent call-এর পরেও বেঁচে থাকলে parent-এর environment-ও closure হিসেবে বেঁচে থাকে।""",
         ex_en=r"""
             - **Two phases per context:** creation (environment record set up: function declarations get their value, `var` → `undefined`, `let`/`const`/`class` stay uninitialised → temporal dead zone) and execution (code runs line by line).
             - **Block scopes:** `{ }`, `for`, `if` blocks with `let`/`const` get their own small lexical environments inside the function's context.
@@ -370,7 +378,7 @@ QUESTIONS = [
         id="js-026", sub="Modules (ESM vs CommonJS)", diff="medium", type="comparison",
         prio="high", market="both", mins=6,
         tags=["esm", "commonjs", "modules", "node", "require-esm"],
-        ver="ES2015+ modules; ES2025 import attributes; Node.js 24 LTS / 26 (`require(esm)` since 22.12 / 20.19)", vs=True, status="stable",
+        ver="ES2015+ modules; ES2025 import attributes; Node.js 26 LTS / 24 (`require(esm)` since 22.12 / 20.19)", vs=True, status="stable",
         q_en=r"""Compare ES modules (`import`/`export`) with CommonJS (`require`/`module.exports`). What are the practical differences in Node.js today?""",
         q_bn=r"""ES module (`import`/`export`) আর CommonJS (`require`/`module.exports`) তুলনা করো। আজকের Node.js-এ বাস্তবে পার্থক্যগুলো কী?""",
         a_en=r"""
@@ -395,6 +403,8 @@ QUESTIONS = [
 
             নতুন project-এ আমি সব জায়গায় ESM ব্যবহার করি।
         """,
+        quick_en=r"""ES modules are the standard: static `import`/`export`, live read-only bindings, top-level `await`, strict mode, no `__dirname`. CommonJS `require()` is a synchronous runtime call that returns whatever is on `module.exports`; in Node, ESM can import CJS, and CJS can `require()` synchronous ESM since 22.12 / 20.19.""",
+        quick_bn=r"""ES module হলো standard: static `import`/`export`, live read-only binding, top-level `await`, strict mode, আর `__dirname` নেই। CommonJS-এর `require()` runtime-এ চলা একটা synchronous call, যেটা `module.exports`-এ যা আছে তা-ই দেয়; Node-এ ESM CJS import করতে পারে, আর 22.12 / 20.19 থেকে CJS synchronous ESM-কে `require()` করতে পারে।""",
         ex_en=r"""
             - **Live bindings demo:** in the example, ESM prints `1` after `increment()` because `count` is a live view of the exporter's variable; CommonJS prints `0` because destructuring copied the number.
             - **Circular dependencies:** CommonJS gives you a *partially filled* `module.exports`; ESM gives live bindings, and reading a `let`/`const`/`class` export before it's initialised throws a `ReferenceError` (TDZ) — both mean "restructure the code".
@@ -483,6 +493,8 @@ QUESTIONS = [
         a_bn=r"""
             `[4, 16, 36]` log হবে। Iterator helper **lazy**: `toArray()` value টেনে না নেওয়া পর্যন্ত কিছুই চলে না। প্রতিটি টান chain-এর মধ্য দিয়ে একবারে একটা value নিয়ে যায় — `filter` রাখে 2, 4, 6…, `map` সেগুলোর বর্গ করে, আর `take(3)` তিনটা value পেলেই থেমে generator বন্ধ করে দেয়। Generator object `Iterator.prototype` থেকে inherit করে, তাই এই method-গুলো তাদের আছে।
         """,
+        quick_en=r"""It logs `[4, 16, 36]`. Iterator helpers are lazy: values are pulled one at a time through `filter`, `map` and `take(3)`, which stops after three values and closes the generator, so the infinite generator never has to finish.""",
+        quick_bn=r"""এটা `[4, 16, 36]` log করে। Iterator helper lazy: value একটা একটা করে `filter`, `map` আর `take(3)` দিয়ে টানা হয়, আর `take(3)` তিনটা value পেয়েই থেমে generator বন্ধ করে দেয়, তাই infinite generator-কে কখনো শেষ হতে হয় না।""",
         ex_en=r"""
             - **Option B** is how *array* methods behave: `[...].filter()` builds a full new array before `map` runs. With an infinite source that would never finish — which is exactly what iterator helpers avoid.
             - **Option C** assumes `take` runs before `filter`; the chain order is respected.
@@ -563,6 +575,8 @@ QUESTIONS = [
         a_bn=r"""
             `750 undefined ['owner'] false 1`। `#balance` একটা আসল **private field** (ES2022), অদ্ভুত নামের property নয়: `w['#balance']` সাধারণ string key খোঁজে এবং কিছুই পায় না, আর `Object.keys` (সাথে `JSON.stringify`, spread, `structuredClone`-ও) এটা দেখতে পায় না। `#balance in obj` হলো valid ES2022 **brand check**, যেটা কেবল সেই object-এর জন্য `true` দেয় যেটা সত্যিই `Wallet` দিয়ে construct হয়েছে। Static private `#count` একবার বেড়েছে।
         """,
+        quick_en=r"""`750 undefined ['owner'] false 1`. `#balance` is a real private field, so `w['#balance']` and `Object.keys` can't see it, and `#balance in obj` is a valid brand check that is `true` only for objects actually created by `Wallet`.""",
+        quick_bn=r"""`750 undefined ['owner'] false 1`। `#balance` সত্যিকারের private field, তাই `w['#balance']` বা `Object.keys` এটা দেখতে পায় না; আর `#balance in obj` একটা valid brand check, যেটা শুধু `Wallet` দিয়ে তৈরি object-এর জন্য `true` হয়।""",
         ex_en=r"""
             - **Option C** is the duck-typing trap: `{ balance: 750 }` *looks* like a wallet, but it has no `#balance` slot, so the brand check is `false`.
             - **Option B** treats `#balance` like a string key — it isn't one; the `#` is part of the syntax.

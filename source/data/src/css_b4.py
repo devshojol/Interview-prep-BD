@@ -57,6 +57,8 @@ QUESTIONS = [
 
             সমাধান হলো `:focus-visible`। Browser কিছু heuristic দিয়ে এটা শুধু তখনই match করায়, যখন focus indicator কাজের — keyboard দিয়ে navigate করার পর, আর text input-এ সবসময় — আর সাধারণত mouse দিয়ে button click করলে *নয়*। তাই আমি global `outline: none` মুছে ফেলি, আর `:focus-visible`-এর জন্য একটা স্পষ্ট, brand-এর সাথে মানানসই focus style বানাই: offset-সহ মোটা outline, এমন রঙে যেটা আশেপাশের রঙের সাথে কমপক্ষে 3:1 contrast রাখে।
         """,
+        quick_en=r"""`*:focus { outline: none; }` makes keyboard focus invisible and fails WCAG 2.4.7 Focus Visible. Remove it and style `:focus-visible` instead, which browsers show for keyboard navigation but usually not for mouse clicks, with a clear outline at 3:1 contrast.""",
+        quick_bn=r"""`*:focus { outline: none; }` keyboard focus অদৃশ্য করে দেয়, যা WCAG 2.4.7 Focus Visible ভাঙে। এটা মুছে `:focus-visible` style করো, যেটা browser keyboard navigation-এ দেখায় কিন্তু mouse click-এ সাধারণত দেখায় না, সাথে 3:1 contrast-এর স্পষ্ট outline।""",
         ex_en=r"""
             - **Outline vs box-shadow:** `outline` doesn't affect layout and remains visible in Windows forced-colours (high contrast) mode, while `box-shadow` is removed there. If you design focus with `box-shadow`, add `outline: 2px solid transparent` so a visible outline appears in forced-colours mode.
             - **Contrast:** the focus indicator is a UI component, so WCAG 1.4.11 asks for 3:1 against adjacent colours. A two-tone indicator (e.g. outline + `outline-offset` on a coloured button) works on both light and dark backgrounds.
@@ -123,6 +125,8 @@ QUESTIONS = [
         a_bn=r"""
             **4.5:1** (success criterion 1.4.3, *Contrast (Minimum)*)। বড় text — কমপক্ষে 24px regular বা প্রায় 18.7px bold — এর জন্য 3:1 লাগে, আর 7:1 হলো আরও কড়া AAA level।
         """,
+        quick_en=r"""4.5:1 for normal text (WCAG 1.4.3). Large text, at least 24px regular or about 18.7px bold, needs 3:1, and 7:1 is the stricter AAA level.""",
+        quick_bn=r"""সাধারণ text-এর জন্য 4.5:1 (WCAG 1.4.3)। বড় text, অর্থাৎ কমপক্ষে 24px regular বা প্রায় 18.7px bold, তার জন্য 3:1, আর 7:1 হলো আরও কড়া AAA level।""",
         ex_en=r"""
             The tempting wrong answer is 3:1, because that number appears twice in WCAG: for **large text** and for **non-text contrast** (1.4.11) — input borders, icons, focus indicators and chart elements against their surroundings. Option D is a misconception: the requirement doesn't change with the theme, so dark mode needs the same ratios.
 
@@ -185,6 +189,8 @@ QUESTIONS = [
 
             Sidebar-এর height-এও একটা সীমা দেব (`max-height: calc(100dvh - 32px); overflow-y: auto;`), যাতে লম্বা filter list নিজের ভেতরে scroll করা যায়।
         """,
+        quick_en=r"""Three causes: there's no `top` inset; `overflow-x: hidden` makes `.page` a scroll container, so the sidebar sticks to the wrong scroller; and flex stretch makes `.filters` as tall as the list. Add `top: 16px`, use `overflow-x: clip` (or fix the overflow) and `align-self: flex-start`.""",
+        quick_bn=r"""তিনটা কারণ: `top` inset নেই; `overflow-x: hidden` `.page`-কে scroll container বানায়, তাই sidebar ভুল scroller-এ আটকাতে চায়; আর flex stretch `.filters`-কে list-এর সমান লম্বা করে দেয়। `top: 16px` দাও, `overflow-x: clip` ব্যবহার করো (বা overflow-এর কারণ ঠিক করো), আর `align-self: flex-start` দাও।""",
         ex_en=r"""
             - **Sticky's mental model:** it's relative positioning that switches to "fixed-like" within the bounds of (a) its nearest scrolling ancestor and (b) its parent's box. Most bugs violate one of those two.
             - **`clip` vs `hidden`:** `overflow: clip` (now supported in all modern browsers) clips painting but is not a scroll container, so it doesn't capture sticky descendants and can't be scrolled programmatically.
@@ -255,6 +261,8 @@ QUESTIONS = [
 
             **Accessibility:** শুধু `vw` দিয়ে font size দিলে user browser-এর default font size বাড়ালেও এটা বাড়ে না, page zoom করলেও বাড়ে না (zoom করলে CSS pixel-এ viewport ছোট হয়, তাই `vw`-ও ছোট হয়) — এতে WCAG 1.4.4 *Resize Text* ভঙ্গ হতে পারে। সীমাগুলো আর preferred value-র একটা অংশ `rem`-এ রাখলে user-এর font setting আর zoom তখনো কাজ করে। তবুও আমি 200% zoom আর বড় default font size দিয়ে test করি, আর heading-এর তুলনায় body text-কে অনেক কম fluid রাখি।
         """,
+        quick_en=r"""`font-size: clamp(1.5rem, 1.0714rem + 1.9048vw, 2.5rem)`: a linear `rem` + `vw` value that is 24px at 360px and 40px at 1200px. Pure `vw` ignores the user's font size and zoom, so keeping a `rem` part matters for accessibility.""",
+        quick_bn=r"""`font-size: clamp(1.5rem, 1.0714rem + 1.9048vw, 2.5rem)`: একটা linear `rem` + `vw` value, যা 360px-এ 24px আর 1200px-এ 40px। শুধু `vw` দিলে user-এর font size আর zoom উপেক্ষিত হয়, তাই accessibility-র জন্য একটা `rem` অংশ রাখা জরুরি।""",
         ex_en=r"""
             - **Why not media-query steps?** Steps work, but they jump at each breakpoint and need several rules; `clamp()` is one declaration that's continuous.
             - **Component-level fluid type:** inside a container query container, `cqi` units (`1.0714rem + 4cqi`) make the heading respond to the card's width instead of the viewport.
@@ -324,6 +332,8 @@ QUESTIONS = [
         a_bn=r"""
             প্রথম option-টা। `&` parent selector-এর প্রতিনিধি: এর পরে space থাকলে মানে **descendant** (`.card .title`), space না থাকলে একই element-এর **compound** selector (`.card.featured`), আর `&` যেকোনো জায়গায় বসতে পারে — `.sidebar &` মানে "`.sidebar`-এর ভেতরের একটা `.card`"।
         """,
+        quick_en=r"""A is `.card .title`, B is `.card.featured` and C is `.sidebar .card`. A space after `&` means descendant, no space means the same element, and `&` can appear anywhere, including at the end.""",
+        quick_bn=r"""A হলো `.card .title`, B হলো `.card.featured`, আর C হলো `.sidebar .card`। `&`-এর পরে space মানে descendant, space না থাকলে একই element, আর `&` যেকোনো জায়গায় বসতে পারে, শেষেও।""",
         ex_en=r"""
             The tempting wrong answer is D, because older docs and early browser implementations had stricter rules. Native nesting allows `&` anywhere in the nested selector, and modern browsers also accept nested selectors that don't start with `&` (`.title { … }` inside `.card` means `.card .title`).
 
@@ -382,6 +392,8 @@ QUESTIONS = [
             - In-app browser আর পুরোনো Android WebView-এর জন্য analytics দেখো, এগুলো সর্বশেষ Chrome-এর চেয়ে পিছিয়ে থাকতে পারে — social media app থেকে আসা traffic-এ এটা সাধারণ।
             - Polyfill শুধু তখনই, যখন feature-টা অপরিহার্য আর polyfill ছোট ও maintain করা হয়।
         """,
+        quick_en=r"""Use Baseline plus your own analytics: ship widely available features (nesting, `:has()`, size queries, layers, subgrid) freely, use newly available ones like style queries and `@scope` as enhancements, and keep limited ones like anchor positioning behind `@supports` with a working fallback.""",
+        quick_bn=r"""Baseline আর নিজের analytics মিলিয়ে ঠিক করি: widely available feature (nesting, `:has()`, size query, layer, subgrid) নির্দ্বিধায় ship করি, style query বা `@scope`-এর মতো newly available feature enhancement হিসেবে দিই, আর anchor positioning-এর মতো limited feature কার্যকর fallback-সহ `@supports`-এর পেছনে রাখি।""",
         ex_en=r"""
             **What the newer features are for:**
             - **`@scope (.card) to (.reviews)`** limits styles to a subtree with a lower boundary ("donut scope") and adds *scoping proximity* to the cascade — the closer scope root wins.
@@ -464,6 +476,8 @@ QUESTIONS = [
             - **`content-visibility: hidden`** — element-এর box থাকে, কিন্তু এর **ভেতরের content** render হয় না, পড়া হয় না, focus-ও করা যায় না; rendering state cache থাকে, তাই আবার দেখানো দ্রুত হয়। ঘনঘন toggle করা hidden tab বা panel-এর জন্য ভালো।
             - **`aria-hidden="true"`** — পুরোপুরি দৃশ্যমান, কিন্তু শুধু **assistive tech থেকে লুকানো**। Decorative duplicate-এর জন্য (text-এর পাশের icon)। Focus করা যায় এমন content-এ কখনো দিও না।
         """,
+        quick_en=r"""`display: none` and `hidden` remove the element completely; `visibility: hidden` keeps its space but hides it from everyone; `opacity: 0` still takes clicks, focus and screen readers; a visually-hidden class stays readable by screen readers; `aria-hidden="true"` hides it only from assistive tech.""",
+        quick_bn=r"""`display: none` আর `hidden` element-কে পুরোপুরি সরিয়ে দেয়; `visibility: hidden` জায়গা রাখে কিন্তু সবার কাছ থেকে লুকায়; `opacity: 0`-এ click, focus আর screen reader সব চলে; visually-hidden class screen reader পড়তে পারে; `aria-hidden="true"` শুধু assistive tech থেকে লুকায়।""",
         ex_en=r"""
             - **Related tool — `inert`:** visible but not focusable, clickable or exposed to assistive tech; ideal for background content behind a custom overlay or an off-screen drawer while it's closed.
             - **Animating "hidden" states:** `display` and `visibility` can't animate smoothly on their own. Animate `opacity`/`transform`, then switch `visibility` at the end of the transition (it transitions discretely), or use `@starting-style` with `transition-behavior: allow-discrete` for `display`.
@@ -550,6 +564,8 @@ QUESTIONS = [
 
             **4. Guardrail।** Cascade layer-এর ভেতরে custom property হিসেবে token; ভবিষ্যতের জন্য logical property (`margin-inline`, `padding-block`); touch target কমপক্ষে 24×24 CSS px (WCAG 2.5.8), সম্ভব হলে আরও বড়; `prefers-reduced-motion`; আর **দুই ভাষাতেই** 320px, 768px আর 1440px-এ visual regression test।
         """,
+        quick_en=r"""This is advanced: mobile-first media queries for the page, container queries so the card adapts to its slot, and a fluid `clamp()` type scale in `rem`. Use `:lang(bn)` for Bangla fonts with taller line-height and no letter-spacing, subset WOFF2 fonts, and test both languages at 320px.""",
+        quick_bn=r"""এটা advanced বিষয়: page-এর জন্য mobile-first media query, card যাতে নিজের জায়গা অনুযায়ী বদলায় সেজন্য container query, আর `rem`-এ fluid `clamp()` type scale। Bangla font-এর জন্য `:lang(bn)` দিয়ে বেশি line-height আর letter-spacing ছাড়া style, subset করা WOFF2 font, আর 320px-এ দুই ভাষাতেই test।""",
         ex_en=r"""
             **Data flow of a layout decision:** viewport width → media query picks the page template → each slot's width → container query picks the component layout → fluid tokens size type and spacing. Each layer has one job, which keeps debugging simple.
 

@@ -58,6 +58,10 @@
    "nest-008",
    "drizzle-019"
   ],
+  "quickAnswer": {
+   "en": "Use a `@Catch()` filter registered via `APP_FILTER` that replies through `HttpAdapterHost`, so it works on Express and Fastify. `HttpException` keeps its status and body, a `23505` code found after unwrapping `DrizzleQueryError.cause` becomes 409, and anything else becomes a generic 500 logged with its stack.",
+   "bn": "`APP_FILTER` দিয়ে register করা একটা `@Catch()` filter ব্যবহার করি, যেটা `HttpAdapterHost` দিয়ে reply দেয়, তাই Express আর Fastify দুটোতেই চলে। `HttpException` নিজের status আর body রাখে, `DrizzleQueryError.cause` unwrap করে `23505` পেলে 409, আর বাকি সব generic 500 যেটা stack-সহ log হয়।"
+  },
   "commonMistakes": {
    "en": "Returning `exception.message` for unknown errors (leaks internals); using Express-only `response.status().json()` in a shared filter; logging every 4xx as an error; checking `err.code` on the Drizzle wrapper instead of `err.cause.code`.",
    "bn": "Unknown error-এর জন্য `exception.message` return করা (internal জিনিস leak হয়); shared filter-এ শুধু Express-এর `response.status().json()` ব্যবহার করা; প্রতিটা 4xx-কে error হিসেবে log করা; `err.cause.code`-এর বদলে Drizzle wrapper-এর `err.code` check করা।"
@@ -129,6 +133,10 @@
    "nest-025",
    "nest-028"
   ],
+  "quickAnswer": {
+   "en": "Profile first: Fastify cuts framework overhead, but most APIs spend their time in the database, so switch only with measured evidence. Express middleware, `@Res()` code and bootstrap (`listen(port, '0.0.0.0')`) must change, so make the code platform-agnostic, run e2e and load tests, then canary-release.",
+   "bn": "আগে profile করি: Fastify framework-এর overhead কমায়, কিন্তু বেশিরভাগ API-র সময় যায় database-এ, তাই মাপা প্রমাণ ছাড়া switch করি না। Express middleware, `@Res()`-নির্ভর code আর bootstrap (`listen(port, '0.0.0.0')`) বদলাতে হয়, তাই আগে code platform-agnostic করি, e2e আর load test চালাই, তারপর canary release দিই।"
+  },
   "commonMistakes": {
    "en": "Switching without profiling; forgetting `'0.0.0.0'` in containers; keeping Express middleware with `app.use()`; assuming Fastify fixes slow database queries.",
    "bn": "Profile না করে switch করা; container-এ `'0.0.0.0'` ভুলে যাওয়া; `app.use()` দিয়ে Express middleware রেখে দেওয়া; ভাবা যে Fastify ধীর database query ঠিক করে দেবে।"
@@ -202,6 +210,10 @@
    "nest-030",
    "nest-032"
   ],
+  "quickAnswer": {
+   "en": "`@nestjs/microservices` runs handlers over transports like TCP, Redis, NATS or Kafka: `@MessagePattern` is request-response via `send()`, `@EventPattern` is fire-and-forget via `emit()`, and a hybrid app serves HTTP plus a transport. To scale a Socket.IO gateway, add the Redis adapter and sticky sessions.",
+   "bn": "`@nestjs/microservices` দিয়ে handler-গুলো TCP, Redis, NATS বা Kafka-র মতো transport-এ চলে: `@MessagePattern` হলো `send()` দিয়ে request-response, `@EventPattern` হলো `emit()` দিয়ে fire-and-forget, আর hybrid app HTTP-র পাশাপাশি transport-এও listen করে। Socket.IO gateway scale করতে Redis adapter আর sticky session লাগে।"
+  },
   "commonMistakes": {
    "en": "Calling `client.send()` without subscribing and wondering why nothing happens; using Redis pub/sub for events that must not be lost; scaling Socket.IO horizontally without an adapter (broadcasts reach only some users).",
    "bn": "Subscribe না করে `client.send()` call করে ভাবা কেন কিছু হচ্ছে না; যে event হারানো চলবে না তার জন্য Redis pub/sub ব্যবহার করা; adapter ছাড়া Socket.IO horizontally scale করা (broadcast শুধু কিছু user-এর কাছে পৌঁছায়)।"
@@ -276,6 +288,10 @@
    "nest-016",
    "nest-023"
   ],
+  "quickAnswer": {
+   "en": "Security: strict global validation with `whitelist`, body size limits, `helmet()`, an explicit CORS allow-list, `@nestjs/throttler`, response DTOs instead of raw entities, and a generic error filter. Performance: no request-scoped providers on hot paths, sized DB pools, caching, queued CPU work and shutdown hooks.",
+   "bn": "Security-র দিকে: `whitelist`-সহ কড়া global validation, body-র আকারের সীমা, `helmet()`, নির্দিষ্ট origin-এর তালিকা দিয়ে CORS, `@nestjs/throttler`, সরাসরি entity না পাঠিয়ে response DTO, আর সাধারণ error filter। Performance-এর দিকে: ব্যস্ত পথে request-scoped provider নয়, মাপমতো DB pool, caching, CPU-ভারী কাজ queue-তে পাঠানো, আর shutdown hook চালু রাখা।"
+  },
   "commonMistakes": {
    "en": "Relying on `@Exclude()` with plain objects; in-memory rate limits with several replicas; IP-based throttling without `trust proxy` (everyone shares the load balancer's IP); `bcrypt.hashSync` in request handlers.",
    "bn": "Plain object-এ `@Exclude()`-এর উপর ভরসা করা; একাধিক replica থাকতেও in-memory rate limit; `trust proxy` ছাড়া IP-based throttling (সবাই load balancer-এর IP share করে); request handler-এ `bcrypt.hashSync`।"
@@ -336,6 +352,10 @@
    "nest-012",
    "nest-013"
   ],
+  "quickAnswer": {
+   "en": "The `ForbiddenException` thrown by a guard. Guards run before interceptors, so `intercept()` is never called, while errors from pipes, the handler and services all flow through `next.handle()`.",
+   "bn": "Guard-এর throw করা `ForbiddenException`। Guard interceptor-এর আগে চলে, তাই `intercept()` call-ই হয় না; অথচ pipe, handler আর service-এর error সব `next.handle()`-এর ভেতর দিয়ে interceptor-এ পৌঁছায়।"
+  },
   "code": {
    "language": "typescript",
    "source": "@Injectable()\nexport class ErrorLoggingInterceptor implements NestInterceptor {\n  private readonly logger = new Logger('Errors');\n\n  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {\n    return next.handle().pipe(\n      catchError((err) => {\n        this.logger.error(err);\n        return throwError(() => err);\n      }),\n    );\n  }\n}"
@@ -425,6 +445,10 @@
    "nest-024",
    "nest-027"
   ],
+  "quickAnswer": {
+   "en": "First make it a modular monolith: bounded contexts that export only small facades, own their tables and talk through domain events written to an outbox, with import rules enforced by lint. Extract a service only for a concrete reason such as a different scaling profile, team ownership or isolation needs.",
+   "bn": "আগে modular monolith বানাই: bounded context-গুলো শুধু ছোট facade export করে, নিজের table নিজে রাখে, আর outbox-এ লেখা domain event দিয়ে কথা বলে; import rule lint দিয়ে enforce করি। আলাদা service তখনই বের করি যখন আলাদা scaling, team ownership বা isolation-এর মতো স্পষ্ট কারণ থাকে।"
+  },
   "commonMistakes": {
    "en": "Splitting into microservices along technical layers (an \"auth service\", a \"database service\"); sharing one database between services; relying on in-process events for critical side effects; extracting before boundaries are clean (creates a distributed monolith).",
    "bn": "Technical layer ধরে microservice ভাগ করা (একটা \"auth service\", একটা \"database service\"); service-এর মধ্যে একই database share করা; গুরুত্বপূর্ণ side effect-এর জন্য in-process event-এর উপর ভরসা; boundary পরিষ্কার হওয়ার আগেই আলাদা করা (distributed monolith তৈরি হয়)।"
@@ -498,6 +522,10 @@
    "nest-023",
    "drizzle-030"
   ],
+  "quickAnswer": {
+   "en": "Resolve the tenant from a verified JWT claim or subdomain, keep it in AsyncLocalStorage, and default to shared tables with `tenant_id` plus PostgreSQL Row-Level Security, with dedicated databases for big tenants. Make caches, rate limits and jobs tenant-aware; the main risk is cross-tenant data leaks.",
+   "bn": "Tenant বের করি verified JWT claim বা subdomain থেকে, AsyncLocalStorage-এ রাখি, আর default হিসেবে `tenant_id`-সহ shared table আর PostgreSQL Row-Level Security; বড় tenant-এর জন্য আলাদা database। Cache, rate limit আর job-ও tenant-aware করি; সবচেয়ে বড় risk হলো এক tenant-এর data আরেক tenant-এর কাছে leak হওয়া।"
+  },
   "commonMistakes": {
    "en": "Trusting a client-supplied tenant header; relying only on developers remembering `WHERE tenant_id = ?`; session-level `SET` behind a transaction-mode pooler; unbounded per-tenant connection pools; cache keys without the tenant id.",
    "bn": "Client-এর পাঠানো tenant header বিশ্বাস করা; শুধু developer-রা `WHERE tenant_id = ?` মনে রাখবে এই ভরসায় থাকা; transaction-mode pooler-এর পেছনে session-level `SET`; সীমাহীন per-tenant connection pool; tenant id ছাড়া cache key।"
@@ -572,6 +600,10 @@
    "nest-030",
    "drizzle-016"
   ],
+  "quickAnswer": {
+   "en": "The root cause is a non-atomic check-then-act handler running concurrently on several instances. Verify the signature, dedupe with a unique `(provider, event_id)` row via `ON CONFLICT DO NOTHING`, use a conditional `UPDATE`, send SMS through an outbox, and require an `Idempotency-Key` on `POST /orders`.",
+   "bn": "মূল কারণ একটা non-atomic check-then-act handler, যেটা কয়েকটা instance-এ একসাথে চলে। Signature verify করি, `ON CONFLICT DO NOTHING` দিয়ে unique `(provider, event_id)` row রেখে dedupe করি, status বদলানো conditional `UPDATE` দিয়ে করি, SMS outbox দিয়ে পাঠাই, আর `POST /orders`-এ `Idempotency-Key` বাধ্যতামূলক করি।"
+  },
   "commonMistakes": {
    "en": "Checking \"already processed?\" with a SELECT before processing (race); deduplicating in memory per instance; sending SMS inside the request transaction; trusting webhooks without signature verification; using only a Redis lock with a TTL.",
    "bn": "Process করার আগে SELECT দিয়ে \"আগে process হয়েছে?\" check করা (race); প্রতিটা instance-এ memory-তে dedupe করা; request transaction-এর ভেতরে SMS পাঠানো; signature verify না করে webhook বিশ্বাস করা; শুধু TTL সহ Redis lock-এর উপর নির্ভর করা।"

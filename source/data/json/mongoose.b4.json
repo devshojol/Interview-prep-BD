@@ -52,6 +52,10 @@
   "related": [
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "It throws a `MongooseError` saying `Model.find()` no longer accepts a callback: callbacks were removed in Mongoose 7, and Mongoose 9 removed the last ones. Use `const users = await User.find({ role: \"admin\" });` instead.",
+   "bn": "এটা একটা `MongooseError` throw করে, যেখানে বলা থাকে `Model.find()` আর callback নেয় না: Mongoose 7-এ callback বাদ দেওয়া হয়েছে, আর Mongoose 9 বাকি শেষগুলোও সরিয়ে দিয়েছে। এর বদলে লেখো `const users = await User.find({ role: \"admin\" });`।"
+  },
   "code": {
    "language": "javascript",
    "source": "User.find({ role: \"admin\" }, function (err, users) {\n  if (err) return console.error(err);\n  console.log(users.length);\n});"
@@ -136,6 +140,10 @@
    "mongoose-005",
    "mongoose-017"
   ],
+  "quickAnswer": {
+   "en": "`\"abc\"` can't be cast to an `ObjectId`, so `findById` throws a `CastError` that becomes a 500, and a missing product returns `null`, which is sent as 200. Validate with `mongoose.isObjectIdOrHexString()` (or map `CastError` to 400) and return 404 on `null` (or use `.orFail()`).",
+   "bn": "`\"abc\"`-কে `ObjectId`-তে cast করা যায় না, তাই `findById` একটা `CastError` throw করে যেটা 500 হয়ে যায়; আর product না থাকলে `null` আসে, যেটা 200 হিসেবে যায়। `mongoose.isObjectIdOrHexString()` দিয়ে validate করো (বা `CastError`-কে 400-এ map করো), আর `null` হলে 404 দাও (বা `.orFail()` ব্যবহার করো)।"
+  },
   "commonMistakes": {
    "en": "Wrapping everything in `try/catch` and returning 500 for all errors; relying on `isValidObjectId()` semantics that differ between Mongoose versions; forgetting the `null` check.",
    "bn": "সবকিছু `try/catch`-এ মুড়ে সব error-এর জন্য 500 return করা; Mongoose version ভেদে বদলে যাওয়া `isValidObjectId()`-এর আচরণের ওপর ভরসা করা; `null` check ভুলে যাওয়া।"
@@ -210,6 +218,10 @@
    "mongoose-032",
    "mongoose-003"
   ],
+  "quickAnswer": {
+   "en": "Nothing is built automatically: `schema.index()` only declares the index, and with `autoIndex: false` it exists only after you run `Order.createIndexes()`, `syncIndexes()` or a migration. Until then the \"My orders\" query keeps scanning.",
+   "bn": "নিজে থেকে কিছুই build হয় না: `schema.index()` শুধু index declare করে, আর `autoIndex: false` থাকলে `Order.createIndexes()`, `syncIndexes()` বা migration চালানোর পরেই index তৈরি হয়। ততক্ষণ \"My orders\" query scan করতেই থাকে।"
+  },
   "options": [
    {
     "en": "Mongoose builds the index lazily the first time a query needs it",
@@ -294,6 +306,10 @@
    "mongoose-016",
    "mongoose-001"
   ],
+  "quickAnswer": {
+   "en": "Mongoose is an ODM on top of the official driver: schemas, casting, validation, hooks, `populate()` and TypeScript types, at the cost of an abstraction layer and hydration overhead. I pick Mongoose for CRUD-heavy business apps and the native driver plus database validation for high-throughput or shared data.",
+   "bn": "Mongoose হলো official driver-এর ওপর বানানো একটা ODM: schema, casting, validation, hook, `populate()` আর TypeScript type দেয়, বিনিময়ে একটা abstraction layer আর hydration-এর খরচ। CRUD-ভারী business app-এ আমি Mongoose নিই, আর high-throughput বা কয়েকটা service-এর shared data-র জন্য native driver সাথে database-level validation।"
+  },
   "commonMistakes": {
    "en": "Claiming the driver can't do relationships (it has `$lookup`); assuming Mongoose validation protects data written by other services; picking the driver \"for speed\" without measuring.",
    "bn": "Driver relationship সামলাতে পারে না বলা (এতে `$lookup` আছে); ধরে নেওয়া Mongoose validation অন্য service-এর লেখা data-ও রক্ষা করে; না মেপেই \"speed-এর জন্য\" driver বেছে নেওয়া।"
@@ -360,6 +376,10 @@
    "mongoose-010",
    "mongoose-032"
   ],
+  "quickAnswer": {
+   "en": "Check Node.js ≥ 20.19 and driver 7.x, then fix the breaking changes: no `next()` in pre hooks, update pipelines need `updatePipeline: true`, `returnDocument: \"after\"` replaces `new: true`, ObjectId/UUID changes, and `FilterQuery` → `QueryFilter`. Roll out with tests, type checks and a staging soak, keeping 8.x as rollback.",
+   "bn": "আগে Node.js ≥ 20.19 আর driver 7.x নিশ্চিত করো, তারপর breaking change ঠিক করো: pre hook-এ আর `next()` নেই, update pipeline-এ `updatePipeline: true` লাগে, `new: true`-এর জায়গায় `returnDocument: \"after\"`, ObjectId/UUID-এর পরিবর্তন, আর `FilterQuery` → `QueryFilter`। Test, type check আর staging-এ কিছুদিন চালিয়ে rollout করো, 8.x-কে rollback হিসেবে রাখো।"
+  },
   "commonMistakes": {
    "en": "Bumping the version and relying on \"it compiles\"; enabling `updatePipeline` globally without reviewing call sites; ignoring deprecation warnings for `new: true`.",
    "bn": "শুধু version বাড়িয়ে \"compile তো হচ্ছে\" ভেবে নিশ্চিন্ত থাকা; call site review না করেই globally `updatePipeline` চালু করা; `new: true`-এর deprecation warning উপেক্ষা করা।"
@@ -430,6 +450,10 @@
    "mongoose-030",
    "mongoose-002"
   ],
+  "quickAnswer": {
+   "en": "Discriminators give schema inheritance in one collection: a base model holds the shared fields, child models add their own, and a discriminator key (`__t` by default) stores each document's type. Querying a child model filters by that key automatically; use them for things like SMS/email/push notifications listed together.",
+   "bn": "Discriminator দিয়ে একটা collection-এর ভেতরেই schema inheritance করা যায়: base model-এ common field থাকে, child model নিজের field যোগ করে, আর একটা discriminator key (default `__t`) প্রতিটি document-এর type রাখে। Child model দিয়ে query করলে ওই key দিয়ে নিজে থেকেই filter হয়; SMS/email/push notification-এর মতো একসাথে দেখানো জিনিসে এটা কাজে লাগে।"
+  },
   "commonMistakes": {
    "en": "Thinking each discriminator gets its own collection; expecting base-model queries, `$lookup` or `Model.collection` calls to filter by type automatically; adding base hooks after creating discriminators.",
    "bn": "ভাবা যে প্রতিটি discriminator-এর আলাদা collection থাকে; base model-এর query, `$lookup` বা `Model.collection` call automatically type অনুযায়ী filter করবে আশা করা; discriminator তৈরির পরে base hook যোগ করা।"
@@ -500,6 +524,10 @@
    "mongoose-007",
    "mongoose-015"
   ],
+  "quickAnswer": {
+   "en": "An ever-growing `posts` array is unbounded (toward 16 MB, bigger rewrites) and a dual write that can drift out of sync. Store only `author` on each post, define a virtual `posts` (`ref`, `localField: \"_id\"`, `foreignField: \"author\"`), and populate it with `select`, `match`, a sort and `perDocumentLimit` rather than `limit`.",
+   "bn": "সবসময় বাড়তে থাকা `posts` array unbounded (16 MB-এর দিকে যায়, প্রতিবার বড় document আবার লিখতে হয়), আর এটা একটা dual write, যেটা sync হারাতে পারে। প্রতিটি post-এ শুধু `author` রাখো, একটা virtual `posts` বানাও (`ref`, `localField: \"_id\"`, `foreignField: \"author\"`), আর `select`, `match`, sort ও `limit`-এর বদলে `perDocumentLimit` দিয়ে populate করো।"
+  },
   "commonMistakes": {
    "en": "Keeping both `author.posts` and `post.author` \"for convenience\"; using `limit` and expecting it per author; forgetting `toJSON: { virtuals: true }` and thinking populate failed.",
    "bn": "\"সুবিধার জন্য\" `author.posts` আর `post.author` দুটোই রাখা; `limit` দিয়ে প্রতি author-এ আলাদা limit আশা করা; `toJSON: { virtuals: true }` ভুলে গিয়ে ভাবা populate fail করেছে।"
@@ -568,6 +596,10 @@
   "related": [
    "mongoose-001"
   ],
+  "quickAnswer": {
+   "en": "`User` was registered on the default connection with `mongoose.model()`, but the app only opened a separate `createConnection()`, so the default connection never connects and operations buffer until the 10-second timeout. Register the model on that connection (`conn.model(\"User\", userSchema)`), or use `mongoose.connect()` consistently.",
+   "bn": "`mongoose.model()` দিয়ে `User` register হয়েছে default connection-এ, কিন্তু app শুধু আলাদা একটা `createConnection()` খুলেছে; তাই default connection কখনো connect হয় না, আর operation-গুলো 10 second-এর timeout পর্যন্ত buffer হয়ে থাকে। Model-টা ওই connection-এই register করো (`conn.model(\"User\", userSchema)`), অথবা সব জায়গায় `mongoose.connect()` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Increasing `bufferTimeoutMS` to \"fix\" it; assuming the database is down; mixing `mongoose.model()` with `createConnection()` connections.",
    "bn": "\"Fix\" করতে `bufferTimeoutMS` বাড়িয়ে দেওয়া; ধরে নেওয়া database down; `createConnection()`-এর connection-এর সাথে `mongoose.model()` মিশিয়ে ফেলা।"

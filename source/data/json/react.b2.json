@@ -54,6 +54,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "A controlled input takes its value from React state (`value` + `onChange`), so React is the source of truth and you can validate on every keystroke. An uncontrolled input keeps its value in the DOM (`defaultValue`) and you read it on submit, often via `FormData`.",
+   "bn": "Controlled input-এর value আসে React state থেকে (`value` + `onChange`), তাই React-ই source of truth, আর প্রতি keystroke-এ validate করা যায়। Uncontrolled input-এর value DOM-এ থাকে (`defaultValue`), submit-এর সময় সেটা পড়া হয়, সাধারণত `FormData` দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Initialising controlled inputs with `undefined`/`null`, or assuming uncontrolled inputs are \"bad practice\".",
    "bn": "Controlled input-কে `undefined`/`null` দিয়ে initialize করা, অথবা uncontrolled input-কে \"bad practice\" মনে করা।"
@@ -109,6 +113,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The value changes immediately and survives re-renders, but no re-render is triggered. A ref is a plain mutable `{ current }` object React keeps for the component's lifetime; it isn't part of the render output.",
+   "bn": "Value সাথে সাথে বদলে যায় আর re-render-এর পরেও থাকে, কিন্তু কোনো re-render হয় না। Ref হলো একটা সাধারণ mutable `{ current }` object, যেটা React component-এর পুরো জীবনকাল ধরে রাখে; এটা render output-এর অংশ না।"
+  },
   "options": [
    {
     "en": "The component re-renders and shows the new value",
@@ -191,6 +199,10 @@
   "related": [
    "react-013"
   ],
+  "quickAnswer": {
+   "en": "`useEffect` syncs a component with something outside React (timers, subscriptions, sockets) after the render is committed. The dependency array decides when it re-runs and the returned cleanup runs before the next run and on unmount, roughly covering legacy mount, update and unmount.",
+   "bn": "`useEffect` render commit হওয়ার পর component-কে React-এর বাইরের কিছুর (timer, subscription, socket) সাথে sync রাখে। Dependency array ঠিক করে কখন আবার চলবে, আর return করা cleanup পরের run-এর আগে ও unmount-এ চলে; এটা মোটামুটি legacy mount, update আর unmount-এর কাজ করে।"
+  },
   "commonMistakes": {
    "en": "Using effects to compute derived state or to respond to user events, and leaving out dependencies to make an effect \"run once\".",
    "bn": "Derived state হিসাব করতে বা user event-এর প্রতিক্রিয়া দিতে effect ব্যবহার করা, আর effect \"একবার চালাতে\" dependency বাদ দিয়ে দেওয়া।"
@@ -260,6 +272,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "`useMemo` caches a computed value, `useCallback` caches a function reference, and `React.memo` skips a child's re-render when its props are shallowly equal. With React Compiler 1.0 I don't add them by default, but keep them as escape hatches and don't remove existing ones untested.",
+   "bn": "`useMemo` একটা হিসাব করা value cache করে, `useCallback` function reference cache করে, আর props shallowly equal হলে `React.memo` child-এর re-render বাদ দেয়। React Compiler 1.0 থাকলে আমি এগুলো default-এ লিখি না, তবে escape hatch হিসেবে রাখি, আর test না করে পুরনোগুলো সরাই না।"
+  },
   "commonMistakes": {
    "en": "Wrapping everything in `useCallback`/`useMemo` \"for performance\" without a memoized consumer, or claiming the compiler made these hooks deprecated.",
    "bn": "কোনো memoized consumer ছাড়াই \"performance-এর জন্য\" সবকিছু `useCallback`/`useMemo`-এ wrap করা, অথবা দাবি করা যে compiler আসার ফলে এই hook-গুলো deprecated।"
@@ -332,6 +348,10 @@
    "react-013",
    "react-012"
   ],
+  "quickAnswer": {
+   "en": "Fetch inside a `useEffect` that depends on `url`, create an `AbortController` and abort it in the cleanup, so a stale request is cancelled when the URL changes or the component unmounts. Throw on `!res.ok` and ignore `AbortError`.",
+   "bn": "`url`-এর উপর নির্ভরশীল একটা `useEffect`-এর ভেতরে fetch করো, একটা `AbortController` বানিয়ে cleanup-এ abort করো, যাতে URL বদলালে বা unmount হলে পুরনো request বাতিল হয়। `!res.ok` হলে error throw করো আর `AbortError` উপেক্ষা করো।"
+  },
   "commonMistakes": {
    "en": "Forgetting the cleanup (stale responses win), treating `fetch` as rejecting on 404/500, or putting an object/inline options in the dependency array and causing an infinite refetch loop.",
    "bn": "Cleanup ভুলে যাওয়া (তখন পুরনো response জিতে যায়), ভাবা যে 404/500-এ `fetch` reject করে, অথবা dependency array-তে object/inline options দিয়ে অসীম refetch loop তৈরি করা।"
@@ -408,6 +428,10 @@
   "related": [
    "react-005"
   ],
+  "quickAnswer": {
+   "en": "An Action is an async function React runs in a transition; `<form action={fn}>` calls it with `FormData`. `useActionState` returns state, the wrapped action and `isPending`, `useFormStatus` reads the parent form's status, and `useOptimistic` shows a temporary value until it finishes.",
+   "bn": "Action হলো একটা async function যেটা React transition-এর ভেতরে চালায়; `<form action={fn}>` সেটাকে `FormData` দিয়ে call করে আর pending state track করে। `useActionState` দেয় state, wrapped action আর `isPending`; `useFormStatus` parent form-এর status পড়ে; আর `useOptimistic` কাজ শেষ হওয়া পর্যন্ত একটা অস্থায়ী value দেখায়।"
+  },
   "commonMistakes": {
    "en": "Calling `useFormStatus` in the form's own component, using the old `useFormState` name (renamed to `useActionState`), or forgetting that the optimistic value reverts when the Action ends.",
    "bn": "Form-এর নিজের component-এ `useFormStatus` call করা, পুরনো `useFormState` নাম ব্যবহার করা (এখন `useActionState`), অথবা ভুলে যাওয়া যে Action শেষ হলে optimistic value ফিরে যায়।"
@@ -479,6 +503,10 @@
   "related": [
    "react-014"
   ],
+  "quickAnswer": {
+   "en": "Both mark rendering as non-urgent: `useTransition` wraps a state update you own, while `useDeferredValue` gives a lagging copy of a value. For the search box, keep `setQuery` urgent and render the memoized list from `useDeferredValue(query)`; virtualise it if renders are still slow.",
+   "bn": "দুটোই rendering-কে non-urgent করে: `useTransition` তোমার নিজের state update wrap করে, আর `useDeferredValue` একটা value-র পিছিয়ে থাকা copy দেয়। Search box-এ `setQuery` urgent রাখো, আর memoized list `useDeferredValue(query)` দিয়ে render করো; তবুও ধীর হলে list virtualise করো।"
+  },
   "commonMistakes": {
    "en": "Wrapping the controlled input's own `setState` in `startTransition`, or expecting `useDeferredValue` to make the expensive list faster by itself.",
    "bn": "Controlled input-এর নিজের `setState`-কে `startTransition`-এ wrap করা, অথবা আশা করা যে `useDeferredValue` নিজে থেকেই expensive list-কে দ্রুত করে দেবে।"
@@ -562,6 +590,10 @@
    "react-014",
    "react-013"
   ],
+  "quickAnswer": {
+   "en": "Do it in small reversible steps: move off CRA to Vite first, then React 18.3 with `createRoot` to surface deprecation warnings, run the codemods and check dependencies, upgrade to 19 behind a canary rollout, and enable React Compiler last, incrementally.",
+   "bn": "ছোট ছোট, ফেরত আনা যায় এমন ধাপে করো: আগে CRA ছেড়ে Vite-এ যাও, তারপর `createRoot`-সহ React 18.3-তে গিয়ে deprecation warning দেখো, codemod চালাও আর dependency দেখো, canary rollout দিয়ে 19-এ upgrade করো, আর সবশেষে ধীরে ধীরে React Compiler চালু করো।"
+  },
   "commonMistakes": {
    "en": "A big-bang upgrade of bundler + React + compiler in one PR, enabling the compiler on code that breaks the Rules of React, or removing all `useMemo`/`useCallback` immediately \"because the compiler handles it\".",
    "bn": "এক PR-এ bundler + React + compiler সব একসাথে upgrade করা, Rules of React ভাঙে এমন code-এ compiler চালু করা, অথবা \"compiler সামলাবে\" ভেবে সাথে সাথে সব `useMemo`/`useCallback` মুছে ফেলা।"

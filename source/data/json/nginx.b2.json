@@ -63,6 +63,10 @@
    "nginx-004",
    "nginx-013"
   ],
+  "quickAnswer": {
+   "en": "Add an `upstream` for `127.0.0.1:3000` and a `server` with `listen 80`, `server_name api.example.com`, `client_max_body_size 10m` and per-site logs. Then `proxy_pass` to the upstream, set `Host`, `X-Real-IP`, `X-Forwarded-For` and `X-Forwarded-Proto`, and enable `trust proxy` in Express.",
+   "bn": "`127.0.0.1:3000`-এর জন্য একটা `upstream` বানাও, আর একটা `server`-এ `listen 80`, `server_name api.example.com`, `client_max_body_size 10m` আর site-এর আলাদা log দাও। তারপর upstream-এ `proxy_pass` করো, `Host`, `X-Real-IP`, `X-Forwarded-For` আর `X-Forwarded-Proto` header set করো, আর Express-এ `trust proxy` চালু করো।"
+  },
   "commonMistakes": {
    "en": "Leaving Node listening on `0.0.0.0:3000` with the port open, forgetting `Host`/`X-Forwarded-Proto` (broken redirects and secure cookies), and editing `nginx.conf` directly without `nginx -t`.",
    "bn": "Port খোলা রেখে Node-কে `0.0.0.0:3000`-এ listen করতে দেওয়া, `Host`/`X-Forwarded-Proto` ভুলে যাওয়া (redirect আর secure cookie ভেঙে যায়), আর `nginx -t` ছাড়াই সরাসরি `nginx.conf` edit করা।"
@@ -153,6 +157,10 @@
   "related": [
    "nginx-012"
   ],
+  "quickAnswer": {
+   "en": "On refresh the browser asks NGINX for `/dashboard/settings`, which isn't a file, so `try_files $uri =404` returns 404. Use `try_files $uri $uri/ /index.html;` so the SPA router handles it, but keep `try_files $uri =404` for `/assets/` so missing chunks still return 404.",
+   "bn": "Refresh করলে browser NGINX-এর কাছে `/dashboard/settings` চায়, এমন কোনো file নেই, তাই `try_files $uri =404` 404 দেয়। `try_files $uri $uri/ /index.html;` দাও যাতে SPA router route-টা সামলায়, তবে `/assets/`-এর জন্য `try_files $uri =404` রাখো, যাতে হারানো chunk-এ 404-ই আসে।"
+  },
   "commonMistakes": {
    "en": "Using `error_page 404 /index.html;` (it returns status 404 for every deep link), or applying the fallback to `/assets/` and `/api/` too.",
    "bn": "`error_page 404 /index.html;` ব্যবহার করা (এতে প্রতিটা deep link-এ status 404 যায়), অথবা `/assets/` আর `/api/`-এও fallback প্রয়োগ করে ফেলা।"
@@ -222,6 +230,10 @@
    "nginx-001",
    "nginx-003"
   ],
+  "quickAnswer": {
+   "en": "The master validates the new config; if it's valid, it starts new workers with it and tells the old workers to finish their in-flight requests and exit. If the config is invalid, NGINX logs the error and keeps running the old one.",
+   "bn": "Master নতুন config যাচাই করে; ঠিক থাকলে নতুন config দিয়ে নতুন worker চালু করে, আর পুরনো worker-দের চলমান request শেষ করে বের হয়ে যেতে বলে। Config ভুল হলে NGINX error log করে আর পুরনো config দিয়েই চলতে থাকে।"
+  },
   "options": [
    {
     "en": "The master checks the new config; if it's valid, it starts new workers with it and tells the old workers to finish their current requests and exit",
@@ -289,6 +301,10 @@
    "nginx-012",
    "nginx-006"
   ],
+  "quickAnswer": {
+   "en": "`/var/www/app/static/static/logo.png`: `root` appends the full request URI, so `/static/` is added a second time. Use `root /var/www/app;`, or `alias /var/www/app/static/;`, which replaces the matched prefix.",
+   "bn": "`/var/www/app/static/static/logo.png`: `root` পুরো request URI যোগ করে, তাই `/static/` দুইবার চলে আসে। `root /var/www/app;` দাও, অথবা `alias /var/www/app/static/;`, যেটা match হওয়া prefix-টা replace করে।"
+  },
   "code": {
    "language": "nginx",
    "source": "location /static/ {\n    root /var/www/app/static;\n}"
@@ -377,6 +393,10 @@
    "nginx-005",
    "nginx-002"
   ],
+  "quickAnswer": {
+   "en": "To Express, NGINX is the client, so pass `Host $host`, `X-Real-IP`, `X-Forwarded-For $proxy_add_x_forwarded_for` and `X-Forwarded-Proto $scheme`. Then set `app.set('trust proxy', 1)` so `req.ip` and `req.secure` use those headers.",
+   "bn": "Express-এর কাছে NGINX-ই client, তাই `Host $host`, `X-Real-IP`, `X-Forwarded-For $proxy_add_x_forwarded_for` আর `X-Forwarded-Proto $scheme` পাঠাও। তারপর `app.set('trust proxy', 1)` দাও, যাতে `req.ip` আর `req.secure` এই header-গুলো থেকে আসে।"
+  },
   "commonMistakes": {
    "en": "Setting `trust proxy` to `true` blindly, overwriting XFF with `$remote_addr` behind a CDN (losing the real IP), or reading `req.headers['x-forwarded-for']` manually and trusting the first value.",
    "bn": "না ভেবে `trust proxy` `true` করে দেওয়া, CDN-এর পেছনে XFF-কে `$remote_addr` দিয়ে overwrite করা (আসল IP হারিয়ে যায়), অথবা হাতে `req.headers['x-forwarded-for']` পড়ে প্রথম value-টাই বিশ্বাস করা।"
@@ -450,6 +470,10 @@
    "nginx-005",
    "nginx-007"
   ],
+  "quickAnswer": {
+   "en": "`Upgrade` and `Connection` are hop-by-hop headers, so set them explicitly (`Upgrade $http_upgrade`, plus a `map` for `Connection`) or Node sees a plain GET. The 60-second drops come from the default `proxy_read_timeout`: raise it for this location and send WebSocket pings.",
+   "bn": "`Upgrade` আর `Connection` hop-by-hop header, তাই এগুলো নিজে set করতে হয় (`Upgrade $http_upgrade`, আর `Connection`-এর জন্য একটা `map`), না হলে Node একটা সাধারণ GET দেখে। ৬০ সেকেন্ডে connection কাটে default `proxy_read_timeout`-এর কারণে: এই location-এ সেটা বাড়াও আর WebSocket ping পাঠাও।"
+  },
   "commonMistakes": {
    "en": "Hard-coding `Connection \"upgrade\"` for a location that also serves normal requests, setting a huge timeout instead of heartbeats, and forgetting that WebSockets across multiple backends need stickiness or a shared message bus.",
    "bn": "সাধারণ request-ও serve করে এমন location-এ `Connection \"upgrade\"` hard-code করা, heartbeat-এর বদলে বিশাল timeout দেওয়া, আর ভুলে যাওয়া যে একাধিক backend-এ WebSocket চালাতে stickiness বা shared message bus লাগে।"
@@ -527,6 +551,10 @@
    "nginx-005",
    "nginx-013"
   ],
+  "quickAnswer": {
+   "en": "Inside the NGINX container `localhost` is NGINX itself, so use the service name `api`. NGINX resolves that name once at load, so a recreated `api` gets a new IP NGINX doesn't know; use `server api:3000 resolve;` in a zoned upstream with `resolver 127.0.0.11` (1.27.3+), or a variable in `proxy_pass`.",
+   "bn": "NGINX container-এর ভেতরে `localhost` মানে NGINX নিজেই, তাই service name `api` ব্যবহার করো। NGINX নামটা config load-এর সময় একবারই resolve করে, তাই `api` নতুন করে তৈরি হলে তার নতুন IP NGINX জানে না; `resolver 127.0.0.11`-সহ zone-ওয়ালা upstream-এ `server api:3000 resolve;` দাও (1.27.3+), অথবা `proxy_pass`-এ একটা variable ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Using `network_mode: host` everywhere to make `localhost` work, hard-coding container IPs, or assuming NGINX re-resolves `proxy_pass` hostnames automatically.",
    "bn": "`localhost` চালানোর জন্য সব জায়গায় `network_mode: host` ব্যবহার করা, container-এর IP hard-code করা, অথবা ধরে নেওয়া যে NGINX `proxy_pass`-এর hostname নিজে থেকেই আবার resolve করে।"
@@ -618,6 +646,10 @@
    "nginx-030",
    "nginx-007"
   ],
+  "quickAnswer": {
+   "en": "Use two upstreams (stable and canary) and `split_clients` on a stable user ID plus a salt to send 5% to v2, with a `map` on a cookie so QA can force it. Log the variant to compare errors, ramp or roll back by changing the percentage and reloading, and keep both versions schema-compatible.",
+   "bn": "দুটো upstream রাখো (stable আর canary), আর stable user ID ও একটা salt-এর উপর `split_clients` দিয়ে 5% user-কে v2-তে পাঠাও; একটা cookie-র উপর `map` দিয়ে QA জোর করে v2 নিতে পারবে। Variant log করে error তুলনা করো, percentage বদলে reload দিয়ে ramp বা rollback করো, আর দুই version-কে একই schema-র সাথে compatible রাখো।"
+  },
   "commonMistakes": {
    "en": "Splitting randomly per request (users flip between versions), bucketing only by IP, not logging which variant served the request, and running incompatible schema changes during the canary.",
    "bn": "প্রতি request-এ random ভাগ করা (user-রা version-এর মধ্যে আসা-যাওয়া করে), শুধু IP দিয়ে bucket করা, কোন variant request serve করল সেটা log না করা, আর canary চলাকালীন incompatible schema পরিবর্তন চালানো।"

@@ -58,6 +58,10 @@
    "redis-006",
    "redis-027"
   ],
+  "quickAnswer": {
+   "en": "Redis is an in-memory data structure server: you store strings, hashes, lists, sets, sorted sets and more under keys. It's fast because the data lives in RAM, its structures are purpose-built, and commands run one at a time on a single thread, so there are no locks and every command is atomic.",
+   "bn": "Redis হলো একটা in-memory data structure server: key-এর অধীনে string, hash, list, set, sorted set ইত্যাদি রাখা যায়। এটা দ্রুত কারণ data RAM-এ থাকে, data structure-গুলো কাজ অনুযায়ী বানানো, আর command-গুলো একটা thread-এ একটার পর একটা চলে, তাই lock লাগে না আর প্রতিটা command atomic।"
+  },
   "commonMistakes": {
    "en": "Saying Redis is fast \"because it is multi-threaded\", calling it \"just a cache\", or claiming it can never lose data.",
    "bn": "Redis \"multi-threaded বলে দ্রুত\" বলা, একে \"শুধু একটা cache\" বলা, অথবা দাবি করা যে Redis-এ কখনো data হারায় না।"
@@ -113,6 +117,10 @@
    "redis-001",
    "redis-029"
   ],
+  "quickAnswer": {
+   "en": "`12`: Redis runs commands one at a time, and `INCR` is a single atomic read-modify-write on the server, so neither increment is lost and no `MULTI` is needed.",
+   "bn": "`12`: Redis একবারে একটা command চালায়, আর `INCR` server-এ একটাই atomic read-modify-write, তাই কোনো increment হারায় না, `MULTI`-ও লাগে না।"
+  },
   "options": [
    {
     "en": "`12`, because each `INCR` runs atomically, one after the other",
@@ -194,6 +202,10 @@
    "redis-018",
    "redis-015"
   ],
+  "quickAnswer": {
+   "en": "Strings hold text, numbers or JSON (cache, counters); hashes are field-value maps (a user profile); lists are ordered push/pop sequences (simple queues, latest items); sets hold unique members (tags, likes); sorted sets order members by score (leaderboards). The type decides which operations are atomic and cheap.",
+   "bn": "String-এ text, number বা JSON থাকে (cache, counter); hash হলো field-value map (user profile); list হলো ordered push/pop sequence (সহজ queue, latest item); set-এ unique member থাকে (tag, like); sorted set score অনুযায়ী সাজানো (leaderboard)। কোন type নেবে সেটাই ঠিক করে কোন operation atomic আর সস্তা।"
+  },
   "commonMistakes": {
    "en": "Storing everything as JSON strings, or using a list where uniqueness is needed (a set) or ordering by score is needed (a sorted set).",
    "bn": "সবকিছু JSON string হিসেবে রাখা, অথবা যেখানে uniqueness দরকার (set) বা score অনুযায়ী ordering দরকার (sorted set) সেখানে list ব্যবহার করা।"
@@ -253,6 +265,10 @@
    "redis-018",
    "redis-020"
   ],
+  "quickAnswer": {
+   "en": "`-1`: a successful `SET` without an expiry option discards the old TTL, so the OTP now never expires, a real security bug. Pass the expiry again (`EX 120`), or use `KEEPTTL` if you want to keep the remaining time.",
+   "bn": "`-1`: expiry option ছাড়া সফল `SET` আগের TTL মুছে দেয়, ফলে OTP-টা এখন আর কখনো expire হবে না, এটা সত্যিকারের security bug। আবার expiry দাও (`EX 120`), অথবা বাকি সময়টা রাখতে চাইলে `KEEPTTL` ব্যবহার করো।"
+  },
   "code": {
    "language": "text",
    "source": "SET otp:01712 4821 EX 120\nSET otp:01712 9999\nTTL otp:01712"
@@ -345,6 +361,10 @@
    "redis-024",
    "redis-002"
   ],
+  "quickAnswer": {
+   "en": "Build the key from the client id plus the current window number, and send `INCR` and `EXPIRE key window NX` together in one `MULTI`, so counts are atomic and no key is left without a TTL. Over the limit, return `429` with `Retry-After`; fail open for general APIs and closed for login/OTP, at O(1) per request.",
+   "bn": "Client id আর বর্তমান window number মিলিয়ে key বানাও, তারপর `INCR` আর `EXPIRE key window NX` একসাথে একটা `MULTI`-তে পাঠাও, তাতে count atomic থাকে আর কোনো key TTL ছাড়া থাকে না। Limit পার হলে `Retry-After`-সহ `429` দাও; সাধারণ API-তে fail open আর login/OTP-তে fail closed, প্রতি request-এ O(1)।"
+  },
   "commonMistakes": {
    "en": "Calling `expire()` in a separate await after `incr()`, resetting the TTL on every request (turning the window into \"100 per minute of silence\"), or keying only by IP behind a reverse proxy.",
    "bn": "`incr()`-এর পর আলাদা await-এ `expire()` call করা, প্রতিটা request-এ TTL reset করা (তাতে window হয়ে যায় \"চুপ থাকার প্রতি মিনিটে 100\"), অথবা reverse proxy-র পেছনে শুধু IP দিয়ে key বানানো।"
@@ -420,6 +440,10 @@
    "redis-014",
    "redis-023"
   ],
+  "quickAnswer": {
+   "en": "Five bugs: no TTL, no invalidation on write, a hit returns the raw string, a missing product is cached forever as `\"null\"`, and a Redis error breaks the page. Fix: parse on hit, set a TTL with jitter, cache misses briefly, `DEL` after the DB update, and fall back to the DB on Redis errors.",
+   "bn": "পাঁচটা bug: TTL নেই, write-এর পর invalidation নেই, hit হলে raw string return হয়, missing product `\"null\"` হয়ে চিরকাল cache-এ থাকে, আর Redis error হলে page ভেঙে যায়। Fix: hit-এ parse করো, jitter-সহ TTL দাও, miss অল্প সময় cache করো, DB update-এর পর `DEL` করো, আর Redis error হলে DB-তে fallback করো।"
+  },
   "commonMistakes": {
    "en": "Fixing only the TTL and forgetting invalidation, updating the cache instead of deleting it, or using `if (cached)` instead of `cached !== null`, which treats a legitimately cached empty string as a miss.",
    "bn": "শুধু TTL ঠিক করে invalidation ভুলে যাওয়া, cache delete না করে update করা, অথবা `cached !== null`-এর বদলে `if (cached)` ব্যবহার করা — যেটা বৈধভাবে cache করা empty string-কে miss হিসেবে ধরে।"
@@ -504,6 +528,10 @@
    "redis-031",
    "redis-025"
   ],
+  "quickAnswer": {
+   "en": "Stampede: a hot key expires and many requests rebuild it at once; fix with a lock (single-flight), serve-stale or early refresh. Penetration: lookups for keys that exist nowhere always hit the DB; cache \"not found\" briefly or use a Bloom filter. Avalanche: many keys expire together; add TTL jitter and warm keys.",
+   "bn": "Stampede: hot key expire হলে অনেক request একসাথে সেটা rebuild করে; lock (single-flight), stale serve বা আগেভাগে refresh দিয়ে ঠেকাও। Penetration: কোথাও নেই এমন key-এর request সবসময় DB-তে যায়; \"not found\" অল্প সময় cache করো বা Bloom filter দাও। Avalanche: অনেক key একসাথে expire হয়; TTL-এ jitter দাও আর key warm করো।"
+  },
   "commonMistakes": {
    "en": "Solving a stampede by simply making the TTL longer (it just moves the spike), or using a lock with no TTL and no wait limit, which can freeze every request if the rebuilder crashes.",
    "bn": "শুধু TTL বাড়িয়ে stampede সমাধান করা (এতে spike শুধু সরে যায়), অথবা TTL আর wait limit ছাড়া lock ব্যবহার করা — rebuilder crash করলে যেটা সব request আটকে দিতে পারে।"
@@ -581,6 +609,10 @@
    "redis-025",
    "redis-028"
   ],
+  "quickAnswer": {
+   "en": "A Redis lock is only a lease: a pause past the TTL, a failover that loses the lock, or an unsafe `DEL` can let two workers charge. Redlock still depends on timing, so it isn't a correctness guarantee. Enforce correctness where the side effect happens: an idempotency key, conditional DB updates and fencing tokens.",
+   "bn": "Redis lock আসলে একটা lease: TTL পেরিয়ে যাওয়া pause, failover-এ lock হারানো বা unsafe `DEL`-এর কারণে দুটো worker charge করে ফেলতে পারে। Redlock-ও timing-এর ওপর নির্ভর করে, তাই correctness guarantee দেয় না। Correctness নিশ্চিত করো যেখানে side effect হয় সেখানে: idempotency key, conditional DB update আর fencing token দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Believing a longer TTL or Redlock makes the lock \"safe\", releasing with plain `DEL`, or generating the fencing token in a separate call after acquiring the lock.",
    "bn": "ভাবা যে TTL বাড়ালে বা Redlock ব্যবহার করলে lock \"safe\" হয়ে যায়, সাধারণ `DEL` দিয়ে release করা, অথবা lock নেওয়ার পর আলাদা call-এ fencing token তৈরি করা।"

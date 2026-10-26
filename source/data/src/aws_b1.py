@@ -49,6 +49,8 @@ QUESTIONS = [
 
             **Shared responsibility model** অনুযায়ী security ভাগ হয় এভাবে: cloud-টা নিজে (data centre, hardware, hypervisor, global network) secure রাখার দায়িত্ব AWS-এর। আর cloud-এ তুমি যা রাখো (data, IAM, configuration), সেটা secure রাখার দায়িত্ব তোমার। কোন service ব্যবহার করছ তার উপর এই সীমারেখা বদলায়। **EC2**-তে আমি নিজে OS ও runtime patch করি, security group আর app configure করি। **RDS**-এ database engine আর OS AWS patch করে, কিন্তু DB user, network access, encryption setting আর backup retention আমার দায়িত্ব। **Lambda**-তে server আর runtime patching AWS-এর হাতে; code, IAM role-এর permission আর data আমার দায়িত্ব। কোনো runtime deprecated হওয়ার আগে নতুন runtime-এ migrate করাও আমার কাজ।
         """,
+        quick_en=r"""IaaS means you manage the OS and everything above it (EC2), PaaS means the provider runs the platform and you bring code or data (RDS), and SaaS is finished software (Gmail). AWS secures the cloud and you secure what you put in it: on EC2 you patch the OS, on RDS AWS patches the engine, on Lambda you own code, IAM and data.""",
+        quick_bn=r"""IaaS-এ OS থেকে উপরের সবকিছু তুমি manage করো (EC2), PaaS-এ platform চালায় provider আর তুমি শুধু code বা data আনো (RDS), আর SaaS হলো তৈরি software (Gmail)। AWS cloud-টা secure করে, cloud-এ যা রাখো সেটা secure করা তোমার কাজ: EC2-তে OS patch তুমি করো, RDS-এ engine patch করে AWS, আর Lambda-তে তোমার দায়িত্ব code, IAM আর data।""",
         ex_en=r"""
             - The more managed the service, the less operational work you have, but you also get less control (no SSH into RDS, no custom kernel on Lambda).
             - Some things stay your job on every service: IAM permissions, data classification, encryption choices, network exposure and client-side security.
@@ -97,6 +99,8 @@ QUESTIONS = [
         a_bn=r"""
             দ্বিতীয় option-টা সঠিক। Region (যেমন `ap-south-1` Mumbai বা `ap-southeast-1` Singapore) হলো একটা isolated ভৌগোলিক এলাকা, যার ভেতরে কয়েকটা AZ থাকে। প্রতিটা AZ এক বা একাধিক data centre, যেখানে power আর networking redundant। **High availability**-র জন্য app একাধিক AZ-তে ছড়িয়ে রাখি। আর **disaster recovery**, দূরের user-দের জন্য কম latency, বা data-residency নিয়মের জন্য একাধিক Region ব্যবহার করি।
         """,
+        quick_en=r"""A Region is a separate geographic area with several isolated AZs, and each AZ is one or more data centres with independent power and networking, linked by low-latency connections. Spreading across AZs gives high availability, but it doesn't survive a whole-Region outage; that needs a multi-Region DR design.""",
+        quick_bn=r"""Region হলো আলাদা একটা geographic এলাকা, যার ভেতরে কয়েকটা isolated AZ থাকে; প্রতিটা AZ এক বা একাধিক data centre, যাদের power আর networking আলাদা, আর AZ-গুলো low-latency link দিয়ে যুক্ত। কয়েকটা AZ-এ ছড়ালে high availability পাওয়া যায়, কিন্তু পুরো Region down হলে টিকতে multi-Region DR design লাগে।""",
         ex_en=r"""
             - **Option 4 is the tempting trap.** Multi-AZ protects you from a data centre or AZ failure, not from a Region-wide problem. Surviving a Region outage needs a multi-Region DR strategy.
             - Option 1 is wrong twice. An AZ can be more than one data centre, and edge locations are a separate, much larger network of points of presence used by CloudFront and Route 53.
@@ -139,6 +143,8 @@ QUESTIONS = [
 
             এখনকার best practice: মানুষ **IAM Identity Center** (বা company IdP-র সাথে federation) দিয়ে MFA-সহ login করে, আর short-lived credential-সহ role পায়। Workload-গুলো role ব্যবহার করে: EC2 instance profile, Lambda execution role বা ECS task role। Long-lived access key-ওয়ালা IAM user আমি এড়িয়ে চলি। Root user MFA দিয়ে lock করে রাখি, শুধু যে অল্প কিছু কাজে root লাগে তখনই ব্যবহার করি। আর প্রতিটা policy least privilege মেনে লিখি।
         """,
+        quick_en=r"""A policy is a JSON document that allows or denies actions; a user is a long-term identity, a group bundles users to share policies, and a role has no long-term credentials, so whoever assumes it gets temporary STS credentials. Today people sign in through IAM Identity Center with MFA, and workloads use roles, not access keys.""",
+        quick_bn=r"""Policy হলো JSON document, যেটা কোন action allow বা deny হবে বলে দেয়; user হলো long-term identity, group অনেক user-কে একসাথে policy দেয়, আর role-এর কোনো long-term credential নেই, যে assume করে সে STS থেকে temporary credential পায়। এখন মানুষ IAM Identity Center দিয়ে MFA-সহ login করে, আর workload access key-এর বদলে role ব্যবহার করে।""",
         ex_en=r"""
             - **Evaluation basics:** everything is denied by default. A request needs an explicit `Allow`, and an explicit `Deny` in any applicable policy always wins.
             - **A role has two policies.** The *trust policy* says who may assume the role (for example `ec2.amazonaws.com` or a GitHub OIDC provider). The *permissions policy* says what the role can do.
@@ -187,6 +193,8 @@ QUESTIONS = [
         a_bn=r"""
             Option 2। **Instance profile** Instance Metadata Service-এর মাধ্যমে role-এর temporary credential পৌঁছে দেয়। SDK-এর default credential provider chain (যেমন SDK v3-এ `new S3Client({})`) কোনো বাড়তি code ছাড়াই সেগুলো খুঁজে নেয়, আর credential নিজে থেকেই rotate হয়। Disk বা Git-এ কোনো secret থাকে না, আর policy-টা শুধু ওই একটা bucket-এ সীমাবদ্ধ রাখা যায়।
         """,
+        quick_en=r"""Attach an IAM role with a least-privilege policy to the instance (an instance profile). The SDK's default credential chain picks up its temporary, auto-rotating credentials from the metadata service, so no access keys sit in `.env`, user data or Git.""",
+        quick_bn=r"""Instance-এ least-privilege policy-সহ একটা IAM role attach করো (instance profile)। SDK-এর default credential chain metadata service থেকে temporary, নিজে থেকে rotate হওয়া credential নিয়ে নেয়, তাই `.env`, user data বা Git-এ কোনো access key রাখতে হয় না।""",
         ex_en=r"""
             - **Option 1 is the tempting one** because many tutorials do it and it works. But long-lived keys leak through Git pushes, backups, AMIs and screenshots. They never rotate on their own, and anyone with shell access can copy them.
             - Option 4 is wrong because user data is not a secret store. Anyone with permission to read instance attributes can see it, and so can any process on the instance through the metadata service.
@@ -228,6 +236,8 @@ QUESTIONS = [
             - **User data** হলো একটা script, যেটা প্রথম boot-এ (cloud-init দিয়ে) চলে, package install করে app চালু করে।
             - **Purchasing option:** On-Demand (কোনো commitment নেই), Savings Plans বা Reserved Instances (১ বা ৩ বছরের commitment-এ discount), Spot (খালি পড়ে থাকা capacity অনেক কম দামে, কিন্তু AWS দুই মিনিটের notice দিয়ে ফেরত নিতে পারে), আর licensing বা compliance-এর প্রয়োজনে Dedicated Host।
         """,
+        quick_en=r"""EC2 gives you virtual servers in your VPC: the instance type sets the hardware size, the AMI is the boot image, and user data is a first-boot script. EBS persists across stop/start while instance store data is lost on stop or terminate, and you pay On-Demand, with Savings Plans/Reserved Instances, or on reclaimable Spot.""",
+        quick_bn=r"""EC2 তোমার VPC-র ভেতরে virtual server দেয়: instance type ঠিক করে hardware-এর size, AMI হলো boot image, আর user data হলো প্রথম boot-এ চলা script। EBS stop/start-এর পরেও থাকে, কিন্তু instance store-এর data stop বা terminate হলে হারিয়ে যায়; দাম দাও On-Demand, Savings Plans/Reserved Instances, বা সস্তা কিন্তু AWS ফেরত নিতে পারে এমন Spot-এ।""",
         ex_en=r"""
             - **Stop vs terminate:** a stopped instance keeps its EBS volumes, and you don't pay for compute while it's stopped (you still pay for storage). Terminating deletes the root volume by default (`DeleteOnTermination`).
             - **The public IP changes on stop/start** unless you attach an Elastic IP. This is a common reason a DNS record "suddenly" breaks.
@@ -287,6 +297,8 @@ QUESTIONS = [
 
             **Versioning** একটা object-এর প্রতিটা version রেখে দেয়, তাই ভুল করে overwrite বা delete হলেও ফেরানো যায় (delete করলে শুধু একটা delete marker যোগ হয়)। **Lifecycle rule** transition automate করে, যেমন Standard → ৩০ দিন পর Standard-IA → ৯০ দিন পর Glacier। Expiration-ও automate করে: পুরনো log delete, N দিন পর noncurrent version delete, আর অসম্পূর্ণ multipart upload পরিষ্কার।
         """,
+        quick_en=r"""Storage classes trade storage price against retrieval cost and speed: Standard for hot data, Standard-IA for rare reads, Glacier tiers for archives, and Intelligent-Tiering when access is unpredictable. Versioning keeps old versions so overwrites and deletes can be undone, and lifecycle rules transition or expire objects.""",
+        quick_bn=r"""Storage class-গুলো storage-এর দাম আর retrieval-এর খরচ ও speed-এর মধ্যে trade-off করে: hot data-র জন্য Standard, কম পড়া data-র জন্য Standard-IA, archive-এর জন্য Glacier tier, আর access pattern অজানা হলে Intelligent-Tiering। Versioning পুরনো version রেখে দেয় বলে overwrite বা delete undo করা যায়, আর lifecycle rule object-কে নিজে থেকে অন্য class-এ সরায় বা expire করে।""",
         ex_en=r"""
             - **Versioning without lifecycle silently grows the bill**, because every overwrite keeps the old copy. Always pair it with `NoncurrentVersionExpiration`.
             - Minimum storage durations apply: 30 days for the IA classes, 90 for Glacier Instant and Flexible Retrieval, 180 for Deep Archive. Moving tiny or short-lived objects to IA can therefore cost more, not less.
@@ -354,6 +366,8 @@ QUESTIONS = [
         a_bn=r"""
             Option 2। April 2023 থেকে নতুন bucket-এ default-এ **Block Public Access** চালু থাকে আর **ACL disabled** থাকে (Object Ownership = *Bucket owner enforced*)। January 2023 থেকে প্রতিটা নতুন object default-এ **SSE-S3** দিয়ে encrypted at rest হয়। File public-ভাবে serve করতে চাইলে recommended pattern হলো private bucket-এর সামনে Origin Access Control-সহ CloudFront। Private file-এ সাময়িক access দিতে presigned URL ব্যবহার করো।
         """,
+        quick_en=r"""Block Public Access is on, ACLs are disabled (Object Ownership = Bucket owner enforced), and the object is encrypted at rest with SSE-S3 automatically, so it's private. To serve files publicly, put CloudFront with OAC in front; for temporary access, use presigned URLs.""",
+        quick_bn=r"""Block Public Access চালু থাকে, ACL disabled থাকে (Object Ownership = Bucket owner enforced), আর object নিজে থেকেই SSE-S3 দিয়ে encrypted থাকে, তাই এটা private। Public-ভাবে file দিতে হলে সামনে OAC-সহ CloudFront বসাও; কিছু সময়ের জন্য access দিতে presigned URL ব্যবহার করো।""",
         ex_en=r"""
             - **Option 4 is the tempting trap** for anyone who learned from older tutorials. With ACLs disabled, a request that sets an ACL such as `public-read` is rejected (`AccessControlListNotSupported`). Access is controlled only by policies.
             - Option 1 was never true: S3 objects have always been private by default. The newer defaults just make it much harder to expose them by accident.

@@ -83,6 +83,8 @@ QUESTIONS = [
             5. `.call(other)` — explicit binding → `Karim`।
             6. `bind(other)` একটা স্থায়ীভাবে bound function তৈরি করে; পরে `.call(user)` দিয়েও সেটা বদলানো যায় না → `Karim`।
         """,
+        quick_en=r"""`Rahim`, `undefined`, `undefined`, `Rahim`, `Karim`, `Karim`. A regular function's `this` comes from how it is called (`undefined` for a plain call in strict mode), an arrow uses the `this` of where it was written, and a bound function can't be re-bound with `.call`.""",
+        quick_bn=r"""`Rahim`, `undefined`, `undefined`, `Rahim`, `Karim`, `Karim`। Regular function-এর `this` ঠিক হয় কীভাবে call করা হলো তা দিয়ে (strict mode-এ plain call হলে `undefined`), arrow function যেখানে লেখা হয়েছে সেখানকার `this` নেয়, আর `bind` করা function-কে `.call` দিয়ে আবার বদলানো যায় না।""",
         ex_en=r"""
             Precedence for regular functions, highest first:
 
@@ -177,6 +179,8 @@ QUESTIONS = [
 
             তাই: `A E G C D F B`।
         """,
+        quick_en=r"""`A E G C D F B`. Synchronous code runs first (the async function runs until its `await`), then every microtask in FIFO order (`C`, `D`, then the `await` continuation `F`), and only then the `setTimeout` task `B`.""",
+        quick_bn=r"""`A E G C D F B`। আগে synchronous code চলে (async function তার `await` পর্যন্ত চলে), তারপর সব microtask FIFO order-এ (`C`, `D`, তারপর `await`-এর পরের অংশ `F`), আর সবশেষে `setTimeout`-এর task `B`।""",
         ex_en=r"""
             Step by step:
 
@@ -273,6 +277,8 @@ QUESTIONS = [
         a_bn=r"""
             Option A। `first()` synchronously চলে আর `second()` call করে, যেটা `second` log করে একটা আগেই fulfilled promise return করে। তবুও `await` `first`-কে **থামায়**, আর `first end`-কে microtask হিসেবে queue করে। `Promise`-এর executor synchronously চলে (`promise executor`), আর `resolve()` `then 1`-কে queue করে। `script end`-এর পর microtask-গুলো FIFO ক্রমে চলে: `first end`, `then 1`, আর `then 1` শেষ হলে `then 2` queue হয়। `setTimeout`-এর task সবার শেষে।
         """,
+        quick_en=r"""Option A: the sync logs come first (`script start`, `first start`, `second`, `promise executor`, `script end`), then the microtasks `first end`, `then 1`, `then 2`, and finally `timeout`. `await` suspends `first` even though `second()` is already fulfilled, and its continuation is queued before `then 1`.""",
+        quick_bn=r"""Option A: আগে sync log-গুলো (`script start`, `first start`, `second`, `promise executor`, `script end`), তারপর microtask `first end`, `then 1`, `then 2`, আর শেষে `timeout`। `second()` আগেই fulfil হলেও `await` `first`-কে থামিয়ে দেয়, আর তার পরের অংশ `then 1`-এর আগেই queue-তে ঢোকে।""",
         ex_en=r"""
             - **Option B** (the most tempting) assumes `await` continues synchronously when the awaited function has no real async work. It never does — `await` always yields to the microtask queue at least once.
             - **Option C** was actually the behaviour of older engines: before a 2019 spec optimisation (e.g. in Node 10), awaiting a native promise cost three microtask ticks, so both `then 1` and `then 2` ran before `first end`. All current engines take a single tick here. Don't write code that depends on these tick counts.
@@ -364,6 +370,8 @@ QUESTIONS = [
             - Prototype-এর method বদলালে আগের instance-গুলোও সেটা দেখে, কারণ lookup live → `Tommy barks`।
             - `Animal.prototype`-কে নতুন object দিয়ে replace করলে `dog`-এর উপর **কোনো প্রভাব পড়ে না** — তৈরির সময়ই তার `[[Prototype]]` ঠিক হয়ে গেছে। শুধু নতুন instance নতুন object ব্যবহার করে।
         """,
+        quick_en=r"""`Tommy makes a sound`, `3 4`, `4`, `false true`, `Tommy barks`, `Tommy barks replaced`. Reads check own properties first and then walk the prototype chain live, but replacing `Animal.prototype` affects only new instances, because `dog` keeps the prototype it was created with.""",
+        quick_bn=r"""`Tommy makes a sound`, `3 4`, `4`, `false true`, `Tommy barks`, `Tommy barks replaced`। Property পড়ার সময় আগে নিজের property, তারপর live prototype chain দেখা হয়; কিন্তু `Animal.prototype` পুরো বদলে দিলে শুধু নতুন instance-এ প্রভাব পড়ে, কারণ `dog` তৈরির সময়ের prototype-ই ধরে রাখে।""",
         ex_en=r"""
             Line by line:
 
@@ -450,6 +458,8 @@ QUESTIONS = [
 
             `JSON.parse` একটা `SyntaxError` throw করে, যেটাকে `{ cause: err }` দিয়ে নতুন একটা `Error`-এ wrap করা হয়, তাই `loadConfig()` সেই wrapper দিয়ে reject করে। `Promise.any`-এর দুটো input-ই reject করে, তাই এটা একটা `AggregateError` দিয়ে reject করে, যার `errors` array-তে কারণগুলো **input-এর ক্রমে** থাকে। `errors[0]` হলো wrapper, আর তার `cause` হলো আসল `SyntaxError`।
         """,
+        quick_en=r"""`AggregateError 2 SyntaxError`. Both inputs reject, so `Promise.any` rejects with an `AggregateError` whose `errors` keep input order; `errors[0]` is the wrapper `Error`, and its `cause` is the original `SyntaxError` from `JSON.parse`.""",
+        quick_bn=r"""`AggregateError 2 SyntaxError`। দুটো input-ই reject করে, তাই `Promise.any` একটা `AggregateError` দেয় যার `errors` input order-এ থাকে; `errors[0]` হলো wrapper `Error`, আর তার `cause` হলো `JSON.parse`-এর আসল `SyntaxError`।""",
         ex_en=r"""
             - **Option B** assumes `Promise.any` rejects with the first error like `Promise.all`. It doesn't: it only rejects when *all* inputs reject, and always with an `AggregateError`.
             - **Option D** reads `errors[0].name` instead of `errors[0].cause.name` — the wrapper is a plain `Error`; the root cause is one level deeper.
@@ -524,6 +534,8 @@ QUESTIONS = [
 
             প্রতিটি call O(1) time আর O(1) space।
         """,
+        quick_en=r"""Debounce keeps a timer id in a closure: each call clears the old timer and starts a new one, so `fn` runs once, with the latest arguments and `this`, after calls stop for `wait` ms, and `cancel()` clears the timer. Throttle instead runs `fn` at most once per interval while calls keep coming (scroll, mousemove).""",
+        quick_bn=r"""Debounce একটা closure-এ timer id রাখে: প্রতিটা call পুরনো timer clear করে নতুন timer শুরু করে, তাই call থামার `wait` ms পরে `fn` একবারই চলে, সর্বশেষ argument আর সঠিক `this` নিয়ে; `cancel()` timer clear করে দেয়। Throttle এর বদলে call চলতে থাকলেও প্রতি interval-এ সর্বোচ্চ একবার `fn` চালায় (scroll, mousemove)।""",
         ex_en=r"""
             - **`this` and arguments:** `fn.apply(this, args)` forwards both. Returning an arrow function from `debounce` would lose the call-site `this` (e.g. when used as an object method).
             - **Leading vs trailing:** my debounce is trailing-only. A `leading` option fires on the first call and ignores the rest of the burst — good for a "submit" button to block double-clicks.
@@ -650,6 +662,8 @@ QUESTIONS = [
 
             Time O(n), space O(n)।
         """,
+        quick_en=r"""Return a new Promise, wrap each item in `Promise.resolve`, store each result at its original index, and resolve when a `remaining` counter reaches zero (resolve `[]` right away for empty input). Pass the outer `reject` directly so the first rejection wins; O(n) time and space.""",
+        quick_bn=r"""একটা নতুন Promise return করি, প্রতিটা item-কে `Promise.resolve` দিয়ে wrap করি, result রাখি তার আসল index-এ, আর `remaining` counter শূন্য হলে resolve করি (empty input-এ সাথে সাথে `[]`)। বাইরের `reject` সরাসরি দিয়ে দিই, তাই প্রথম rejection-ই জেতে; time আর space O(n)।""",
         ex_en=r"""
             - **Why a counter, not `results.length`?** Assigning `results[2]` first makes `length` 3 immediately even though slots 0–1 are empty.
             - **Why `Array.from`?** `Promise.all` accepts any iterable (a `Set`, a generator). If iteration itself throws, the error is thrown inside the executor, which rejects the returned promise — the same as the native behaviour (e.g. `promiseAll(null)` rejects with a `TypeError`).

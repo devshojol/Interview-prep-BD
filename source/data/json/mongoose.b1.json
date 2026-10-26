@@ -58,6 +58,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "A schema is the blueprint of your data (types, validators, defaults, hooks, virtuals) and exists only in your Node.js app. A model is the class compiled from it with `mongoose.model()`, bound to a collection and giving you `find`, `create` and `updateOne`; a document is one instance of the model, with `save()` and change tracking.",
+   "bn": "Schema হলো data-র blueprint (type, validator, default, hook, virtual), যেটা শুধু তোমার Node.js app-এই থাকে। Model হলো `mongoose.model()` দিয়ে schema থেকে compile করা class, যেটা একটা collection-এর সাথে যুক্ত আর `find`, `create`, `updateOne`-এর মতো API দেয়; document হলো model-এর একটা instance, যার `save()` আর change tracking আছে।"
+  },
   "commonMistakes": {
    "en": "Saying MongoDB \"stores the schema\", or calling `mongoose.model()` inside a request handler on every request.",
    "bn": "MongoDB \"schema store করে\" বলা, অথবা প্রতিটি request-এ request handler-এর ভেতরে `mongoose.model()` call করা।"
@@ -125,6 +129,10 @@
   "related": [
    "mongoose-001"
   ],
+  "quickAnswer": {
+   "en": "Common SchemaTypes are `String`, `Number`, `Boolean`, `Date`, `ObjectId` (for references), arrays, `Decimal128`, `Map`, `UUID` and `Mixed`. Common options are `required`, `default`, `validate`, `select`, `immutable` and `index`/`unique`, plus type-specific ones like `trim`, `lowercase`, `enum` and `min`/`max`.",
+   "bn": "সাধারণ SchemaType হলো `String`, `Number`, `Boolean`, `Date`, `ObjectId` (reference-এর জন্য), array, `Decimal128`, `Map`, `UUID` আর `Mixed`। সাধারণ option হলো `required`, `default`, `validate`, `select`, `immutable` আর `index`/`unique`, সাথে type অনুযায়ী `trim`, `lowercase`, `enum`, `min`/`max`-এর মতো option।"
+  },
   "commonMistakes": {
    "en": "Treating `unique` as validation; using `Mixed` everywhere to \"avoid schema problems\"; storing prices as floating-point taka.",
    "bn": "`unique`-কে validation মনে করা; \"schema-র ঝামেলা এড়াতে\" সব জায়গায় `Mixed` ব্যবহার করা; দাম floating-point টাকা হিসেবে রাখা।"
@@ -188,6 +196,10 @@
   "related": [
    "mongoose-002"
   ],
+  "quickAnswer": {
+   "en": "`unique` is not a validator: it only tells Mongoose to build a unique index, and MongoDB itself rejects duplicates with an E11000 error. If that index was never built, or failed to build because duplicates already existed, nothing stops duplicates.",
+   "bn": "`unique` কোনো validator না: এটা শুধু Mongoose-কে একটা unique index বানাতে বলে, আর duplicate আটকায় MongoDB নিজে, E11000 error দিয়ে। Index কখনো build না হলে, বা আগে থেকেই duplicate থাকায় build fail করলে, duplicate আটকানোর কিছুই থাকে না।"
+  },
   "options": [
    {
     "en": "`unique` is a built-in validator, so `doc.validate()` rejects a duplicate email before any database write",
@@ -273,6 +285,10 @@
    "mongoose-001",
    "mongoose-002"
   ],
+  "quickAnswer": {
+   "en": "Create with `create()`, read with `find`/`findOne`/`findById`, and update or delete with `updateOne`/`deleteOne` and their relatives. `save()` runs validation and save hooks but is read-modify-write; `updateOne()` is one atomic command that skips save hooks and validates only with `runValidators: true`.",
+   "bn": "Create করো `create()` দিয়ে, read করো `find`/`findOne`/`findById` দিয়ে, আর update বা delete করো `updateOne`/`deleteOne` ও এদের মতো method দিয়ে। `save()` validation আর save hook চালায়, কিন্তু এটা read-modify-write; `updateOne()` একটা atomic command, save hook চালায় না, আর `runValidators: true` দিলে তবেই validate করে।"
+  },
   "commonMistakes": {
    "en": "Expecting `updateOne()` to trigger `pre('save')` hooks; using `{ new: true }` in new Mongoose 9 code; decrementing stock with `doc.stock -= 1; await doc.save()` under concurrency.",
    "bn": "`updateOne()`-এ `pre('save')` hook চলবে আশা করা; নতুন Mongoose 9 code-এ `{ new: true }` ব্যবহার করা; concurrency থাকা অবস্থায় `doc.stock -= 1; await doc.save()` দিয়ে stock কমানো।"
@@ -336,6 +352,10 @@
   "related": [
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "It resolves to `null`. `findOne()` and `findById()` return `null` when nothing matches instead of throwing, while `find()` returns an empty array, so check for `null` and usually respond with a 404.",
+   "bn": "এটা `null` দেয়। কিছু match না করলে `findOne()` আর `findById()` throw না করে `null` return করে, আর `find()` দেয় empty array; তাই `null` check করো, সাধারণত 404 পাঠাও।"
+  },
   "options": [
    {
     "en": "An empty array `[]`",
@@ -420,6 +440,10 @@
    "mongoose-003",
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "Update validators are off by default, so `findByIdAndUpdate` never checks `min` and `enum`; pass `runValidators: true`. Also whitelist fields instead of passing `req.body` (mass assignment), use `returnDocument: \"after\"` instead of the deprecated `new: true`, and return 404 for `null` and 400 for a `CastError`.",
+   "bn": "Update validator default-ভাবে বন্ধ, তাই `findByIdAndUpdate` কখনো `min` আর `enum` check করে না; `runValidators: true` দাও। সাথে `req.body` সরাসরি না দিয়ে field whitelist করো (mass assignment), deprecated `new: true`-এর বদলে `returnDocument: \"after\"` দাও, আর `null`-এ 404, `CastError`-এ 400 return করো।"
+  },
   "commonMistakes": {
    "en": "Assuming schema validation always runs; relying on `runValidators` to catch `$inc` going negative; trusting `req.body` as an update document.",
    "bn": "ধরে নেওয়া যে schema validation সবসময় চলে; `$inc` দিয়ে negative হওয়া ধরতে `runValidators`-এর ওপর ভরসা করা; `req.body`-কে update document হিসেবে বিশ্বাস করা।"
@@ -499,6 +523,10 @@
   "related": [
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "Four bugs: `Product.updateOne` has no `{ session }` (it commits outside the transaction), `Promise.all` runs parallel operations on one session, `matchedCount` is never checked (overselling), and the SMS sits inside a callback that can re-run. Fix each one, and send the SMS only after commit.",
+   "bn": "চারটা bug: `Product.updateOne`-এ `{ session }` নেই (তাই transaction-এর বাইরে commit হয়), `Promise.all` একই session-এ parallel operation চালায়, `matchedCount` কখনো check হয় না (oversell), আর SMS এমন callback-এর ভেতরে যেটা আবার চলতে পারে। প্রতিটা ঠিক করো, আর SMS পাঠাও শুধু commit-এর পরে।"
+  },
   "commonMistakes": {
    "en": "Thinking that code inside the callback is automatically transactional; using `Promise.all` for speed; assuming the callback runs exactly once.",
    "bn": "ভাবা যে callback-এর ভেতরের সব code automatically transactional; speed-এর জন্য `Promise.all` ব্যবহার করা; ধরে নেওয়া যে callback ঠিক একবারই চলে।"
@@ -587,6 +615,10 @@
    "mongoose-023",
    "mongoose-002"
   ],
+  "quickAnswer": {
+   "en": "Split the data into `Product`, a small `Inventory` document per SKU, a customer `Order`, one `SellerOrder` per seller, and `Payment` with discriminators per method. Checkout is one short transaction with a conditional `$inc` on inventory, side effects go through an outbox, and webhooks are idempotent via a unique transaction ID.",
+   "bn": "Data ভাগ করো `Product`, প্রতি SKU-র জন্য ছোট একটা `Inventory` document, customer-এর `Order`, প্রতি seller-এর জন্য একটা `SellerOrder`, আর payment method অনুযায়ী discriminator সহ `Payment`-এ। Checkout হবে inventory-তে conditional `$inc` সহ একটা ছোট transaction, side effect যাবে outbox দিয়ে, আর unique transaction ID দিয়ে webhook idempotent থাকবে।"
+  },
   "commonMistakes": {
    "en": "One giant `Order` document that every seller edits; stock checked with `findOne` then decremented with `save()`; calling the payment gateway inside the transaction; populating everything for admin reports.",
    "bn": "এমন একটা বিশাল `Order` document, যেটা সব seller edit করে; `findOne` দিয়ে stock check করে `save()` দিয়ে কমানো; transaction-এর ভেতরে payment gateway call করা; admin report-এর জন্য সবকিছু populate করা।"

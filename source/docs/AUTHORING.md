@@ -157,6 +157,103 @@ Useful known-good roots: `https://react.dev/reference/react/useEffect`, `https:/
 `https://nginx.org/en/docs/http/ngx_http_proxy_module.html`,
 `https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html`.
 
+## 8a. Quick answers, quick-recall questions and behavioural questions
+
+The bank has two layers. The **main bank** (§4–§5) is deep: mechanism, trade-offs, production gotchas. On top of
+it sits a **quick layer** for fast revision and viva-style rounds, in the plain style Bangladeshi juniors meet in
+written tests and first interviews: "Q: What is X? A: one to three plain sentences". The quick layer never
+replaces the deep answer, and it must never contradict it.
+
+### Quick answer on every main-bank question (`quick_en` / `quick_bn`)
+
+Every question whose type is not `quick` or `behavioral` needs `quick_en` + `quick_bn` (check.py errors without
+it). The app shows it as a **Quick answer** callout above the full answer, and flashcards show it instead of the
+full answer.
+
+- **What it is:** the first thing a strong candidate says out loud: the direct answer in 1–3 plain sentences
+  (≤ ~300 characters in English), one paragraph, no bullet lists, no new facts. Read the full answer and
+  compress it; if the full answer has a key caveat ("only in Express 5", "not Baseline yet"), keep it.
+- **By type:** conceptual/comparison → definition + the one distinction that matters. MCQ → the correct choice
+  *by content* ("`regex`: the regex location wins…"), never just a letter. Output → the exact output plus the
+  one-line reason. Debugging → root cause + fix in one breath. Coding/query → the approach and its complexity.
+  Scenario/system design/architecture → the recommendation and its main reason.
+- **Avoid:** restating the question, "It depends" without the deciding factor, filler ("this is very
+  important"), analogies that are wrong on inspection.
+- **Bangla:** natural spoken Bangla, tech terms in Latin script (`closure`, `event loop`, `index`), same meaning
+  and caveats as the English. Not a word-for-word translation.
+
+Example (js-004, closures):
+```python
+quick_en=r"""A closure is a function that keeps access to the variables of the scope it was created in, even after that outer function has returned. That's how a returned counter function can keep its own private `count`.""",
+quick_bn=r"""Closure হলো এমন একটা function, যেটা যে scope-এ তৈরি হয়েছে সেই scope-এর variable-গুলো outer function return করার পরেও ব্যবহার করতে পারে। এজন্যই return করা একটা counter function নিজের private `count` মনে রাখতে পারে।""",
+```
+
+### Quick-recall questions (`type="quick"`)
+
+Each technology has a set of **10 quick-recall questions** in `data/src/<tech>_quick.py`
+(`save("<tech>", "quick", QUESTIONS)`), ids `<prefix>-q01` … `<prefix>-q10` (e.g. `js-q01`, `next-q03`).
+They are left out of the §4/§5 difficulty and type targets.
+
+- **Topic choice:** the fundamentals interviewers ask juniors most in viva/written rounds ("What is
+  hoisting?", "`app.use()` vs `app.get()`?", "`find()` vs `findOne()`?"). Prefer fundamentals the main bank only
+  covers indirectly, or gaps from `audit/AUDIT_REPORT.md` §E. One concept per question. No trivia (release dates,
+  who created it) and no version-number quizzes.
+- **Fields:** `type="quick"`, `diff="easy"` (a few `"medium"` allowed; never hard/extreme), `mins=1`–`2`,
+  `prio="high"` or `"medium"`, `market="both"` unless there is evidence for another label, `vs` / `status` as
+  usual. **No `quick_*`**: the `a_*` *is* the short answer.
+- **`a_en` / `a_bn`:** 1–3 plain sentences (≤ ~400 characters). An everyday analogy is welcome only if it is
+  accurate ("an index is like the index at the back of a book" is fine; "Node.js is a JavaScript engine" is
+  wrong: it's a runtime built on V8).
+- **`code` (optional, encouraged):** a tiny example (≤ 8 lines) with the result in `output`, or as
+  `// → result` comments. It is shown with the answer, not the question, so comments may give results. Run
+  it.
+- **`ex_*`:** 1–3 short lines: why it matters, or the one gotcha that follow-up questions probe.
+- **`tip_*`:** one sentence on how to say it in an interview. **`follow`:** 1–2 follow-ups. **`related`:** the
+  main-bank question(s) that cover the concept in depth. **`refs`:** one official page.
+- **Accuracy rules (§7) apply in full.** Current APIs only; label legacy things as legacy (e.g. Pages Router
+  `getServerSideProps`, `middleware.ts`), don't teach them as current.
+
+Example:
+```python
+Q(
+    id="js-q01", sub="Scope & Hoisting", diff="easy", type="quick",
+    prio="high", market="both", mins=1,
+    tags=["hoisting", "tdz", "var", "let"],
+    ver="Version-independent concept (ECMAScript 2026)", vs=False, status="stable",
+    q_en=r"""What is hoisting, and how do `var`, `let` and `const` differ?""",
+    q_bn=r"""Hoisting কী, আর `var`, `let` ও `const`-এর মধ্যে পার্থক্য কী?""",
+    a_en=r"""Before running a scope, JavaScript registers all its declarations, so you can refer to them before the line that declares them. A `var` starts as `undefined`, while `let` and `const` stay in the temporal dead zone (TDZ) until their declaration runs, so reading them early throws a `ReferenceError`.""",
+    a_bn=r"""কোনো scope চালানোর আগে JavaScript তার সব declaration register করে নেয়, তাই declaration-এর line-এর আগেও সেগুলোর নাম ব্যবহার করা যায়। `var` শুরুতে `undefined` থাকে, কিন্তু `let` আর `const` declaration-এর line চলা পর্যন্ত temporal dead zone (TDZ)-এ থাকে, তাই আগে পড়তে গেলে `ReferenceError` হয়।""",
+    code=r"""
+        console.log(a); // undefined
+        var a = 1;
+        console.log(b); // ReferenceError: Cannot access 'b' before initialization
+        let b = 2;
+    """, lang="javascript",
+    ex_en=r"""Nothing is physically moved. Function declarations are hoisted with their body, so you can call them before they appear; function expressions assigned to `let`/`const` are not.""",
+    ex_bn=r"""আসলে code সরানো হয় না। Function declaration body-সহ hoist হয়, তাই আগে call করা যায়; কিন্তু `let`/`const`-এ রাখা function expression-কে আগে call করা যায় না।""",
+    tip_en=r"""Say "declarations are registered first; `let`/`const` sit in the TDZ" and show the two-line example.""",
+    tip_bn=r"""বলো "declaration আগে register হয়; `let`/`const` TDZ-এ থাকে", তারপর দুই line-এর example-টা দেখাও।""",
+    follow=[("Are function expressions hoisted?", "Function expression কি hoist হয়?")],
+    related=["js-002"],
+    refs=[("MDN — Hoisting", "https://developer.mozilla.org/en-US/docs/Glossary/Hoisting")],
+),
+```
+
+### Behavioural & project questions (`technology="behavioral"`, `type="behavioral"`)
+
+`data/src/behavioral_b1.py` (`save("behavioral", "b1", QUESTIONS)`), ids `beh-001` …. For questions like "Tell
+me about yourself", "Walk me through your project", "Hardest bug you fixed", "Why this company?".
+
+- `a_*`: 1–3 sentences on **what the interviewer is checking and how to structure the answer** (e.g. STAR:
+  situation, task, action, result).
+- `ex_*`: a short **sample answer** in first person with clearly marked placeholders such as
+  `[your project]`, written for a junior/fresher developer. Never invent statistics, salaries, company
+  facts or claims about what a specific company asks.
+- `mist_*`: the common ways candidates lose the room. `tip_*`, `follow` as usual. `refs` are optional for this
+  category (check.py only warns). `diff` is `easy` or `medium`; `market` is `both` unless the advice is
+  specific to Bangladesh (then explain why in the answer, without unsourced claims).
+
 ## 9. Final self-review before you finish
 
 - [ ] `python3 tools/check.py <tech>` → `OK — no errors.`; difficulty distribution on target.

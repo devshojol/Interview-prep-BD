@@ -57,6 +57,10 @@
    "css-016",
    "css-021"
   ],
+  "quickAnswer": {
+   "en": "Mobile-first means the base styles target small screens and `min-width` queries add layout as space grows. Pick breakpoints where the content breaks, written in `rem`, not by device names, and also use features like `hover`, `pointer`, `prefers-reduced-motion` and `prefers-color-scheme`.",
+   "bn": "Mobile-first মানে base style ছোট screen-এর জন্য, আর জায়গা বাড়লে `min-width` query দিয়ে layout বাড়ানো। Breakpoint ঠিক করো যেখানে content ভাঙে সেখানে, `rem`-এ লিখে, device-এর নাম দেখে নয়; সাথে `hover`, `pointer`, `prefers-reduced-motion` আর `prefers-color-scheme`-এর মতো feature-ও কাজে লাগে।"
+  },
   "commonMistakes": {
    "en": "Using device-named breakpoints (\"iPhone\", \"iPad\"), writing breakpoints in `px` only, relying on `:hover` for essential actions, or forgetting the viewport meta tag.",
    "bn": "Device-এর নামে breakpoint (\"iPhone\", \"iPad\"), শুধু `px`-এ breakpoint লেখা, জরুরি action-এর জন্য `:hover`-এর উপর নির্ভর করা, অথবা viewport meta tag ভুলে যাওয়া।"
@@ -113,6 +117,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The `content` property is missing, so the pseudo-element is never generated. Add `content: \"\"` and the other styles apply to the generated box.",
+   "bn": "`content` property নেই, তাই pseudo-element তৈরিই হয় না। `content: \"\"` যোগ করলে বাকি style-গুলো তৈরি হওয়া box-এ লাগবে।"
+  },
   "code": {
    "language": "html",
    "source": "<span class=\"badge\">New</span>\n\n<style>\n  .badge::before {\n    display: inline-block;\n    width: 8px;\n    height: 8px;\n    margin-right: 6px;\n    border-radius: 50%;\n    background: #e63946;\n  }\n</style>"
@@ -193,6 +201,10 @@
    "css-017",
    "css-003"
   ],
+  "quickAnswer": {
+   "en": "The heading is green and the note is gray. `--accent` is inherited from the nearest ancestor that sets it, `.card`, which overrides `:root`; the fallback is used only when the property isn't defined at all, as with `--muted`.",
+   "bn": "Heading সবুজ আর note ধূসর। `--accent` নিকটতম যে ancestor সেটা set করেছে, অর্থাৎ `.card` থেকে inherit হয়, যেটা `:root`-কে override করে; fallback তখনই ব্যবহার হয় যখন property একদমই define করা নেই, যেমন `--muted`।"
+  },
   "commonMistakes": {
    "en": "Answering blue because `:root` is \"global\", or red because a fallback was provided.",
    "bn": "`:root` \"global\" বলে নীল বলা, অথবা fallback দেওয়া আছে বলে লাল বলা।"
@@ -267,6 +279,10 @@
    "css-024",
    "css-026"
   ],
+  "quickAnswer": {
+   "en": "A transition animates between two states when a value changes, like hover or a class toggle; a `@keyframes` animation runs multi-step motion on its own, like a spinner. Animate `transform` and `opacity`, and put large motion inside `@media (prefers-reduced-motion: no-preference)`.",
+   "bn": "Transition কোনো value বদলালে দুই state-এর মাঝে animate করে, যেমন hover বা class toggle; `@keyframes` animation নিজে থেকেই multi-step motion চালায়, যেমন spinner। `transform` আর `opacity` animate করো, আর বড় motion রাখো `@media (prefers-reduced-motion: no-preference)`-এর ভেতরে।"
+  },
   "commonMistakes": {
    "en": "Animating `height`, `top` or `left` for routine effects, removing *all* feedback for reduced-motion users, using `0s` transition durations that stop `transitionend` from ever firing, or ignoring JavaScript-driven motion.",
    "bn": "সাধারণ effect-এর জন্য `height`, `top` বা `left` animate করা, reduced-motion user-দের জন্য *সব* feedback সরিয়ে ফেলা, এমন `0s` transition duration ব্যবহার করা যাতে `transitionend` কখনো fire-ই হয় না, অথবা JavaScript দিয়ে চালানো motion উপেক্ষা করা।"
@@ -323,6 +339,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`position: relative; z-index: auto;` does not create a stacking context on its own. `opacity` below 1, any `transform` other than `none` (even `translateZ(0)`) and `isolation: isolate` all do.",
+   "bn": "`position: relative; z-index: auto;` নিজে থেকে stacking context তৈরি করে না। 1-এর কম `opacity`, `none` ছাড়া যেকোনো `transform` (এমনকি `translateZ(0)`) আর `isolation: isolate`, এরা সবাই করে।"
+  },
   "options": [
    {
     "en": "`opacity: 0.99`",
@@ -402,6 +422,10 @@
    "css-017",
    "css-018"
   ],
+  "quickAnswer": {
+   "en": "`@property` registers a custom property with a type, an `inherits` flag and an `initial-value`, so the browser can animate it (for example a gradient angle), fall back on invalid values and compute it. Baseline newly available since July 2024; older browsers treat it as a normal custom property.",
+   "bn": "`@property` একটা custom property-কে type, `inherits` flag আর `initial-value`-সহ register করে, ফলে browser সেটা animate করতে পারে (যেমন gradient-এর angle), ভুল value-তে fallback নেয় আর compute করে। July 2024 থেকে Baseline newly available; পুরোনো browser এটাকে সাধারণ custom property হিসেবে দেখে।"
+  },
   "commonMistakes": {
    "en": "Forgetting `inherits` or `initial-value` (the rule is silently ignored), using `3em` as an initial value, or expecting unregistered custom properties to animate smoothly.",
    "bn": "`inherits` বা `initial-value` ভুলে যাওয়া (rule চুপচাপ উপেক্ষিত হয়), initial value হিসেবে `3em` দেওয়া, অথবা register না করা custom property মসৃণভাবে animate হবে বলে আশা করা।"
@@ -475,6 +499,10 @@
    "css-014",
    "css-020"
   ],
+  "quickAnswer": {
+   "en": "Reproduce at 320–360px, then find the element that sticks out with an outline on everything, a script that lists boxes wider than the viewport, or by hiding sections. Fix the cause (fixed widths, `100vw`, long strings, `min-width: auto`, unconstrained media) rather than `overflow-x: hidden` on `body`.",
+   "bn": "320–360px-এ reproduce করো, তারপর সব element-এ outline দিয়ে, viewport-এর চেয়ে চওড়া box খুঁজে বের করার script চালিয়ে, বা section লুকিয়ে লুকিয়ে বাইরে বেরোনো element খোঁজো। `body`-তে `overflow-x: hidden` না দিয়ে আসল কারণ ঠিক করো (fixed width, `100vw`, লম্বা string, `min-width: auto`, সীমাহীন media)।"
+  },
   "commonMistakes": {
    "en": "Slapping `overflow-x: hidden` on `body`/`html`, using `100vw` for full-width sections, or hunting randomly instead of measuring element boxes.",
    "bn": "`body`/`html`-এ `overflow-x: hidden` চাপিয়ে দেওয়া, full-width section-এর জন্য `100vw` ব্যবহার করা, অথবা element-এর box না মেপে এলোমেলোভাবে খোঁজা।"
@@ -559,6 +587,10 @@
    "css-024",
    "css-013"
   ],
+  "quickAnswer": {
+   "en": "This is advanced: profile on a real device, then remove `will-change` from every card, shrink the `backdrop-filter` blur, animate a pseudo-element's `opacity` instead of the shadow, drop per-image `drop-shadow()`, and scope the `:has()` rule to the listing. Verify with before/after traces.",
+   "bn": "এটা advanced বিষয়: আসল device-এ profile করি, তারপর সব card থেকে `will-change` সরাই, `backdrop-filter`-এর blur কমাই, shadow-এর বদলে pseudo-element-এর `opacity` animate করি, প্রতিটা image-এর `drop-shadow()` বাদ দিই, আর `:has()` rule-কে listing-এর মধ্যে সীমিত করি। শেষে আগে-পরের trace মিলিয়ে দেখি।"
+  },
   "commonMistakes": {
    "en": "Adding even more `will-change` or `translateZ(0)` to \"force GPU\", profiling only on a desktop, fixing all suspects at once without measuring which mattered, or assuming `:has()` cost is negligible at `body` level.",
    "bn": "\"GPU জোর করে চালাতে\" আরও `will-change` বা `translateZ(0)` যোগ করা, শুধু desktop-এ profile করা, কোনটা আসলে দায়ী তা না মেপে সব সন্দেহভাজন একসাথে ঠিক করা, অথবা `body` level-এ `:has()`-এর খরচ নগণ্য বলে ধরে নেওয়া।"

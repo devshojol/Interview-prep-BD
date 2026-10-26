@@ -63,6 +63,10 @@
    "aws-012",
    "aws-009"
   ],
+  "quickAnswer": {
+   "en": "Four problems: the registrar still delegates to its own nameservers instead of the Route 53 NS records, port 443 is closed in the security group, NGINX has no TLS server block (run certbot after DNS works), and there's no Elastic IP, so the IP changes on stop/start. Fix DNS delegation first.",
+   "bn": "চারটা সমস্যা: registrar এখনো নিজের nameserver-এ delegate করছে, Route 53-এর NS record-এ না; security group-এ port 443 বন্ধ; NGINX-এ কোনো TLS server block নেই (DNS ঠিক হলে certbot চালাও); আর Elastic IP নেই, তাই stop/start-এ IP বদলে যায়। আগে DNS delegation ঠিক করো।"
+  },
   "commonMistakes": {
    "en": "Waiting days for \"propagation\" when the nameservers were never changed, opening only port 80, or running certbot before DNS points to the server.",
    "bn": "Nameserver কখনো বদলানোই হয়নি, অথচ দিনের পর দিন \"propagation\"-এর জন্য অপেক্ষা করা, শুধু port 80 খোলা, বা DNS server-এ point করার আগেই certbot চালানো।"
@@ -154,6 +158,10 @@
    "aws-016",
    "aws-028"
   ],
+  "quickAnswer": {
+   "en": "ECR stores images, a task definition is the versioned blueprint (image, CPU/memory, secrets, logs, task and execution roles), a task is a running copy, and a service keeps N tasks healthy behind an ALB. Default to Fargate (no servers to patch); pick the EC2 launch type for steady high utilisation, GPUs or host-level control.",
+   "bn": "ECR image রাখে, task definition হলো versioned blueprint (image, CPU/memory, secret, log, task role আর execution role), task হলো তার চলমান copy, আর service ALB-এর পেছনে N-টা task সুস্থ রাখে। Default হিসেবে Fargate নাও (patch করার server নেই); টানা বেশি utilisation, GPU বা host-level control লাগলে EC2 launch type নাও।"
+  },
   "commonMistakes": {
    "en": "Deploying with the `latest` tag (you can't tell which version is running or roll back reliably), putting secrets in plain `environment` values, or giving the execution role the app's S3 permissions.",
    "bn": "`latest` tag দিয়ে deploy করা (কোন version চলছে বোঝা যায় না, ঠিকমতো rollback-ও করা যায় না), secret সাধারণ `environment` value হিসেবে রাখা, বা app-এর S3 permission execution role-কে দিয়ে দেওয়া।"
@@ -227,6 +235,10 @@
    "aws-019",
    "aws-023"
   ],
+  "quickAnswer": {
+   "en": "Use the built-in ALB and EC2 metrics plus the CloudWatch agent for memory, disk and logs (with a retention period), then alarm through SNS on target 5xx, p95/p99 `TargetResponseTime`, `UnHealthyHostCount`, CPU and disk. Add OpenTelemetry tracing to X-Ray to see which downstream call is slow.",
+   "bn": "ALB আর EC2-এর built-in metric নাও, আর memory, disk ও log-এর জন্য CloudWatch agent বসাও (retention period-সহ); তারপর target 5xx, p95/p99 `TargetResponseTime`, `UnHealthyHostCount`, CPU আর disk-এর ওপর SNS-এ alarm দাও। কোন downstream call ধীর সেটা দেখতে OpenTelemetry দিয়ে X-Ray-তে trace পাঠাও।"
+  },
   "commonMistakes": {
    "en": "Expecting memory metrics without the agent, alarming on average latency only, or leaving log groups on \"never expire\".",
    "bn": "Agent ছাড়াই memory metric আশা করা, শুধু average latency-তে alarm দেওয়া, বা log group \"never expire\" অবস্থায় রেখে দেওয়া।"
@@ -312,6 +324,10 @@
    "aws-019",
    "aws-030"
   ],
+  "quickAnswer": {
+   "en": "Spread every tier across AZs: CloudFront with WAF in front of a private S3 bucket and an ALB, a stateless API in an Auto Scaling group or ECS service with health checks, and RDS Multi-AZ. Size capacity so the remaining AZs carry the load (static stability); a full-Region outage is a DR problem, not HA.",
+   "bn": "প্রতিটা tier কয়েকটা AZ জুড়ে ছড়াও: private S3 bucket আর ALB-এর সামনে WAF-সহ CloudFront, health check-সহ Auto Scaling group বা ECS service-এ stateless API, আর RDS Multi-AZ। Capacity এমনভাবে রাখো যেন বাকি AZ-গুলো পুরো load নিতে পারে (static stability); পুরো Region down হওয়া DR-এর বিষয়, HA-র না।"
+  },
   "commonMistakes": {
    "en": "Running everything in one AZ \"with an Auto Scaling group\", storing sessions or uploads on instance disks, using one zonal NAT Gateway for all AZs, or making the health check depend on the database.",
    "bn": "\"Auto Scaling group আছে\" বলে সবকিছু একটা AZ-এ চালানো, instance-এর disk-এ session বা upload রাখা, সব AZ-এর জন্য একটা zonal NAT Gateway, বা health check-কে database-এর উপর নির্ভরশীল করা।"
@@ -386,6 +402,10 @@
    "aws-015",
    "aws-032"
   ],
+  "quickAnswer": {
+   "en": "Three causes: `s3:PutObject` is granted on the bucket ARN instead of `bucket/*`, the bucket policy's `StringNotEquals` Deny fires because the encryption header is missing, and the role lacks `kms:GenerateDataKey`. To debug, confirm the caller in CloudTrail, then check explicit Deny, Allow, SCPs/boundaries and the key policy.",
+   "bn": "তিনটা কারণ: `s3:PutObject` দেওয়া হয়েছে bucket ARN-এ, `bucket/*`-এ না; encryption header না থাকায় bucket policy-র `StringNotEquals` Deny লেগে যায়; আর role-এর `kms:GenerateDataKey` নেই। যেকোনো AccessDenied debug করতে আগে CloudTrail-এ আসল caller কে দেখো, তারপর explicit Deny, Allow, SCP/boundary আর key policy পরপর check করো।"
+  },
   "commonMistakes": {
    "en": "Fixing it with `\"Action\": \"s3:*\", \"Resource\": \"*\"` (that still fails because of the explicit Deny and KMS), or assuming an Allow can override a Deny.",
    "bn": "`\"Action\": \"s3:*\", \"Resource\": \"*\"` দিয়ে ঠিক করার চেষ্টা (explicit Deny আর KMS-এর কারণে তবুও fail করবে), বা ভাবা যে Allow দিয়ে Deny override করা যায়।"
@@ -478,6 +498,10 @@
    "aws-017",
    "aws-018"
   ],
+  "quickAnswer": {
+   "en": "Each invocation opens a DB connection and never closes it, exhausting RDS: create one pool outside the handler, use RDS Proxy and cap reserved concurrency. A Lambda in private subnets has no internet route, so add a NAT Gateway (VPC endpoints for AWS services), and set client timeouts so calls fail fast.",
+   "bn": "প্রতিটা invocation একটা DB connection খোলে আর বন্ধ করে না, ফলে RDS-এর connection শেষ হয়ে যায়: handler-এর বাইরে একটা pool বানাও, RDS Proxy ব্যবহার করো আর reserved concurrency দিয়ে cap দাও। Private subnet-এর Lambda-র internet route নেই, তাই NAT Gateway যোগ করো (AWS service-এর জন্য VPC endpoint), আর client timeout দাও যাতে call দ্রুত fail করে।"
+  },
   "commonMistakes": {
    "en": "Raising the Lambda timeout to 15 minutes, moving the function to a public subnet to \"get internet\", or adding `client.end()` while still opening a new connection on every request (it works, but connection setup and TLS cost every time and storms still happen).",
    "bn": "Lambda timeout বাড়িয়ে ১৫ মিনিট করা, \"internet পেতে\" function-কে public subnet-এ সরানো, বা প্রতি request-এ নতুন connection খোলা চালু রেখে শুধু `client.end()` যোগ করা (কাজ করে, কিন্তু প্রতিবার connection setup আর TLS-এর খরচ লাগে, storm-ও থেকে যায়)।"
@@ -562,6 +586,10 @@
    "aws-006",
    "aws-005"
   ],
+  "quickAnswer": {
+   "en": "Find the jump in Cost Explorer grouped by service, then usage type (often NAT Gateway bytes, data transfer, idle resources or logs), and fix it with gateway endpoints, cleanup, lifecycle rules and right-sizing. Prevent repeats with AWS Budgets, Cost Anomaly Detection, cost-allocation tags and Savings Plans for the baseline.",
+   "bn": "Cost Explorer-এ service, তারপর usage type দিয়ে group করে বাড়তি খরচটা খুঁজে বের করো (প্রায়ই NAT Gateway bytes, data transfer, অলস resource বা log), তারপর gateway endpoint, cleanup, lifecycle rule আর right-sizing দিয়ে ঠিক করো। আবার যেন না হয়, সেজন্য AWS Budgets, Cost Anomaly Detection, cost-allocation tag, আর baseline-এর জন্য Savings Plans রাখো।"
+  },
   "commonMistakes": {
    "en": "Jumping straight to \"buy Reserved Instances\" before finding the cause, deleting resources without checking ownership tags, or ignoring data transfer because \"compute is the expensive part\".",
    "bn": "কারণ খোঁজার আগেই \"Reserved Instances কিনে ফেলো\" বলা, ownership tag না দেখে resource delete করা, বা \"compute-ই তো দামি\" ভেবে data transfer উপেক্ষা করা।"

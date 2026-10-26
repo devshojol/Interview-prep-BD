@@ -44,6 +44,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""The "build time only, and not for secrets" answer is correct. `ARG` is a build-time variable, set with `docker build --build-arg NAME=value`, that disappears after the build unless you copy it into an `ENV`. `ENV` is stored in the image config and is present in every container started from the image (overridable with `docker run -e`). Build-arg values can show up in `docker history` and provenance attestations, and `ENV` is visible via `docker inspect`, so neither is safe for secrets. Use BuildKit secret mounts for those.""",
         a_bn=r""""শুধু build time, আর secret-এর জন্য না" উত্তরটাই সঠিক। `ARG` হলো build-time variable, যেটা `docker build --build-arg NAME=value` দিয়ে set করা হয়, আর `ENV`-এ copy না করলে build শেষে হারিয়ে যায়। `ENV` image config-এ সংরক্ষিত থাকে, আর ওই image থেকে চালানো প্রতিটা container-এ থাকে (`docker run -e` দিয়ে override করা যায়)। Build-arg-এর value `docker history` আর provenance attestation-এ দেখা যেতে পারে, আর `ENV` `docker inspect`-এ দেখা যায়। তাই কোনোটাই secret-এর জন্য নিরাপদ না। Secret-এর জন্য BuildKit secret mount ব্যবহার করো।""",
+        quick_en=r"""`ARG` exists only during the build (unless copied into an `ENV`), while `ENV` is stored in the image and present in every container. Build-arg values can show up in history and provenance, and `ENV` in `docker inspect`, so neither is safe for secrets; use BuildKit secret mounts.""",
+        quick_bn=r"""`ARG` শুধু build-এর সময় থাকে (`ENV`-এ copy না করলে), আর `ENV` image-এ থেকে যায়, প্রতিটা container-এ পাওয়া যায়। Build-arg-এর value history আর provenance-এ, আর `ENV` `docker inspect`-এ দেখা যায়, তাই কোনোটাই secret-এর জন্য নিরাপদ না; secret-এর জন্য BuildKit secret mount ব্যবহার করো।""",
         ex_en=r"""
             The "available inside every build stage" option is the tempting trap. An `ARG` before the first `FROM` can only be used **in `FROM` lines** (e.g. `ARG NODE_VERSION=24` then `FROM node:${NODE_VERSION}-alpine`). To use it inside a stage, redeclare `ARG NODE_VERSION` after that stage's `FROM`.
 
@@ -80,6 +82,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The "`version:` is obsolete" answer is correct. Modern Compose implements the **Compose Specification**, where the top-level `version` is obsolete and only triggers a warning. Run it as `docker compose up` (a space, the Docker CLI plugin). The original Python `docker-compose` v1 reached end-of-life in 2023. Prefer naming new files `compose.yaml` and simply delete the `version:` line.""",
         a_bn=r""""`version:` obsolete" উত্তরটাই সঠিক। আধুনিক Compose **Compose Specification** implement করে, যেখানে top-level `version` obsolete, এটা শুধু একটা warning দেয়। চালাও `docker compose up` দিয়ে (মাঝে space, Docker CLI plugin)। আসল Python-ভিত্তিক `docker-compose` v1 ২০২৩ সালে end-of-life হয়ে গেছে। নতুন file-এর নাম `compose.yaml` রাখাই ভালো, আর `version:` line-টা মুছে দাও।""",
+        quick_en=r"""`version:` is obsolete: modern Compose ignores it with a warning and validates against the Compose Specification. Run `docker compose up` (the CLI plugin), because the old Python `docker-compose` v1 is end-of-life, and simply delete the `version:` line.""",
+        quick_bn=r"""`version:` এখন obsolete: আধুনিক Compose এটা warning দিয়ে ignore করে আর Compose Specification অনুযায়ী validate করে। `docker compose up` (CLI plugin) চালাও, কারণ পুরনো Python `docker-compose` v1 end-of-life; আর `version:` line-টা মুছে দাও।""",
         ex_en=r"""
             "Compose v5 rejects `version:`" is the tempting wrong answer. Compose doesn't fail on `version:`; it warns that the attribute is obsolete. The `depends_on` option reflects history: the old v3 **file format** dropped `depends_on` conditions, but the Compose Specification brought them back (`condition: service_healthy`) with no version key needed. As for file names, Compose still looks for `compose.yaml`, `compose.yml`, `docker-compose.yaml` and `docker-compose.yml`, preferring `compose.yaml`.
 
@@ -162,6 +166,8 @@ QUESTIONS = [
 
             **সমাধান:** hostname হিসেবে **service name** ব্যবহার করো: `postgres://app:secret@db:5432/app`। Compose সব service-কে built-in DNS-সহ একটা project network-এ রাখে, তাই `db` database container-এর IP-তে resolve হয়। সাথে healthcheck আর `depends_on: condition: service_healthy` যোগ করো, যাতে startup-এ API Postgres-এর সাথে race না করে। Host থেকে access সত্যিই না লাগলে `ports: "5432:5432"` বাদ দিতে পারো (লাগলে `127.0.0.1`-এ bind করো)।
         """,
+        quick_en=r"""Inside the `api` container, `localhost` is the api container itself, not Postgres. Use the service name as the host (`db:5432`), which Compose's DNS resolves, and add a healthcheck with `depends_on: condition: service_healthy` so the API doesn't race the database on startup.""",
+        quick_bn=r"""`api` container-এর ভেতরে `localhost` মানে api container নিজেই, Postgres না। Host হিসেবে service name (`db:5432`) দাও, Compose-এর DNS এটা resolve করে। সাথে healthcheck আর `depends_on: condition: service_healthy` দাও, যাতে startup-এ API database-এর আগে দৌড়ে না যায়।""",
         ex_en=r"""
             - **Published ports are for the host, not for container-to-container traffic.** Containers talk directly over the network on the **container** port (5432), whatever the host mapping is.
             - **The DB runs on the host, not in Compose?** Use `host.docker.internal`. Docker Desktop provides it automatically. On Linux, add `extra_hosts: ["host.docker.internal:host-gateway"]`.
@@ -190,7 +196,7 @@ QUESTIONS = [
         id="docker-017", sub="Non-root Containers", diff="medium", type="security-performance",
         prio="high", market="both", mins=6,
         tags=["non-root", "user", "capabilities", "read-only", "hardening"],
-        ver="Docker Engine 29, Node.js 24 LTS images", vs=False, status="stable",
+        ver="Docker Engine 29, Node.js 24 (Maintenance LTS) images", vs=False, status="stable",
         q_en=r"""Why shouldn't a production container run as root? How do you run a Node.js container as a non-root user, and what else would you lock down?""",
         q_bn=r"""Production container root হিসেবে চালানো কেন উচিত না? Node.js container কীভাবে non-root user হিসেবে চালাবে, আর এর বাইরে কী কী lock down করবে?""",
         a_en=r"""
@@ -217,6 +223,8 @@ QUESTIONS = [
             - কখনো `--privileged` না, কখনো `/var/run/docker.sock` mount না;
             - memory/CPU/PID limit, minimal base image আর CVE scanning।
         """,
+        quick_en=r"""Without user-namespace remapping or rootless mode, root in a container is UID 0 on the host too, so a compromised app can do far more damage, especially after a container escape. Run as the image's `node` user (`COPY --chown`, `USER node`) and add a read-only filesystem, `cap_drop: [ALL]` and `no-new-privileges`.""",
+        quick_bn=r"""User-namespace remapping বা rootless mode ছাড়া container-এর root আর host-এর root একই UID 0, তাই app hack হলে অনেক বেশি ক্ষতি হতে পারে, বিশেষ করে container escape হলে। Image-এর `node` user দিয়ে চালাও (`COPY --chown`, `USER node`), সাথে read-only filesystem, `cap_drop: [ALL]` আর `no-new-privileges` দাও।""",
         ex_en=r"""
             - **Verify it:** `docker exec api id` should print `uid=1000(node)`, and `docker inspect -f '{{.Config.User}}' image` shows the configured user.
             - **Kubernetes `runAsNonRoot: true`** can only verify a **numeric** UID. If you target Kubernetes, `USER 1000:1000` (or setting `runAsUser`) avoids a "cannot verify user is non-root" error.
@@ -302,6 +310,8 @@ QUESTIONS = [
 
             **Docker যা করে না:** standalone Docker Engine **unhealthy container restart করে না**। Restart policy শুধু process **exit** করলে প্রতিক্রিয়া দেখায়। Kubernetes image-এর `HEALTHCHECK` পুরোপুরি উপেক্ষা করে নিজের liveness/readiness probe ব্যবহার করে, আর ECS-এ health check define করা হয় task definition-এ।
         """,
+        quick_en=r"""A health check is a command Docker runs inside the container on a schedule (exit 0 means healthy), giving a healthy or unhealthy status. Compose's `service_healthy` and deploy scripts use it, but standalone Docker doesn't restart an unhealthy container: restart policies only react to the process exiting.""",
+        quick_bn=r"""Health check হলো একটা command, যেটা Docker নির্দিষ্ট সময় পরপর container-এর ভেতরে চালায় (exit 0 মানে healthy), আর তা থেকে status healthy বা unhealthy হয়। Compose-এর `service_healthy` আর deploy script এটা ব্যবহার করে, কিন্তু standalone Docker unhealthy container restart করে না; restart policy শুধু process exit করলে কাজ করে।""",
         ex_en=r"""
             - **Tooling inside the image:** `node:24-alpine` includes BusyBox `wget`, but `node:24-slim` has neither `curl` nor `wget`, and distroless has no shell. A small `node -e "fetch(...)"` check works on any Node image without adding packages.
             - **Liveness vs readiness:** a health endpoint that checks the database can turn a short DB blip into every replica being marked unhealthy, or restarted by an orchestrator. Keep liveness cheap ("is the event loop responsive?") and put dependency checks in readiness.
@@ -367,6 +377,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""The `unless-stopped` answer is correct. Both `always` and `unless-stopped` restart a container whenever it exits. The difference shows up after a **manual stop**: on the next daemon start (e.g. after a server reboot), `always` brings the container back, while `unless-stopped` respects that you stopped it. `on-failure[:N]` restarts only on a non-zero exit code, optionally at most N times.""",
         a_bn=r"""`unless-stopped`-এর উত্তরটাই সঠিক। `always` আর `unless-stopped` দুটোই container exit করলেই restart করে। পার্থক্য দেখা যায় **হাতে stop করার** পরে: পরের বার daemon start হলে (যেমন server reboot-এর পরে) `always` container-টা আবার চালু করে, কিন্তু `unless-stopped` তোমার stop করার সিদ্ধান্ত মেনে নেয়। `on-failure[:N]` শুধু non-zero exit code-এ restart করে, চাইলে সর্বোচ্চ N বার।""",
+        quick_en=r"""With `unless-stopped`, a container you stopped manually stays stopped after a daemon or host restart, while `always` brings it back. Both restart on any exit; `on-failure` restarts only on a non-zero exit code.""",
+        quick_bn=r"""`unless-stopped`-এ হাতে stop করা container daemon বা host restart-এর পরেও বন্ধ থাকে, কিন্তু `always` সেটা আবার চালু করে। দুটোই যেকোনো exit-এ restart করে; `on-failure` শুধু non-zero exit code-এ restart করে।""",
         ex_en=r"""
             The tempting wrong answer is the claim that `restart: always` reacts to `unhealthy`. Restart policies react only to the main process **exiting**; health status doesn't trigger them. Replacing unhealthy containers is an orchestrator feature (Swarm, Kubernetes, ECS).
 
@@ -414,6 +426,8 @@ QUESTIONS = [
 
             **DB isolate করা:** service-গুলোকে আলাদা network-এ ভাগ করো। NGINX আর API থাকবে `frontend`-এ; API আর Postgres থাকবে `backend`-এ, যেটা `internal: true` (outbound internet নেই, publish করা port নেই)। Postgres কোনো host port publish করবে না, ফলে এর কাছে পৌঁছানোর একমাত্র পথ API container।
         """,
+        quick_en=r"""On a user-defined bridge, Docker's embedded DNS (`127.0.0.11`) resolves container and service names; the default bridge has no name-based DNS, and host networking shares the host's stack with no isolation. To isolate a database, attach it only to an `internal: true` network shared with the API and publish no port.""",
+        quick_bn=r"""User-defined bridge-এ Docker-এর embedded DNS (`127.0.0.11`) container আর service name resolve করে; default bridge-এ name দিয়ে DNS নেই, আর host networking host-এর network stack share করে, কোনো isolation থাকে না। Database isolate করতে সেটাকে শুধু API-র সাথে share করা একটা `internal: true` network-এ রাখো, কোনো port publish কোরো না।""",
         ex_en=r"""
             - **DNS caching pitfalls:** some clients resolve a hostname once and cache the IP forever (NGINX does this for static `proxy_pass` hosts). When a container is recreated with a new IP, they keep calling the old one. Re-resolve, or use the service's DNS-aware options.
             - **Firewalls:** Docker programs iptables/nftables NAT rules for published ports. Those rules sit in front of ufw's rules, so ufw doesn't protect published ports. Filter in the `DOCKER-USER` chain or bind ports to `127.0.0.1`.
@@ -487,6 +501,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The "persists between builds, never in the image" answer is correct. A cache mount is a persistent directory managed by the builder and mounted only while that `RUN` executes. It isn't part of the layer, so it adds nothing to the image. Its value shows up exactly when the **layer cache misses** (e.g. the lockfile changed): npm re-runs, but it finds most packages already downloaded in `/root/.npm`.""",
         a_bn=r""""Build-এর মধ্যে থেকে যায়, কখনো image-এ ঢোকে না" উত্তরটাই সঠিক। Cache mount হলো builder-এর manage করা একটা স্থায়ী directory, যেটা শুধু ওই `RUN` চলার সময় mount থাকে। এটা layer-এর অংশ না, তাই image-এ কিছুই যোগ করে না। এর আসল সুবিধা দেখা যায় ঠিক তখন, যখন **layer cache miss হয়** (যেমন lockfile বদলেছে): npm আবার চলে, কিন্তু বেশিরভাগ package `/root/.npm`-এ আগে থেকেই download করা পায়।""",
+        quick_en=r"""The cache mount persists between builds on the same builder and is never part of the image. It pays off when the layer cache misses (the lockfile changed): `npm ci` still runs, but it reuses packages already downloaded into `/root/.npm`.""",
+        quick_bn=r"""Cache mount একই builder-এ এক build থেকে আরেক build-এ থেকে যায়, কিন্তু কখনো image-এর অংশ হয় না। Layer cache miss করলে (lockfile বদলালে) এর লাভ বোঝা যায়: `npm ci` আবার চলে, কিন্তু `/root/.npm`-এ আগে download হওয়া package reuse করে।""",
         ex_en=r"""
             The tempting wrong answer is the one about `--cache-to … mode=max` uploading the mount. `--cache-to`/`--cache-from` export **layer** cache (the results of instructions), not the contents of cache mounts. Cache mounts live on the builder instance, so a fresh ephemeral CI runner starts with an empty one. You either use a persistent builder, accept the cold cache, or use CI-specific workarounds that save and restore the mount directory.
 

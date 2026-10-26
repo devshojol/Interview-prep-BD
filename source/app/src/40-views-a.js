@@ -230,7 +230,7 @@
 
     const hero = h('section', { class: 'hero' },
       h('h1', null, tb(isNew ? 'welcomeNew' : 'welcomeBack')),
-      h('p', null, tb('welcomeText', { n: QUESTIONS.length, t: TECHS.length })),
+      h('p', null, tb('welcomeText', { n: QUESTIONS.length, t: TECHS.filter((x) => x.group !== 'career').length })),
       h('div', { class: 'btn-row mt-2' },
         linkBtn(cont.href, cont.label, 'btn--primary', state.activeSession ? 'play' : 'book'),
         linkBtn('#/practice', t('startPractice'), 'btn--secondary', 'target'),
@@ -471,7 +471,7 @@
       const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
       f.page = clamp(f.page, 1, pages);
       clear(countEl);
-      countEl.append(h('strong', null, String(list.length)), ' ', t('matchingQuestions'), list.length ? h('span', { class: 'muted small' }, ' · ' + t('showingRange', { a: (f.page - 1) * PAGE_SIZE + 1, b: Math.min(list.length, f.page * PAGE_SIZE) })) : null);
+      append(countEl, [h('strong', null, String(list.length)), ' ', t('matchingQuestions'), list.length ? h('span', { class: 'muted small' }, ' · ' + t('showingRange', { a: (f.page - 1) * PAGE_SIZE + 1, b: Math.min(list.length, f.page * PAGE_SIZE) })) : null]);
       clear(results);
       if (!list.length) {
         results.append(emptyState('search', QUESTIONS.length ? 'noMatchTitle' : 'bankEmpty', QUESTIONS.length ? 'noMatchText' : 'bankEmptyText', QUESTIONS.length ? [btn(t('clearFilters'), clearAll, 'btn--primary', 'x')] : null));
@@ -554,7 +554,10 @@
   }
   function answerPanel(q) {
     const parts = [];
-    parts.push(section('checkCircle', 'referenceAnswer', biText(q.answer)));
+    if (q.quickAnswer && (q.quickAnswer.en || q.quickAnswer.bn)) {
+      parts.push(h('div', { class: 'callout callout--quick' }, h('div', { class: 'callout__title' }, icon('zap', 16), tb('quickAnswer', null, { inline: true })), biText(q.quickAnswer)));
+      parts.push(section('checkCircle', 'fullAnswer', biText(q.answer)));
+    } else parts.push(section('checkCircle', q.type === 'behavioral' ? 'howToAnswer' : 'referenceAnswer', biText(q.answer)));
     if (q.complexity && (q.complexity.time || q.complexity.space)) {
       parts.push(h('div', { class: 'row' },
         q.complexity.time ? h('span', { class: 'badge badge--primary' }, t('timeComplexity') + ': ' + q.complexity.time) : null,
@@ -566,7 +569,7 @@
     }
     if (q.code && q.code.output) parts.push(codeBlock(q.code, { output: true }));
     q.extraCode.forEach((x) => parts.push(codeBlock(x, { label: pick(x.label) || null })));
-    if (q.explanation.en || q.explanation.bn) parts.push(section('bulb', 'explanation', biText(q.explanation)));
+    if (q.explanation.en || q.explanation.bn) parts.push(section(q.type === 'behavioral' ? 'message' : 'bulb', q.type === 'behavioral' ? 'sampleAnswer' : 'explanation', biText(q.explanation)));
     if (q.commonMistakes) parts.push(h('div', { class: 'callout callout--warn' }, h('div', { class: 'callout__title' }, icon('alert', 16), tb('commonMistakes', null, { inline: true })), biText(q.commonMistakes)));
     if (q.interviewTip.en || q.interviewTip.bn) parts.push(h('div', { class: 'callout callout--tip' }, h('div', { class: 'callout__title' }, icon('mic', 16), tb('interviewTip', null, { inline: true })), biText(q.interviewTip)));
     if (q.followUps.length) parts.push(section('message', 'followUps', h('ul', { class: 'list-plain' }, q.followUps.map((fu) => h('li', null, icon('chevR', 14), h('div', { style: { minWidth: 0 } }, biText(fu, { plain: true, noLabels: true })))))));

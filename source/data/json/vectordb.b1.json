@@ -62,6 +62,10 @@
    "vec-003",
    "vec-011"
   ],
+  "quickAnswer": {
+   "en": "An embedding is a list of numbers (a vector) that a model produces from text or an image, trained so that similar meanings get nearby vectors. That lets search match meaning instead of words (\"cheap phone\" finds \"budget smartphone\"), as long as documents and queries use the same model.",
+   "bn": "Embedding হলো একটা model-এর বানানো সংখ্যার list (vector), text বা image থেকে তৈরি, যাতে একই রকম অর্থের জিনিসের vector কাছাকাছি থাকে। তাই search শব্দের বদলে অর্থ মেলাতে পারে (\"cheap phone\" দিয়ে \"budget smartphone\" পাওয়া যায়), শর্ত একটাই: document আর query একই model দিয়ে embed করতে হবে।"
+  },
   "commonMistakes": {
    "en": "Calling embeddings \"encrypted\" or \"compressed text\" (they aren't reversible encryption and can leak information), or mixing vectors from different models in one index.",
    "bn": "Embedding-কে \"encrypted\" বা \"compressed text\" বলা (এগুলো উল্টানো যায় এমন encryption নয়, আর তথ্য ফাঁস করতে পারে), অথবা আলাদা model-এর vector একই index-এ মেশানো।"
@@ -118,6 +122,10 @@
    "vec-011",
    "vec-024"
   ],
+  "quickAnswer": {
+   "en": "The insert fails: a `vector(768)` column only accepts 768-dimensional vectors, so pgvector raises `expected 768 dimensions, not 1536`. Nothing is truncated and the column isn't resized.",
+   "bn": "Insert fail করে: `vector(768)` column শুধু 768-dimension-এর vector নেয়, তাই pgvector `expected 768 dimensions, not 1536` error দেয়। কিছু কেটে রাখা হয় না, column-ও নিজে থেকে বদলায় না।"
+  },
   "options": [
    {
     "en": "pgvector silently keeps the first 768 values",
@@ -198,6 +206,10 @@
    "vec-006",
    "vec-013"
   ],
+  "quickAnswer": {
+   "en": "Offline, embed each item, store the vector with its id and metadata, and build an ANN index such as HNSW. At query time, embed the query with the same model, fetch the top-k nearest vectors (usually by cosine distance, optionally filtered by metadata) and return them with scores.",
+   "bn": "Offline-এ প্রতিটা item embed করো, vector-টা id আর metadata-সহ রাখো, আর HNSW-এর মতো ANN index বানাও। Query-র সময় একই model দিয়ে query embed করো, সবচেয়ে কাছের top-k vector আনো (সাধারণত cosine distance দিয়ে, দরকারে metadata filter-সহ), আর score-সহ ফেরত দাও।"
+  },
   "commonMistakes": {
    "en": "Forgetting to embed the query with the same model, or assuming the top result is always relevant.",
    "bn": "Query একই model দিয়ে embed করতে ভুলে যাওয়া, অথবা ধরে নেওয়া যে প্রথম result সবসময় relevant।"
@@ -266,6 +278,10 @@
    "vec-012",
    "vec-003"
   ],
+  "quickAnswer": {
+   "en": "Cosine similarity measures the angle between two vectors and ignores their length: 1 means same direction, 0 unrelated, −1 opposite. Vector databases usually sort by cosine distance = 1 − similarity, so smaller is closer; in pgvector, `<=>` returns that distance.",
+   "bn": "Cosine similarity দুটো vector-এর মাঝের angle মাপে, length গোনে না: 1 মানে একই দিক, 0 মানে সম্পর্কহীন, −1 মানে উল্টো দিক। Vector database সাধারণত cosine distance = 1 − similarity দিয়ে sort করে, তাই ছোট মানেই কাছে; pgvector-এ `<=>` এই distance দেয়।"
+  },
   "commonMistakes": {
    "en": "Confusing cosine *distance* with cosine *similarity* (sorting the wrong way), or thinking a similarity of 1.0 means the vectors are identical (they only point the same way).",
    "bn": "Cosine *distance* আর cosine *similarity* গুলিয়ে ফেলা (উল্টো দিকে sort করা), অথবা ভাবা যে similarity 1.0 মানে vector দুটো হুবহু এক (আসলে শুধু একই দিকে নির্দেশ করে)।"
@@ -327,6 +343,10 @@
    "vec-004",
    "vec-018"
   ],
+  "quickAnswer": {
+   "en": "Cosine ranks A first (same direction: 1.0 vs 0.707), but L2 ranks B first (distance 1 vs ≈4.24). Once every vector is normalised to length 1, cosine, dot product and L2 all give the same ranking.",
+   "bn": "Cosine A-কে আগে রাখে (একই দিক: 1.0 বনাম 0.707), কিন্তু L2 B-কে আগে রাখে (distance 1 বনাম ≈4.24)। সব vector length 1-এ normalise করলে cosine, dot product আর L2 একই ranking দেয়।"
+  },
   "options": [
    {
     "en": "Cosine similarity and Euclidean (L2) distance both rank A first",
@@ -404,6 +424,10 @@
    "vec-025",
    "vec-009"
   ],
+  "quickAnswer": {
+   "en": "Filter `WHERE in_stock`, `ORDER BY embedding <=> '[1,0,0]'` ascending with `LIMIT 3`, and compute similarity separately as `1 - distance`, rounded. Result: products 1, 2 and 5. The `<=>` operator must match the index's `vector_cosine_ops`; ordering by the similarity `DESC` would force a full scan.",
+   "bn": "`WHERE in_stock` দিয়ে filter করো, `LIMIT 3`-সহ `ORDER BY embedding <=> '[1,0,0]'` ascending দাও, আর similarity আলাদা করে `1 - distance` হিসেবে round করে দেখাও। Result: product 1, 2 আর 5। `<=>` operator-কে index-এর `vector_cosine_ops`-এর সাথে মিলতে হবে; similarity দিয়ে `DESC` sort করলে full scan হবে।"
+  },
   "commonMistakes": {
    "en": "Writing `ORDER BY similarity DESC`, using `<->` (L2) against a cosine index, or forgetting that `<=>` is a distance, not a similarity.",
    "bn": "`ORDER BY similarity DESC` লেখা, cosine index-এর বিপরীতে `<->` (L2) ব্যবহার করা, অথবা ভুলে যাওয়া যে `<=>` হলো distance, similarity নয়।"
@@ -489,6 +513,10 @@
    "vec-026",
    "vec-031"
   ],
+  "quickAnswer": {
+   "en": "Ingest asynchronously: extract text, chunk by structure, attach metadata (ACL groups, model version) and upsert embeddings idempotently. Retrieve with hybrid search filtered by the user's permissions inside the query, rerank, let the LLM answer only from cited context, and track recall and faithfulness on a golden set.",
+   "bn": "Ingestion async রাখো: text বের করো, structure অনুযায়ী chunk করো, metadata (ACL group, model version) যোগ করো, আর idempotent-ভাবে embedding upsert করো। Query-র ভেতরেই user-এর permission দিয়ে filter করা hybrid search চালাও, rerank করো, LLM যেন শুধু cite করা context থেকে উত্তর দেয়, আর golden set দিয়ে recall ও faithfulness মাপো।"
+  },
   "commonMistakes": {
    "en": "Putting access control only in the prompt, skipping evaluation (\"it looked good in the demo\"), or re-embedding everything on every sync instead of upserting changed chunks.",
    "bn": "Access control শুধু prompt-এ রাখা, evaluation বাদ দেওয়া (\"demo-তে তো ভালোই দেখাচ্ছিল\"), অথবা পরিবর্তিত chunk upsert না করে প্রতিবার sync-এ সবকিছু আবার embed করা।"
@@ -568,6 +596,10 @@
    "vec-019",
    "vec-027"
   ],
+  "quickAnswer": {
+   "en": "Run BM25 and multilingual vector search in parallel, fuse them with Reciprocal Rank Fusion and rerank with business signals. Keep price and stock as filterable metadata instead of baking them into embeddings, plan RAM (5M × 768 floats ≈ 15 GB raw), and fall back to keyword-only search if embedding fails.",
+   "bn": "BM25 আর multilingual vector search একসাথে চালাও, Reciprocal Rank Fusion দিয়ে মেলাও, আর business signal দিয়ে rerank করো। Price আর stock embedding-এ না ঢুকিয়ে filter করা যায় এমন metadata হিসেবে রাখো, RAM হিসাব করো (5M × 768 float ≈ 15 GB raw), আর embedding fail করলে শুধু keyword search-এ fallback করো।"
+  },
   "commonMistakes": {
    "en": "Embedding price and stock into the product vector, relying on vectors alone for brand/model searches, or ignoring Banglish queries in evaluation.",
    "bn": "দাম আর stock product vector-এর ভেতরে embed করে ফেলা, brand/model search-এর জন্য শুধু vector-এর ওপর ভরসা করা, অথবা evaluation-এ Banglish query উপেক্ষা করা।"

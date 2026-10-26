@@ -50,6 +50,8 @@ QUESTIONS = [
 
             node-redis বা ioredis দিয়ে core command ব্যবহার করা সাধারণ Node.js app-এ Redis আর Valkey একই রকম আচরণ করে। পার্থক্য দেখা যায় নতুন feature-এ (Redis 8 Query Engine, Vector Sets, সাম্প্রতিক command), তাই তুমি যা ব্যবহার করো provider সেটা support করে কিনা দেখে নাও। Licensing মূলত গুরুত্বপূর্ণ যদি তুমি Redis modify করে redistribute করো বা service হিসেবে দাও — সেটা legal team-এর প্রশ্ন, আতঙ্কিত হওয়ার কারণ নয়।
         """,
+        quick_en=r"""In 7.4 Redis moved from BSD to source-available licences, so the Linux Foundation forked Valkey from 7.2.4. Redis 8 added AGPLv3, became "Redis Open Source" and bundled JSON, the Query Engine and Vector Sets. Core commands behave the same in both, so only check provider support for newer features.""",
+        quick_bn=r"""Redis 7.4-এ BSD থেকে source-available licence-এ গেলে Linux Foundation 7.2.4 থেকে Valkey fork করে। Redis 8 AGPLv3 যোগ করে, নাম হয় "Redis Open Source", আর JSON, Query Engine, Vector Sets bundle করে। Core command দুটোতেই একইভাবে চলে, তাই শুধু নতুন feature-এর provider support দেখে নাও।""",
         ex_en=r"""
             - **Vector Sets** (Redis 8.0+) store elements with vectors and answer similarity queries (`VADD`, `VSIM`), using an HNSW graph with quantisation by default — handy for small semantic-search features without a separate vector database.
             - **Release lines:** Redis 8.2 is an extended-support line, and 8.10 is the current stable release.
@@ -104,6 +106,8 @@ QUESTIONS = [
 
             আমি Memcached বেছে নেব শুধু খুব সাধারণ, বিশাল, multi-core string cache-এর জন্য, যেখানে আর কিছু লাগবে না আর team আগে থেকেই এটা চালায়। প্রায় যেকোনো নতুন Node.js project-এ Redis একটা tool দিয়েই caching, session, rate limiting আর queue সামলে নেয়।
         """,
+        quick_en=r"""Memcached is a simple, multi-threaded cache of opaque strings with no persistence or replication; Redis adds rich data types, persistence, replication, Pub/Sub, Streams and scripting. Pick Memcached only for a huge, plain string cache your team already runs; otherwise use Redis.""",
+        quick_bn=r"""Memcached হলো persistence বা replication ছাড়া opaque string-এর একটা সহজ multi-threaded cache; Redis-এ আছে rich data type, persistence, replication, Pub/Sub, Streams আর scripting। শুধু বিশাল সাধারণ string cache, যেটা team আগে থেকেই চালায়, সেখানে Memcached; বাকি সব ক্ষেত্রে Redis।""",
         ex_en=r"""
             - **Operational simplicity** is Memcached's real strength: no persistence to tune, no data-structure misuse, predictable memory (slab allocator).
             - **Consistency of comparison:** both are cache-first tools; neither replaces a primary database for relational data.
@@ -143,6 +147,8 @@ QUESTIONS = [
 
             ফাঁদগুলো হলো: আগে থেকে থাকা key-এ `SET ... NX` (nil, কোনো পরিবর্তন নেই), non-numeric string-এ `INCR` (error), না-থাকা key-এ `EXPIRE` (0), আর `TTL`-এর দুইটা বিশেষ value: `-1` = expiry নেই, `-2` = key-ই নেই।
         """,
+        quick_en=r"""`OK`, `7`, `1`, `(nil)`, `"7"`, `OK`, `ERR value is not an integer or out of range`, `0`, `OK`, `1`, `-1`, `-2`. `SET ... NX` skips an existing key, `INCR` fails on text, `EXPIRE` on a missing key returns 0, and `TTL` gives -1 for no expiry and -2 for a missing key.""",
+        quick_bn=r"""`OK`, `7`, `1`, `(nil)`, `"7"`, `OK`, `ERR value is not an integer or out of range`, `0`, `OK`, `1`, `-1`, `-2`। `SET ... NX` existing key বদলায় না, text-এ `INCR` error দেয়, missing key-তে `EXPIRE` 0 দেয়, আর `TTL`-এ -1 মানে expiry নেই, -2 মানে key-ই নেই।""",
         ex_en=r"""
             1. `SET stock:42 10` → `OK`.
             2. `DECRBY stock:42 3` → 10 − 3 = `7` (integers are stored as strings but parsed for arithmetic).
@@ -239,6 +245,8 @@ QUESTIONS = [
 
             **দুইবার process ঠেকানো:** Streams **at-least-once** delivery দেয় — worker কাজ শেষ করে `XACK`-এর ঠিক আগে crash করতে পারে, তখন message আবার আসবে। Handler-কে **idempotent** বানাও: যেমন order id-কে unique key রেখে DB-তে insert (`ON CONFLICT DO NOTHING`), আর DB commit সফল হলেই শুধু `XACK`।
         """,
+        quick_en=r"""Messages the crashed worker received but didn't `XACK` stay in the group's Pending Entries List, so nothing is lost: a restart with the same name re-reads them with ID `0`, or others take them with `XAUTOCLAIM`. Delivery is at-least-once, so make the handler idempotent and `XACK` only after the DB commit.""",
+        quick_bn=r"""Crash করা worker যে message পেয়েছিল কিন্তু `XACK` করেনি, সেগুলো group-এর Pending Entries List-এ থেকে যায়, হারায় না: একই নামে restart হলে ID `0` দিয়ে আবার পড়ে, নইলে অন্যরা `XAUTOCLAIM` দিয়ে নিয়ে নেয়। Delivery at-least-once, তাই handler idempotent রাখো আর DB commit-এর পরেই `XACK` করো।""",
         ex_en=r"""
             - **Consumer names:** use a stable name per worker (e.g. pod name) so a restarted worker can reclaim its own backlog; random names leave orphans that only `XAUTOCLAIM` will rescue.
             - **`XAUTOCLAIM` is cursor-based:** loop with the returned `nextId` until it's `0-0` to scan the whole PEL.
@@ -304,6 +312,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Use a **hash tag**. In Redis Cluster a key's slot is `CRC16(key) mod 16384`, but if the key contains `{...}`, only the part inside the braces is hashed. `user:{42}:profile` and `user:{42}:settings` both hash `42`, land in the same slot, and can be used together in one transaction or script.""",
         a_bn=r"""**Hash tag** ব্যবহার করো। Redis Cluster-এ key-এর slot হলো `CRC16(key) mod 16384`, কিন্তু key-তে `{...}` থাকলে শুধু brace-এর ভেতরের অংশ hash হয়। `user:{42}:profile` আর `user:{42}:settings` দুটোই `42` hash করে, একই slot-এ পড়ে, আর একটা transaction বা script-এ একসাথে ব্যবহার করা যায়।""",
+        quick_en=r"""Use a hash tag: `user:{42}:profile` and `user:{42}:settings`. Redis Cluster hashes only the part inside `{}`, so both keys land in the same slot and can be used in one transaction.""",
+        quick_bn=r"""Hash tag ব্যবহার করো: `user:{42}:profile` আর `user:{42}:settings`। Redis Cluster শুধু `{}`-এর ভেতরের অংশ hash করে, তাই দুটো key একই slot-এ পড়ে আর একটা transaction-এ ব্যবহার করা যায়।""",
         ex_en=r"""
             Multi-key commands, transactions and Lua scripts only work when every key involved is in the **same hash slot**. Option A fails because Redis Cluster supports only database 0 — `SELECT` to another DB isn't allowed. Option B is impossible: the slot count is fixed at 16384. Option C is tempting: pipelining does work across slots because the client splits commands per node, but it is **not atomic**, so you lose the transaction guarantee.
 
@@ -357,6 +367,8 @@ QUESTIONS = [
 
             **সিদ্ধান্ত:** dataset আর write throughput একটা machine-এ স্বচ্ছন্দে আঁটলে আমি primary + replica + Sentinel (বা managed সমতুল্য) দিয়ে শুরু করি — সহজ, cross-slot নিয়ম নেই। Memory বা write load একটা node ছাড়িয়ে গেলে Cluster-এ যাই, আর শুরু থেকেই hash tag মাথায় রেখে key design করি।
         """,
+        quick_en=r"""Replication copies a primary's writes to replicas asynchronously; Sentinel adds automatic failover and tells clients the current primary, but the data must fit one node. Cluster shards keys over 16,384 slots with built-in failover, at the cost of same-slot rules. Start with Sentinel and move to Cluster when one node isn't enough.""",
+        quick_bn=r"""Replication primary-র write asynchronously replica-তে পাঠায়; Sentinel automatic failover দেয় আর client-কে বর্তমান primary জানায়, কিন্তু পুরো data একটা node-এ ধরতে হয়। Cluster 16,384 slot-এ key ভাগ করে আর built-in failover দেয়, তবে multi-key কাজ একই slot-এ রাখতে হয়। শুরু Sentinel দিয়ে; একটা node যথেষ্ট না হলে Cluster।""",
         ex_en=r"""
             - **Data loss window:** because replication is async, a primary can acknowledge a write and die before replicating it — the promoted replica won't have it. `WAIT numreplicas timeout` and `min-replicas-to-write` shrink the window but don't make Redis strongly consistent.
             - **Split brain:** a primary isolated in a minority partition may keep accepting writes for a while; those are discarded when it rejoins as a replica.
@@ -421,6 +433,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""`EXEC` returns `1`, a `WRONGTYPE` error and `2`, and `counter` ends up as `2`. A command that fails *at runtime* inside a transaction returns its error in the `EXEC` reply, but the other commands still run — Redis transactions have no rollback.""",
         a_bn=r"""`EXEC` return করে `1`, একটা `WRONGTYPE` error আর `2`, আর `counter` শেষে হয় `2`। Transaction-এর ভেতরে কোনো command *runtime-এ* fail করলে `EXEC` reply-তে তার error আসে, কিন্তু বাকি command-গুলো চলতেই থাকে — Redis transaction-এ rollback নেই।""",
+        quick_en=r"""`EXEC` returns `1`, a `WRONGTYPE` error and `2`, and `counter` ends up `2`. A command that fails at runtime just returns its error inside the `EXEC` reply; the other commands still run, because Redis transactions have no rollback.""",
+        quick_bn=r"""`EXEC` দেয় `1`, একটা `WRONGTYPE` error আর `2`, আর `counter` হয় `2`। Runtime-এ fail করা command শুধু `EXEC` reply-র ভেতরে নিজের error দেয়; বাকি command চলতেই থাকে, কারণ Redis transaction-এ rollback নেই।""",
         ex_en=r"""
             Redis distinguishes two kinds of errors:
             - **Queue-time errors** (unknown command, wrong number of arguments) are detected before `EXEC`; the server then refuses to run the transaction (`EXECABORT`). That's option C — tempting, but `LPUSH name x` is syntactically valid, so it queues fine.
@@ -480,6 +494,8 @@ QUESTIONS = [
 
             **কারণ অনুযায়ী সমাধান:** `KEYS`-এর বদলে `SCAN`, বড় key `UNLINK` দিয়ে delete করে ভাগ করো; THP বন্ধ করো; RDB snapshot একটা replica-তে সরাও (বা snapshot কম ঘনঘন করো) আর `no-appendfsync-on-rewrite` বিবেচনা করো; দ্রুত disk; TTL-এ jitter; 30 GB dataset shard করো যাতে প্রতিটা fork ছোট হয়। তারপর latency monitor (`latency-monitor-threshold`) চালু করে fork time আর slow-log entry-তে alert দাও।
         """,
+        quick_en=r"""Periodic stalls with low CPU mean something blocks the single command thread: check `SLOWLOG` for `KEYS` or big-key commands, `latest_fork_usec` for RDB/AOF fork stalls (worse with transparent huge pages), AOF fsync delays, mass expiry and swapping. Fix the cause: `SCAN`, `UNLINK`, disable THP, snapshot on a replica.""",
+        quick_bn=r"""CPU কম অথচ মাঝে মাঝে stall মানে কিছু একটা single command thread আটকে দিচ্ছে: `SLOWLOG`-এ `KEYS` বা big-key command, `latest_fork_usec`-এ RDB/AOF fork stall (transparent huge pages থাকলে আরও খারাপ), AOF fsync delay, mass expiry আর swap দেখো। কারণ অনুযায়ী fix: `SCAN`, `UNLINK`, THP বন্ধ, replica-তে snapshot।""",
         ex_en=r"""
             - **Why average CPU misleads:** a 2-second stall every 5 minutes barely moves a CPU average but wrecks p99. Always look at max/percentile latency and event timelines.
             - **`SLOWLOG` measures execution time only** — it won't show time spent waiting on fork or disk, which is why you also need `latest_fork_usec`, the latency monitor (`LATENCY DOCTOR`, `LATENCY LATEST`) and the Redis log.

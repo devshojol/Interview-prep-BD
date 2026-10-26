@@ -58,6 +58,10 @@
    "redis-004",
    "redis-017"
   ],
+  "quickAnswer": {
+   "en": "In-memory sessions exist only in one instance's RAM, so when the load balancer sends the next request to another instance the user looks logged out (restarts wipe them too). Store sessions in shared Redis with a TTL, keep only the session id in the cookie, and `DEL` the key on logout.",
+   "bn": "In-memory session শুধু একটা instance-এর RAM-এ থাকে, তাই load balancer পরের request অন্য instance-এ পাঠালে user logged out দেখায় (restart-এও মুছে যায়)। Session রাখো shared Redis-এ TTL-সহ, cookie-তে রাখো শুধু session id, আর logout-এ key-টা `DEL` করো।"
+  },
   "commonMistakes": {
    "en": "Storing the whole session in a JWT/cookie and calling it the same thing (you lose server-side revocation), or putting sessions in a cache instance with `allkeys-lru`, where active users can be evicted.",
    "bn": "পুরো session JWT/cookie-তে রেখে একই জিনিস বলে দাবি করা (server-side revocation হারাও), অথবা `allkeys-lru` policy-র cache instance-এ session রাখা — যেখানে active user-ও evict হয়ে যেতে পারে।"
@@ -116,6 +120,10 @@
    "redis-015",
    "redis-021"
   ],
+  "quickAnswer": {
+   "en": "They are lost: Pub/Sub delivers only to clients subscribed at the moment of publishing and never stores messages (at-most-once). If consumers must catch up after downtime, use Streams with consumer groups.",
+   "bn": "Message-গুলো হারিয়ে যায়: Pub/Sub শুধু publish-এর মুহূর্তে subscribe করা client-দের কাছে পাঠায়, কিছুই store করে না (at-most-once)। Downtime-এর পরে consumer-কে catch up করতে হলে consumer group-সহ Streams ব্যবহার করো।"
+  },
   "extraCode": [
    {
     "language": "text",
@@ -196,6 +204,10 @@
    "redis-026",
    "redis-008"
   ],
+  "quickAnswer": {
+   "en": "Set `maxmemory-policy allkeys-lru` (or `allkeys-lfu`). The default `noeviction` rejects writes at the limit, and `volatile-*` policies only evict keys that have a TTL, which most of these keys don't.",
+   "bn": "`maxmemory-policy allkeys-lru` (বা `allkeys-lfu`) set করো। Default `noeviction` limit-এ পৌঁছালে write reject করে, আর `volatile-*` policy শুধু TTL-ওয়ালা key evict করে, অথচ এখানে বেশিরভাগ key-এর TTL নেই।"
+  },
   "extraCode": [
    {
     "language": "text",
@@ -291,6 +303,10 @@
    "redis-003",
    "redis-032"
   ],
+  "quickAnswer": {
+   "en": "Redis expires keys lazily when they're touched and with a background cycle that samples keys with TTLs, so unread expired keys can linger briefly, and freed memory isn't always returned to the OS. For per-field expiry in a hash, use `HEXPIRE`/`HTTL` (7.4+) or `HSETEX`/`HGETEX` (8.0+).",
+   "bn": "Redis key expire করে দুইভাবে: key touch করার সময় lazy check, আর একটা background cycle যেটা TTL-ওয়ালা key sample করে মুছে। তাই কেউ না পড়লে expired key কিছুক্ষণ থেকে যেতে পারে, আর free হওয়া memory সবসময় OS-এ ফেরত যায় না। Hash-এর field-ভিত্তিক expiry-র জন্য `HEXPIRE`/`HTTL` (7.4+) বা `HSETEX`/`HGETEX` (8.0+)।"
+  },
   "commonMistakes": {
    "en": "Thinking Redis runs a timer per key, or assuming `EXPIRE` on a hash key expires individual fields (it expires the whole hash).",
    "bn": "ভাবা যে Redis প্রতিটা key-এর জন্য আলাদা timer চালায়, অথবা ধরে নেওয়া যে hash key-তে `EXPIRE` দিলে আলাদা field expire হয় (আসলে পুরো hash expire হয়)।"
@@ -316,7 +332,7 @@
    "connections",
    "resp3"
   ],
-  "technologyVersion": "node-redis 6.3; ioredis 6.0; Node.js 24 LTS",
+  "technologyVersion": "node-redis 6.3; ioredis 6.0; Node.js 26 LTS",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -360,6 +376,10 @@
    "redis-005",
    "redis-028"
   ],
+  "quickAnswer": {
+   "en": "Create one long-lived client per process (node-redis is what Redis recommends; ioredis is also common), always attach an `'error'` listener, configure reconnects and timeouts, use separate connections for subscribe and blocking commands, and close the client on `SIGTERM`.",
+   "bn": "প্রতি process-এ একটা long-lived client রাখো (Redis node-redis recommend করে; ioredis-ও বেশ প্রচলিত), সবসময় `'error'` listener লাগাও, reconnect আর timeout ঠিক করো, subscribe আর blocking command-এর জন্য আলাদা connection নাও, আর `SIGTERM`-এ client close করো।"
+  },
   "commonMistakes": {
    "en": "Creating a new Redis connection per HTTP request, forgetting the `'error'` listener, or running `SUBSCRIBE` on the same client used for normal commands.",
    "bn": "প্রতিটা HTTP request-এ নতুন Redis connection তৈরি করা, `'error'` listener ভুলে যাওয়া, অথবা সাধারণ command-এর client-এই `SUBSCRIBE` চালানো।"
@@ -434,6 +454,10 @@
    "redis-007",
    "redis-032"
   ],
+  "quickAnswer": {
+   "en": "Stabilise first: check `INFO memory` and the policy (likely `noeviction`); switch a pure cache to `allkeys-lru`, otherwise raise `maxmemory` or free safe keys. Then find what grew (keys without TTL, big keys, client buffers) and fix it for good: TTLs, capped collections, separate cache and durable instances, alerts.",
+   "bn": "আগে পরিস্থিতি সামলাও: `INFO memory` আর policy দেখো (সম্ভবত `noeviction`); pure cache হলে `allkeys-lru`-তে নাও, নইলে `maxmemory` বাড়াও বা নিরাপদ key মুছো। তারপর খোঁজো কী বেড়েছে (TTL ছাড়া key, big key, client buffer) আর স্থায়ী fix দাও: TTL, সীমিত collection, cache আর durable instance আলাদা, alert।"
+  },
   "commonMistakes": {
    "en": "Running `KEYS *` on the struggling instance to \"look around\", flipping a mixed cache+queue instance to `allkeys-lru` (silently evicting jobs), or restarting Redis and losing data.",
    "bn": "চাপে থাকা instance-এ \"খুঁজে দেখতে\" `KEYS *` চালানো, cache+queue মেশানো instance-কে `allkeys-lru`-তে বদলে দেওয়া (চুপচাপ job evict হয়ে যায়), অথবা Redis restart করে data হারানো।"
@@ -503,6 +527,10 @@
    "redis-006",
    "redis-028"
   ],
+  "quickAnswer": {
+   "en": "RDB saves compact point-in-time snapshots (fast restarts, but you lose writes since the last one); AOF logs every write and with `everysec` loses about a second. Use no persistence or RDB only for a pure cache, AOF `everysec` plus RDB backups and a replica for sessions, and AOF plus idempotent consumers for a Stream queue.",
+   "bn": "RDB ছোট point-in-time snapshot নেয় (দ্রুত restart, কিন্তু শেষ snapshot-এর পরের write হারায়); AOF প্রতিটা write log করে, `everysec`-এ মোটামুটি এক second-এর write হারাতে পারে। Pure cache-এ persistence বন্ধ বা শুধু RDB, session store-এ AOF `everysec` + RDB backup + replica, আর Stream queue-তে AOF + idempotent consumer।"
+  },
   "commonMistakes": {
    "en": "Saying AOF means \"zero data loss\", thinking replication replaces backups, or enabling `appendfsync always` everywhere without measuring the write-latency cost.",
    "bn": "AOF মানেই \"শূন্য data loss\" বলা, replication-কে backup-এর বিকল্প ভাবা, অথবা write-latency-র খরচ না মেপেই সব জায়গায় `appendfsync always` চালু করা।"
@@ -582,6 +610,10 @@
    "redis-024",
    "redis-028"
   ],
+  "quickAnswer": {
+   "en": "Pre-warm the product and absorb the hot key with a tiny in-process cache and a CDN. For buying, add admission control, then reserve stock atomically in one Lua script (check, decrement, record the buyer, append to a Stream) so overselling is impossible, and let workers create orders in PostgreSQL idempotently.",
+   "bn": "Product আগে থেকে warm করো, আর hot key-এর চাপ ছোট in-process cache ও CDN দিয়ে সামলাও। কেনার path-এ আগে admission control, তারপর একটা Lua script-এ atomically stock reserve করো (check, decrement, buyer record, Stream-এ append), তাই oversell হতে পারে না; worker-রা idempotent-ভাবে PostgreSQL-এ order বানাবে।"
+  },
   "commonMistakes": {
    "en": "Doing `GET stock` then `DECR` from Node (race → oversell), letting the hot product key expire at peak, or treating Redis as the only record of who bought what.",
    "bn": "Node থেকে `GET stock` তারপর `DECR` করা (race → oversell), peak-এর সময় hot product key expire হতে দেওয়া, অথবা কে কী কিনল তার একমাত্র record হিসেবে Redis-কে ধরা।"

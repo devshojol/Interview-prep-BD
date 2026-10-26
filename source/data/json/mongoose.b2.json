@@ -54,6 +54,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Store the author's ID with `type: Schema.Types.ObjectId, ref: \"User\"`. `populate(\"author\")` is not a database join: Mongoose runs one more query (`User.find({ _id: { $in: ids } })`) and swaps the IDs for documents; limit fields with `.populate(\"author\", \"name avatarUrl\")` and handle `null` for deleted users.",
+   "bn": "Post-এ author-এর ID রাখো `type: Schema.Types.ObjectId, ref: \"User\"` দিয়ে। `populate(\"author\")` database join না: Mongoose আরেকটা query চালায় (`User.find({ _id: { $in: ids } })`) আর ID-র জায়গায় document বসিয়ে দেয়; `.populate(\"author\", \"name avatarUrl\")` দিয়ে field সীমিত করো, আর user delete হয়ে গেলে `null` handle করো।"
+  },
   "commonMistakes": {
    "en": "Thinking populate performs a server-side JOIN; populating full user documents (including sensitive fields); forgetting that deleted references populate as `null`.",
    "bn": "ভাবা যে populate server-side JOIN করে; পুরো user document populate করা (sensitive field সহ); ভুলে যাওয়া যে delete হওয়া reference populate হলে `null` আসে।"
@@ -116,6 +120,10 @@
   "related": [
    "mongoose-002"
   ],
+  "quickAnswer": {
+   "en": "Virtuals are not included in `toJSON()`/`toObject()` output by default, and `res.json()` serialises the document through `toJSON()`. Set `toJSON: { virtuals: true }` in the schema options so `fullName` appears.",
+   "bn": "Default-ভাবে virtual `toJSON()`/`toObject()`-এর output-এ থাকে না, আর `res.json()` document-কে `toJSON()` দিয়েই serialise করে। `fullName` দেখাতে schema option-এ `toJSON: { virtuals: true }` দাও।"
+  },
   "code": {
    "language": "javascript",
    "source": "userSchema.virtual(\"fullName\").get(function () {\n  return `${this.firstName} ${this.lastName}`;\n});\n\napp.get(\"/me\", async (req, res) => {\n  const user = await User.findById(req.userId);\n  res.json(user);\n});"
@@ -198,6 +206,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Three bugs: the arrow function has no document `this`, Mongoose 9 pre hooks no longer receive `next`, and with no `isModified(\"password\")` check every save re-hashes the hash. Use an `async function` that returns early if the password is unchanged and awaits `bcrypt.hash` instead of the blocking `hashSync`.",
+   "bn": "তিনটা bug: arrow function-এ `this` document না, Mongoose 9-এর pre hook আর `next` পায় না, আর `isModified(\"password\")` check না থাকায় প্রতিটি save-এ আগের hash-কেই আবার hash করা হয়। একটা `async function` লেখো, password না বদলালে আগেই return করো, আর blocking `hashSync`-এর বদলে `await bcrypt.hash` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Keeping `next` \"just in case\"; using arrow functions for hooks, methods or virtual getters; assuming `pre('save')` also runs on `findByIdAndUpdate`.",
    "bn": "\"যদি লাগে\" ভেবে `next` রেখে দেওয়া; hook, method বা virtual getter-এ arrow function ব্যবহার করা; ধরে নেওয়া `pre('save')` `findByIdAndUpdate`-এও চলে।"
@@ -276,6 +288,10 @@
    "mongoose-013",
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "`User.findByIdAndUpdate(id, { password })` doesn't run the hook: it sends an update straight to MongoDB and triggers query middleware (`findOneAndUpdate`), not `save` middleware. `create()` and the other two options all call `save()`.",
+   "bn": "`User.findByIdAndUpdate(id, { password })` hook চালায় না: এটা সরাসরি MongoDB-তে update পাঠায় আর query middleware (`findOneAndUpdate`) trigger করে, `save` middleware না। `create()` আর বাকি দুইটা option সবাই `save()` call করে।"
+  },
   "options": [
    {
     "en": "`await User.create({ email, password })`",
@@ -359,6 +375,10 @@
   "related": [
    "mongoose-006"
   ],
+  "quickAnswer": {
+   "en": "N+1 is one query for the list plus one per item; `populate()` batches it into one extra `$in` query per path, but can't filter or sort parents by populated fields. `$lookup` joins on the server and can `$match`/`$sort` on joined data: populate for CRUD pages, `$lookup` for reports.",
+   "bn": "N+1 মানে list-এর জন্য একটা query আর প্রতিটি item-এর জন্য আরেকটা; `populate()` প্রতি path-এ একটা অতিরিক্ত `$in` query দিয়ে এটা ঠিক করে, কিন্তু populated field দিয়ে parent filter বা sort করতে পারে না। `$lookup` server-এ join করে আর joined data-তে `$match`/`$sort` করা যায়: CRUD page-এ populate, report-এ `$lookup`।"
+  },
   "commonMistakes": {
    "en": "Believing `populate()` is a JOIN; using populate's `match` expecting parents to be filtered; passing string IDs into aggregation `$match`.",
    "bn": "`populate()`-কে JOIN মনে করা; parent filter হবে ভেবে populate-এর `match` ব্যবহার করা; aggregation-এর `$match`-এ string ID দেওয়া।"
@@ -433,6 +453,10 @@
    "mongoose-015",
    "mongoose-006"
   ],
+  "quickAnswer": {
+   "en": "Add a `{ category: 1, createdAt: -1, _id: -1 }` index, replace deep `skip()` with keyset pagination, use `.lean()` with projections, populate only a few seller fields instead of all reviews, and cache or drop the exact count. Also validate `category` and bound `page`/`limit` to block operator injection and huge pages.",
+   "bn": "`{ category: 1, createdAt: -1, _id: -1 }` index দাও, গভীর `skip()`-এর বদলে keyset pagination করো, projection সহ `.lean()` ব্যবহার করো, সব review না এনে seller-এর অল্প কয়েকটা field populate করো, আর exact count cache করো বা বাদ দাও। সাথে `category` validate করো আর `page`/`limit` সীমিত রাখো, যাতে operator injection আর বিশাল page আটকানো যায়।"
+  },
   "commonMistakes": {
    "en": "Adding `.lean()` and calling it done; adding an index on `category` alone (still sorts in memory); trusting `req.query` values as filter objects.",
    "bn": "শুধু `.lean()` যোগ করে কাজ শেষ মনে করা; শুধু `category`-তে index দেওয়া (তবুও memory-তে sort হয়); `req.query`-র value-কে filter object হিসেবে বিশ্বাস করা।"
@@ -507,6 +531,10 @@
   "related": [
    "mongoose-004"
   ],
+  "quickAnswer": {
+   "en": "Both saves succeed and the final price is 1,250, so A's change is silently lost. Default `__v` versioning only guards certain array changes; a plain field update is sent as `$set` filtered by `_id` only, so the last save wins.",
+   "bn": "দুইটা save-ই সফল হয় আর শেষ price হয় 1,250, তাই A-র পরিবর্তন চুপচাপ হারিয়ে যায়। Default `__v` versioning শুধু কিছু array পরিবর্তন রক্ষা করে; সাধারণ field update শুধু `_id` filter দিয়ে `$set` হিসেবে যায়, তাই শেষ save-ই জেতে।"
+  },
   "options": [
    {
     "en": "Mongoose merges both changes and keeps 1,500 because it was saved first",
@@ -593,6 +621,10 @@
    "mongoose-023",
    "mongoose-030"
   ],
+  "quickAnswer": {
+   "en": "It's a read-modify-write race: hundreds of requests read `stock: 100`, all pass the check, and each `save()` overwrites the others. Let the database decide with an atomic `updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })`, add idempotency keys, and queue or throttle requests for the hot document.",
+   "bn": "এটা read-modify-write race: শত শত request একসাথে `stock: 100` পড়ে, সবাই check পার হয়, আর প্রতিটি `save()` অন্যদের লেখা overwrite করে। সিদ্ধান্ত database-কে নিতে দাও atomic `updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })` দিয়ে, idempotency key যোগ করো, আর hot document-এর জন্য request queue বা throttle করো।"
+  },
   "commonMistakes": {
    "en": "Adding a mutex in Node.js (doesn't work across multiple instances); checking stock with `findOne` before `updateOne`; wrapping everything in a long transaction that calls the payment gateway.",
    "bn": "Node.js-এ একটা mutex যোগ করা (একাধিক instance-এ কাজ করে না); `updateOne`-এর আগে `findOne` দিয়ে stock check করা; payment gateway call সহ সবকিছু একটা লম্বা transaction-এ মুড়ে দেওয়া।"

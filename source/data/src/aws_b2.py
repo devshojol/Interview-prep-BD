@@ -47,6 +47,8 @@ QUESTIONS = [
 
             বাস্তবে আমি প্রায় সব filtering security group দিয়েই করি। যেমন ALB-এর group internet থেকে 443 allow করে, আর app server-এর group port 3000 শুধু ALB-এর security group থেকে allow করে। NACL ব্যবহার করি বাড়তি একটা মোটা দাগের layer হিসেবে, যেমন পুরো subnet-এর জন্য পরিচিত কোনো খারাপ IP range block করা।
         """,
+        quick_en=r"""A security group attaches to network interfaces, is stateful and has only allow rules; a NACL attaches to a subnet, is stateless (you must allow return traffic, including ephemeral ports) and has numbered allow and deny rules. Do most filtering with security groups and use NACLs as a coarse extra layer.""",
+        quick_bn=r"""Security group network interface-এ attach হয়, stateful, আর শুধু allow rule থাকে; NACL subnet-এ attach হয়, stateless (return traffic, ephemeral port-সহ, আলাদা করে allow করতে হয়), আর এতে নম্বর দেওয়া allow ও deny rule থাকে। বেশিরভাগ filtering security group দিয়ে করো, NACL রাখো মোটা দাগের extra layer হিসেবে।""",
         ex_en=r"""
             - **Security groups can reference other security groups** ("allow 5432 from the app tier's SG"). That keeps rules correct as instances scale in and out, and NACLs can't do it.
             - A classic NACL bug: you allow inbound 443 but forget the outbound ephemeral range, so connections hang and time out. Because NACLs are stateless, return traffic is just another rule to write.
@@ -113,6 +115,8 @@ QUESTIONS = [
 
             Custom NACL থাকলে দেখো inbound 22 আর outbound ephemeral port allow আছে কি না। আরও ভালো হয় port 22 একদম না খুলে **SSM Session Manager** বা EC2 Instance Connect ব্যবহার করলে।
         """,
+        quick_en=r"""A timeout is a network-path problem, not a key problem: the subnet's route table has no `0.0.0.0/0` route to an Internet Gateway, and the security group doesn't allow port 22. Attach an IGW and add the default route, allow 22 only from your IP, or skip SSH and use Session Manager.""",
+        quick_bn=r"""Timeout মানে network path-এর সমস্যা, key-এর না: subnet-এর route table-এ Internet Gateway-তে যাওয়ার `0.0.0.0/0` route নেই, আর security group-এ port 22 খোলা নেই। IGW attach করে default route যোগ করো, 22 শুধু নিজের IP থেকে allow করো, অথবা SSH বাদ দিয়ে Session Manager ব্যবহার করো।""",
         ex_en=r"""
             The error message tells you where to look:
             - **`Connection timed out`**: packets are dropped. Check the security group, NACL, route table / IGW, whether the instance has a public IP, or whether your own network blocks outbound port 22.
@@ -184,6 +188,8 @@ QUESTIONS = [
             - **Cold start:** কোনো warm execution environment খালি না থাকলে Lambda নতুন একটা বানায়, code load করে, handler-এর বাইরের init code চালায়, ফলে latency বাড়ে। Warm invocation-এ environment reuse হয়, তাই SDK client আর DB pool আমি handler-এর *বাইরে* তৈরি করি।
             - **Concurrency:** চলমান প্রতিটা request-এর জন্য আলাদা environment লাগে, আর account-এর regional quota আছে। *Reserved concurrency* একটা function-এর ভাগ নিশ্চিত করে, আবার সর্বোচ্চ সীমাও বেঁধে দেয়। *Provisioned concurrency* environment আগে থেকে initialise করে রাখে, ফলে latency-sensitive path-এ cold start থাকে না।
         """,
+        quick_en=r"""Lambda runs your code on events with no servers to manage, billed per request and GB-second; max timeout is 15 minutes and memory goes up to 10 GB. `nodejs24.x` is the current GA runtime (async handlers only), cold starts add latency when a new environment initialises, and each concurrent request needs its own environment.""",
+        quick_bn=r"""Lambda event এলে তোমার code চালায়, server manage করতে হয় না, আর bill হয় request ও GB-second হিসেবে; সর্বোচ্চ timeout 15 মিনিট, memory 10 GB পর্যন্ত। `nodejs24.x` এখনকার GA runtime (async handler, callback চলে না), নতুন environment তৈরি হলে cold start-এ latency বাড়ে, আর প্রতিটা চলমান request-এর জন্য আলাদা environment লাগে।""",
         ex_en=r"""
             - **When Lambda is a poor fit:** jobs longer than 15 minutes, steady high-throughput traffic (containers often cost less), workloads that need persistent connections or local state, or opening many direct connections to RDS (use RDS Proxy).
             - Synchronous invocations have a 6 MB request/response payload limit, so for large files hand the client a presigned S3 URL instead.
@@ -247,6 +253,8 @@ QUESTIONS = [
         a_bn=r"""
             Option 3। **Alias record** হলো Route 53-এর একটা extension, যেটা একটা name-কে AWS resource-এ (ALB, CloudFront, API Gateway, S3 website endpoint ইত্যাদি) point করায়। Route 53 resource-এর *বর্তমান* IP দিয়ে উত্তর দেয়। CNAME-এর মতো না, alias zone apex-এও কাজ করে। AWS resource-এর জন্য alias query-তে টাকা লাগে না, আর alias target-এর health-ও evaluate করতে পারে।
         """,
+        quick_en=r"""Create Route 53 alias A (and AAAA) records for both `example.com` and `www.example.com` that target the ALB. Unlike a CNAME, an alias works at the zone apex, resolves to the ALB's current IPs and is free to query.""",
+        quick_bn=r"""`example.com` আর `www.example.com` দুটোর জন্যই ALB-কে target করে Route 53 alias A (আর AAAA) record বানাও। CNAME-এর মতো না, alias zone apex-এ কাজ করে, ALB-এর বর্তমান IP ফেরত দেয়, আর এর query free।""",
         ex_en=r"""
             - **Option 1 is the tempting one.** It works for `www`, but the DNS standard doesn't allow a CNAME at the zone apex, because it would conflict with the SOA and NS records there.
             - Option 2 breaks silently. ALB IP addresses change over time, so hardcoded IPs eventually point to nothing.
@@ -269,13 +277,13 @@ QUESTIONS = [
         id="aws-012", sub="Deploying Node.js on EC2", diff="medium", type="scenario",
         prio="high", market="bangladesh", mins=8,
         tags=["ec2", "nginx", "pm2", "route53", "deployment"],
-        ver="Amazon Linux 2023 / Ubuntu LTS, Node.js 24 LTS, NGINX 1.30, PM2", vs=True, status="stable",
+        ver="Amazon Linux 2023 / Ubuntu LTS, Node.js 26 LTS, NGINX 1.30, PM2", vs=True, status="stable",
         q_en=r"""Walk me through deploying an Express (Node.js) API to a single EC2 instance with NGINX as a reverse proxy, PM2 (or systemd) as the process manager, HTTPS, and a custom domain managed in Route 53.""",
         q_bn=r"""একটা Express (Node.js) API একটা EC2 instance-এ deploy করার পুরো ধাপগুলো বলো: reverse proxy হিসেবে NGINX, process manager হিসেবে PM2 (বা systemd), HTTPS, আর Route 53-এ manage করা custom domain।""",
         a_en=r"""
             1. **Launch:** an Amazon Linux 2023 or Ubuntu LTS instance (a small `t3`/`t4g` is fine to start) in a public subnet. Attach an **IAM role** (instance profile) instead of access keys, and allocate an **Elastic IP** so the address survives stop/start.
             2. **Security group:** 80 and 443 from anywhere, and 22 only from my IP (or no 22 at all, using SSM Session Manager). Port 3000 stays **closed** to the internet.
-            3. **Install:** Node.js 24 LTS (NodeSource, nvm or official binaries), NGINX and git. Clone, build, and run `npm ci --omit=dev`.
+            3. **Install:** Node.js 26 LTS (NodeSource, nvm or official binaries; 24 is in Maintenance), NGINX and git. Clone, build, and run `npm ci --omit=dev`.
             4. **Config and secrets:** read from SSM Parameter Store / Secrets Manager at startup instead of committing a `.env` file. The app listens on `127.0.0.1:3000`.
             5. **Process manager:** `pm2 start ecosystem.config.cjs`, then `pm2 startup` + `pm2 save` so it comes back after a reboot. Alternatively, write a systemd unit with `Restart=always`.
             6. **NGINX:** a server block with `server_name api.example.com` and `proxy_pass http://127.0.0.1:3000` plus the forwarding headers. Check with `nginx -t`, then reload.
@@ -286,7 +294,7 @@ QUESTIONS = [
         a_bn=r"""
             1. **Launch:** public subnet-এ একটা Amazon Linux 2023 বা Ubuntu LTS instance (শুরুতে ছোট `t3`/`t4g`-ই যথেষ্ট)। Access key-এর বদলে **IAM role** (instance profile) attach করো, আর stop/start-এর পরেও address যেন না বদলায় সেজন্য **Elastic IP** নাও।
             2. **Security group:** 80 আর 443 সবার জন্য খোলা, 22 শুধু আমার IP থেকে (বা SSM Session Manager ব্যবহার করে 22 একদমই না খোলা)। Port 3000 internet-এর জন্য **বন্ধ** থাকবে।
-            3. **Install:** Node.js 24 LTS (NodeSource, nvm বা official binary), NGINX, git। তারপর clone, build, আর `npm ci --omit=dev`।
+            3. **Install:** Node.js 26 LTS (NodeSource, nvm বা official binary; 24 এখন Maintenance-এ), NGINX, git। তারপর clone, build, আর `npm ci --omit=dev`।
             4. **Config আর secret:** `.env` file commit না করে startup-এ SSM Parameter Store / Secrets Manager থেকে পড়ো। App শুনবে `127.0.0.1:3000`-এ।
             5. **Process manager:** `pm2 start ecosystem.config.cjs`, তারপর `pm2 startup` + `pm2 save`, যাতে reboot-এর পরে app আবার চালু হয়। বিকল্প হিসেবে `Restart=always`-সহ systemd unit লেখা যায়।
             6. **NGINX:** `server_name api.example.com` আর `proxy_pass http://127.0.0.1:3000`-সহ forwarding header দিয়ে server block। `nginx -t` দিয়ে check করে reload করো।
@@ -294,6 +302,8 @@ QUESTIONS = [
             8. **HTTPS:** `certbot --nginx` দিয়ে Let's Encrypt (auto-renewal-সহ), অথবা সামনে ALB বসিয়ে free ACM certificate।
             9. **চালানো:** log আর memory metric-এর জন্য CloudWatch agent, log rotation, alarm, আর AWS Backup দিয়ে EBS snapshot।
         """,
+        quick_en=r"""Launch Amazon Linux 2023 or Ubuntu LTS with an instance role and an Elastic IP, open only 80/443, run the app on `127.0.0.1:3000` under PM2 or systemd, and put NGINX in front with `proxy_pass`. Point a Route 53 A record at the Elastic IP and add HTTPS with `certbot --nginx` or an ALB with ACM.""",
+        quick_bn=r"""Instance role আর Elastic IP-সহ Amazon Linux 2023 বা Ubuntu LTS চালু করো, শুধু 80/443 খোলো, app-কে PM2 বা systemd দিয়ে `127.0.0.1:3000`-এ চালাও, আর সামনে `proxy_pass`-সহ NGINX বসাও। Route 53-এর A record Elastic IP-তে point করো, আর HTTPS দাও `certbot --nginx` দিয়ে বা ACM certificate-সহ ALB দিয়ে।""",
         ex_en=r"""
             - **Why NGINX in front of Node:** TLS termination, gzip, static files, request size limits and buffering of slow clients. Node also stays on an unprivileged port as a non-root user.
             - Set `app.set('trust proxy', 1)` in Express so `req.ip` and `req.protocol` reflect the real client behind NGINX. Rate limiters and secure cookies depend on this.
@@ -380,6 +390,8 @@ QUESTIONS = [
             5. **Routing:** default root object `index.html`। **SPA**-র জন্য 403 আর 404 error-কে status 200-সহ `/index.html`-এ map করো (বা CloudFront Function দিয়ে rewrite করো)। **Next.js export**-এ page হয় `about.html` বা `about/index.html` (`trailingSlash: true` দিলে)। Default root object শুধু `/`-এর জন্য কাজ করে, তাই একটা CloudFront Function দিয়ে `/about/` → `/about/index.html` rewrite করো।
             6. **Caching:** hash-যুক্ত asset-এ `Cache-Control: public, max-age=31536000, immutable`, আর `index.html`-এ `no-cache`। প্রতিটা deploy-এর পরে `/index.html` (বা `/*`) invalidate করো।
         """,
+        quick_en=r"""Upload the build to a private S3 bucket and serve it through CloudFront with OAC, an ACM certificate in us-east-1 and Route 53 alias records. For an SPA, map 403/404 to `/index.html` with status 200 (or use a CloudFront Function); for a Next.js export, rewrite `/about/` to `/about/index.html` with a CloudFront Function.""",
+        quick_bn=r"""Build-টা private S3 bucket-এ upload করো, আর OAC, us-east-1-এর ACM certificate ও Route 53 alias record-সহ CloudFront দিয়ে serve করো। SPA হলে 403/404-কে status 200-সহ `/index.html`-এ map করো (বা CloudFront Function দাও); Next.js export হলে CloudFront Function দিয়ে `/about/`-কে `/about/index.html`-এ rewrite করো।""",
         ex_en=r"""
             - **Why 403 and not 404?** With OAC, CloudFront can only `GetObject`. Without `s3:ListBucket`, S3 returns **403 Access Denied** for a missing key instead of 404, so the SPA fallback must handle 403 too.
             - S3 static website hosting still works for quick demos, but it needs a public bucket and only serves HTTP. CloudFront + OAC gives you HTTPS, a private bucket, caching at edge locations and AWS WAF support.

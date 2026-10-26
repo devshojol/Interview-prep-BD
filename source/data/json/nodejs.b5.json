@@ -14,7 +14,7 @@
    "error-handling",
    "try-catch"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -53,6 +53,10 @@
   "related": [
    "node-012"
   ],
+  "quickAnswer": {
+   "en": "`fs.readFile` is asynchronous, so `readConfig` returns `undefined` before the callback runs, and the `return` inside the callback goes nowhere. The `throw` in the callback happens later, outside `try/catch`, so it crashes the process; fix it with `node:fs/promises` and `async`/`await`.",
+   "bn": "`fs.readFile` asynchronous, তাই callback চলার আগেই `readConfig` `undefined` return করে দেয়, আর callback-এর ভেতরের `return` কারো কাছে পৌঁছায় না। Callback-এর `throw` পরে ঘটে, `try/catch`-এর বাইরে, তাই process crash করে; সমাধান হলো `node:fs/promises` আর `async`/`await`।"
+  },
   "commonMistakes": {
    "en": "Fixing it by switching to `readFileSync` inside a request path, or adding `async` to `readConfig` while still using the callback version of `readFile`.",
    "bn": "Request path-এর ভেতরে `readFileSync`-এ বদলে \"ঠিক\" করা, অথবা `readConfig`-এ `async` যোগ করে তখনও `readFile`-এর callback version ব্যবহার করা।"
@@ -88,7 +92,7 @@
    "readiness",
    "deployment"
   ],
-  "technologyVersion": "Node.js 19+ semantics for server.close() (current: 24 LTS / 26)",
+  "technologyVersion": "Node.js 19+ semantics for server.close() (current: 26 LTS / 24)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -136,6 +140,10 @@
    "node-020",
    "node-007"
   ],
+  "quickAnswer": {
+   "en": "Set a `shuttingDown` flag so readiness returns `503`, wait briefly for the load balancer, then `server.close()` (closing idle keep-alive sockets), and in its callback close DB/Redis/queues and set `process.exitCode`. An unref'd `setTimeout` force-closes connections and exits with `1` if draining is too slow.",
+   "bn": "একটা `shuttingDown` flag set করো যাতে readiness `503` দেয়, load balancer-এর জন্য একটু অপেক্ষা করো, তারপর `server.close()` (idle keep-alive socket বন্ধ করে), আর তার callback-এ DB/Redis/queue বন্ধ করে `process.exitCode` set করো। Unref করা একটা `setTimeout` drain বেশি সময় নিলে connection জোর করে বন্ধ করে `1` দিয়ে exit করে।"
+  },
   "commonMistakes": {
    "en": "Calling `process.exit()` directly in the signal handler, forgetting a hard timeout (a stuck request blocks the deploy), or not ignoring a second signal (double cleanup).",
    "bn": "Signal handler-এ সরাসরি `process.exit()` call করা, hard timeout ভুলে যাওয়া (একটি আটকে থাকা request deploy আটকে দেয়), অথবা দ্বিতীয় signal ignore না করা (দুবার cleanup)।"
@@ -165,7 +173,7 @@
    "request-id",
    "observability"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; pino 10 / Express 5.x (example)",
+  "technologyVersion": "Node.js 26 LTS / 24; pino 10 / Express 5.x (example)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -212,6 +220,10 @@
   "related": [
    "node-006"
   ],
+  "quickAnswer": {
+   "en": "Use a structured JSON logger such as pino plus `AsyncLocalStorage` from `node:async_hooks`: a middleware reads or generates a request ID, creates a child logger and calls `als.run(store, next)`. Any code in that request, even after `await`s, gets the same logger with `als.getStore()`.",
+   "bn": "pino-র মতো structured JSON logger আর `node:async_hooks`-এর `AsyncLocalStorage` ব্যবহার করো: একটা middleware request ID পড়ে বা তৈরি করে, child logger বানায় আর `als.run(store, next)` call করে। ওই request-এর যেকোনো code, `await`-এর পরেও, `als.getStore()` দিয়ে একই logger পায়।"
+  },
   "commonMistakes": {
    "en": "Storing the current request in a module-level variable (it gets overwritten by concurrent requests), or using `console.log` with string concatenation and hoping to grep it later.",
    "bn": "Module-level variable-এ current request রাখা (concurrent request এসে সেটা overwrite করে দেয়), অথবা string জোড়া দিয়ে `console.log` করে পরে grep করার আশা করা।"
@@ -237,7 +249,7 @@
    "abortsignal",
    "promises"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -285,6 +297,10 @@
    "node-005",
    "node-031"
   ],
+  "quickAnswer": {
+   "en": "Match the style to the shape of the result: one result → a Promise (an `async` function), many events over time → an EventEmitter, a large sequence the consumer should pace → a Readable stream or `async function*`. For cancellation and timeouts, accept an `AbortSignal` as `signal` in the options.",
+   "bn": "Result-এর ধরন দেখে style বেছে নাও: একটা result → Promise (`async` function), সময়ের সাথে অনেক event → EventEmitter, বড় sequence যার গতি consumer ঠিক করবে → Readable stream বা `async function*`। Cancellation আর timeout-এর জন্য options-এ `signal` হিসেবে একটা `AbortSignal` নাও।"
+  },
   "commonMistakes": {
    "en": "Returning a giant array for unbounded data (memory blow-up), or building cancellation with ad-hoc boolean flags instead of `AbortSignal`.",
    "bn": "সীমাহীন data-র জন্য বিশাল array return করা (memory বিস্ফোরণ), অথবা `AbortSignal` ব্যবহার না করে নিজের মতো boolean flag দিয়ে cancellation বানানো।"
@@ -310,7 +326,7 @@
    "worker-pool",
    "coding"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (ES2017+ async/await)",
+  "technologyVersion": "Node.js 26 LTS / 24 (ES2017+ async/await)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -354,6 +370,10 @@
    "node-030",
    "node-007"
   ],
+  "quickAnswer": {
+   "en": "Use a worker pool: start `min(limit, items.length)` async workers that each claim the next index, await `fn`, store the result at that index and loop; `Promise.all` waits for them. Writing by index keeps input order, and a shared `failed` flag stops new work after a rejection; O(n) time and space.",
+   "bn": "Worker pool ব্যবহার করো: `min(limit, items.length)`টা async worker চালু করো, প্রত্যেকে পরের index নেয়, `fn` await করে, result সেই index-এ রাখে আর আবার ঘোরে; `Promise.all` সবগুলোর জন্য অপেক্ষা করে। Index ধরে লেখায় input order ঠিক থাকে, আর shared `failed` flag rejection-এর পরে নতুন কাজ থামায়; time আর space O(n)।"
+  },
   "commonMistakes": {
    "en": "Pushing results in completion order (`results.push`) instead of by index, starting all promises first and then \"limiting\" with `await` (they're already running), or forgetting that an exception in one worker should stop the others from taking new work.",
    "bn": "Index ধরে না রেখে শেষ হওয়ার ক্রমে (`results.push`) ফলাফল রাখা, আগে সব promise শুরু করে তারপর `await` দিয়ে \"limit\" করা (ততক্ষণে সেগুলো চলছেই), অথবা ভুলে যাওয়া যে একটি worker-এ exception হলে বাকিদের নতুন কাজ নেওয়া বন্ধ করা উচিত।"
@@ -384,7 +404,7 @@
    "presigned-url",
    "memory"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; Express 5.x; AWS SDK for JavaScript v3 (example)",
+  "technologyVersion": "Node.js 26 LTS / 24; Express 5.x; AWS SDK for JavaScript v3 (example)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -436,6 +456,10 @@
    "node-005",
    "node-011"
   ],
+  "quickAnswer": {
+   "en": "Root cause: `multer.memoryStorage()` buffers each whole file (up to 2 GB) in memory with no backpressure, so concurrent uploads exhaust RAM and stall the event loop. Best fix: presigned direct-to-S3 uploads; if the API must proxy, stream with `pipeline()` into a bounded multipart upload and cap concurrent uploads.",
+   "bn": "Root cause: `multer.memoryStorage()` প্রতিটা পুরো file (2 GB পর্যন্ত) কোনো backpressure ছাড়াই memory-তে রাখে, তাই একসাথে অনেক upload হলে RAM শেষ হয় আর event loop আটকে যায়। সেরা সমাধান: presigned URL দিয়ে সরাসরি S3-তে upload; API-কে proxy করতেই হলে `pipeline()` দিয়ে সীমিত-memory-র multipart upload-এ stream করো আর একসাথে upload-এর সংখ্যা সীমিত রাখো।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it by raising container memory or `--max-old-space-size`, switching to disk storage without limits (fills the disk instead), or trusting the client's `Content-Type`.",
    "bn": "Container memory বা `--max-old-space-size` বাড়িয়ে \"ঠিক\" করা, কোনো limit ছাড়া disk storage-এ যাওয়া (তখন disk ভরে যায়), অথবা client-এর `Content-Type` বিশ্বাস করা।"

@@ -58,6 +58,10 @@
    "pg-002",
    "pg-004"
   ],
+  "quickAnswer": {
+   "en": "A comma-separated tags column breaks 1NF: searches like `LIKE '%5g%'` are fragile and can't use a normal index, and nothing checks the values. Products and tags are many-to-many, so use a `tags` table plus a `product_tags(product_id, tag_id)` junction table with a composite primary key and two foreign keys.",
+   "bn": "Comma দিয়ে আলাদা করা tags column 1NF ভাঙে: `LIKE '%5g%'`-এর মতো search ভঙ্গুর, সাধারণ index ব্যবহার করতে পারে না, আর value-গুলো কেউ যাচাই করে না। Product আর tag-এর সম্পর্ক many-to-many, তাই একটা `tags` table আর composite primary key ও দুটো foreign key-সহ `product_tags(product_id, tag_id)` junction table বানাও।"
+  },
   "commonMistakes": {
    "en": "Forgetting the composite primary key on the junction table (allowing duplicate links), or forgetting an index on `tag_id` for reverse lookups.",
    "bn": "Junction table-এ composite primary key না দেওয়া (ফলে duplicate link ঢুকে যায়), অথবা উল্টো দিকের lookup-এর জন্য `tag_id`-তে index না দেওয়া।"
@@ -117,6 +121,10 @@
    "pg-001",
    "pg-005"
   ],
+  "quickAnswer": {
+   "en": "The referenced column (`customers.id`) must be a primary key or unique, so it is already indexed, but PostgreSQL does not index the referencing column `orders.customer_id` for you. You usually add `CREATE INDEX ON orders (customer_id);` yourself.",
+   "bn": "Referenced column (`customers.id`) primary key বা unique হতেই হবে, তাই সেটার index আগে থেকেই থাকে; কিন্তু referencing column `orders.customer_id`-এ PostgreSQL নিজে index বানায় না। সাধারণত `CREATE INDEX ON orders (customer_id);` নিজেকেই দিতে হয়।"
+  },
   "extraCode": [
    {
     "language": "sql",
@@ -196,6 +204,10 @@
   "related": [
    "pg-012"
   ],
+  "quickAnswer": {
+   "en": "`numeric(12,2)`, because it does exact decimal arithmetic. `real` and `double precision` are binary floating point, so sums of prices drift. Storing integer paisa in a `bigint` is the other valid design.",
+   "bn": "`numeric(12,2)`, কারণ এটা exact decimal হিসাব করে। `real` আর `double precision` binary floating point, তাই দামের যোগফলে ভুল জমতে থাকে। আরেকটা ঠিক design হলো integer paisa হিসেবে `bigint`-এ রাখা।"
+  },
   "extraCode": [
    {
     "language": "sql",
@@ -282,6 +294,10 @@
    "pg-001",
    "pg-025"
   ],
+  "quickAnswer": {
+   "en": "PostgreSQL has `NOT NULL`, `CHECK`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY` and `EXCLUDE` constraints, enforced for every writer. In a `UNIQUE` column NULLs count as distinct by default, so many NULLs are allowed; since PostgreSQL 15 `UNIQUE NULLS NOT DISTINCT` allows only one.",
+   "bn": "PostgreSQL-এ `NOT NULL`, `CHECK`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY` আর `EXCLUDE` constraint আছে, যেগুলো প্রত্যেক writer-কে মানতে হয়। `UNIQUE` column-এ default-ভাবে NULL-গুলো আলাদা ধরা হয়, তাই অনেকগুলো NULL রাখা যায়; PostgreSQL 15 থেকে `UNIQUE NULLS NOT DISTINCT` দিলে মাত্র একটা NULL চলে।"
+  },
   "commonMistakes": {
    "en": "Assuming a `UNIQUE` column allows only one NULL (true in SQL Server, not in PostgreSQL by default), or trying to validate data from another table inside a `CHECK`.",
    "bn": "ধরে নেওয়া যে `UNIQUE` column-এ মাত্র একটা NULL রাখা যায় (SQL Server-এ সত্য, কিন্তু PostgreSQL-এ default-ভাবে নয়), অথবা `CHECK`-এর ভেতরে অন্য table-এর data দিয়ে validation করার চেষ্টা করা।"
@@ -351,6 +367,10 @@
    "pg-014",
    "pg-002"
   ],
+  "quickAnswer": {
+   "en": "An index (a B-tree by default) maps column values to row locations so PostgreSQL can find rows without scanning the whole table. It speeds up selective filters, joins, `ORDER BY ... LIMIT` and uniqueness, but costs disk space and slows writes; confirm with `EXPLAIN`.",
+   "bn": "Index (default-ভাবে B-tree) column-এর value থেকে row-এর location-এ যাওয়ার একটা আলাদা structure, যাতে PostgreSQL পুরো table না পড়েই row খুঁজে পায়। এটা selective filter, join, `ORDER BY ... LIMIT` আর uniqueness দ্রুত করে, কিন্তু disk জায়গা নেয় আর write ধীর করে; `EXPLAIN` দিয়ে যাচাই করো।"
+  },
   "commonMistakes": {
    "en": "Indexing every column \"just in case\", or assuming that creating an index guarantees the planner will use it.",
    "bn": "\"কাজে লাগতে পারে\" ভেবে সব column-এ index দেওয়া, অথবা ধরে নেওয়া যে index বানালেই planner সেটা ব্যবহার করবে।"
@@ -420,6 +440,10 @@
    "pg-007",
    "pg-019"
   ],
+  "quickAnswer": {
+   "en": "Each statement autocommits unless you open `BEGIN`; between `BEGIN` and `COMMIT` all changes apply together or not at all. After any error the transaction is aborted and every later command fails until `ROLLBACK`, and a `SAVEPOINT` lets you undo just part of the work.",
+   "bn": "`BEGIN` না দিলে প্রতিটা statement নিজেই autocommit হয়; `BEGIN` থেকে `COMMIT` পর্যন্ত সব change একসাথে হয়, নয়তো কোনোটাই হয় না। কোনো error হলে transaction aborted হয়ে যায় আর `ROLLBACK` না করা পর্যন্ত পরের সব command fail করে; `SAVEPOINT` দিয়ে কাজের একটা অংশ undo করা যায়।"
+  },
   "commonMistakes": {
    "en": "Running `BEGIN`/`COMMIT` through `pool.query()` in Node.js, or retrying statements inside an aborted transaction instead of rolling back.",
    "bn": "Node.js-এ `pool.query()` দিয়ে `BEGIN`/`COMMIT` চালানো, অথবা rollback না করে aborted transaction-এর ভেতরেই statement আবার চালানোর চেষ্টা করা।"
@@ -504,6 +528,10 @@
    "pg-029",
    "pg-023"
   ],
+  "quickAnswer": {
+   "en": "MVCC means PostgreSQL keeps several versions of a row: an `UPDATE` writes a new version instead of overwriting. Each query reads a snapshot of committed versions, so readers and writers don't block each other; two writers on the same row still wait, and `VACUUM` cleans up dead versions.",
+   "bn": "MVCC মানে PostgreSQL একটা row-এর কয়েকটা version রাখে: `UPDATE` পুরোনোটা overwrite না করে নতুন version লেখে। প্রতিটা query committed version-এর একটা snapshot পড়ে, তাই reader আর writer একে অপরকে block করে না; তবে একই row-এ দুজন writer অপেক্ষা করে, আর dead version-গুলো `VACUUM` পরিষ্কার করে।"
+  },
   "commonMistakes": {
    "en": "Saying PostgreSQL never locks rows. MVCC removes read/write blocking, but concurrent writes to the same row still take row-level locks.",
    "bn": "বলা যে PostgreSQL কখনো row lock করে না। MVCC read/write-এর block দূর করে, কিন্তু একই row-তে একসাথে write হলে row-level lock নেওয়া হয়ই।"
@@ -558,6 +586,10 @@
    "pg-007",
    "pg-023"
   ],
+  "quickAnswer": {
+   "en": "Read Committed. Each statement sees data committed before that statement started, so two `SELECT`s in one transaction can return different results if someone commits in between.",
+   "bn": "Read Committed। প্রতিটা statement নিজে শুরু হওয়ার আগে যা commit হয়েছে সেটাই দেখে, তাই মাঝখানে কেউ commit করলে একই transaction-এর দুটো `SELECT` আলাদা result দিতে পারে।"
+  },
   "extraCode": [
    {
     "language": "sql",

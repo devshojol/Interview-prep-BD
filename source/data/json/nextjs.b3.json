@@ -54,6 +54,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "The remote `<Image>` has no `width`/`height` (or `fill`), so Next.js can't size it or prevent layout shift, and `images.domains` is deprecated in favour of `images.remotePatterns`. Also add `sizes` for responsive grids and `preload` for the LCP image.",
+   "bn": "Remote `<Image>`-এ `width`/`height` (বা `fill`) নেই, তাই Next.js size জানে না আর layout shift আটকাতে পারে না; আর `images.domains` deprecated, এর বদলে `images.remotePatterns`। Responsive grid-এ `sizes` আর LCP image-এ `preload` যোগ করো।"
+  },
   "commonMistakes": {
    "en": "Using `unoptimized` everywhere to silence errors, or allowing all hosts with a `**` wildcard hostname.",
    "bn": "Error চুপ করাতে সব জায়গায় `unoptimized` ব্যবহার করা, অথবা `**` wildcard hostname দিয়ে সব host-কে অনুমতি দেওয়া।"
@@ -129,6 +133,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Create `app/api/products/[id]/route.ts` exporting `GET(request, { params })`, `await params`, validate that `id` is a positive integer, then return `Response.json(...)` with 400, 404 or 200. Route params are always strings, so convert before querying.",
+   "bn": "`app/api/products/[id]/route.ts` বানাও যেটা `GET(request, { params })` export করে, `await params` করো, `id` positive integer কিনা যাচাই করো, তারপর 400, 404 বা 200 দিয়ে `Response.json(...)` return করো। Route param সবসময় string, তাই query-র আগে convert করো।"
+  },
   "commonMistakes": {
    "en": "Reading `params.id` synchronously, using `parseInt` (which accepts `\"12abc\"` as 12), or returning 200 with an error body.",
    "bn": "`params.id` synchronously পড়া, `parseInt` ব্যবহার করা (যেটা `\"12abc\"`-কে 12 হিসেবে মেনে নেয়), অথবা error body-সহ 200 return করা।"
@@ -199,6 +207,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "SSG builds HTML once, SSR renders per request, ISR serves static pages that regenerate later, and CSR renders in the browser. In Next.js 16 with Cache Components you choose per component: cached parts go into a static shell and request-time parts stream inside `<Suspense>` (Partial Prerendering).",
+   "bn": "SSG একবার build-এ HTML বানায়, SSR প্রতি request-এ render করে, ISR static page দেয় যেটা পরে regenerate হয়, আর CSR browser-এ render করে। Next.js 16-এ Cache Components দিয়ে component ধরে বেছে নাও: cached অংশ static shell-এ যায়, আর request-time অংশ `<Suspense>`-এর ভেতরে stream হয় (Partial Prerendering)।"
+  },
   "commonMistakes": {
    "en": "Saying the App Router uses `getServerSideProps`, or claiming a page is \"either static or dynamic\" in a Cache Components app.",
    "bn": "বলা যে App Router `getServerSideProps` ব্যবহার করে, অথবা দাবি করা যে Cache Components app-এ একটা page \"হয় static, নয় dynamic\"।"
@@ -264,6 +276,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "The first client render must match the server HTML, and three things break it: the `typeof window` mobile check, `toLocaleString()` without a fixed locale and time zone, and a `<div>` inside a `<p>`. Use CSS for responsiveness, format dates deterministically and use valid nesting.",
+   "bn": "প্রথম client render-কে server HTML-এর সাথে হুবহু মিলতে হয়, আর তিনটা জিনিস সেটা ভাঙে: `typeof window` দিয়ে mobile check, নির্দিষ্ট locale ও time zone ছাড়া `toLocaleString()`, আর `<p>`-এর ভেতরে `<div>`। Responsive-এর জন্য CSS, date-এর জন্য নির্দিষ্ট format, আর valid nesting ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Wrapping the whole page in `suppressHydrationWarning`, or disabling SSR for the entire route to hide the error.",
    "bn": "পুরো page-কে `suppressHydrationWarning`-এ wrap করা, অথবা error লুকাতে পুরো route-এর SSR বন্ধ করে দেওয়া।"
@@ -344,6 +360,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Export a `metadata` object or an async `generateMetadata` (await `params`) from layouts and pages, add `opengraph-image.tsx` for OG images, and `app/sitemap.ts` and `app/robots.ts` for crawlers. Server rendering itself is the biggest win: crawlers get real HTML.",
+   "bn": "Layout আর page থেকে `metadata` object বা async `generateMetadata` (`params` await করে) export করো, OG image-এর জন্য `opengraph-image.tsx`, আর crawler-এর জন্য `app/sitemap.ts` ও `app/robots.ts`। সবচেয়ে বড় লাভ server rendering নিজেই: crawler আসল HTML পায়।"
+  },
   "commonMistakes": {
    "en": "Using `next/head` in the App Router (that's the Pages Router API), or exporting `metadata` from a Client Component.",
    "bn": "App Router-এ `next/head` ব্যবহার করা (এটা Pages Router-এর API), অথবা Client Component থেকে `metadata` export করা।"
@@ -369,7 +389,7 @@
    "deployment",
    "nginx"
   ],
-  "technologyVersion": "Next.js 16.4, Node.js 24 LTS, Docker Engine 29",
+  "technologyVersion": "Next.js 16.4, Node.js 26 LTS, Docker Engine 29",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -382,8 +402,8 @@
    "bn": "**Image:** `next.config`-এ `output: 'standalone'` দাও। তখন `next build` একটা ছোট `server.js` আর app আসলে যেসব `node_modules` file ব্যবহার করে শুধু সেগুলো নিয়ে `.next/standalone` তৈরি করে। একটা multi-stage Dockerfile dependency install করে, build করে, আর একটা হালকা runtime image-এ শুধু তিনটা জিনিস copy করে: standalone folder, `.next/static` আর `public` (standalone এই দুটো নিজে রাখে না)। এটা non-root `node` user হিসেবে `node server.js` দিয়ে চলে, `HOSTNAME=0.0.0.0` আর `PORT=3000`-সহ।\n\n**পরিকল্পনা রাখতে হবে:**\n- **Environment variable:** `NEXT_PUBLIC_*` value build time-এ বসিয়ে দেওয়া হয়, তাই একটা image প্রতি environment-এ এগুলো বদলাতে পারে না। Request time-এ server-এ config পড়ে নিচে পাঠাও, অথবা প্রতি environment-এ আলাদা build করো।\n- **Reverse proxy:** TLS, compression আর request limit-এর জন্য সামনে NGINX বা load balancer — response buffering বন্ধ রেখে, যাতে streaming কাজ করে।\n- **একাধিক container:** cache share করো (cache handler), সবগুলোর জন্য একই `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` ব্যবহার করো, আর rolling deploy-এর জন্য `deploymentId` set করো।\n- **Operations:** একটা health-check route, stdout-এ log, `SIGTERM`-এ graceful shutdown, আর memory limit (image optimisation অনেক CPU/memory খায়)।"
   },
   "explanation": {
-   "en": "**Why standalone:** a full `node_modules` can be hundreds of MB; output file tracing copies only what's needed, which shrinks images and attack surface and speeds up deploys.\n\n**Common mistakes in production:**\n- Forgetting to copy `.next/static` → CSS/JS 404s, unstyled pages.\n- Binding to `localhost` inside the container → the app isn't reachable from outside; `HOSTNAME=0.0.0.0` fixes it.\n- Running as root, or baking secrets into image layers via `ENV`/`COPY .env` — pass secrets at runtime instead.\n- Using an EOL Node.js base image — Node.js 24 LTS is the safe choice today (Next.js 16 needs at least 20.9).\n\n**Vercel vs self-hosting:** Vercel handles the CDN, image optimisation, cache sharing, skew protection and scaling for you; self-hosting gives cost control and data residency but you own all of that.",
-   "bn": "**Standalone কেন:** পুরো `node_modules` কয়েকশো MB হতে পারে; output file tracing শুধু দরকারি জিনিস copy করে, ফলে image ছোট হয়, attack surface কমে আর deploy দ্রুত হয়।\n\n**Production-এর সাধারণ ভুল:**\n- `.next/static` copy করতে ভুলে যাওয়া → CSS/JS 404, style ছাড়া page।\n- Container-এর ভেতরে `localhost`-এ bind করা → বাইরে থেকে app-এ পৌঁছানো যায় না; `HOSTNAME=0.0.0.0` এটা ঠিক করে।\n- Root হিসেবে চালানো, অথবা `ENV`/`COPY .env` দিয়ে image layer-এ secret ঢুকিয়ে ফেলা — secret runtime-এ পাঠাও।\n- EOL Node.js base image ব্যবহার করা — আজকের দিনে Node.js 24 LTS নিরাপদ পছন্দ (Next.js 16-এর জন্য কমপক্ষে 20.9 লাগে)।\n\n**Vercel বনাম self-hosting:** Vercel তোমার হয়ে CDN, image optimisation, cache sharing, skew protection আর scaling সামলায়; self-hosting খরচের নিয়ন্ত্রণ আর data residency দেয়, কিন্তু এসবের দায়িত্ব তোমার।"
+   "en": "**Why standalone:** a full `node_modules` can be hundreds of MB; output file tracing copies only what's needed, which shrinks images and attack surface and speeds up deploys.\n\n**Common mistakes in production:**\n- Forgetting to copy `.next/static` → CSS/JS 404s, unstyled pages.\n- Binding to `localhost` inside the container → the app isn't reachable from outside; `HOSTNAME=0.0.0.0` fixes it.\n- Running as root, or baking secrets into image layers via `ENV`/`COPY .env` — pass secrets at runtime instead.\n- Using an EOL Node.js base image. Node.js 26 (Active LTS) is the safe choice for new images; 24 still gets security fixes in Maintenance (Next.js 16 needs at least 20.9).\n\n**Vercel vs self-hosting:** Vercel handles the CDN, image optimisation, cache sharing, skew protection and scaling for you; self-hosting gives cost control and data residency but you own all of that.",
+   "bn": "**Standalone কেন:** পুরো `node_modules` কয়েকশো MB হতে পারে; output file tracing শুধু দরকারি জিনিস copy করে, ফলে image ছোট হয়, attack surface কমে আর deploy দ্রুত হয়।\n\n**Production-এর সাধারণ ভুল:**\n- `.next/static` copy করতে ভুলে যাওয়া → CSS/JS 404, style ছাড়া page।\n- Container-এর ভেতরে `localhost`-এ bind করা → বাইরে থেকে app-এ পৌঁছানো যায় না; `HOSTNAME=0.0.0.0` এটা ঠিক করে।\n- Root হিসেবে চালানো, অথবা `ENV`/`COPY .env` দিয়ে image layer-এ secret ঢুকিয়ে ফেলা — secret runtime-এ পাঠাও।\n- EOL Node.js base image ব্যবহার করা। নতুন image-এর জন্য Node.js 26 (Active LTS) নিরাপদ পছন্দ; 24 Maintenance-এ থেকেও security fix পায় (Next.js 16-এর জন্য কমপক্ষে 20.9 লাগে)।\n\n**Vercel বনাম self-hosting:** Vercel তোমার হয়ে CDN, image optimisation, cache sharing, skew protection আর scaling সামলায়; self-hosting খরচের নিয়ন্ত্রণ আর data residency দেয়, কিন্তু এসবের দায়িত্ব তোমার।"
   },
   "interviewTip": {
    "en": "Show the Dockerfile reasoning (standalone, multi-stage, non-root), then pivot to \"what bites you in production\" — env-var inlining and multi-instance consistency are the points that impress.",
@@ -416,13 +436,17 @@
   "related": [
    "next-007"
   ],
+  "quickAnswer": {
+   "en": "Use `output: 'standalone'` in a multi-stage Dockerfile and copy only the standalone folder, `.next/static` and `public`, running as non-root. Plan for build-time `NEXT_PUBLIC_*` values, a non-buffering reverse proxy, a shared cache and encryption key across containers, and graceful shutdown.",
+   "bn": "Multi-stage Dockerfile-এ `output: 'standalone'` ব্যবহার করো, আর শুধু standalone folder, `.next/static` ও `public` copy করে non-root user হিসেবে চালাও। আগে থেকে ভাবো: build-time-এ বসে যাওয়া `NEXT_PUBLIC_*` value, buffering ছাড়া reverse proxy, container-গুলোর মধ্যে shared cache ও encryption key, আর graceful shutdown।"
+  },
   "commonMistakes": {
    "en": "Copying the whole project and `node_modules` into a single-stage image, or expecting a `NEXT_PUBLIC_` variable set with `docker run -e` to change the client bundle.",
    "bn": "পুরো project আর `node_modules` একটা single-stage image-এ copy করা, অথবা আশা করা যে `docker run -e` দিয়ে set করা `NEXT_PUBLIC_` variable client bundle বদলে দেবে।"
   },
   "code": {
    "language": "dockerfile",
-   "source": "# syntax=docker/dockerfile:1\nFROM node:24-alpine AS deps\nWORKDIR /app\nCOPY package.json package-lock.json ./\nRUN npm ci\n\nFROM node:24-alpine AS builder\nWORKDIR /app\nCOPY --from=deps /app/node_modules ./node_modules\nCOPY . .\nENV NEXT_TELEMETRY_DISABLED=1\nRUN npm run build            # next.config.ts has output: 'standalone'\n\nFROM node:24-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production \\\n    NEXT_TELEMETRY_DISABLED=1 \\\n    HOSTNAME=0.0.0.0 \\\n    PORT=3000\nCOPY --from=builder --chown=node:node /app/public ./public\nCOPY --from=builder --chown=node:node /app/.next/standalone ./\nCOPY --from=builder --chown=node:node /app/.next/static ./.next/static\nUSER node\nEXPOSE 3000\nHEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1\nCMD [\"node\", \"server.js\"]"
+   "source": "# syntax=docker/dockerfile:1\nFROM node:26-alpine AS deps\nWORKDIR /app\nCOPY package.json package-lock.json ./\nRUN npm ci\n\nFROM node:26-alpine AS builder\nWORKDIR /app\nCOPY --from=deps /app/node_modules ./node_modules\nCOPY . .\nENV NEXT_TELEMETRY_DISABLED=1\nRUN npm run build            # next.config.ts has output: 'standalone'\n\nFROM node:26-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production \\\n    NEXT_TELEMETRY_DISABLED=1 \\\n    HOSTNAME=0.0.0.0 \\\n    PORT=3000\nCOPY --from=builder --chown=node:node /app/public ./public\nCOPY --from=builder --chown=node:node /app/.next/standalone ./\nCOPY --from=builder --chown=node:node /app/.next/static ./.next/static\nUSER node\nEXPOSE 3000\nHEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1\nCMD [\"node\", \"server.js\"]"
   },
   "technology": "nextjs"
  },
@@ -488,6 +512,10 @@
   "related": [
    "next-023"
   ],
+  "quickAnswer": {
+   "en": "Export a `proxy` function from `proxy.ts` that reads the session cookie, redirects signed-out users to `/login?from=...` and signed-in users away from auth pages, with a static `matcher` excluding API and static files. Keep it an optimistic check; real authorization belongs in a data-access layer.",
+   "bn": "`proxy.ts` থেকে একটা `proxy` function export করো যেটা session cookie পড়ে, signed-out user-কে `/login?from=...`-এ আর signed-in user-কে auth page থেকে সরিয়ে redirect করে, আর static `matcher` দিয়ে API ও static file বাদ দেয়। এটা শুধু optimistic check; আসল authorization data-access layer-এ হবে।"
+  },
   "commonMistakes": {
    "en": "Naming the file `middleware.ts` in a new v16 project, querying the database in proxy on every request, or forgetting the matcher so static assets get redirected to the login page.",
    "bn": "নতুন v16 project-এ file-এর নাম `middleware.ts` রাখা, প্রতিটা request-এ proxy-তে database query করা, অথবা matcher ভুলে যাওয়া — ফলে static asset-ও login page-এ redirect হয়।"
@@ -556,6 +584,10 @@
    "next-014",
    "next-016"
   ],
+  "quickAnswer": {
+   "en": "`cookies()` and an uncached query are awaited outside any `<Suspense>` boundary, so Next.js can't build a static shell. With Cache Components, request-time data must be cached or wrapped in `<Suspense>`.",
+   "bn": "`cookies()` আর একটা uncached query কোনো `<Suspense>` boundary-র বাইরে await হচ্ছে, তাই Next.js static shell বানাতে পারে না। Cache Components-এ request-time data হয় cache করতে হবে, নয়তো `<Suspense>`-এ রাখতে হবে।"
+  },
   "code": {
    "language": "tsx",
    "source": "// app/account/page.tsx\nimport { cookies } from 'next/headers';\n\nexport default async function AccountPage() {\n  const session = (await cookies()).get('session')?.value;\n  const orders = await getOrders(session); // uncached database query\n\n  return (\n    <main>\n      <h1>Your account</h1>\n      <OrderList orders={orders} />\n    </main>\n  );\n}"

@@ -44,6 +44,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The decorative divider gets `alt=\"\"` so screen readers skip it, and the logo inside the home link gets an `alt` that describes the link's purpose (\"Dokan — home\"), not the picture.",
+   "bn": "Decorative divider-এ `alt=\"\"` দিই যাতে screen reader সেটা skip করে, আর home link-এর ভেতরের logo-র `alt` হবে link-এর উদ্দেশ্য (\"Dokan — home\"), ছবির বর্ণনা নয়।"
+  },
   "options": [
    {
     "en": "Divider: `<img src=\"wave.svg\" alt=\"\">` — Logo: `<a href=\"/\"><img src=\"logo.png\" alt=\"Dokan — home\"></a>`",
@@ -124,6 +128,10 @@
    "html-024",
    "html-026"
   ],
+  "quickAnswer": {
+   "en": "Use a `<label>` whose `for` matches the input's `id` (or wrap the input in it): that gives an accessible name and a bigger click target. A `placeholder` disappears when you type, is low-contrast and isn't a reliable name, so use it only for an example format.",
+   "bn": "Input-এর `id`-এর সাথে মিলিয়ে `for`-সহ `<label>` দাও (বা input-কে label-এর ভেতরে রাখো); এতে accessible name আর বড় click target দুটোই পাওয়া যায়। `placeholder` type করলেই হারিয়ে যায়, রং হালকা, আর নির্ভরযোগ্য name নয়, তাই এটা শুধু example format দেখানোর জন্য।"
+  },
   "commonMistakes": {
    "en": "Using `for` with the input's `name`, duplicate IDs, styling a `<span>` or `<p>` as a label, and relying on placeholders alone.",
    "bn": "Input-এর `name` দিয়ে `for` লেখা, duplicate ID, `<span>` বা `<p>`-কে label-এর মতো style করা, আর শুধু placeholder-এর উপর ভরসা করা।"
@@ -187,6 +195,10 @@
   "related": [
    "html-007"
   ],
+  "quickAnswer": {
+   "en": "It logs `421`, `available`, `string`, then the button's HTML with a new `data-discount-rate=\"10\"` at the end. Every `dataset` value is a string, so `\"42\" + 1` concatenates and `\"false\"` is truthy.",
+   "bn": "Output: `421`, `available`, `string`, তারপর শেষে নতুন `data-discount-rate=\"10\"`-সহ button-এর HTML। `dataset`-এর সব value string, তাই `\"42\" + 1` জোড়া লাগে, আর `\"false\"` truthy।"
+  },
   "commonMistakes": {
    "en": "Expecting `43`, expecting `'sold out'`, or writing `dataset['product-id']` (it's `dataset.productId`).",
    "bn": "`43` আশা করা, `'sold out'` আশা করা, অথবা `dataset['product-id']` লেখা (সঠিক হলো `dataset.productId`)।"
@@ -240,6 +252,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "An `auto` popover is shown in the top layer, light-dismisses on an outside click or Esc, and opening it closes other unrelated `auto` popovers. It is non-modal and needs no `z-index` or JavaScript.",
+   "bn": "`auto` popover top layer-এ দেখায়, বাইরে click বা Esc চাপলে light dismiss হয়, আর খুললে অন্য unrelated `auto` popover বন্ধ হয়ে যায়। এটা non-modal, আর `z-index` বা JavaScript লাগে না।"
+  },
   "options": [
    {
     "en": "It's modal: the rest of the page becomes inert and focus is trapped inside, like `showModal()`.",
@@ -320,6 +336,10 @@
    "html-014",
    "html-015"
   ],
+  "quickAnswer": {
+   "en": "Invoker commands let a `<button>` with `commandfor` and `command` open or close a dialog or popover, or send a custom `--` command event, without click handlers. `<details>` sharing a `name` form an exclusive accordion. Invoker commands are Baseline only since December 2025, so keep a fallback.",
+   "bn": "Invoker command দিয়ে `commandfor` আর `command`-সহ একটা `<button>` click handler ছাড়াই dialog বা popover খুলতে-বন্ধ করতে, বা `--` দিয়ে শুরু custom command event পাঠাতে পারে। একই `name`-এর `<details>`-গুলো মিলে exclusive accordion হয়। Invoker command মাত্র December 2025 থেকে Baseline, তাই fallback রাখো।"
+  },
   "commonMistakes": {
    "en": "Writing `commandfor` with a CSS selector instead of an ID, forgetting the `--` prefix on custom commands, or assuming every visitor's browser supports invoker commands.",
    "bn": "`commandfor`-এ ID-র বদলে CSS selector লেখা, custom command-এ `--` prefix দিতে ভুলে যাওয়া, অথবা ধরে নেওয়া যে প্রত্যেক visitor-এর browser invoker command support করে।"
@@ -393,6 +413,10 @@
    "html-025",
    "html-002"
   ],
+  "quickAnswer": {
+   "en": "A unique `<title>` and meta description for the search result, `rel=\"canonical\"` so duplicate URLs don't split ranking, Open Graph tags for Facebook and WhatsApp share previews, and JSON-LD with schema.org `Product`/`Offer` for rich results.",
+   "bn": "Search result-এর জন্য unique `<title>` আর meta description, duplicate URL-এ ranking ভাগ না হতে `rel=\"canonical\"`, Facebook আর WhatsApp share preview-এর জন্য Open Graph tag, আর rich result-এর জন্য JSON-LD-তে schema.org `Product`/`Offer`।"
+  },
   "commonMistakes": {
    "en": "Using relative canonical URLs, `name=\"og:title\"` instead of `property`, the same title/description on every page, or adding tags only on the client in an SPA.",
    "bn": "Relative canonical URL দেওয়া, `property`-র বদলে `name=\"og:title\"` লেখা, সব page-এ একই title/description রাখা, অথবা SPA-তে শুধু client-side-এ tag যোগ করা।"
@@ -466,6 +490,10 @@
    "html-013",
    "html-005"
   ],
+  "quickAnswer": {
+   "en": "Add `novalidate` but keep using the Constraint Validation API; mark bad fields with `aria-invalid` and a visible message linked by `aria-describedby`; on submit, show an error summary with links and move focus to it. Server errors use the same slots, and the user's input is kept.",
+   "bn": "`novalidate` দিলেও Constraint Validation API ব্যবহার করি; ভুল field-এ `aria-invalid` আর `aria-describedby` দিয়ে যুক্ত দৃশ্যমান message দিই; submit-এ link-সহ error summary দেখিয়ে focus সেখানে নিই। Server error-ও একই জায়গায় দেখাই, আর user যা লিখেছে তা রেখে দিই।"
+  },
   "commonMistakes": {
    "en": "Showing errors only in red, using a toast that disappears, validating on every keystroke from the first character, clearing the form after a server error, or injecting a `role=\"alert\"` element together with its text and expecting it to be announced.",
    "bn": "শুধু লাল রঙে error দেখানো, হারিয়ে যাওয়া toast ব্যবহার করা, প্রথম character থেকেই প্রতিটা keystroke-এ validate করা, server error-এর পর form খালি করে দেওয়া, অথবা text-সহ একসাথে `role=\"alert\"` element inject করে আশা করা যে সেটা announce হবে।"
@@ -535,6 +563,10 @@
    "html-017",
    "html-030"
   ],
+  "quickAnswer": {
+   "en": "The server sends the same empty shell with default tags for every URL: social crawlers don't run JavaScript, and Google renders it late and unreliably. Server-render or pre-render the routes, or at least inject per-route title, OG and canonical tags at the server or edge.",
+   "bn": "Server প্রতিটা URL-এ default tag-সহ একই খালি shell পাঠায়: social crawler JavaScript চালায় না, আর Google দেরিতে ও অনির্ভরযোগ্যভাবে render করে। Route-গুলো server-render বা pre-render করো, নইলে অন্তত server বা edge-এ প্রতি route-এর title, OG আর canonical tag inject করো।"
+  },
   "commonMistakes": {
    "en": "Assuming \"Google runs JavaScript, so SEO is fine\", updating `document.title` client-side and expecting share previews to change, using hash routing, or returning 200 for not-found pages.",
    "bn": "\"Google তো JavaScript চালায়, তাই SEO ঠিক আছে\" ধরে নেওয়া, client-side-এ `document.title` বদলে share preview বদলাবে আশা করা, hash routing ব্যবহার করা, অথবা not-found page-এর জন্য 200 ফেরত দেওয়া।"

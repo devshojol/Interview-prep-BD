@@ -46,6 +46,8 @@ QUESTIONS = [
 
             Component হলো এমন একটা function যেটা JSX return করে। ছোট হাতের tag (`div`) মানে DOM element, আর বড় হাতের নাম (`UserCard`) মানে component।
         """,
+        quick_en=r"""JSX is HTML-like syntax inside JavaScript that a compiler (Babel, SWC, TypeScript) turns into function calls like `jsx("h1", props)` from `react/jsx-runtime`. Each call returns a React element, a plain object that describes the UI, not a real DOM node.""",
+        quick_bn=r"""JSX হলো JavaScript-এর ভেতরে HTML-এর মতো syntax, যেটাকে compiler (Babel, SWC, TypeScript) `react/jsx-runtime`-এর `jsx("h1", props)`-এর মতো function call-এ বদলে দেয়। প্রতিটা call একটা React element return করে, যেটা UI-এর বর্ণনা দেওয়া একটা সাধারণ object, আসল DOM node না।""",
         ex_en=r"""
             - **Why no `import React`?** Since the automatic runtime (React 17+), the compiler injects the `react/jsx-runtime` import, so you don't need `React` in scope just for JSX.
             - **Rules:** return a single root (use a Fragment `<>...</>` if needed), close every tag (`<img />`), use camelCase attributes (`className`, `htmlFor`, `onClick`, `tabIndex`).
@@ -107,6 +109,8 @@ QUESTIONS = [
 
             আমার নিয়ম: কোনো value যদি props বা অন্য state থেকে হিসাব করে বের করা যায়, তাহলে সেটা state-এ রাখাই উচিত না — আমি render-এর সময়ই সেটা compute করি।
         """,
+        quick_en=r"""Props are read-only inputs a parent passes to a child, like function arguments. State is data a component owns and changes with its setter, and changing it re-renders the component. Data flows down through props; a child changes parent data through a callback prop.""",
+        quick_bn=r"""Props হলো parent থেকে child-এ পাঠানো read-only input, অনেকটা function argument-এর মতো। State হলো component-এর নিজের data, setter দিয়ে বদলায়, আর বদলালে component re-render হয়। Data props দিয়ে নিচে নামে; child-কে parent-এর data বদলাতে হলে callback prop ব্যবহার করে।""",
         ex_en=r"""
             - **Owner:** props are owned by the parent; state is owned by the component that declares it.
             - **Mutability:** never mutate props (`props.user.name = 'x'` is a bug). State changes only through the setter with a new value.
@@ -172,6 +176,8 @@ QUESTIONS = [
 
             `count` হলো একটা snapshot: এই render-এ এর মান `0`, তাই দুটো `setCount(count + 1)` call-ই "1 দিয়ে replace করো" queue করে। Updater `setCount(c => c + 1)` queue-তে থাকা `1` পায় আর `2` return করে। Handler-এর ভেতরের `console.log` তখনো পুরনো snapshot `0` দেখে, কারণ state বদলায় শুধু *পরের* render-এ। React তিনটা update batch করে একটাই re-render করে, তাই `render` আর মাত্র একবার log হয়।
         """,
+        quick_en=r"""It logs `render: 0`, `clicked: 0`, `render: 2`, and the button shows 2. `count` is a snapshot (0), so both `setCount(count + 1)` queue 1, the updater turns that into 2, and React batches all three into one re-render.""",
+        quick_bn=r"""Log হবে `render: 0`, `clicked: 0`, `render: 2`, আর button-এ দেখাবে 2। `count` একটা snapshot (0), তাই দুইটা `setCount(count + 1)`-ই 1 queue করে, updater সেটাকে 2 বানায়, আর React তিনটা update মিলিয়ে একবারই re-render করে।""",
         ex_en=r"""
             Step by step:
 
@@ -247,6 +253,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Use a stable, unique id from the data, such as `todo.id`. Keys tell React which item is which between renders, so state, focus and DOM nodes stay attached to the right item when the list changes.""",
         a_bn=r"""Data থেকে পাওয়া স্থায়ী, unique id ব্যবহার করো, যেমন `todo.id`। Key দিয়ে React বুঝতে পারে কোন item কোনটা, ফলে list বদলালেও state, focus আর DOM node সঠিক item-এর সাথেই থাকে।""",
+        quick_en=r"""Use a stable unique id from the data, `key={todo.id}`. Keys tell React which item is which between renders, so state, focus and DOM nodes stay with the right item when items are added, deleted or reordered.""",
+        quick_bn=r"""Data থেকে আসা স্থায়ী unique id ব্যবহার করো, `key={todo.id}`। Key দিয়ে React বোঝে কোন item কোনটা, তাই item যোগ, delete বা reorder হলেও state, focus আর DOM node ঠিক item-এর সাথেই থাকে।""",
         ex_en=r"""
             The tempting wrong answer is the **index**: it removes the warning and works for static lists, but when you insert, delete or reorder, the indexes shift. React then reuses the wrong component instance, so an input's text or a checkbox's checked state "jumps" to a different row.
 
@@ -293,6 +301,8 @@ QUESTIONS = [
             - Interval-এর ভেতরে সর্বশেষ value *পড়তে* চাইলে (যেমন log করার জন্য) সেই logic `useEffectEvent`-এ রাখো (React 19.2 থেকে stable) অথবা ref-এ রাখো।
             - Dependency array-তে `count` দিলেও কাজ হয়, কিন্তু তখন প্রতিটা tick-এ interval clear হয়ে নতুন করে তৈরি হয়।
         """,
+        quick_en=r"""It logs `tick 0` three times and the screen stays at 1. The effect runs once, so the interval closes over the first render where `count` is 0 and keeps setting 1; fix it with the updater `setCount(c => c + 1)`.""",
+        quick_bn=r"""`tick 0` তিনবার log হয় আর screen-এ 1-ই থেকে যায়। Effect একবারই চলে, তাই interval প্রথম render-এর closure ধরে রাখে যেখানে `count` 0, আর বারবার 1 set করে; সমাধান হলো updater `setCount(c => c + 1)`।""",
         ex_en=r"""
             Each render has its own props, state and functions. A function created in render 1 "remembers" render 1's values forever — that's a normal JavaScript closure, not a React bug. The problem appears when a long-lived callback (interval, subscription, WebSocket handler) is created once and never refreshed.
 
@@ -394,6 +404,8 @@ QUESTIONS = [
 
             এতে যদি তোমার app ভেঙে যায় (double subscription, দুটো API call-এর conflicting result), তাহলে bug-টা আসল — user অন্য page-এ গিয়ে ফিরে এলে বা `<Activity>`-এর মতো feature-এও এটা দেখা দিত।
         """,
+        quick_en=r"""In development with StrictMode: `render Rahim` twice, then `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`; in production just one render and one subscribe. StrictMode double-renders and re-runs effects in dev only, to expose impure renders and missing cleanups.""",
+        quick_bn=r"""Development-এ StrictMode থাকলে: `render Rahim` দুইবার, তারপর `effect: subscribe`, `cleanup: unsubscribe`, `effect: subscribe`; production-এ শুধু একবার render আর একবার subscribe। StrictMode শুধু dev-এ দুইবার render করে আর effect আবার চালায়, যাতে impure render আর missing cleanup ধরা পড়ে।""",
         ex_en=r"""
             Order of events on mount: React renders (twice in StrictMode — both renders happen before anything is committed), commits the DOM, then runs effects. StrictMode then calls the cleanup and the setup again. Your effect should be **symmetrical**: whatever setup does (subscribe, connect, add listener), cleanup undoes.
 
@@ -507,6 +519,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""It shows `Admin: 3`. React decides whether to keep state by looking at the **element type and its position in the tree**, not at which line of JSX produced it. Both branches render a `<Counter>` as the first child of the same `<div>`, so React treats it as the same component and preserves its state.""",
         a_bn=r"""দেখাবে `Admin: 3`। State রাখবে কি না, React সেটা ঠিক করে **element type আর tree-তে তার position** দেখে — JSX-এর কোন লাইন থেকে element এসেছে সেটা দেখে না। দুই branch-ই একই `<div>`-এর প্রথম child হিসেবে `<Counter>` render করে, তাই React এটাকে একই component ধরে state রেখে দেয়।""",
+        quick_en=r"""It shows `Admin: 3`. React keeps state based on element type and position in the tree, and both branches render a `<Counter>` in the same spot, so the state is kept and only `label` changes.""",
+        quick_bn=r"""দেখাবে `Admin: 3`। React state রাখে element-এর type আর tree-তে তার position দেখে, আর দুই branch-ই একই জায়গায় `<Counter>` render করে, তাই state থেকে যায়, শুধু `label` বদলায়।""",
         ex_en=r"""
             The tempting answer is `Admin: 0`, because the code *looks* like two different counters. But reconciliation only sees "position 0 of this div: was `Counter`, is still `Counter`" → same fiber, update props, keep state.
 
@@ -580,6 +594,8 @@ QUESTIONS = [
 
             Trade-off: headless library-র (React Aria, Radix) উপর তৈরি করলে accessibility-র কয়েক মাসের কাজ বাঁচে, কিন্তু এমন একটা dependency যোগ হয় যেটা তোমার নিয়ন্ত্রণে নেই।
         """,
+        quick_en=r"""Use compound components with Context, support both controlled and uncontrolled modes, behave like the native element (spread props, `ref` as a prop) and build accessibility in. Ship `'use client'` only on interactive entries, style with CSS variables, tree-shakeable ESM and semver with codemods.""",
+        quick_bn=r"""Context-সহ compound component ব্যবহার করো, controlled আর uncontrolled দুই mode-ই support করো, native element-এর মতো আচরণ করো (props spread, `ref` prop হিসেবে), আর accessibility শুরু থেকেই রাখো। শুধু interactive entry-তে `'use client'`, styling-এ CSS variable, tree-shake করা যায় এমন ESM, আর codemod-সহ semver।""",
         ex_en=r"""
             **Why these choices**
             - Compound components + Context keep each piece small and let teams insert their own markup between parts. The cost: misuse outside the parent must be caught with a clear runtime error (see `useTabs` in the code).

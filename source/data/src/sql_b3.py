@@ -104,6 +104,8 @@ QUESTIONS = [
 
             আসল data-য় `DELETE` চালানোর আগে আমি প্রথমে এটাকে `SELECT` হিসেবে চালাই, transaction-এর ভেতরে করি, আর নিশ্চিত হই যে সম্পর্কিত row (order, session) রাখা account-এর দিকে সরানো হয়েছে — না হলে foreign key delete আটকে দেবে, বা cascade করে আসল data মুছে ফেলবে।
         """,
+        quick_en=r"""`GROUP BY LOWER(email) HAVING COUNT(*) > 1` finds the duplicates, and `MIN(id)` picks the oldest row to keep. Then delete every row whose id isn't a keeper, after running it as a `SELECT` first, inside a transaction, with related rows re-pointed.""",
+        quick_bn=r"""`GROUP BY LOWER(email) HAVING COUNT(*) > 1` duplicate খুঁজে বের করে, আর `MIN(id)` রাখার জন্য সবচেয়ে পুরোনো row বাছে। তারপর যেসব row-এর id keeper নয় সেগুলো delete করো, তবে আগে `SELECT` হিসেবে চালিয়ে দেখো, transaction-এর ভেতরে করো, আর related row-গুলো রাখা account-এ সরিয়ে নাও।""",
         ex_en=r"""
             - **Decide what "duplicate" means** with the business first: case-insensitive email? Trimmed whitespace? Same phone number? Gmail dots? The normalisation expression in `GROUP BY` encodes that decision.
             - **Window-function version:** `ROW_NUMBER() OVER (PARTITION BY LOWER(email) ORDER BY id)` marks the first row 1 and duplicates 2, 3...; delete rows with `rn > 1`. It's handy when you want to keep "the newest" or "the most complete" row instead.
@@ -197,6 +199,8 @@ QUESTIONS = [
 
             `FILTER (WHERE ...)` clause (standard SQL, PostgreSQL আর SQLite support করে) একই কাজ আরও পড়ার মতো করে লেখে। সূক্ষ্ম পার্থক্য: কোনো row match না করলে `SUM ... FILTER` **NULL** দেয়, আর `SUM(CASE ... ELSE 0 END)` দেয় 0। Report-এ শূন্য লাগলে `FILTER`-এর সাথে `COALESCE(..., 0)` ব্যবহার করো।
         """,
+        quick_en=r"""Conditional aggregation: `GROUP BY category` with one `SUM(CASE WHEN month = ... THEN amount ELSE 0 END)` per month. `SUM(...) FILTER (WHERE ...)` reads better, but returns NULL instead of 0 when no rows match, so wrap it in `COALESCE`.""",
+        quick_bn=r"""Conditional aggregation: `GROUP BY category`, আর প্রতিটা মাসের জন্য একটা করে `SUM(CASE WHEN month = ... THEN amount ELSE 0 END)`। `SUM(...) FILTER (WHERE ...)` পড়তে সহজ, কিন্তু কোনো row না মিললে 0-এর বদলে NULL দেয়, তাই `COALESCE` দিয়ে মুড়ে দাও।""",
         ex_en=r"""
             - **Portability:** `SUM(CASE ...)` works everywhere (MySQL, SQL Server, Oracle, PostgreSQL, SQLite). `FILTER` is PostgreSQL/SQLite; SQL Server and Oracle also have a `PIVOT` operator, and PostgreSQL's `tablefunc` extension offers `crosstab()`.
             - **Dynamic columns:** SQL needs the output columns known when the query is written. If months change every time, either build the SQL dynamically (carefully — never from raw user input) or return long-format rows and pivot in the application/BI tool.
@@ -252,6 +256,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""**4.** Rahim matches two orders (2 rows), Karim matches one (1 row), and Nadia has no orders, so the LEFT JOIN keeps her once with a NULL `order_id` (1 row). Order 13 has no customer and isn't returned, because a LEFT JOIN keeps unmatched rows from the **left** table only.""",
         a_bn=r"""**4।** Rahim দুটো order-এর সাথে মেলে (২ row), Karim একটার সাথে (১ row), আর Nadia-র কোনো order নেই, তাই LEFT JOIN তাকে NULL `order_id`-সহ একবার রাখে (১ row)। Order 13-এর কোনো customer নেই, তাই আসে না, কারণ LEFT JOIN শুধু **বাম** table-এর unmatched row রাখে।""",
+        quick_en=r"""4 rows. Rahim matches two orders, Karim one, and Nadia has none, so LEFT JOIN keeps her once with a NULL `order_id`; the order with no customer is dropped because only unmatched left rows are kept.""",
+        quick_bn=r"""4টা row। Rahim দুটো order-এর সাথে মেলে, Karim একটার সাথে, আর Nadia-র কোনো order নেই, তাই LEFT JOIN তাকে NULL `order_id`-সহ একবার রাখে; customer ছাড়া order-টা বাদ যায়, কারণ শুধু বাঁ দিকের না-মেলা row রাখা হয়।""",
         ex_en=r"""
             - **3** is the tempting answer ("one row per customer"), but a join produces one row per matching *pair*, so customers with several orders repeat.
             - **5** would be a `FULL OUTER JOIN` (adds the orphan order 13 with a NULL name).
@@ -335,6 +341,8 @@ QUESTIONS = [
             - **Q2 — column-এর ভুল ক্রম।** `(last_name, first_name)`-এর composite B-tree phone book-এর মতো আগে `last_name` অনুযায়ী সাজানো। শুধু `first_name` দিয়ে খুঁজলে এই সাজানো ক্রম কাজে লাগে না (leftmost-prefix rule)। `first_name`-এ একটা index দাও, অথবা সেটাই যদি সাধারণ query হয় তবে composite index-এর ক্রম বদলাও।
             - **Q3 — শুরুতে wildcard।** `LIKE '%4567'`-এর কোনো নির্দিষ্ট prefix নেই, তাই B-tree seek করতে পারে না। `REVERSE(phone)`-এ index দিয়ে উল্টো prefix খোঁজো, অথবা trigram index ব্যবহার করো (PostgreSQL-এ `pg_trgm`)।
         """,
+        quick_en=r"""All three predicates aren't sargable: a function on the indexed column, a search on only the second column of a composite index, and a leading-wildcard `LIKE`. Fix them with a half-open range on the bare column, an index on `first_name`, and a reversed-value or trigram index.""",
+        quick_bn=r"""তিনটা predicate-ই sargable নয়: indexed column-এর ওপর function, composite index-এর শুধু দ্বিতীয় column দিয়ে search, আর শুরুতে wildcard-সহ `LIKE`। Fix: খালি column-এর ওপর half-open range, `first_name`-এ index, আর reverse করা value বা trigram index।""",
         ex_en=r"""
             - **Composite index column order:** put columns used with equality first and range/sort columns last, e.g. `(customer_id, created_at)` serves `WHERE customer_id = ? AND created_at >= ?` and `ORDER BY created_at` for one customer. The index also serves queries on just `customer_id`, but not on just `created_at`. (PostgreSQL 18's skip scan can sometimes use a non-leading column when the leading column has very few distinct values — it doesn't help here, since `last_name` has many.)
             - **Other sargability killers:** arithmetic on the column (`WHERE price * 1.15 > 1000` → `WHERE price > 1000 / 1.15`), implicit type conversions (comparing a `VARCHAR` column to a number in MySQL), `OR` across different columns (sometimes rewrite as `UNION`), and `LOWER(email) = ...` without a matching expression index.
@@ -363,7 +371,7 @@ QUESTIONS = [
         id="sql-021", sub="SQL Injection & Parameterized Queries", diff="medium", type="security-performance",
         prio="high", market="both", mins=6,
         tags=["sql-injection", "parameterized-queries", "node-pg", "security", "owasp"],
-        ver="node-postgres 8.x on Node.js 24 LTS; Express 5.x", vs=False, status="stable",
+        ver="node-postgres 8.x on Node.js 26 LTS; Express 5.x", vs=False, status="stable",
         q_en=r"""This Express endpoint builds SQL with template strings. Show how it can be exploited and rewrite it safely, including the user-controlled sort order.""",
         q_bn=r"""এই Express endpoint template string দিয়ে SQL বানায়। এটা কীভাবে exploit করা যায় দেখাও, আর user-নিয়ন্ত্রিত sort order-সহ নিরাপদভাবে আবার লেখো।""",
         code=r"""
@@ -422,6 +430,8 @@ QUESTIONS = [
 
             সমাধান: **parameterized query** — `$1` placeholder, value আলাদাভাবে পাঠানো, তাই input সবসময় data, কখনো SQL নয়। Identifier (column-এর নাম, sort direction) parameter হতে পারে না, তাই user-এর পছন্দ একটা **allowlist** দিয়ে map করো। বাড়তি সুরক্ষা: least-privilege DB role, input validation, `LIMIT`, আর client-কে কাঁচা SQL error message না দেখানো।
         """,
+        quick_en=r"""Pasting input into SQL lets an attacker change the query: `' OR 1=1 --` returns every row, and `sort` can leak data. Use parameterized queries with `$1` placeholders for values, and an allowlist for identifiers like the sort column, which can't be parameters.""",
+        quick_bn=r"""Input সরাসরি SQL-এ বসালে attacker query বদলে দিতে পারে: `' OR 1=1 --` সব row ফেরত দেয়, আর `sort` দিয়ে data ফাঁস হতে পারে। Value-র জন্য `$1` placeholder-সহ parameterized query ব্যবহার করো, আর sort column-এর মতো identifier, যেগুলো parameter হতে পারে না, সেগুলোর জন্য allowlist।""",
         ex_en=r"""
             - **Why parameters work:** with `pool.query(text, values)`, node-postgres uses the extended protocol — the SQL is parsed first, and `$1` is bound to a value afterwards. Nothing in the value can change the parse tree.
             - **Escaping by hand is fragile** (encodings, quotes, backslashes, numeric contexts). Use parameters; reserve escaping for LIKE wildcards inside an already-parameterized value.
@@ -530,6 +540,8 @@ QUESTIONS = [
 
             এই subquery-রূপ সব database-এ চলে। PostgreSQL-এ `UPDATE ... FROM` (join), আর MySQL-এ `UPDATE ... JOIN`-ও আছে — `SET` clause-এ অন্য table-এর column দরকার হলে এগুলো কাজে লাগে।
         """,
+        quick_en=r"""`UPDATE products SET price = ROUND(price * 1.10, 2) WHERE category_id IN (SELECT id FROM categories WHERE name = 'Electronics')`. The subquery form is portable; PostgreSQL also has `UPDATE ... FROM` and MySQL `UPDATE ... JOIN`.""",
+        quick_bn=r"""`UPDATE products SET price = ROUND(price * 1.10, 2) WHERE category_id IN (SELECT id FROM categories WHERE name = 'Electronics')`। Subquery-র রূপটা সব database-এ চলে; PostgreSQL-এ `UPDATE ... FROM` আর MySQL-এ `UPDATE ... JOIN`-ও আছে।""",
         ex_en=r"""
             **Safe habits for writes on production data:**
             - Run the `WHERE` clause as a `SELECT` first and check the row count.
@@ -629,6 +641,8 @@ QUESTIONS = [
 
             প্রতিটা ধাপ `depth + 1` বহন করে আর `path` বাড়ায় — এটা একটা সুবিধাজনক sort key-ও, যা tree-টাকে ক্রম অনুযায়ী দেখায়। Rafi, Lina আর Shafiq Mitu-র line-এর বাইরে, তাই কখনো আসে না।
         """,
+        quick_en=r"""Use `WITH RECURSIVE`: the anchor selects Mitu at depth 0, and the recursive member joins employees whose `manager_id` matches the previous level, adding `depth + 1` and extending the path. It stops when a level returns no rows.""",
+        quick_bn=r"""`WITH RECURSIVE` ব্যবহার করো: anchor depth 0-তে Mitu-কে নেয়, আর recursive অংশ আগের level-এর সাথে `manager_id` মেলে এমন employee join করে, `depth + 1` আর path বাড়িয়ে। কোনো level-এ row না এলে recursion থেমে যায়।""",
         ex_en=r"""
             - **Cycles:** if bad data makes A manage B and B manage A, recursion never ends. Guard with a depth limit (`WHERE o.depth < 20`) or by checking the path; PostgreSQL 14+ has a standard `CYCLE` clause, and SQL Server stops at `MAXRECURSION` (default 100).
             - **Type matching:** the anchor and recursive parts must produce compatible column types — that's why `path` is cast to the same `VARCHAR(500)` in both (PostgreSQL is strict about this).
@@ -718,6 +732,8 @@ QUESTIONS = [
 
             July: (90,000 − 120,000) / 120,000 = −25.0%; August: (135,000 − 90,000) / 90,000 = +50.0%।
         """,
+        quick_en=r"""Aggregate revenue per month in a CTE, read last month with `LAG(revenue) OVER (ORDER BY month)`, and compute `100.0 * (revenue - prev) / NULLIF(prev, 0)`. `NULLIF` turns a zero denominator into NULL instead of an error, and `100.0` avoids integer division.""",
+        quick_bn=r"""CTE-তে মাস অনুযায়ী revenue যোগ করো, `LAG(revenue) OVER (ORDER BY month)` দিয়ে আগের মাসেরটা পড়ো, আর হিসাব করো `100.0 * (revenue - prev) / NULLIF(prev, 0)`। `NULLIF` শূন্য denominator-কে error-এর বদলে NULL বানায়, আর `100.0` integer division ঠেকায়।""",
         ex_en=r"""
             - **Missing months are the hidden bug:** `LAG` looks at the previous *row*, not the previous *calendar month*. If June had no orders, July would be compared with May. Fix by generating a month calendar (PostgreSQL: `generate_series(date '2026-05-01', date '2026-09-01', interval '1 month')`, or a recursive CTE elsewhere) and `LEFT JOIN`ing revenue to it with `COALESCE(revenue, 0)`.
             - A named window avoids repeating the definition: `... LAG(revenue) OVER w ... WINDOW w AS (ORDER BY month)`.

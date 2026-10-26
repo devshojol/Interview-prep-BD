@@ -61,6 +61,10 @@
    "mongo-004",
    "mongo-017"
   ],
+  "quickAnswer": {
+   "en": "Single-document writes are always atomic, so first try to keep the invariant in one document and use a conditional `$inc`. Use a transaction only when several documents must change together (a wallet transfer, order + stock + ledger); it needs a replica set, must stay short and should retry on transient errors.",
+   "bn": "একটা document-এর write সবসময় atomic, তাই প্রথমে চেষ্টা করো invariant-টা এক document-এ রাখতে আর conditional `$inc` ব্যবহার করতে। কয়েকটা document একসাথে বদলাতেই হলে (wallet transfer, order + stock + ledger) তবেই transaction; এর জন্য replica set লাগে, transaction ছোট রাখতে হয়, আর transient error-এ retry করতে হয়।"
+  },
   "commonMistakes": {
    "en": "Claiming MongoDB has no transactions; wrapping every request in a transaction; running transactions against a standalone `mongod`; calling a payment API inside the transaction callback.",
    "bn": "MongoDB-তে transaction নেই বলা; প্রতিটি request transaction-এ মুড়ে দেওয়া; standalone `mongod`-এ transaction চালানো; transaction callback-এর ভেতরে payment API call করা।"
@@ -125,6 +129,10 @@
    "mongo-010",
    "mongo-031"
   ],
+  "quickAnswer": {
+   "en": "The write is durable on a majority of the data-bearing voting members, so any newly elected primary has it and it won't be rolled back after a failover. It does not mean every secondary has it, or that any secondary read will see it immediately.",
+   "bn": "Write-টা data রাখা voting member-দের majority-তে durable হয়েছে, তাই নতুন যে primary-ই নির্বাচিত হোক তার কাছে write-টা থাকবে, failover-এর পর rollback হবে না। এর মানে এই না যে সব secondary-তে পৌঁছে গেছে, বা যেকোনো secondary read সাথে সাথে এটা দেখবে।"
+  },
   "options": [
    {
     "en": "The write has been applied on every member of the replica set, including all secondaries",
@@ -209,6 +217,10 @@
    "mongo-006",
    "mongo-008"
   ],
+  "quickAnswer": {
+   "en": "`$regex` is simple, but a case-insensitive \"contains\" search can't use an index well and has no ranking; a text index adds stemming and `textScore` ranking but no typo tolerance or autocomplete. For a customer search box I'd choose Atlas Search (`$search`) for fuzzy matching, autocomplete, synonyms and facets.",
+   "bn": "`$regex` সহজ, কিন্তু case-insensitive \"contains\" search index ভালোভাবে ব্যবহার করতে পারে না আর কোনো ranking নেই; text index stemming আর `textScore` ranking দেয়, কিন্তু typo tolerance বা autocomplete নেই। Customer-এর search box-এর জন্য আমি Atlas Search (`$search`) নেব: fuzzy matching, autocomplete, synonym আর facet সব পাওয়া যায়।"
+  },
   "commonMistakes": {
    "en": "Assuming a regular index makes `/term/i` fast; creating multiple text indexes on one collection; passing raw user input into `$regex`.",
    "bn": "ধরে নেওয়া যে সাধারণ index `/term/i`-কে দ্রুত করবে; এক collection-এ একাধিক text index বানানো; raw user input সরাসরি `$regex`-এ দেওয়া।"
@@ -273,6 +285,10 @@
    "mongo-004",
    "mongo-016"
   ],
+  "quickAnswer": {
+   "en": "It logs `null`. `findOneAndUpdate` returns the document as it was **before** the update by default, and on an upsert there was no document before, even though the cart was inserted. Pass `{ upsert: true, returnDocument: \"after\" }` to get the new cart.",
+   "bn": "`null` log হয়। `findOneAndUpdate` default-ভাবে update-এর **আগের** document return করে, আর upsert-এর ক্ষেত্রে আগে কোনো document ছিলই না, যদিও cart-টা insert হয়েছে। নতুন cart পেতে `{ upsert: true, returnDocument: \"after\" }` দাও।"
+  },
   "code": {
    "language": "javascript",
    "source": "const cart = await db.collection(\"carts\").findOneAndUpdate(\n  { phone: \"+8801711000000\" },\n  { $setOnInsert: { createdAt: new Date() }, $inc: { visits: 1 } },\n  { upsert: true }\n);\nconsole.log(cart);"
@@ -361,6 +377,10 @@
    "mongo-024",
    "mongo-018"
   ],
+  "quickAnswer": {
+   "en": "The main app risk is the new per-operation memory limit (the greater of 1 GB or 20% of RAM), so test heavy aggregations; also use Mongoose 9.10.4+ because of a `syncIndexes()` issue. Self-managed now gets majors plus an annual X.5 release, so do a rolling upgrade and keep FCV at 8.0 until stable.",
+   "bn": "App-এর জন্য সবচেয়ে বড় ঝুঁকি নতুন per-operation memory limit (1 GB অথবা RAM-এর 20%, যেটা বড়), তাই heavy aggregation test করো; আর `syncIndexes()` সমস্যার কারণে Mongoose 9.10.4+ ব্যবহার করো। Self-managed এখন major আর বছরে একটা X.5 release পায়, তাই rolling upgrade করো আর stable না হওয়া পর্যন্ত FCV 8.0-তে রাখো।"
+  },
   "commonMistakes": {
    "en": "Assuming self-managed deployments get 9.1/9.2 minor releases; raising FCV immediately after swapping binaries; treating the un-deprecation of `$where` as permission to use it widely.",
    "bn": "ধরে নেওয়া যে self-managed deployment 9.1/9.2 minor release পাবে; binary বদলানোর সাথে সাথেই FCV বাড়িয়ে দেওয়া; `$where` আর deprecated নয় বলে সেটা ব্যাপকভাবে ব্যবহারের অনুমতি মনে করা।"
@@ -434,6 +454,10 @@
    "mongo-018",
    "mongo-031"
   ],
+  "quickAnswer": {
+   "en": "Run the debit, credit and ledger insert inside `withTransaction()`, passing `{ session }` to each, with a conditional debit (`balance: { $gte: amount }` + `$inc`) that throws if `matchedCount` is 0. A unique index on `ledger.requestId` makes retries idempotent, and the callback must contain only database work because it may re-run.",
+   "bn": "Debit, credit আর ledger insert `withTransaction()`-এর ভেতরে চালাও, প্রতিটিতে `{ session }` দিয়ে; debit হবে conditional (`balance: { $gte: amount }` + `$inc`), আর `matchedCount` 0 হলে throw করো। `ledger.requestId`-এ unique index দিলে retry idempotent হয়, আর callback আবার চলতে পারে বলে এর ভেতরে শুধু database-এর কাজ রাখো।"
+  },
   "commonMistakes": {
    "en": "Reading the balance with `findOne` and then updating (race condition); forgetting `{ session }` on one operation; sending the SMS inside the callback; catching the error inside the callback so the transaction commits anyway.",
    "bn": "`findOne` দিয়ে balance পড়ে তারপর update করা (race condition); কোনো একটা operation-এ `{ session }` ভুলে যাওয়া; callback-এর ভেতরে SMS পাঠানো; callback-এর ভেতরেই error catch করে ফেলা, ফলে transaction তবুও commit হয়ে যায়।"
@@ -512,6 +536,10 @@
    "mongo-006",
    "mongo-022"
   ],
+  "quickAnswer": {
+   "en": "The login filter allows operator injection (a password of `{ \"$ne\": null }` bypasses login) and compares plain-text passwords: validate strings, query by email only and compare a bcrypt hash. The public, auth-less `0.0.0.0:27017` and the `root` app user need authentication, least-privilege RBAC, a firewall or private network, and TLS.",
+   "bn": "Login filter-এ operator injection সম্ভব (password হিসেবে `{ \"$ne\": null }` পাঠালেই login bypass), আর password plain text-এ compare হচ্ছে: input string কিনা validate করো, শুধু email দিয়ে query করো, bcrypt hash compare করো। Public, auth ছাড়া `0.0.0.0:27017` আর `root` app user-এর জন্য দরকার authentication, least-privilege RBAC, firewall বা private network, আর TLS।"
+  },
   "commonMistakes": {
    "en": "Believing MongoDB is immune to injection because it \"doesn't use SQL\"; relying on Mongoose alone without validating types; fixing the code but leaving port 27017 open to the internet.",
    "bn": "MongoDB \"SQL ব্যবহার করে না\" বলে injection থেকে নিরাপদ মনে করা; type validate না করে শুধু Mongoose-এর ওপর নির্ভর করা; code ঠিক করে port 27017 internet-এ খোলা রেখে দেওয়া।"
@@ -612,6 +640,10 @@
    "mongo-009",
    "mongo-030"
   ],
+  "quickAnswer": {
+   "en": "The `followers`/`likes` arrays are unbounded: celebrity documents approach the 16 MB limit, every follow rewrites a huge document, and one document becomes a hotspot. Store each edge in its own `follows`/`likes` collection with unique indexes, and keep `followerCount` up to date with `$inc`.",
+   "bn": "`followers`/`likes` array-গুলো unbounded: celebrity-র document 16 MB limit-এর কাছে চলে যায়, প্রতিটি follow-এ একটা বিশাল document আবার লিখতে হয়, আর একটা document hotspot হয়ে যায়। প্রতিটি edge আলাদা `follows`/`likes` collection-এ unique index সহ রাখো, আর `followerCount` `$inc` দিয়ে update রাখো।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it with GridFS or by splitting the array into `followers2`, `followers3` fields; counting followers with `countDocuments` on every profile view; incrementing counters even when the like already existed.",
    "bn": "GridFS দিয়ে বা array-কে `followers2`, `followers3` field-এ ভাগ করে \"fix\" করা; প্রতিটি profile view-এ `countDocuments` দিয়ে follower গোনা; like আগে থেকে থাকলেও counter বাড়ানো।"

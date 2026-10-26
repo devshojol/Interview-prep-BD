@@ -37,6 +37,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""The first one. In v12 all core packages are published as ESM, and the minimum runtime is Node.js 20.19+ or 22.12+ — the versions where `require(esm)` works by default, which is how most CommonJS apps keep working.""",
         a_bn=r"""প্রথমটা। v12-এ সব core package ESM হিসেবে publish হয়, আর minimum runtime হলো Node.js 20.19+ বা 22.12+ — এই version গুলোতেই `require(esm)` default-এ কাজ করে, আর এভাবেই বেশিরভাগ CommonJS app চলতে থাকে।""",
+        quick_en=r"""In NestJS 12 the core packages ship as ES modules and need Node.js 20.19+ or 22.12+, the versions where `require(esm)` works by default, so existing CommonJS apps can still load them.""",
+        quick_bn=r"""NestJS 12-এ core package-গুলো ES module হিসেবে আসে আর Node.js 20.19+ বা 22.12+ লাগে — এই version-গুলোতে `require(esm)` default-এ চলে, তাই পুরোনো CommonJS app-ও এগুলো load করতে পারে।""",
         ex_en=r"""
             Other v12 points worth knowing:
             - **Express stays the default** adapter (`@nestjs/platform-express` 12 uses Express 5.x); Fastify remains an optional adapter. Express 5 already became the default in Nest 11, so route wildcards follow the newer path syntax.
@@ -96,6 +98,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""Bootstrap fails. `ConfigModule.forRoot()` validates `process.env` against the schema while the module is initialised; a required variable without a default is missing, so it throws "Config validation error: DATABASE_URL: ..." and the app never starts.""",
         a_bn=r"""Bootstrap fail করে। Module initialise হওয়ার সময় `ConfigModule.forRoot()` schema দিয়ে `process.env` validate করে; default ছাড়া একটা required variable নেই, তাই "Config validation error: DATABASE_URL: ..." throw করে আর app কখনো চালু হয় না।""",
+        quick_en=r"""Bootstrap fails: `ConfigModule.forRoot()` validates `process.env` against the schema while the module initialises, finds the required `DATABASE_URL` missing and throws a config validation error, so the app never starts listening.""",
+        quick_bn=r"""Bootstrap fail করে: module initialise হওয়ার সময় `ConfigModule.forRoot()` schema দিয়ে `process.env` validate করে, required `DATABASE_URL` না পেয়ে config validation error throw করে, তাই app কখনো listen শুরুই করে না।""",
         ex_en=r"""
             This is the **fail-fast** behaviour you want: a misconfigured deployment crashes immediately (and the orchestrator shows it) instead of serving traffic and failing on the first query. Option one is what happens **without** a schema — the tempting answer if you've only used plain `process.env`.
 
@@ -143,6 +147,8 @@ QUESTIONS = [
 
             NestJS, Express-কে replace করে না — বরং গুছিয়ে দেয়।
         """,
+        quick_en=r"""Express is a minimal, unopinionated HTTP library; NestJS is an opinionated framework that runs on top of Express (or Fastify) and adds modules, DI, decorators, pipes, guards and testing tools. Pick Express for small services and prototypes, NestJS for large, long-lived codebases and bigger teams.""",
+        quick_bn=r"""Express একটা minimal, unopinionated HTTP library; NestJS একটা opinionated framework যেটা Express (বা Fastify)-এর উপরেই চলে এবং module, DI, decorator, pipe, guard আর testing tool যোগ করে। ছোট service বা prototype-এর জন্য Express, বড় ও দীর্ঘমেয়াদি codebase আর বড় team-এর জন্য NestJS।""",
         ex_en=r"""
             - **Structure:** Express — you design it; NestJS — modules, controllers, providers.
             - **Validation / auth:** Express — pick libraries and wire them manually; NestJS — pipes, guards, decorators.
@@ -213,6 +219,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Middleware → guards → interceptors (before the handler) → pipes → route handler → interceptors (after, on the way out) → exception filters, which only run if something throws.""",
         a_bn=r"""Middleware → guard → interceptor (handler-এর আগে) → pipe → route handler → interceptor (পরে, ফেরার পথে) → exception filter, যেটা শুধু কিছু throw হলে চলে।""",
+        quick_en=r"""Middleware → guards → interceptors (before) → pipes → route handler → interceptors (after) → exception filters, and the filters run only when something throws.""",
+        quick_bn=r"""ক্রমটা হলো: প্রথমে middleware, তারপর guard, তারপর interceptor-এর আগের অংশ, তারপর pipe, তারপর route handler, ফেরার পথে interceptor-এর পরের অংশ; আর কিছু throw হলে শুধু তখনই exception filter চলে।""",
         ex_en=r"""
             The order follows responsibility: middleware does generic request work (logging, request ids, body parsing); guards decide **whether** the request may continue (so no time is wasted validating a body for an unauthenticated user); interceptors wrap the handler call; pipes transform and validate the handler's arguments right before it runs.
 
@@ -270,6 +278,8 @@ QUESTIONS = [
 
             Module-এ `{ provide: APP_INTERCEPTOR, useClass: ... }` দিয়ে register করি (`app.useGlobalInterceptors(new ...)` না দিয়ে), যাতে Nest logger বা `ConfigService`-এর মতো dependency inject করতে পারে। এভাবে register করা interceptor handler-এর আগে registration-এর ক্রমে আর পরে উল্টো ক্রমে চলে।
         """,
+        quick_en=r"""Implement `intercept(context, next)` and use RxJS on `next.handle()`: `tap({ next, error })` logs the duration for successful and failed requests, and `map()` wraps the result in `{ data, meta }` after setting `x-request-id`. Register both with `APP_INTERCEPTOR` so Nest can inject their dependencies.""",
+        quick_bn=r"""`intercept(context, next)` লিখে `next.handle()`-এর উপর RxJS operator লাগাই: `tap({ next, error })` success আর failed দুই request-এরই duration log করে, আর `map()` `x-request-id` set করে result-কে `{ data, meta }`-এ wrap করে। দুটোকেই `APP_INTERCEPTOR` দিয়ে register করি, যাতে Nest এদের dependency inject করতে পারে।""",
         ex_en=r"""
             - **Error path:** `tap`'s `error` callback sees errors thrown by pipes, the handler and services — but not by guards or middleware, which run before interceptors.
             - **Don't swallow errors:** if you use `catchError`, rethrow with `throwError(() => err)` so exception filters still produce the right status.
@@ -389,6 +399,8 @@ QUESTIONS = [
 
             এতে controller-এর repeated boilerplate কমে আর auth-এর "কীভাবে" অংশ এক জায়গায় থাকে।
         """,
+        quick_en=r"""`@CurrentUser()` is built with `createParamDecorator`, reading `request.user` (or one field of it) from the `ExecutionContext`. `@Auth(...roles)` uses `applyDecorators` to combine `SetMetadata` for the roles with `@UseGuards(JwtAuthGuard, RolesGuard)`, and the roles guard reads that metadata with `Reflector`.""",
+        quick_bn=r"""`@CurrentUser()` বানাই `createParamDecorator` দিয়ে, যেটা `ExecutionContext` থেকে `request.user` (বা তার একটা field) পড়ে। `@Auth(...roles)` বানাই `applyDecorators` দিয়ে — role-এর জন্য `SetMetadata` আর `@UseGuards(JwtAuthGuard, RolesGuard)` একসাথে, আর roles guard সেই metadata `Reflector` দিয়ে পড়ে।""",
         ex_en=r"""
             - **Metadata lookup:** in the guard, `reflector.getAllAndOverride(ROLES_KEY, [context.getHandler(), context.getClass()])` lets a method-level `@Roles()` override a class-level one; `getAllAndMerge` combines them.
             - **Type-safe alternative:** `export const Roles = Reflector.createDecorator<Role[]>()` creates a decorator and its metadata key in one go; read it with `reflector.get(Roles, context.getHandler())`.
@@ -491,6 +503,8 @@ QUESTIONS = [
 
             **Option:** অনেক strategy (Google, local, SAML) লাগলে Passport (`@nestjs/passport` + `passport-jwt` strategy) ঠিক আছে। শুধু JWT-র জন্য `@nestjs/jwt` দিয়ে ছোট একটা custom guard সহজ আর debug করাও সহজ।
         """,
+        quick_en=r"""Make it secure by default: a global `JwtAuthGuard` (`APP_GUARD`) verifies Bearer tokens with `@nestjs/jwt`, a `@Public()` decorator opens the few public routes, and a global `RolesGuard` reads `@Roles('admin')` via `Reflector` and returns 403. Ownership checks stay in the service because they need data.""",
+        quick_bn=r"""Secure by default রাখি: global `JwtAuthGuard` (`APP_GUARD`) `@nestjs/jwt` দিয়ে Bearer token verify করে, `@Public()` decorator দিয়ে অল্প কয়েকটা public route খোলা রাখি, আর global `RolesGuard` `Reflector` দিয়ে `@Roles('admin')` পড়ে দরকার হলে 403 দেয়। Ownership check service-এ থাকে, কারণ তার জন্য data লাগে।""",
         ex_en=r"""
             - **Why global + `@Public()`:** opt-out security is safer than opt-in. One missing `@UseGuards()` in an opt-in design exposes data.
             - **401 vs 403:** missing/invalid token → `UnauthorizedException` (401); valid user without the role → `false` from the guard (403).
@@ -655,6 +669,8 @@ QUESTIONS = [
 
             Element গুলো plain object থেকে যায় বলে তাদের decorator কখনো দেখা হয় না, আর `whitelist`-ও `hack` সরাতে পারে না। `@ValidateNested({ each: true })` আর `@Type(() => OrderItemDto)` যোগ করলে দুটো সমস্যাই মিটে যায়।
         """,
+        quick_en=r"""The nested items are never validated: `@IsArray()` only checks the array, and without `@ValidateNested({ each: true })` and `@Type(() => OrderItemDto)` the elements stay plain objects, so their decorators and `whitelist` are ignored. Adding those two decorators fixes it.""",
+        quick_bn=r"""Nested item-গুলো কখনো validate-ই হয় না: `@IsArray()` শুধু array কি না দেখে, আর `@ValidateNested({ each: true })` ও `@Type(() => OrderItemDto)` ছাড়া element-গুলো plain object থেকে যায়, তাই তাদের decorator বা `whitelist` কাজ করে না। ওই দুটো decorator যোগ করলেই ঠিক হয়।""",
         ex_en=r"""
             - **Root cause:** decorator metadata stores `Array` as the design type of `items`, not `OrderItemDto[]`. Without `@Type`, class-transformer has no idea what to instantiate.
             - **Security impact:** with `whitelist` silently not applying to nested data, extra fields (`isAdmin`, `price`) can reach the service — a mass-assignment risk if you spread the DTO into a DB insert.

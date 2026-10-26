@@ -44,6 +44,8 @@ QUESTIONS = [
 
             তাই `OrdersService`-এর যদি `UsersService` লাগে, তাহলে `UsersModule` সেটা export করবে আর `OrdersModule`, `UsersModule`-কে import করবে।
         """,
+        quick_en=r"""A module is a class with `@Module()` that groups one feature's code, and Nest builds the dependency graph from the root `AppModule`. `controllers` handle requests, `providers` are services that stay private by default, `exports` shares some of them, and `imports` pulls in other modules' exported providers.""",
+        quick_bn=r"""Module হলো `@Module()` decorator দেওয়া একটা class, যেটা একটা feature-এর code একসাথে রাখে; root `AppModule` থেকে Nest পুরো dependency graph তৈরি করে। `controllers` request handle করে, `providers` হলো service যেগুলো default-এ private, `exports` দিয়ে কিছু provider বাইরে share করা যায়, আর `imports` দিয়ে অন্য module-এর exported provider আনা হয়।""",
         ex_en=r"""
             - **Encapsulation is enforced.** If `UsersModule` forgets `exports: [UsersService]`, injecting it in `OrdersService` fails at startup with "Nest can't resolve dependencies of the OrdersService (?)".
             - **Modules are singletons.** Importing `UsersModule` in five modules still gives one shared `UsersService` instance. But if you also list `UsersService` directly in `OrdersModule.providers`, you get a *second* instance — a common source of "my cache/state is not shared" bugs.
@@ -144,6 +146,8 @@ QUESTIONS = [
             - Service `NotFoundException` throw করে, Nest সেটাকে 404 JSON response বানায়।
             - `UpdateUserDto extends PartialType(CreateUserDto)` একই validation rule reuse করে, শুধু সব field optional হয়ে যায়।
         """,
+        quick_en=r"""Keep the controller thin: `@Controller('users')` with `@Get`, `@Post`, `@Patch(':id')` and `@Delete(':id')`, `ParseIntPipe` on the id so `/users/abc` gets a 400, and a validated DTO as the body. The service throws `NotFoundException` for the 404, and `@HttpCode(204)` makes `DELETE` reply with no body.""",
+        quick_bn=r"""Controller পাতলা রাখি: `@Controller('users')`-এ `@Get`, `@Post`, `@Patch(':id')`, `@Delete(':id')`, id-তে `ParseIntPipe` যাতে `/users/abc` 400 পায়, আর body-তে validated DTO। 404-এর জন্য service `NotFoundException` throw করে, আর `@HttpCode(204)` দিলে `DELETE` কোনো body ছাড়াই উত্তর দেয়।""",
         ex_en=r"""
             - **Thin controllers:** keeping logic in the service makes it reusable (from a queue consumer or CLI) and easy to unit-test without HTTP.
             - **Status codes:** Nest defaults to 200 for everything except `POST` (201). Use `@HttpCode()` for 204/202. Avoid injecting `@Res()` just to set a status — it switches the route to manual response mode and you lose interceptors' response mapping unless you pass `{ passthrough: true }`.
@@ -282,6 +286,8 @@ QUESTIONS = [
 
             Service আসলে business logic রাখার provider, যাতে controller হালকা থাকে।
         """,
+        quick_en=r"""A provider is anything Nest's IoC container can create and inject, usually an `@Injectable()` service. You list it in a module's `providers` and declare it in the constructor; Nest reads the parameter types from decorator metadata, creates the instance (once by default) and passes it in, so you never call `new`.""",
+        quick_bn=r"""Provider হলো যেকোনো কিছু যেটা Nest-এর IoC container তৈরি করে inject করতে পারে, সাধারণত `@Injectable()` দেওয়া একটা service। Module-এর `providers`-এ রেখে constructor-এ declare করলেই Nest decorator metadata থেকে type পড়ে instance বানায় (default-এ একবার) আর pass করে দেয়, তাই নিজে কখনো `new` করতে হয় না।""",
         ex_en=r"""
             - **Why it matters:** loose coupling (the controller depends on an injected instance, not a concrete construction), lifecycle management by the framework, and easy testing — you swap a provider for a mock in `Test.createTestingModule()`.
             - **How Nest knows the types:** `emitDecoratorMetadata` stores `design:paramtypes`. That's why `import type { UsersService }` breaks injection — the type is erased and Nest sees `undefined`. The NestJS 12 error message even suggests checking for `import type`.
@@ -350,6 +356,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""Singleton (`Scope.DEFAULT`): Nest creates one instance when the app bootstraps and shares it with every consumer, across all modules that import the provider's module.""",
         a_bn=r"""Singleton (`Scope.DEFAULT`): app bootstrap-এর সময় Nest একটা instance তৈরি করে এবং provider-এর module যারা import করে, সব module-এর সব consumer-এর সাথে সেটাই share করে।""",
+        quick_en=r"""One shared singleton (`Scope.DEFAULT`): Nest creates a single instance at bootstrap, and every consumer in every module that imports the provider's module gets that same instance.""",
+        quick_bn=r"""একটাই shared singleton (`Scope.DEFAULT`): bootstrap-এর সময় Nest একটা instance তৈরি করে, আর provider-এর module import করা সব module-এর সব consumer সেই একই instance পায়।""",
         ex_en=r"""
             Singleton is the default because it's the cheapest: no per-request allocation, and Node's single-threaded model makes sharing safe as long as you don't store request-specific data in fields.
 
@@ -396,6 +404,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`{"type":"string","next":"21"}`. Query values always arrive as strings, the `: number` annotation is compile-time only, and `ValidationPipe` without `transform: true` returns the original value — so `"2" + 1` is string concatenation.""",
         a_bn=r"""`{"type":"string","next":"21"}`। Query value সবসময় string হিসেবে আসে, `: number` annotation শুধু compile-time-এর জিনিস, আর `transform: true` ছাড়া `ValidationPipe` original value-ই ফেরত দেয় — তাই `"2" + 1` string concatenation হয়ে যায়।""",
+        quick_en=r"""`{"type":"string","next":"21"}`. Query values always arrive as strings, `: number` is compile-time only, and `ValidationPipe` without `transform: true` returns the original value, so `"2" + 1` is string concatenation.""",
+        quick_bn=r"""`{"type":"string","next":"21"}`। Query value সবসময় string হয়ে আসে, `: number` শুধু compile-time-এর জিনিস, আর `transform: true` ছাড়া `ValidationPipe` original value-ই ফেরত দেয় — তাই `"2" + 1` string concatenation হয়ে যায়।""",
         ex_en=r"""
             The tempting answer is the first one, because TypeScript "says" `page` is a number. But types are erased; at runtime Nest only has the metadata type `Number`. `ValidationPipe` validates **class** metatypes (DTOs) and skips primitives, so nothing is checked or converted.
 
@@ -434,6 +444,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Because interfaces disappear after compilation. `ValidationPipe` needs a real class at runtime: it uses `class-transformer` to turn the plain body into an instance and `class-validator` to read the decorators (`@IsEmail()`, `@Length()`) attached to that class.""",
         a_bn=r"""কারণ compile-এর পরে interface আর থাকে না। `ValidationPipe`-এর runtime-এ একটা আসল class দরকার: `class-transformer` দিয়ে plain body-কে instance বানায়, আর `class-validator` দিয়ে ওই class-এ লাগানো decorator (`@IsEmail()`, `@Length()`) পড়ে।""",
+        quick_en=r"""Because interfaces are erased at compile time, while classes exist at runtime. `ValidationPipe` needs that class: `class-transformer` turns the plain body into an instance and `class-validator` reads decorators like `@IsEmail()` from it.""",
+        quick_bn=r"""কারণ interface compile-এর পরে মুছে যায়, কিন্তু class runtime-এও থাকে। `ValidationPipe`-এর সেই class দরকার: `class-transformer` plain body-কে instance বানায়, আর `class-validator` তার উপর লাগানো `@IsEmail()`-এর মতো decorator পড়ে।""",
         ex_en=r"""
             A DTO (Data Transfer Object) defines the shape of data crossing a boundary — usually the request body. With an interface, the handler parameter's metadata type becomes `Object`, so the pipe silently skips validation and any payload gets through. That's the dangerous part: no error, just no validation.
 
@@ -475,6 +487,8 @@ QUESTIONS = [
 
             Guard bind করি controller বা method-এ `@UseGuards()` দিয়ে, অথবা globally `APP_GUARD` provider দিয়ে।
         """,
+        quick_en=r"""A guard is a `CanActivate` class that decides whether a request may reach the handler, the standard place for auth checks. If `canActivate()` returns `false`, Nest throws `ForbiddenException` (403 "Forbidden resource"); throw `UnauthorizedException` yourself if you want 401.""",
+        quick_bn=r"""Guard হলো `CanActivate` implement করা একটা class, যেটা ঠিক করে request handler পর্যন্ত যাবে কি না — auth check-এর স্বাভাবিক জায়গা। `canActivate()` `false` দিলে Nest `ForbiddenException` throw করে (403 "Forbidden resource"); 401 চাইলে নিজেকেই `UnauthorizedException` throw করতে হয়।""",
         ex_en=r"""
             - **Why guards and not middleware for auth?** A guard has the `ExecutionContext`, so it knows *which handler* will run and can read metadata like `@Roles('admin')` via `Reflector`. Middleware runs before routing decisions and doesn't know that.
             - **Order:** guards run after middleware and before interceptors and pipes. So the body hasn't been validated yet when a guard runs.
@@ -570,6 +584,8 @@ QUESTIONS = [
 
             Nest-এর built-in global exception filter সব unhandled exception handle করে। `HttpException`-এর subclass হলে তার response serialise করে; অন্য যেকোনো কিছু unknown error ধরা হয় — server-এ log হয় আর generic 500 body দিয়ে replace হয়।
         """,
+        quick_en=r"""`/users/missing` returns 404 `{"message":"User 42 not found","error":"Not Found","statusCode":404}` and `/users/crash` returns 500 `{"statusCode":500,"message":"Internal server error"}`. The built-in filter sends `HttpException` responses as they are but hides unknown errors behind a generic 500.""",
+        quick_bn=r"""`/users/missing` দেয় 404 `{"message":"User 42 not found","error":"Not Found","statusCode":404}`, আর `/users/crash` দেয় 500 `{"statusCode":500,"message":"Internal server error"}`। Built-in exception filter `HttpException`-এর response যেমন আছে তেমন পাঠায়, কিন্তু অজানা error-এর message লুকিয়ে generic 500 দেয়।""",
         ex_en=r"""
             Step by step:
             1. `NotFoundException` extends `HttpException` with status 404. Passing a string sets `message`; Nest adds the standard `error` text (`"Not Found"`) and `statusCode`.

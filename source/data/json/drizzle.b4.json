@@ -62,6 +62,10 @@
    "drizzle-016",
    "drizzle-030"
   ],
+  "quickAnswer": {
+   "en": "Three bugs: the update uses `db` instead of `tx`, so it commits outside the transaction (and hangs a one-connection pool); the read-check-write in JavaScript loses updates, so use one `UPDATE ... WHERE stock >= qty RETURNING`; and the payment call inside the transaction should move after commit via an outbox.",
+   "bn": "তিনটা bug: update-এ `tx`-এর বদলে `db`, তাই সেটা transaction-এর বাইরে commit হয় (আর one-connection pool-এ আটকে যায়); JavaScript-এ read-check-write করায় update হারায়, তাই একটাই `UPDATE ... WHERE stock >= qty RETURNING` লাগে; আর transaction-এর ভেতরের payment call outbox দিয়ে commit-এর পরে সরাতে হবে।"
+  },
   "commonMistakes": {
    "en": "Fixing only `db` → `tx` and keeping the read-modify-write race; \"fixing\" the race with an application-level mutex (doesn't work across instances); calling external services inside long transactions.",
    "bn": "শুধু `db` → `tx` ঠিক করে read-modify-write race রেখে দেওয়া; application-level mutex দিয়ে race \"ঠিক\" করা (একাধিক instance-এ কাজ করে না); দীর্ঘ transaction-এর ভেতরে external service call করা।"
@@ -145,6 +149,10 @@
    "drizzle-017",
    "drizzle-032"
   ],
+  "quickAnswer": {
+   "en": "Don't do it in one migration; use expand → migrate → contract: add `full_name`, write both columns, backfill in batches, switch reads, and drop `name` in a later release. For NOT NULL, add a `CHECK (phone IS NOT NULL) NOT VALID`, validate it in a separate run, then `SET NOT NULL` without a long locking scan.",
+   "bn": "এক migration-এ করি না; expand → migrate → contract: `full_name` যোগ করি, দুই column-এই লিখি, batch-এ backfill করি, read switch করি, আর পরের release-এ `name` drop করি। NOT NULL-এর জন্য আগে `CHECK (phone IS NOT NULL) NOT VALID`, আলাদা run-এ validate, তারপর `SET NOT NULL` — লম্বা lock-ধরা scan ছাড়াই।"
+  },
   "commonMistakes": {
    "en": "Answering \"create\" in the rename prompt (drop + add = data loss); renaming in one step during a rolling deploy; backfilling millions of rows in one transaction; putting ADD NOT VALID and VALIDATE in the same migrator run.",
    "bn": "Rename prompt-এ \"create\" বেছে নেওয়া (drop + add = data loss); rolling deploy-এর সময় এক ধাপে rename করা; এক transaction-এ লাখ লাখ row backfill করা; ADD NOT VALID আর VALIDATE একই migrator run-এ রাখা।"
@@ -218,6 +226,10 @@
    "drizzle-014",
    "drizzle-010"
   ],
+  "quickAnswer": {
+   "en": "v1.0 is still a release candidate, so 0.45.x stays in production. It brings `defineRelations()`, Relational Queries v2 with object-style `where`/`orderBy`, validators under `drizzle-orm/zod` and a new migration folder layout; upgrade after GA or on a pilot service, with `drizzle-kit up` and full integration tests.",
+   "bn": "v1.0 এখনো release candidate, তাই production-এ 0.45.x-ই থাকে। এতে আসছে `defineRelations()`, object-style `where`/`orderBy`-সহ Relational Queries v2, `drizzle-orm/zod`-এ validator আর নতুন migration folder layout; upgrade করি GA-র পরে বা একটা pilot service-এ, `drizzle-kit up` আর পুরো integration test চালিয়ে।"
+  },
   "commonMistakes": {
    "en": "Calling v1 \"the current stable version\"; copying v2 object-style `where` into 0.45 code; upgrading `drizzle-orm` without `drizzle-kit`; assuming the migration folder format is unchanged.",
    "bn": "v1-কে \"বর্তমান stable version\" বলা; 0.45-এর code-এ v2-এর object-style `where` কপি করা; `drizzle-kit` ছাড়া `drizzle-orm` upgrade করা; ধরে নেওয়া যে migration folder-এর format বদলায়নি।"
@@ -292,6 +304,10 @@
    "drizzle-015",
    "drizzle-022"
   ],
+  "quickAnswer": {
+   "en": "Performance: N+1 item queries (batch with `inArray`), deep OFFSET paging (use keyset), selecting every column and missing FK indexes. Security: `sql.raw(req.query.sort)` is SQL injection (whitelist sorts), `values(req.body)` allows mass assignment, and query params aren't validated.",
+   "bn": "Performance: N+1 item query (`inArray` দিয়ে একবারে আনো), গভীর OFFSET paging (keyset ব্যবহার করো), সব column select, আর FK-তে index নেই। Security: `sql.raw(req.query.sort)` সরাসরি SQL injection (sort whitelist করো), `values(req.body)` mass assignment-এর সুযোগ দেয়, আর query param validate হয় না।"
+  },
   "commonMistakes": {
    "en": "Fixing N+1 with `Promise.all` over 20 queries (still 20 round trips and 20 pooled connections); escaping the sort string manually instead of whitelisting; adding indexes without checking the plan.",
    "bn": "২০টা query-তে `Promise.all` দিয়ে N+1 \"ঠিক\" করা (তখনও ২০টা round trip আর ২০টা pooled connection); whitelist না করে sort string নিজে escape করা; plan না দেখে index যোগ করা।"
@@ -370,6 +386,10 @@
    "drizzle-017",
    "drizzle-031"
   ],
+  "quickAnswer": {
+   "en": "Work on a restored copy, run `drizzle-kit pull` to generate the schema, review it until `generate` reports no changes, then record the initial migration as applied without running any DDL. After that every change goes through `generate` → review → `migrate`, while old raw SQL keeps working through `db.execute(sql...)`.",
+   "bn": "Restore করা copy-তে কাজ করি, `drizzle-kit pull` দিয়ে schema বানাই, `generate` \"no changes\" না বলা পর্যন্ত review করি, তারপর কোনো DDL না চালিয়ে initial migration-কে applied হিসেবে record করি। এরপর প্রতিটা change যায় `generate` → review → `migrate` পথে, আর পুরোনো raw SQL `db.execute(sql...)` দিয়ে চলতে থাকে।"
+  },
   "commonMistakes": {
    "en": "Running `drizzle-kit push` against the legacy production database; uncommenting the introspected SQL and running it (fails or duplicates objects); rewriting all queries at once; ignoring objects Drizzle doesn't model.",
    "bn": "Legacy production database-এ `drizzle-kit push` চালানো; introspect করা SQL uncomment করে চালানো (fail করে বা object duplicate হয়); সব query একবারে আবার লেখা; Drizzle যা model করে না সেগুলো উপেক্ষা করা।"
@@ -444,6 +464,10 @@
    "drizzle-016",
    "nest-032"
   ],
+  "quickAnswer": {
+   "en": "Keep stock in PostgreSQL with `CHECK (stock >= 0)` and reserve with one short guarded `UPDATE ... WHERE stock >= qty` plus a reservation row, so it can't oversell. Add admission control or bucketed stock for the hot rows, expire reservations with `FOR UPDATE SKIP LOCKED` workers, and serve product pages from cache.",
+   "bn": "Stock থাকে PostgreSQL-এ `CHECK (stock >= 0)`-সহ, আর reserve করি একটাই ছোট guarded `UPDATE ... WHERE stock >= qty` আর একটা reservation row দিয়ে — তাই oversell হয় না। Hot row-এর জন্য admission control বা bucketed stock, `FOR UPDATE SKIP LOCKED` worker দিয়ে reservation expire, আর product page cache থেকে।"
+  },
   "commonMistakes": {
    "en": "Using Redis as the only source of truth for stock; reading stock from a replica during checkout; holding a transaction open across the payment call; one global lock (advisory lock or mutex) that serialises every product.",
    "bn": "Stock-এর একমাত্র source of truth হিসেবে Redis ব্যবহার করা; checkout-এর সময় replica থেকে stock পড়া; payment call জুড়ে transaction খোলা রাখা; সব product-কে এক লাইনে দাঁড় করানো একটা global lock (advisory lock বা mutex)।"
@@ -518,6 +542,10 @@
    "drizzle-020",
    "drizzle-025"
   ],
+  "quickAnswer": {
+   "en": "Split the schema per bounded context, use thin repositories that accept `db` or `tx`, and let services own transaction boundaries by passing `tx` explicitly. Use Drizzle for CRUD and joins but plain SQL (`sql` tag, views) for heavy analytics, `withReplicas()` for reads, and integration tests on real PostgreSQL.",
+   "bn": "Schema bounded context ধরে ভাগ করি, পাতলা repository বানাই যেগুলো `db` বা `tx` নেয়, আর `tx` explicitly pass করে transaction-এর সীমা service-এর হাতে রাখি। CRUD আর join-এ Drizzle, ভারী analytics-এ সাধারণ SQL (`sql` tag, view), read-এ `withReplicas()`, আর আসল PostgreSQL-এ integration test।"
+  },
   "commonMistakes": {
    "en": "Wrapping Drizzle in a generic repository that hides joins and SQL; letting each repository open its own transaction; mocking the database in all tests; forcing complex reports through the query builder.",
    "bn": "Drizzle-কে এমন generic repository-তে wrap করা যা join আর SQL লুকিয়ে ফেলে; প্রতিটা repository-কে নিজের transaction খুলতে দেওয়া; সব test-এ database mock করা; জটিল report জোর করে query builder দিয়ে লেখা।"
@@ -592,6 +620,10 @@
    "drizzle-017",
    "drizzle-026"
   ],
+  "quickAnswer": {
+   "en": "A plain `CREATE INDEX` blocked writes on the 40M-row table until it finished, and `CONCURRENTLY` can't run inside the migrator's single transaction. Unblock by turning that migration into a no-op, build the index concurrently outside a transaction, drop any invalid leftover, and run online DDL as a separate step.",
+   "bn": "সাধারণ `CREATE INDEX` শেষ না হওয়া পর্যন্ত 40M row-এর table-এ write আটকে রেখেছিল, আর `CONCURRENTLY` migrator-এর single transaction-এর ভেতরে চলতে পারে না। ওই migration-কে no-op বানিয়ে pipeline খুলি, transaction-এর বাইরে concurrently index বানাই, invalid index থাকলে drop করি, আর online DDL আলাদা step হিসেবে চালাই।"
+  },
   "commonMistakes": {
    "en": "Assuming every Drizzle-generated migration is safe for large tables; \"fixing\" by disabling the migrator transaction globally; retrying CONCURRENTLY without dropping the INVALID index; running risky DDL at peak hours.",
    "bn": "ধরে নেওয়া যে Drizzle-generated সব migration বড় table-এর জন্য নিরাপদ; migrator-এর transaction globally বন্ধ করে \"সমাধান\" করা; INVALID index drop না করে আবার CONCURRENTLY চেষ্টা করা; peak hour-এ ঝুঁকিপূর্ণ DDL চালানো।"

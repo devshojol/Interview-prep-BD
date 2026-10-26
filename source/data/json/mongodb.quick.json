@@ -1,0 +1,571 @@
+[
+ {
+  "id": "mongo-q01",
+  "subtopic": "Documents & Collections",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "sql-vs-nosql",
+   "document-database",
+   "basics"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between SQL and NoSQL databases, and when would you choose MongoDB?",
+   "bn": "SQL আর NoSQL database-এর পার্থক্য কী, আর কখন তুমি MongoDB বেছে নেবে?"
+  },
+  "answer": {
+   "en": "SQL databases store data in tables with a fixed schema and combine tables with joins; NoSQL is a family of other models (document, key-value, wide-column, graph). MongoDB is a document database: it stores flexible, JSON-like documents, so data that is read together can live together. I choose it when the data is naturally nested and evolving; for highly relational data with many joins, a SQL database fits better.",
+   "bn": "SQL database data রাখে fixed schema-র table-এ আর join দিয়ে table মেলায়; NoSQL হলো অন্য কয়েক ধরনের model-এর একটা পরিবার (document, key-value, wide-column, graph)। MongoDB একটা document database: flexible, JSON-এর মতো document রাখে, তাই যে data একসাথে read হয় সেটা একসাথেই রাখা যায়। Data স্বাভাবিকভাবে nested আর পরিবর্তনশীল হলে আমি MongoDB নিই; অনেক join-ওয়ালা relational data-র জন্য SQL database বেশি মানানসই।"
+  },
+  "explanation": {
+   "en": "Don't repeat old myths: MongoDB has indexes, joins (`$lookup`) and multi-document ACID transactions, and a SQL database can store JSON too. The real difference is the data model and how you design for your access patterns.",
+   "bn": "পুরনো ভুল ধারণা বলবে না: MongoDB-তে index, join (`$lookup`) আর multi-document ACID transaction আছে, আর SQL database-ও JSON রাখতে পারে। আসল পার্থক্য data model-এ, আর access pattern অনুযায়ী কীভাবে design করছ তাতে।"
+  },
+  "interviewTip": {
+   "en": "Give one example for each side, such as a product catalogue with varying attributes for MongoDB and double-entry accounting for SQL.",
+   "bn": "দুই দিকেরই একটা করে উদাহরণ দাও, যেমন ভিন্ন ভিন্ন attribute-ওয়ালা product catalogue-এর জন্য MongoDB আর double-entry accounting-এর জন্য SQL।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Introduction to MongoDB",
+    "url": "https://www.mongodb.com/docs/manual/introduction/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does MongoDB support transactions?",
+    "bn": "MongoDB কি transaction support করে?"
+   },
+   {
+    "en": "What does \"flexible schema\" mean in practice?",
+    "bn": "বাস্তবে \"flexible schema\" মানে কী?"
+   }
+  ],
+  "related": [
+   "mongo-001",
+   "mongo-009"
+  ],
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q02",
+  "subtopic": "Documents & Collections",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "_id",
+   "objectid",
+   "primary-key"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the `_id` field in MongoDB? Can you set it yourself?",
+   "bn": "MongoDB-তে `_id` field কী? এটা কি নিজে set করা যায়?"
+  },
+  "answer": {
+   "en": "`_id` is the primary key every document must have: it is unique within the collection and always indexed. If you don't provide one, the driver adds an `ObjectId`. You can set your own value (a string, number or UUID, but not an array), but it must be unique and can't be changed after insert.",
+   "bn": "`_id` হলো primary key, যেটা প্রতিটি document-এ থাকতেই হবে: collection-এর ভেতরে unique, আর সবসময় index করা থাকে। তুমি না দিলে driver একটা `ObjectId` বসিয়ে দেয়। নিজের value-ও দেওয়া যায় (string, number বা UUID, তবে array না), কিন্তু সেটা unique হতে হবে আর insert-এর পর বদলানো যায় না।"
+  },
+  "explanation": {
+   "en": "To \"change\" an `_id` you insert a copy with the new value and delete the old document. A natural key like an email as `_id` is fine only if it never changes.",
+   "bn": "`_id` \"বদলাতে\" হলে নতুন value দিয়ে একটা copy insert করে পুরনো document delete করতে হয়। Email-এর মতো natural key `_id` হিসেবে রাখা ঠিক আছে, যদি সেটা কখনো না বদলায়।"
+  },
+  "interviewTip": {
+   "en": "Say the three facts in one breath: required, unique and indexed, immutable.",
+   "bn": "তিনটা কথা একসাথে বলো: বাধ্যতামূলক, unique ও indexed, আর immutable।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Documents",
+    "url": "https://www.mongodb.com/docs/manual/core/document/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is stored inside an ObjectId?",
+    "bn": "একটা ObjectId-এর ভেতরে কী কী থাকে?"
+   }
+  ],
+  "related": [
+   "mongo-003",
+   "mongo-001"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "db.users.insertOne({ _id: \"rafi@example.com\", name: \"Rafi\" })   // → insertedId: 'rafi@example.com'\ndb.users.insertOne({ _id: \"rafi@example.com\", name: \"Rafi 2\" }) // → E11000 duplicate key error\ndb.users.insertOne({ name: \"Mitu\" })                            // → insertedId: ObjectId('...')\ndb.users.updateOne({ name: \"Mitu\" }, { $set: { _id: 5 } })\n// → error: ... would modify the immutable field '_id'"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q03",
+  "subtopic": "CRUD",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "updateone",
+   "replaceone",
+   "set",
+   "crud"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh / Node.js driver)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `updateOne()` with `$set` and `replaceOne()`?",
+   "bn": "`$set` সহ `updateOne()` আর `replaceOne()`-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`updateOne()` changes only the fields named in update operators such as `$set` or `$inc` and leaves the rest of the document alone. `replaceOne()` swaps the whole document (except `_id`) for the new one, so any field you leave out is gone. In mongosh and the driver, `updateOne()` with a plain object and no operators throws an error.",
+   "bn": "`updateOne()` শুধু `$set` বা `$inc`-এর মতো update operator-এ লেখা field-গুলো বদলায়, document-এর বাকি অংশ যেমন ছিল তেমনই থাকে। `replaceOne()` পুরো document-টাই (`_id` বাদে) নতুনটা দিয়ে বদলে দেয়, তাই যে field লেখোনি সেটা মুছে যায়। mongosh আর driver-এ operator ছাড়া plain object দিয়ে `updateOne()` করলে error হয়।"
+  },
+  "explanation": {
+   "en": "Mongoose behaves differently: its `updateOne()` wraps top-level fields in `$set` for you, so the same call there updates `name` instead of throwing.",
+   "bn": "Mongoose-এ আচরণ আলাদা: এর `updateOne()` top-level field-গুলো নিজে থেকেই `$set`-এ মুড়ে দেয়, তাই সেখানে একই call error না দিয়ে `name` update করে।"
+  },
+  "interviewTip": {
+   "en": "Say \"update = change some fields, replace = new whole document\" and mention the missing-fields risk.",
+   "bn": "বলো \"update মানে কিছু field বদলানো, replace মানে পুরো নতুন document\", আর field হারিয়ে যাওয়ার ঝুঁকিটা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — db.collection.updateOne()",
+    "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/"
+   },
+   {
+    "title": "MongoDB Manual — db.collection.replaceOne()",
+    "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.replaceOne/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you update a field inside a nested object without overwriting the object?",
+    "bn": "Nested object-এর ভেতরের একটা field কীভাবে update করবে, পুরো object overwrite না করে?"
+   }
+  ],
+  "related": [
+   "mongo-004"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "// { _id: 1, name: \"Karim\", city: \"Dhaka\", points: 10 }\ndb.users.updateOne({ _id: 1 }, { $set: { city: \"Sylhet\" } })\n// → { _id: 1, name: 'Karim', city: 'Sylhet', points: 10 }\ndb.users.replaceOne({ _id: 1 }, { name: \"Karim\" })\n// → { _id: 1, name: 'Karim' }\ndb.users.updateOne({ _id: 1 }, { name: \"X\" })\n// → error: Update document requires atomic operators"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q04",
+  "subtopic": "CRUD",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "upsert",
+   "setoninsert",
+   "updateone"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh / Node.js driver)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is an upsert in MongoDB?",
+   "bn": "MongoDB-তে upsert কী?"
+  },
+  "answer": {
+   "en": "An upsert is an update with `{ upsert: true }`: if a document matches the filter it is updated, otherwise a new one is inserted, built from the filter's equality fields plus the update. Use `$setOnInsert` for fields that should only be set when the document is created.",
+   "bn": "Upsert হলো `{ upsert: true }` দেওয়া একটা update: filter-এর সাথে কোনো document match করলে সেটা update হয়, না করলে নতুন একটা document insert হয়, যেটা filter-এর equality field আর update মিলিয়ে তৈরি হয়। যে field শুধু document তৈরির সময় set হওয়া উচিত, সেটার জন্য `$setOnInsert` ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "Two requests upserting the same new key at the same moment can both insert. A unique index on the filter field (here `phone`) prevents the duplicate.",
+   "bn": "একই নতুন key-র জন্য একই মুহূর্তে দুইটা request upsert করলে দুটোই insert করে ফেলতে পারে। Filter field-এ (এখানে `phone`) unique index দিলে duplicate আটকায়।"
+  },
+  "interviewTip": {
+   "en": "Describe it as \"update if exists, insert if not\" and show `$setOnInsert`.",
+   "bn": "বলো \"থাকলে update, না থাকলে insert\", তারপর `$setOnInsert` দেখাও।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — db.collection.updateOne()",
+    "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does `findOneAndUpdate` return on an upsert by default?",
+    "bn": "Upsert-এর সময় `findOneAndUpdate` default-ভাবে কী return করে?"
+   }
+  ],
+  "related": [
+   "mongo-021",
+   "mongo-004"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "db.carts.updateOne(\n  { phone: \"01711000000\" },\n  { $inc: { visits: 1 }, $setOnInsert: { createdAt: new Date() } },\n  { upsert: true }\n)\n// 1st run → upsertedCount: 1 (new cart with visits: 1)\n// 2nd run → matchedCount: 1, modifiedCount: 1 (visits: 2)"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q05",
+  "subtopic": "CRUD",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "cursor",
+   "find",
+   "findone",
+   "nodejs-driver"
+  ],
+  "technologyVersion": "MongoDB Node.js driver 7.x (current: MongoDB 9.0)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What does `find()` return in the MongoDB Node.js driver, and how is it different from `findOne()`?",
+   "bn": "MongoDB Node.js driver-এ `find()` কী return করে, আর সেটা `findOne()` থেকে কীভাবে আলাদা?"
+  },
+  "answer": {
+   "en": "`find()` returns a cursor, not an array: a pointer to the results that fetches documents in batches as you read them. Call `.toArray()` or loop with `for await`. `findOne()` returns a promise for a single document, or `null` if nothing matches.",
+   "bn": "`find()` array না, একটা cursor return করে: result-এর একটা pointer, যেটা তুমি পড়তে থাকলে batch করে document আনে। `.toArray()` call করো বা `for await` দিয়ে loop চালাও। `findOne()` একটা document-এর promise দেয়, কিছু match না করলে `null`।"
+  },
+  "explanation": {
+   "en": "A common bug is `const users = await col.find(...)`: awaiting a cursor gives back the cursor itself, not the documents. For a big result set, iterate instead of calling `toArray()`, which loads everything into memory.",
+   "bn": "একটা common bug হলো `const users = await col.find(...)`: cursor-কে await করলে document না, cursor-টাই ফেরত আসে। Result অনেক বড় হলে `toArray()` না করে iterate করো, কারণ `toArray()` সবকিছু memory-তে তোলে।"
+  },
+  "interviewTip": {
+   "en": "Say \"cursor, read lazily in batches\" and mention the `toArray()` memory trade-off.",
+   "bn": "বলো \"cursor, batch করে ধীরে ধীরে পড়া হয়\", আর `toArray()`-এর memory খরচের কথা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — db.collection.find()",
+    "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.find/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you paginate a large result without `skip()`?",
+    "bn": "`skip()` ছাড়া বড় result কীভাবে paginate করবে?"
+   }
+  ],
+  "related": [
+   "mongo-006"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const cursor = db.collection(\"users\").find({ city: \"Dhaka\" });\nconsole.log(cursor instanceof Promise);              // false: it's a FindCursor\nconst users = await cursor.toArray();                // → array of documents\nfor await (const u of db.collection(\"users\").find()) console.log(u.name);\nconsole.log(await db.collection(\"users\").findOne({ _id: 99 })); // → null"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q06",
+  "subtopic": "Aggregation Pipelines",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "aggregation",
+   "match",
+   "group",
+   "sort"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the aggregation pipeline in MongoDB?",
+   "bn": "MongoDB-তে aggregation pipeline কী?"
+  },
+  "answer": {
+   "en": "The aggregation pipeline is a list of stages: each stage transforms the documents and passes the result to the next, like an assembly line. Common stages are `$match` (filter), `$group` (group and compute sums or counts), `$sort`, `$project`, `$lookup` (join) and `$limit`. Put `$match` early so it can use an index and shrink the data.",
+   "bn": "Aggregation pipeline হলো কয়েকটা stage-এর list: প্রতিটি stage document-গুলো বদলে result পরের stage-এ পাঠায়, অনেকটা কারখানার assembly line-এর মতো। Common stage হলো `$match` (filter), `$group` (group করে sum বা count), `$sort`, `$project`, `$lookup` (join) আর `$limit`। `$match` শুরুর দিকে রাখো, যাতে index ব্যবহার করতে পারে আর data কমে যায়।"
+  },
+  "explanation": {
+   "en": "The cancelled order is dropped by `$match` before grouping. `$group` output has no guaranteed order, which is why the `$sort` stage is needed.",
+   "bn": "Cancelled order-টা group করার আগেই `$match`-এ বাদ পড়ে। `$group`-এর output-এর কোনো নিশ্চিত order নেই, তাই `$sort` stage লাগে।"
+  },
+  "interviewTip": {
+   "en": "Compare it to SQL: `$match` ≈ `WHERE`, `$group` ≈ `GROUP BY`, `$sort` ≈ `ORDER BY`.",
+   "bn": "SQL-এর সাথে মিলিয়ে বলো: `$match` ≈ `WHERE`, `$group` ≈ `GROUP BY`, `$sort` ≈ `ORDER BY`।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Aggregation Operations",
+    "url": "https://www.mongodb.com/docs/manual/aggregation/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why should `$match` come before `$lookup` when possible?",
+    "bn": "সম্ভব হলে `$match` কেন `$lookup`-এর আগে রাখা উচিত?"
+   },
+   {
+    "en": "What does `$unwind` do?",
+    "bn": "`$unwind` কী করে?"
+   }
+  ],
+  "related": [
+   "mongo-012",
+   "mongo-013",
+   "mongo-024"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "db.orders.insertMany([\n  { city: \"Dhaka\", amount: 500, status: \"delivered\" }, { city: \"Dhaka\", amount: 1000, status: \"delivered\" },\n  { city: \"Sylhet\", amount: 300, status: \"delivered\" }, { city: \"Dhaka\", amount: 900, status: \"cancelled\" } ])\ndb.orders.aggregate([\n  { $match: { status: \"delivered\" } },\n  { $group: { _id: \"$city\", total: { $sum: \"$amount\" }, orders: { $sum: 1 } } },\n  { $sort: { total: -1 } } ])",
+   "output": "[\n  { _id: 'Dhaka', total: 1500, orders: 2 },\n  { _id: 'Sylhet', total: 300, orders: 1 }\n]"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q07",
+  "subtopic": "Performance & Explain",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "explain",
+   "ixscan",
+   "collscan",
+   "indexes"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you check whether a MongoDB query uses an index?",
+   "bn": "MongoDB-র একটা query index ব্যবহার করছে কিনা, কীভাবে check করবে?"
+  },
+  "answer": {
+   "en": "Run the query with `.explain(\"executionStats\")`. `IXSCAN` in the winning plan means an index was used; `COLLSCAN` means every document was read. Then compare `totalKeysExamined` and `totalDocsExamined` with `nReturned`: for a good index they are close.",
+   "bn": "Query-টা `.explain(\"executionStats\")` দিয়ে চালাও। Winning plan-এ `IXSCAN` থাকলে index ব্যবহার হয়েছে; `COLLSCAN` মানে সব document পড়া হয়েছে। তারপর `totalKeysExamined` আর `totalDocsExamined`-কে `nReturned`-এর সাথে মেলাও: ভালো index হলে সংখ্যাগুলো কাছাকাছি থাকে।"
+  },
+  "explanation": {
+   "en": "Also look for a `SORT` stage: it means the sort happened in memory instead of reading the index in order.",
+   "bn": "`SORT` stage আছে কিনা-ও দেখো: থাকলে বুঝবে sort memory-তে হয়েছে, index-এর order থেকে পড়া হয়নি।"
+  },
+  "interviewTip": {
+   "en": "Name the three numbers (`nReturned`, keys examined, docs examined) and what a healthy ratio looks like.",
+   "bn": "তিনটা সংখ্যার নাম বলো (`nReturned`, examined key, examined doc), আর ভালো অনুপাত দেখতে কেমন সেটা বলো।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Explain Results",
+    "url": "https://www.mongodb.com/docs/manual/reference/explain-results/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why can wrapping a field in a function (like `$year`) stop index use?",
+    "bn": "কোনো field-কে function-এ (যেমন `$year`) মুড়ে দিলে index কেন ব্যবহার হয় না?"
+   }
+  ],
+  "related": [
+   "mongo-008",
+   "mongo-023",
+   "mongo-015"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "// 10,000 users, no index on email yet\ndb.users.find({ email: \"u42@x.com\" }).explain(\"executionStats\")\n// → winningPlan.stage: 'COLLSCAN', nReturned: 1, totalDocsExamined: 10000\ndb.users.createIndex({ email: 1 })\ndb.users.find({ email: \"u42@x.com\" }).explain(\"executionStats\")\n// → 'FETCH' ← 'IXSCAN', nReturned: 1, totalKeysExamined: 1, totalDocsExamined: 1"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q08",
+  "subtopic": "CRUD",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "arrays",
+   "positional-operator",
+   "arrayfilters",
+   "update-operators"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you update one element inside an array, like one item's `qty` in an order?",
+   "bn": "Array-র ভেতরের একটা element কীভাবে update করবে, যেমন একটা order-এর একটা item-এর `qty`?"
+  },
+  "answer": {
+   "en": "Use the positional operators. `$` updates the first array element matched by the query filter, `$[]` updates every element, and `$[<id>]` with `arrayFilters` updates every element that matches a condition you give.",
+   "bn": "Positional operator ব্যবহার করো। `$` query filter-এ match করা প্রথম array element-টা update করে, `$[]` সব element update করে, আর `arrayFilters`-সহ `$[<id>]` তোমার দেওয়া শর্ত মানা সব element update করে।"
+  },
+  "explanation": {
+   "en": "For `$`, the array field must appear in the query filter (here `\"items.sku\": \"B\"`), or MongoDB doesn't know which position to update. The whole update is still atomic for that one document.",
+   "bn": "`$`-এর জন্য array field-টা query filter-এ থাকতেই হবে (এখানে `\"items.sku\": \"B\"`), না হলে MongoDB জানে না কোন position update করবে। পুরো update-টা ওই একটা document-এর জন্য atomic-ই থাকে।"
+  },
+  "interviewTip": {
+   "en": "Show the `$` example first, then say `arrayFilters` is for \"every element that matches\" cases.",
+   "bn": "আগে `$`-এর example দেখাও, তারপর বলো \"শর্ত মানা সব element\"-এর ক্ষেত্রে `arrayFilters` লাগে।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — $[<identifier>] (filtered positional operator)",
+    "url": "https://www.mongodb.com/docs/manual/reference/operator/update/positional-filtered/"
+   },
+   {
+    "title": "MongoDB Manual — db.collection.updateOne()",
+    "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you remove one item from the array?",
+    "bn": "Array থেকে একটা item কীভাবে সরাবে?"
+   }
+  ],
+  "related": [
+   "mongo-004",
+   "mongo-014"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "// { _id: 1, items: [ { sku: \"A\", qty: 1 }, { sku: \"B\", qty: 2 } ] }\ndb.orders.updateOne({ _id: 1, \"items.sku\": \"B\" }, { $inc: { \"items.$.qty\": 3 } })\n// → items: [ { sku: 'A', qty: 1 }, { sku: 'B', qty: 5 } ]\ndb.orders.updateOne({ _id: 1 }, { $set: { \"items.$[it].qty\": 0 } },\n                    { arrayFilters: [ { \"it.sku\": \"A\" } ] })\n// → items: [ { sku: 'A', qty: 0 }, { sku: 'B', qty: 5 } ]"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q09",
+  "subtopic": "Change Streams",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "change-streams",
+   "watch",
+   "realtime",
+   "resume-token"
+  ],
+  "technologyVersion": "MongoDB 9.0, Node.js driver 7.x (replica set or sharded cluster)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is a change stream in MongoDB?",
+   "bn": "MongoDB-তে change stream কী?"
+  },
+  "answer": {
+   "en": "A change stream lets your app subscribe to inserts, updates and deletes on a collection, database or whole deployment in real time with `watch()`; it is built on the oplog. It only works on a replica set or sharded cluster, and every event has a resume token, so a restarted listener can continue where it stopped.",
+   "bn": "Change stream দিয়ে তোমার app `watch()` call করে একটা collection, database বা পুরো deployment-এর insert, update আর delete real time-এ শুনতে পারে; এটা oplog-এর ওপর তৈরি। এটা শুধু replica set বা sharded cluster-এ চলে, আর প্রতিটি event-এ একটা resume token থাকে, তাই listener restart হলে যেখানে থেমেছিল সেখান থেকে আবার শুরু করতে পারে।"
+  },
+  "explanation": {
+   "en": "Typical uses: notifications, cache invalidation, syncing to a search index. Save the last `ev._id` (the resume token) somewhere durable; if the oplog has already moved past it, resuming fails and you need a full resync.",
+   "bn": "সাধারণ ব্যবহার: notification, cache invalidation, search index-এ sync। শেষ `ev._id` (resume token) কোথাও durable জায়গায় save করো; oplog যদি ততক্ষণে সেটা পার হয়ে যায়, resume fail করে আর পুরো resync লাগে।"
+  },
+  "interviewTip": {
+   "en": "Say \"real-time feed of changes, needs a replica set, resumable with a token\": that covers what interviewers check.",
+   "bn": "বলো \"change-এর real-time feed, replica set লাগে, token দিয়ে resume করা যায়\": interviewer যা দেখতে চায় তার সবই এতে আছে।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Change Streams",
+    "url": "https://www.mongodb.com/docs/manual/changestreams/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why not poll the collection every few seconds instead?",
+    "bn": "এর বদলে কয়েক second পরপর collection poll করলে সমস্যা কী?"
+   }
+  ],
+  "related": [
+   "mongo-010",
+   "mongo-030"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const orders = db.collection(\"orders\");\nconst stream = orders.watch([{ $match: { operationType: \"insert\" } }]);\nstream.on(\"change\", (ev) => console.log(ev.operationType, ev.fullDocument.total));\nawait orders.insertOne({ total: 450 });   // → insert 450\n// later: orders.watch([], { resumeAfter: savedToken }) continues after that event"
+  },
+  "technology": "mongodb"
+ },
+ {
+  "id": "mongo-q10",
+  "subtopic": "Schema Design",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "schema-validation",
+   "jsonschema",
+   "validator"
+  ],
+  "technologyVersion": "Version-independent concept (current: MongoDB 9.0, mongosh)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How can MongoDB itself enforce a schema on a collection?",
+   "bn": "MongoDB নিজেই কীভাবে একটা collection-এ schema enforce করতে পারে?"
+  },
+  "answer": {
+   "en": "Add a `$jsonSchema` validator to the collection with `createCollection()` or `collMod`: you can require fields and restrict BSON types, ranges and enum values. With the default settings, an insert or update that breaks the rules fails with \"Document failed validation\", whichever app or tool sends it.",
+   "bn": "`createCollection()` বা `collMod` দিয়ে collection-এ একটা `$jsonSchema` validator যোগ করো: field required করা যায়, আর BSON type, range ও enum value সীমিত করা যায়। Default setting-এ নিয়ম ভাঙা insert বা update \"Document failed validation\" error দিয়ে fail করে, যে app বা tool-ই পাঠাক না কেন।"
+  },
+  "explanation": {
+   "en": "`validationLevel` and `validationAction` control how strictly existing documents and updates are checked, and whether a violation is rejected or only logged. Mongoose validation runs only inside your app; a database validator also protects against scripts and other services.",
+   "bn": "`validationLevel` আর `validationAction` ঠিক করে আগের document আর update কতটা কড়াভাবে check হবে, আর নিয়ম ভাঙলে reject হবে নাকি শুধু log হবে। Mongoose validation শুধু তোমার app-এর ভেতরে চলে; database validator script আর অন্য service থেকেও রক্ষা করে।"
+  },
+  "interviewTip": {
+   "en": "Contrast it with Mongoose: app-level vs database-level validation, and say when you'd want both.",
+   "bn": "Mongoose-এর সাথে তুলনা করো: app-level বনাম database-level validation, আর কখন দুটোই চাইবে সেটা বলো।"
+  },
+  "references": [
+   {
+    "title": "MongoDB Manual — Schema Validation",
+    "url": "https://www.mongodb.com/docs/manual/core/schema-validation/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to existing documents that don't match a newly added validator?",
+    "bn": "নতুন validator যোগ করলে আগের যেসব document নিয়ম মানে না, সেগুলোর কী হয়?"
+   }
+  ],
+  "related": [
+   "mongo-022",
+   "mongo-001"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "db.createCollection(\"products\", { validator: { $jsonSchema: {\n  bsonType: \"object\", required: [\"name\", \"price\"],\n  properties: { name: { bsonType: \"string\" }, price: { bsonType: \"number\", minimum: 0 } }\n} } })\ndb.products.insertOne({ name: \"Pen\", price: -5 })  // → MongoServerError: Document failed validation\ndb.products.insertOne({ name: \"Pen\", price: 20 })  // → acknowledged: true"
+  },
+  "technology": "mongodb"
+ }
+]

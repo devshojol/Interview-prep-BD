@@ -57,6 +57,10 @@
    "html-006",
    "html-009"
   ],
+  "quickAnswer": {
+   "en": "`Rahim`, `Karim`, `Karim`, `Jamal`, `/orders`, `https://dokan.example/orders`. Attributes hold the initial markup values and properties the live state: setting the `value` attribute on an already-changed field only updates `defaultValue`, and `link.href` is the resolved URL.",
+   "bn": "Output: `Rahim`, `Karim`, `Karim`, `Jamal`, `/orders`, `https://dokan.example/orders`। Attribute হলো markup-এর শুরুর value, আর property হলো live state: আগেই বদলানো field-এ `value` attribute set করলে শুধু `defaultValue` বদলায়, আর `link.href` পুরো resolved URL দেয়।"
+  },
   "commonMistakes": {
    "en": "Assuming `setAttribute('value', …)` updates what the user sees after they've typed, or expecting `link.href` to return the relative path.",
    "bn": "User type করার পরেও `setAttribute('value', …)` দিলে দেখানো value বদলাবে বলে ধরে নেওয়া, অথবা `link.href` relative path ফেরত দেবে বলে আশা করা।"
@@ -114,6 +118,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "A `<button>` in a form defaults to `type=\"submit\"`, so after the click handler runs, the whole form is submitted. Give buttons that shouldn't submit `type=\"button\"`.",
+   "bn": "Form-এর ভেতরের `<button>`-এর default `type=\"submit\"`, তাই click handler চলার পরে পুরো form submit হয়ে যায়। যে button submit করবে না, তাতে `type=\"button\"` দাও।"
+  },
   "code": {
    "language": "html",
    "source": "<form action=\"/orders\" method=\"post\">\n  <label for=\"coupon\">Coupon code</label>\n  <input id=\"coupon\" name=\"coupon\">\n  <button onclick=\"applyCoupon()\">Apply coupon</button>\n\n  <!-- ...address and payment fields... -->\n\n  <button>Place order</button>\n</form>"
@@ -184,6 +192,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "It's disabled: `disabled` is a boolean attribute, so its presence means true whatever the value, even `\"false\"`. To enable it, remove the attribute or set `btn.disabled = false`.",
+   "bn": "Button-টা disabled: `disabled` একটা boolean attribute, তাই value যাই হোক, এমনকি `\"false\"` হলেও, attribute থাকলেই true। Enable করতে attribute-টা সরাও বা `btn.disabled = false` দাও।"
+  },
   "options": [
    {
     "en": "Enabled, because the value of `disabled` is `\"false\"`.",
@@ -268,6 +280,10 @@
    "html-010",
    "html-030"
   ],
+  "quickAnswer": {
+   "en": "`srcset` + `sizes` serves the same image at different sizes and lets the browser pick; `<picture>` is for art direction or format fallback, where the first matching `<source>` must be used. Without `sizes`, it defaults to `100vw`, so grid thumbnails download far too large.",
+   "bn": "`srcset` + `sizes` একই ছবির ভিন্ন size দেয়, file বেছে নেয় browser; `<picture>` art direction বা format fallback-এর জন্য, যেখানে প্রথম মিলে যাওয়া `<source>`-ই ব্যবহার করতে হয়। `sizes` না দিলে default `100vw` ধরা হয়, তাই grid-এর thumbnail অনেক বড় download হয়।"
+  },
   "commonMistakes": {
    "en": "Omitting `sizes` with `w` descriptors, putting `alt` on `<source>` instead of `<img>`, or using `<picture>` for plain resolution switching.",
    "bn": "`w` descriptor দিয়ে `sizes` বাদ দেওয়া, `alt` `<img>`-এ না দিয়ে `<source>`-এ দেওয়া, অথবা সাধারণ resolution switching-এর জন্য `<picture>` ব্যবহার করা।"
@@ -337,6 +353,10 @@
    "html-020",
    "html-032"
   ],
+  "quickAnswer": {
+   "en": "Clone a `<template>` row per order, fill the cells with `textContent` (never `innerHTML`) so names are XSS-safe, format the total with `Intl.NumberFormat`, collect rows in a `DocumentFragment` and call `tbody.replaceChildren(fragment)` once. O(n) time and space.",
+   "bn": "প্রতিটা order-এর জন্য `<template>`-এর row clone করি, cell-এ `textContent` দিয়ে লিখি (`innerHTML` কখনো নয়), তাই নাম XSS-safe থাকে; total format করি `Intl.NumberFormat` দিয়ে; সব row একটা `DocumentFragment`-এ জমিয়ে একবার `tbody.replaceChildren(fragment)` call করি। Time আর space O(n)।"
+  },
   "commonMistakes": {
    "en": "Building rows with template literals and `innerHTML` (XSS), appending rows one by one inside the loop, or forgetting that `template.content` must be cloned (appending it directly works only once).",
    "bn": "Template literal আর `innerHTML` দিয়ে row বানানো (XSS), loop-এর ভেতরে একটা একটা করে row append করা, অথবা ভুলে যাওয়া যে `template.content` clone করতে হয় (সরাসরি append করলে মাত্র একবারই কাজ করে)।"
@@ -397,6 +417,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "\"Find a product\". In the accessible name computation `aria-labelledby` wins, then `aria-label`, then the native `<label>`, and only after that fallbacks like `title` or `placeholder`.",
+   "bn": "\"Find a product\"। Accessible name হিসাবের সময় `aria-labelledby` সবার আগে, তারপর `aria-label`, তারপর native `<label>`, আর সবশেষে `title` বা `placeholder`-এর মতো fallback।"
+  },
   "code": {
    "language": "html",
    "source": "<span id=\"hint\">Find a product</span>\n<label for=\"q\">Search products</label>\n<input id=\"q\" type=\"search\"\n       aria-labelledby=\"hint\"\n       aria-label=\"Search\"\n       placeholder=\"e.g. panjabi\"\n       title=\"Type a product name\">"
@@ -485,6 +509,10 @@
    "html-020",
    "html-017"
   ],
+  "quickAnswer": {
+   "en": "Fix the sink with `textContent` or a sanitizer, add a strict nonce-based CSP, and enforce Trusted Types so `innerHTML` throws on plain strings except through a few reviewed policies. Roll out in Report-Only mode first; it's defence in depth, as older browsers lack Trusted Types.",
+   "bn": "`textContent` বা sanitizer দিয়ে sink ঠিক করি, nonce-based strict CSP দিই, আর Trusted Types enforce করি যাতে অল্প কয়েকটা review করা policy ছাড়া plain string দিলে `innerHTML` error throw করে। আগে Report-Only mode-এ চালাই; পুরোনো browser-এ Trusted Types নেই, তাই এটা defence in depth।"
+  },
   "commonMistakes": {
    "en": "Relying on escaping in one place only, using `'unsafe-inline'` in `script-src`, allowlisting whole CDNs, reusing a static nonce, or enforcing Trusted Types on day one without a report-only phase.",
    "bn": "শুধু এক জায়গায় escaping-এর উপর ভরসা করা, `script-src`-এ `'unsafe-inline'` রাখা, পুরো CDN allowlist করা, একই nonce বারবার ব্যবহার করা, অথবা report-only ধাপ ছাড়াই প্রথম দিনেই Trusted Types enforce করা।"
@@ -564,6 +592,10 @@
    "html-022",
    "html-026"
   ],
+  "quickAnswer": {
+   "en": "Follow the ARIA combobox pattern: an input with `role=\"combobox\"`, `aria-expanded` and `aria-controls`, a `role=\"listbox\"` of options, focus kept on the input with `aria-activedescendant` marking the highlight, and a `role=\"status\"` result count. For 64 fixed items, a plain `<select>` may be enough.",
+   "bn": "ARIA combobox pattern মেনে চলি: `role=\"combobox\"`, `aria-expanded` আর `aria-controls`-সহ input, option-গুলোর জন্য `role=\"listbox\"`, focus input-এই থাকে আর `aria-activedescendant` দিয়ে highlight বোঝাই, সাথে result সংখ্যার জন্য `role=\"status\"`। মাত্র 64-টা নির্দিষ্ট item-এর জন্য সাধারণ `<select>`-ই যথেষ্ট হতে পারে।"
+  },
   "commonMistakes": {
    "en": "Putting `role=\"combobox\"` on a wrapper `div` (the old ARIA 1.1 pattern), moving DOM focus into the list, forgetting `aria-expanded`, letting the input blur on mousedown so clicks are lost, or relying on colour alone for the highlighted option.",
    "bn": "Wrapper `div`-এ `role=\"combobox\"` দেওয়া (পুরোনো ARIA 1.1 pattern), DOM focus list-এ সরিয়ে নেওয়া, `aria-expanded` ভুলে যাওয়া, mousedown-এ input blur হতে দেওয়া (ফলে click হারিয়ে যায়), অথবা highlight করা option বোঝাতে শুধু রঙের উপর নির্ভর করা।"

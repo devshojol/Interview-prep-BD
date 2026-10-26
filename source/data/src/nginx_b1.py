@@ -46,6 +46,8 @@ QUESTIONS = [
 
             `worker_processes auto;` প্রতিটা CPU core-এর জন্য একটা worker চালু করে, আর `worker_connections` প্রতিটা worker-এর একসাথে কতগুলো connection থাকতে পারবে তার সীমা ঠিক করে। একটা idle keep-alive connection-এর জন্য সামান্য memory লাগে আর কোনো thread লাগে না, তাই ধীর client আর বিপুল সংখ্যক connection NGINX ভালোভাবে সামলাতে পারে। এজন্যই Node.js-এর সামনে এটা এত ভালো মানায়, কারণ Node.js-ও একই event-loop ধারণা ব্যবহার করে।
         """,
+        quick_en=r"""One master process reads the config, opens the listening ports and manages workers; the workers do all the work. Each worker runs a non-blocking event loop (`epoll`/`kqueue`) that handles thousands of connections without a thread per connection, and `worker_processes auto` starts one worker per CPU core.""",
+        quick_bn=r"""একটা master process config পড়ে, listening port খোলে আর worker-গুলো manage করে; আসল কাজ সব worker-রা করে। প্রতিটা worker একটা non-blocking event loop (`epoll`/`kqueue`) চালায়, connection-প্রতি thread ছাড়াই হাজার হাজার connection সামলায়, আর `worker_processes auto` প্রতি CPU core-এ একটা worker চালু করে।""",
         ex_en=r"""
             - **Why one worker per core:** CPU-heavy work such as TLS handshakes and gzip happens inside workers. More workers than cores just adds context switching.
             - **Blocking is the enemy:** anything that blocks a worker (slow disk reads, synchronous modules) stalls **all** its connections. NGINX offers thread pools (`aio threads`) for that.
@@ -116,6 +118,8 @@ QUESTIONS = [
             - rate limiting, request size limit আর security header;
             - ভেতরের port আর topology লুকিয়ে রাখা। App শুধু `127.0.0.1:3000`-এ listen করে।
         """,
+        quick_en=r"""A forward proxy acts for clients (like an office proxy), while a reverse proxy sits in front of servers and receives requests on their behalf. In front of Node.js, NGINX adds TLS termination, load balancing, fast static files, compression, slow-client buffering and rate limits, and keeps the app private on `127.0.0.1`.""",
+        quick_bn=r"""Forward proxy client-দের হয়ে কাজ করে (যেমন অফিসের proxy), আর reverse proxy server-দের সামনে বসে তাদের হয়ে request নেয়। Node.js-এর সামনে NGINX TLS termination, load balancing, দ্রুত static file, compression, slow client buffering আর rate limit দেয়, আর app-কে `127.0.0.1`-এ লুকিয়ে রাখে।""",
         ex_en=r"""
             - **Who knows about the proxy?** With a forward proxy the **client** knows and configures it. With a reverse proxy only the **server operator** knows. That's the cleanest way to tell them apart.
             - **Same family:** CDNs, API gateways and cloud load balancers (e.g. AWS ALB) are all reverse proxies with extra features.
@@ -195,6 +199,8 @@ QUESTIONS = [
 
             **নিরাপদে পরিবর্তন প্রয়োগ:** `nginx -t` চালাও (syntax আর config test), চাইলে `nginx -T` দিয়ে পুরো কার্যকর config দেখে নাও, তারপর `nginx -s reload` বা `systemctl reload nginx`। Reload graceful হয়, আর config ভুল হলে সেটা reject হয়, পুরনোটা চলতে থাকে।
         """,
+        quick_en=r"""The config is nested contexts (main, `events`, `http`, `server`, `location`), and inner contexts inherit outer directives unless they redefine them. The catch: one `add_header` or `proxy_set_header` at an inner level drops all inherited ones; apply changes with `nginx -t` and then a graceful reload.""",
+        quick_bn=r"""Config হলো nested context (main, `events`, `http`, `server`, `location`), আর ভেতরের context বাইরের directive inherit করে, যদি না নিজে আবার define করে। সাবধান: ভেতরের level-এ একটা `add_header` বা `proxy_set_header` দিলেই inherit হওয়া সবগুলো বাদ পড়ে যায়; পরিবর্তন apply করো `nginx -t` চালিয়ে, তারপর graceful reload দিয়ে।""",
         ex_en=r"""
             - **File layout:** `nginx.org` packages include `/etc/nginx/conf.d/*.conf` from `nginx.conf`, while Debian/Ubuntu packages also use `sites-available/` with symlinks in `sites-enabled/`. Know which one your server uses before adding files.
             - **The inheritance gotcha in practice:** you set HSTS with `add_header` in the `server` block, then add one `add_header Cache-Control …` inside a `location`. Responses from that location silently lose HSTS. NGINX 1.29.3+ (so 1.30 stable) adds `add_header_inherit merge;` to change this behaviour. On older versions, repeat the headers or use a shared `include` snippet.
@@ -273,6 +279,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`client_max_body_size` sets the largest request body NGINX accepts. Its default is **1m**, so a 5 MB upload is rejected with 413 before it ever reaches Node. Raise it, ideally only on the upload route (e.g. `location /api/uploads { client_max_body_size 10m; … }`), instead of globally.""",
         a_bn=r"""`client_max_body_size` ঠিক করে NGINX সর্বোচ্চ কত বড় request body গ্রহণ করবে। এর default **1m**, তাই 5 MB-এর upload Node-এ পৌঁছানোর আগেই 413 দিয়ে reject হয়। এটা বাড়াও, তবে globally না করে সম্ভব হলে শুধু upload route-এ (যেমন `location /api/uploads { client_max_body_size 10m; … }`)।""",
+        quick_en=r"""`client_max_body_size 10m;`. Its default is 1m, so NGINX rejects the 5 MB upload with 413 before it reaches Node; raise it on the upload location rather than globally.""",
+        quick_bn=r"""`client_max_body_size 10m;`। এর default 1m, তাই 5 MB upload Node-এ পৌঁছানোর আগেই NGINX 413 দিয়ে ফিরিয়ে দেয়; global-এ না বাড়িয়ে শুধু upload location-এ বাড়াও।""",
         ex_en=r"""
             The tempting wrong answer is `client_body_buffer_size`. It controls how much of the body is buffered **in memory** before NGINX spills it to a temporary file. It doesn't change the size limit. `proxy_buffer_size` concerns the **upstream response** headers, and `large_client_header_buffers` limits request **headers**.
 
@@ -301,52 +309,58 @@ QUESTIONS = [
                 listen 80;
 
                 location / {
-                    return 200 "A";
+                    return 200 "root";
                 }
                 location /images/ {
-                    return 200 "B";
+                    return 200 "images";
                 }
                 location ^~ /images/icons/ {
-                    return 200 "C";
+                    return 200 "icons";
                 }
                 location ~* \.(png|jpe?g|gif)$ {
-                    return 200 "D";
+                    return 200 "regex";
                 }
                 location = /images/logo.png {
-                    return 200 "E";
+                    return 200 "exact";
                 }
             }
         """,
         lang="nginx",
         options=[
-            ("B — `/images/` is the longest matching prefix", "B — `/images/` হলো সবচেয়ে লম্বা মিলে যাওয়া prefix"),
-            ("D — the regex location wins over a plain prefix match", "D — সাধারণ prefix match-এর উপর regex location জিতে যায়"),
-            ("C — `^~` locations are always checked first", "C — `^~` location সবসময় আগে check করা হয়"),
-            ("A — `/` matches every request", "A — `/` সব request-এর সাথেই মেলে"),
+            ("`images`: `/images/` is the longest matching prefix", "`images`: `/images/` হলো সবচেয়ে লম্বা মিলে যাওয়া prefix"),
+            ("`regex`: the regex location wins over a plain prefix match", "`regex`: সাধারণ prefix match-এর উপর regex location জিতে যায়"),
+            ("`icons`: `^~` locations are always checked first", "`icons`: `^~` location সবসময় আগে check করা হয়"),
+            ("`root`: `/` matches every request", "`root`: `/` সব request-এর সাথেই মেলে"),
         ],
         correct=1,
-        a_en=r"""The answer is **D**. NGINX first checks exact (`=`) matches, then finds the **longest prefix** match, which is `/images/` here, and remembers it. Because that prefix isn't marked `^~`, NGINX then tests **regex locations in the order they appear**. `~* \.(png|jpe?g|gif)$` matches, so it wins. The remembered prefix is used only if no regex matches.""",
-        a_bn=r"""উত্তর **D**। NGINX প্রথমে exact (`=`) match দেখে, তারপর **সবচেয়ে লম্বা prefix** match খোঁজে, এখানে `/images/`, আর সেটা মনে রাখে। ওই prefix-এ `^~` চিহ্ন নেই, তাই NGINX এরপর **file-এ যে ক্রমে আছে সেই ক্রমে regex location** পরীক্ষা করে। `~* \.(png|jpe?g|gif)$` মিলে যায়, তাই এটাই জেতে। কোনো regex না মিললে তবেই মনে রাখা prefix ব্যবহার হয়।""",
+        a_en=r"""The response is `regex` (option **B**). NGINX first checks exact (`=`) matches, then finds the **longest prefix** match, which is `/images/` here, and remembers it. Because that prefix isn't marked `^~`, NGINX then tests **regex locations in the order they appear**. `~* \.(png|jpe?g|gif)$` matches, so it wins. The remembered prefix is used only if no regex matches.""",
+        a_bn=r"""Response হবে `regex` (option **B**)। NGINX প্রথমে exact (`=`) match দেখে, তারপর **সবচেয়ে লম্বা prefix** match খোঁজে, এখানে `/images/`, আর সেটা মনে রাখে। ওই prefix-এ `^~` চিহ্ন নেই, তাই NGINX এরপর **file-এ যে ক্রমে আছে সেই ক্রমে regex location** পরীক্ষা করে। `~* \.(png|jpe?g|gif)$` মিলে যায়, তাই এটাই জেতে। কোনো regex না মিললে তবেই মনে রাখা prefix ব্যবহার হয়।""",
+        quick_en=r"""`regex`: NGINX remembers the longest prefix match (`/images/`), but since it isn't marked `^~`, it then tests regex locations in order and the image regex matches. The remembered prefix is used only if no regex matches.""",
+        quick_bn=r"""`regex`: NGINX সবচেয়ে লম্বা prefix match (`/images/`) মনে রাখে, কিন্তু সেটা `^~` দিয়ে mark করা নেই, তাই এরপর regex location-গুলো ক্রম অনুযায়ী পরীক্ষা করে, আর image-এর regex match করে। কোনো regex match না করলে তবেই মনে রাখা prefix ব্যবহার হয়।""",
         ex_en=r"""
             The full algorithm:
-            1. `=` exact match → use it immediately (`/images/logo.png` → **E**).
-            2. Find the longest prefix match. If it's marked `^~`, use it and **skip regexes** (`/images/icons/cart.png` → **C**, even though it ends in `.png`).
-            3. Otherwise check `~` (case-sensitive) and `~*` (case-insensitive) regexes in file order; the first match wins (`/images/photo.png` → **D**).
-            4. If no regex matches, use the longest prefix from step 2 (`/images/readme.txt` → **B**; `/about` → **A**).
+            1. `=` exact match → use it immediately (`/images/logo.png` → `exact`).
+            2. Find the longest prefix match. If it's marked `^~`, use it and **skip regexes** (`/images/icons/cart.png` → `icons`, even though it ends in `.png`).
+            3. Otherwise check `~` (case-sensitive) and `~*` (case-insensitive) regexes in file order; the first match wins (`/images/photo.png` → `regex`).
+            4. If no regex matches, use the longest prefix from step 2 (`/images/readme.txt` → `images`; `/about` → `root`).
 
-            The tempting wrong answer is B, from people who assume "longest prefix always wins". The `^~` answer (C) is wrong because `^~` only wins when it **is** the longest prefix match. It isn't "checked first".
+            The most common wrong choice is option A (`images`), from people who assume "longest prefix always wins". Option C (`icons`) is wrong because `^~` only wins when it **is** the longest prefix match. It isn't "checked first".
         """,
         ex_bn=r"""
             পুরো algorithm:
-            1. `=` exact match → সাথে সাথে সেটা ব্যবহার (`/images/logo.png` → **E**)।
-            2. সবচেয়ে লম্বা prefix match খোঁজো। সেটা `^~` চিহ্নিত হলে সেটাই ব্যবহার করো আর **regex বাদ দাও** (`/images/icons/cart.png` → **C**, যদিও শেষে `.png`)।
-            3. না হলে file-এর ক্রমে `~` (case-sensitive) আর `~*` (case-insensitive) regex পরীক্ষা করো; প্রথম যেটা মেলে সেটা জেতে (`/images/photo.png` → **D**)।
-            4. কোনো regex না মিললে ধাপ ২-এর সবচেয়ে লম্বা prefix ব্যবহার করো (`/images/readme.txt` → **B**; `/about` → **A**)।
+            1. `=` exact match → সাথে সাথে সেটা ব্যবহার (`/images/logo.png` → `exact`)।
+            2. সবচেয়ে লম্বা prefix match খোঁজো। সেটা `^~` চিহ্নিত হলে সেটাই ব্যবহার করো আর **regex বাদ দাও** (`/images/icons/cart.png` → `icons`, যদিও শেষে `.png`)।
+            3. না হলে file-এর ক্রমে `~` (case-sensitive) আর `~*` (case-insensitive) regex পরীক্ষা করো; প্রথম যেটা মেলে সেটা জেতে (`/images/photo.png` → `regex`)।
+            4. কোনো regex না মিললে ধাপ ২-এর সবচেয়ে লম্বা prefix ব্যবহার করো (`/images/readme.txt` → `images`; `/about` → `root`)।
 
-            বিভ্রান্তিকর ভুল উত্তর হলো B, যারা ধরে নেয় "সবচেয়ে লম্বা prefix সবসময় জেতে" তারা এটা বেছে নেয়। `^~`-এর উত্তর (C) ভুল, কারণ `^~` তখনই জেতে যখন সেটাই সবচেয়ে লম্বা prefix match। এটা "আগে check করা হয়" না।
+            সবচেয়ে বেশি মানুষ যে ভুলটা করে সেটা option A (`images`): তারা ধরে নেয় "সবচেয়ে লম্বা prefix সবসময় জেতে"। Option C (`icons`) ভুল, কারণ `^~` তখনই জেতে যখন সেটাই সবচেয়ে লম্বা prefix match। এটা "আগে check করা হয়" না।
         """,
         tip_en=r"""Recite the order as "exact, longest prefix (stop if `^~`), regex in file order, else the prefix". Then trace two or three URLs through it out loud. Tracing shows understanding, not memorisation.""",
         tip_bn=r"""ক্রমটা এভাবে বলো: "exact, সবচেয়ে লম্বা prefix (`^~` হলে থামো), file-এর ক্রমে regex, নইলে সেই prefix"। তারপর দুই-তিনটা URL এর মধ্য দিয়ে মুখে মুখে trace করো। Trace করা মুখস্থ না, বোঝাপড়া দেখায়।""",
+        follow=[
+            ("What would `GET /images/icons/cart.png` return, and why does its `.png` ending not matter?", "`GET /images/icons/cart.png` কী return করবে, আর এর শেষে `.png` থাকলেও কেন কিছু যায় আসে না?"),
+            ("If you moved the regex location above `location /images/`, would any response change?", "Regex location-টা `location /images/`-এর উপরে সরালে কি কোনো response বদলাবে?"),
+        ],
         related=["nginx-003"],
         refs=[N_HTTP_CORE, N_REQ_PROC],
     ),
@@ -408,6 +422,8 @@ QUESTIONS = [
 
             **সমাধান:** `proxy_pass http://127.0.0.1:4000;` ব্যবহার করো, তাহলে Express পাবে `/api/products`। বিকল্প হলো slash রেখে দেওয়া, তবে সেটা তখনই ঠিক যখন তুমি **ইচ্ছা করেই** prefix কেটে Express route `/products`-এ mount করতে চাও। যেটাই করো, একটা নিয়ম বেছে নিয়ে document করো।
         """,
+        quick_en=r"""The trailing slash in `proxy_pass http://127.0.0.1:4000/;` is a URI part, so NGINX replaces the matched `/api/` with `/` and Express receives `/products`. Drop it (`proxy_pass http://127.0.0.1:4000;`) to pass the original path unchanged.""",
+        quick_bn=r"""`proxy_pass http://127.0.0.1:4000/;`-এর শেষের slash একটা URI part, তাই NGINX match হওয়া `/api/`-কে `/` দিয়ে replace করে, আর Express পায় `/products`। Slash-টা বাদ দাও (`proxy_pass http://127.0.0.1:4000;`), তাহলে আসল path অপরিবর্তিত যাবে।""",
         ex_en=r"""
             - **Mismatched slashes cause stranger bugs:** with `location /api` (no slash) and `proxy_pass http://127.0.0.1:4000/;`, the request `/api/products` becomes `//products`, and `/apiary` also matches the location.
             - **Regex and named locations:** NGINX can't tell which part to replace, so `proxy_pass` there must not have a URI (`nginx -t` reports an error otherwise). Use `rewrite … break` if you need to change the path.
@@ -517,6 +533,8 @@ QUESTIONS = [
             - **ব্যক্তিগত data কখনো cache নয়:** `Authorization` header বা `session` cookie থাকলে `map` `$skip_cache`-কে 1 করে দেয়। `proxy_cache_bypass` cache থেকে পড়া বাদ দেয়, আর `proxy_no_cache` store করা বাদ দেয়।
             - **Observability:** `$upstream_cache_status` (HIT, MISS, EXPIRED, STALE, UPDATING, BYPASS) header-এ আর access log-এ।
         """,
+        quick_en=r"""Cache 200s for 10 seconds in a `proxy_cache_path` zone, with `proxy_cache_lock on` against stampedes and `proxy_cache_use_stale` for errors and updates. A `map` on the `Authorization` header and session cookie feeds `proxy_cache_bypass`/`proxy_no_cache`, and `$upstream_cache_status` shows HIT or MISS.""",
+        quick_bn=r"""একটা `proxy_cache_path` zone-এ 200 response ১০ সেকেন্ড cache করো; stampede ঠেকাতে `proxy_cache_lock on`, আর error ও update-এর সময় `proxy_cache_use_stale`। `Authorization` header আর session cookie-র উপর একটা `map` `proxy_cache_bypass`/`proxy_no_cache` চালায়, আর `$upstream_cache_status` দেখায় HIT না MISS।""",
         ex_en=r"""
             - **Upstream headers win:** `Cache-Control: no-store/private`, `Expires` or `X-Accel-Expires` from Node override `proxy_cache_valid`. By default, responses with `Set-Cookie` aren't cached, and only `GET`/`HEAD` are cached. Never add `proxy_ignore_headers Set-Cookie` without understanding that it can cache one user's cookie for everyone.
             - **Cache key design:** include everything that changes the response (scheme, host, full URI with query string). If the response depends on a header such as language, add it to the key or rely on `Vary`.
@@ -584,6 +602,8 @@ QUESTIONS = [
             - Upstream keepalive (1.29.7 থেকে default চালু) আর passive health check (`max_fails`/`fail_timeout`)-সহ **`least_conn` load balancing**।
             - **কড়া timeout**, আর non-idempotent request-এ retry নয় (NGINX-এর default)।
         """,
+        quick_en=r"""Layer it: a CDN for static assets and bot or DDoS traffic, redundant NGINX nodes doing real-IP, rate limits, micro-caching and `least_conn`, and stateless app replicas pre-scaled before midnight. Protect checkout and the database with atomic Redis stock reservation, a queue or waiting room and idempotency keys.""",
+        quick_bn=r"""Layer করে সাজাও: static asset আর bot বা DDoS traffic-এর জন্য CDN, একাধিক NGINX node যারা real IP, rate limit, micro-caching আর `least_conn` সামলায়, আর মাঝরাতের আগেই scale করে রাখা stateless app replica। Checkout আর database বাঁচাতে Redis-এ atomic stock reservation, queue বা waiting room আর idempotency key ব্যবহার করো।""",
         ex_en=r"""
             **Failure scenarios:**
             - **Node replica dies:** passive health checks stop sending traffic to it after `max_fails`, and the others absorb the load. Without active checks (NGINX Plus), the first failures still hit real users. Keep timeouts short.

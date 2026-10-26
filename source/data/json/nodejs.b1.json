@@ -14,7 +14,7 @@
    "non-blocking-io",
    "event-loop"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (version-independent concept)",
+  "technologyVersion": "Node.js 26 LTS / 24 (version-independent concept)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -58,6 +58,10 @@
    "node-002",
    "node-006"
   ],
+  "quickAnswer": {
+   "en": "Node.js is a server-side JavaScript runtime built on V8 (runs the JavaScript) and libuv (event loop and async I/O). Your code runs on one main thread that never waits for I/O: the OS or libuv's thread pool waits, and the event loop runs the callbacks, so long synchronous CPU work blocks every request.",
+   "bn": "Node.js হলো server-side JavaScript runtime, যেটা V8 (JavaScript চালায়) আর libuv (event loop ও async I/O) দিয়ে তৈরি। আমাদের code একটা main thread-এ চলে, যেটা I/O-এর জন্য অপেক্ষা করে না: অপেক্ষাটা করে OS বা libuv-এর thread pool, আর event loop callback চালায়; তাই লম্বা synchronous CPU কাজ সব request আটকে দেয়।"
+  },
   "commonMistakes": {
    "en": "Saying Node runs JavaScript on many threads, or that *all* async operations use the thread pool. Network I/O does not — it uses the OS's non-blocking sockets.",
    "bn": "Node একাধিক thread-এ JavaScript চালায় বলা, অথবা *সব* async operation thread pool ব্যবহার করে বলা। Network I/O thread pool ব্যবহার করে না — এটা OS-এর non-blocking socket ব্যবহার করে।"
@@ -79,7 +83,7 @@
    "settimeout",
    "output"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (behaviour unchanged across versions)",
+  "technologyVersion": "Node.js 26 LTS / 24 (behaviour unchanged across versions)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -123,6 +127,10 @@
    "node-004",
    "node-013"
   ],
+  "quickAnswer": {
+   "en": "It prints `A`, `E`, `D`, `C`, `B`. Synchronous code runs first, then Node drains the `process.nextTick` queue (`D`), then the Promise microtasks (`C`), and only then does the event loop reach the timers phase for `setTimeout` (`B`).",
+   "bn": "Print হবে `A`, `E`, `D`, `C`, `B`। আগে synchronous code চলে, তারপর Node `process.nextTick` queue খালি করে (`D`), তারপর Promise microtask (`C`), আর এরপরই event loop timers phase-এ গিয়ে `setTimeout` চালায় (`B`)।"
+  },
   "commonMistakes": {
    "en": "Thinking `setTimeout(fn, 0)` runs \"immediately\", or assuming promises always run before `nextTick` (true in ESM, not in CommonJS).",
    "bn": "`setTimeout(fn, 0)` \"সাথে সাথে\" চলে ভাবা, অথবা promise সবসময় `nextTick`-এর আগে চলে ধরে নেওয়া (ESM-এ সত্য, CommonJS-এ নয়)।"
@@ -149,13 +157,13 @@
    "env-file",
    "tooling"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
   "question": {
-   "en": "In a new Node.js 24 LTS project, which of these tasks still requires a third-party npm package?",
-   "bn": "একটি নতুন Node.js 24 LTS project-এ নিচের কোন কাজের জন্য এখনও third-party npm package লাগবে?"
+   "en": "In a new Node.js 26 LTS project, which of these tasks still requires a third-party npm package?",
+   "bn": "একটি নতুন Node.js 26 LTS project-এ নিচের কোন কাজের জন্য এখনও third-party npm package লাগবে?"
   },
   "answer": {
    "en": "Connecting to PostgreSQL. Node.js doesn't ship a PostgreSQL client, so you still install a driver such as `pg` (or an ORM on top of it). The other three are built in: global `fetch()`, the `node:test` runner with `node:assert`, and `.env` loading via `--env-file` or `process.loadEnvFile()`.",
@@ -185,6 +193,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Connecting to PostgreSQL: Node ships no PostgreSQL client, so you still install a driver such as `pg`. HTTP requests (`fetch()`), unit tests (`node:test` with `node:assert`) and `.env` loading (`--env-file` or `process.loadEnvFile()`) are all built in.",
+   "bn": "PostgreSQL-এ connect করা: Node-এ কোনো PostgreSQL client নেই, তাই `pg`-এর মতো driver install করতেই হয়। HTTP request (`fetch()`), unit test (`node:test` আর `node:assert`) আর `.env` load করা (`--env-file` বা `process.loadEnvFile()`) সবই built-in।"
+  },
   "options": [
    {
     "en": "Making HTTP requests with `fetch()`",
@@ -221,7 +233,7 @@
    "phases",
    "output"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26 (behaviour unchanged across versions)",
+  "technologyVersion": "Node.js 26 LTS / 24 (behaviour unchanged across versions)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -265,6 +277,10 @@
    "node-002",
    "node-013"
   ],
+  "quickAnswer": {
+   "en": "It prints `sync`, `nextTick`, `promise`, `immediate`, `timeout`, and inside an I/O callback the order is guaranteed: after the poll phase Node drains nextTicks and promises, then the check phase (`setImmediate`) runs before the next timers phase. At the top level, `setTimeout` 0 vs `setImmediate` is not deterministic.",
+   "bn": "Print হবে `sync`, `nextTick`, `promise`, `immediate`, `timeout`, আর I/O callback-এর ভেতরে এই order নিশ্চিত: poll phase-এর পরে Node nextTick আর promise queue খালি করে, তারপর পরের timers phase-এর আগেই check phase (`setImmediate`) চলে। Top level-এ কিন্তু `setTimeout` 0 আর `setImmediate`-এর order নিশ্চিত নয়।"
+  },
   "commonMistakes": {
    "en": "Claiming `setTimeout(fn, 0)` always runs before `setImmediate` (or always after) regardless of where it is called.",
    "bn": "কোথা থেকে call করা হচ্ছে তা না দেখে বলা যে `setTimeout(fn, 0)` সবসময় `setImmediate`-এর আগে (বা সবসময় পরে) চলে।"
@@ -291,7 +307,7 @@
    "pipeline",
    "drain"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -335,6 +351,10 @@
    "node-011",
    "node-032"
   ],
+  "quickAnswer": {
+   "en": "Backpressure is when data is produced faster than it can be consumed, so chunks pile up in memory. `write()` returns `false` once the buffer passes `highWaterMark`, and you wait for `'drain'`; in practice `pipeline()` from `node:stream/promises` does this for you and also handles errors and cleanup.",
+   "bn": "Backpressure হলো যখন data যত দ্রুত তৈরি হচ্ছে তত দ্রুত consume হচ্ছে না, ফলে chunk-গুলো memory-তে জমতে থাকে। Buffer `highWaterMark` পার হলে `write()` `false` return করে, তখন `'drain'` event-এর জন্য অপেক্ষা করতে হয়; বাস্তবে `node:stream/promises`-এর `pipeline()` এটা নিজেই করে, সাথে error আর cleanup-ও সামলায়।"
+  },
   "commonMistakes": {
    "en": "Ignoring the return value of `write()`, or using `readable.on('data', chunk => writable.write(chunk))`, which has no backpressure at all.",
    "bn": "`write()`-এর return value ignore করা, অথবা `readable.on('data', chunk => writable.write(chunk))` ব্যবহার করা — যেখানে কোনো backpressure-ই নেই।"
@@ -360,7 +380,7 @@
    "performance",
    "redos"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -409,6 +429,10 @@
    "node-018",
    "node-019"
   ],
+  "quickAnswer": {
+   "en": "It's event-loop blocking: one pegged core, everything slow at once and a healthy database mean synchronous code is hogging the main thread. Confirm it with event-loop delay metrics, find the hot path with a CPU profile, then bound inputs, use async APIs, or move CPU work to worker threads or a queue.",
+   "bn": "এটা event loop block হওয়ার লক্ষণ: একটা core 100%, সব request একসাথে slow, অথচ database ঠিক আছে, মানে কোনো synchronous code main thread আটকে রাখছে। Event-loop delay metric দিয়ে নিশ্চিত হও, CPU profile দিয়ে hot path খুঁজে বের করো, তারপর input সীমিত করো, async API ব্যবহার করো, অথবা CPU কাজ worker thread বা queue-তে সরাও।"
+  },
   "commonMistakes": {
    "en": "Blaming the database or network without evidence, or adding `UV_THREADPOOL_SIZE` — the thread pool doesn't help when JavaScript itself is blocking the main thread.",
    "bn": "প্রমাণ ছাড়াই database বা network-কে দোষ দেওয়া, অথবা `UV_THREADPOOL_SIZE` বাড়ানো — JavaScript নিজেই main thread block করলে thread pool কোনো সাহায্য করে না।"
@@ -445,7 +469,7 @@
    "bullmq",
    "system-design"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; BullMQ 5+ (example)",
+  "technologyVersion": "Node.js 26 LTS / 24; BullMQ 5+ (example)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -493,6 +517,10 @@
    "node-018",
    "node-020"
   ],
+  "quickAnswer": {
+   "en": "Put a durable queue (BullMQ on Redis, or SQS) between the API and separate worker deployments, and design for at-least-once delivery with idempotent handlers, because exactly-once isn't realistic. Add deterministic job IDs, retries with backoff and a dead-letter queue, and graceful worker shutdown on `SIGTERM`.",
+   "bn": "API আর আলাদা worker deployment-এর মাঝে একটা durable queue (Redis-এর উপর BullMQ, বা SQS) রাখো, আর at-least-once delivery ধরে নিয়ে handler-গুলো idempotent বানাও, কারণ exactly-once বাস্তবে সম্ভব নয়। সাথে deterministic job ID, backoff-সহ retry, dead-letter queue আর `SIGTERM`-এ worker-এর graceful shutdown রাখো।"
+  },
   "commonMistakes": {
    "en": "Promising \"exactly-once\" processing, running CPU-heavy PDF work in the API process, or retrying every error forever without a DLQ.",
    "bn": "\"Exactly-once\" processing-এর প্রতিশ্রুতি দেওয়া, API process-এর ভেতরেই CPU-heavy PDF কাজ চালানো, অথবা DLQ ছাড়া প্রতিটি error অনন্তকাল retry করা।"

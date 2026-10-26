@@ -40,6 +40,8 @@ QUESTIONS = [
         a_bn=r"""
             চার argument-এর function `(err, req, res, next)`। Express error-handling middleware চেনে তার **arity** দেখে — function-টিতে ঠিক চারটি parameter declare করা থাকতে হবে। স্বাভাবিক processing-এ এটা বাদ পড়ে, শুধু `next(err)` দিয়ে error পাঠালে (বা Express 5-এ handler throw করলে বা rejected promise return করলে) চলে।
         """,
+        quick_en=r"""The four-argument function `(err, req, res, next)`: Express detects error-handling middleware by its arity, so it must declare all four parameters. It is skipped normally and runs only when an error reaches `next(err)` or, in Express 5, is thrown or rejected in a handler.""",
+        quick_bn=r"""চার argument-এর function `(err, req, res, next)`: Express error-handling middleware চেনে তার arity দেখে, তাই চারটা parameter-ই declare করতে হয়। সাধারণ সময়ে এটা skip হয়, শুধু `next(err)`-এ error গেলে বা Express 5-এ handler-এ throw/reject হলে চলে।""",
         ex_en=r"""
             Option C is the classic trap: with only three parameters Express treats it as **normal** middleware, and the names don't matter — `err` actually receives `req`, `req` receives `res`, and `res` receives `next`. When an error happens it's skipped, and Express's default handler responds with an HTML error page; for an unmatched route it runs with shifted arguments and throws `TypeError: res.status is not a function`, which Express then turns into its default 500 HTML page (verified on Express 5.3).
 
@@ -90,6 +92,8 @@ QUESTIONS = [
 
             **Idempotent** মানে একই request বারবার পাঠালে server-এর state একই থাকে: `GET`, `HEAD`, `PUT` আর `DELETE` idempotent; `POST` নয় (দুবার পাঠালে দুটো order তৈরি হয়), আর `PATCH`-এর ক্ষেত্রে নিশ্চয়তা নেই। এজন্যই timeout-এর পর client নিরাপদে `PUT` retry করতে পারে, কিন্তু retry করা `POST`-এর জন্য idempotency key লাগে।
         """,
+        quick_en=r"""Use nouns plus methods: `GET /orders` and `GET /orders/:id` (200, or 404), `POST /orders` (201 with `Location`), `PUT`/`PATCH /orders/:id` (200 or 204), `DELETE /orders/:id` (204). `GET`, `PUT` and `DELETE` are idempotent; `POST` is not (retries need an idempotency key), and `PATCH` isn't guaranteed to be.""",
+        quick_bn=r"""Resource-এর নাম noun, কাজ HTTP method: `GET /orders` আর `GET /orders/:id` (200, বা 404), `POST /orders` (201, সাথে `Location`), `PUT`/`PATCH /orders/:id` (200 বা 204), `DELETE /orders/:id` (204)। `GET`, `PUT` আর `DELETE` idempotent; `POST` নয় (retry করতে idempotency key লাগে), আর `PATCH` idempotent হবে এমন নিশ্চয়তা নেই।""",
         ex_en=r"""
             - **Safe vs idempotent:** safe methods (`GET`, `HEAD`, `OPTIONS`) have no side effects at all; idempotent methods may change state, but repeating them doesn't change it further.
             - **`DELETE` twice** may return `204` then `404` — different responses, but the server state is the same, so it's still idempotent.
@@ -160,6 +164,8 @@ QUESTIONS = [
 
             Fix: response দেওয়ার পর `return`, আর সফল পথে `next()` call করা।
         """,
+        quick_en=r"""On the valid-key path the middleware neither calls `next()` nor responds, so the request hangs until a timeout. It also needs a `return` after sending the `401`; otherwise adding `next()` later would run the protected route for bad keys and cause `ERR_HTTP_HEADERS_SENT`.""",
+        quick_bn=r"""Valid key-এর ক্ষেত্রে middleware `next()`-ও call করে না, response-ও পাঠায় না, তাই timeout পর্যন্ত request ঝুলে থাকে। সাথে `401` পাঠানোর পরে `return` দরকার; নইলে পরে `next()` যোগ করলে ভুল key-তেও protected route চলবে আর `ERR_HTTP_HEADERS_SENT` হবে।""",
         ex_en=r"""
             - **Rule of thumb:** every code path in a middleware must either send a response or call `next()` — exactly once.
             - **Debugging hangs:** log at the start and end of each middleware, or use `DEBUG=express:*,router` to see which layer was entered last. Request-level timeouts and access logs that record *unfinished* requests make this visible in production.
@@ -232,6 +238,8 @@ QUESTIONS = [
 
             Log-এর error শুধু উপসর্গ — আসল ক্ষতি হলো side effect (একটি invalid order), যা client-কে request fail হয়েছে জানানোর পরেও চলে। Fix: প্রতিটি response-এর পর `return` (অথবা Express 5-এ error `throw` করে error middleware-কে response দিতে দেওয়া)।
         """,
+        quick_en=r"""`res.status(400).json(...)` sends a response but doesn't stop the function, so without `return` the handler still creates the order and then tries to respond again, causing `ERR_HTTP_HEADERS_SENT`. Fix: `return` after every response, or in Express 5 `throw` and let the error middleware respond.""",
+        quick_bn=r"""`res.status(400).json(...)` response পাঠায় কিন্তু function থামায় না, তাই `return` না থাকলে handler তবুও order তৈরি করে আবার response পাঠাতে যায়, ফলে `ERR_HTTP_HEADERS_SENT`। সমাধান: প্রতিটা response-এর পরে `return`, অথবা Express 5-এ `throw` করে error middleware-কে response দিতে দাও।""",
         ex_en=r"""
             Other common causes of `ERR_HTTP_HEADERS_SENT`:
             - calling `next()` (or `next(err)`) after already responding;
@@ -338,6 +346,8 @@ QUESTIONS = [
 
             Body-র জন্য `z.strictObject()` ব্যবহার করি, যাতে `isAdmin`-এর মতো অপ্রত্যাশিত key reject হয় — mass assignment-এর বিরুদ্ধে সুরক্ষা।
         """,
+        quick_en=r"""A factory that runs zod `safeParse` on params, query and body, responds `400` with `z.flattenError()` errors per part, or stores the parsed values and calls `next()`. In Express 5 `req.query` is a read-only getter, so keep parsed data in `res.locals.validated`, and use `z.strictObject()` to block mass assignment.""",
+        quick_bn=r"""একটা factory, যেটা params, query আর body-তে zod `safeParse` চালায়; fail করলে প্রতিটা অংশের `z.flattenError()` error-সহ `400` দেয়, নইলে parse করা value রেখে `next()` call করে। Express 5-এ `req.query` read-only getter, তাই parse করা data `res.locals.validated`-এ রাখো, আর mass assignment ঠেকাতে `z.strictObject()` ব্যবহার করো।""",
         ex_en=r"""
             - **Why `safeParse`:** it returns `{ success, data, error }` instead of throwing, so the middleware can collect errors from all parts in one response. (Alternatively, throw the `ZodError` and let the central error handler map it to 400.)
             - **Coercion:** query/params are strings; `z.coerce.number()` converts them. Note `?page=` (empty) coerces to `0` and then fails `.min(1)` — a correct 400.
@@ -457,6 +467,8 @@ QUESTIONS = [
             6. সঠিক `Content-Type` আর `X-Content-Type-Options: nosniff` সহ CDN/আলাদা domain থেকে serve করো।
             7. `MulterError` code map করো: `LIMIT_FILE_SIZE` → `413`, বাকিগুলো → `400`।
         """,
+        quick_en=r"""Risks: DoS from huge or many files, trusting client `mimetype` and `originalname`, and malicious content. Authenticate first, mount `upload.single()` only on that route with `limits`, check magic bytes, re-encode with `sharp`, generate the storage key server-side, serve with `nosniff`, and map `LIMIT_FILE_SIZE` to 413.""",
+        quick_bn=r"""ঝুঁকি: বিশাল বা অনেক file দিয়ে DoS, client-এর দেওয়া `mimetype` আর `originalname` বিশ্বাস করা, আর ক্ষতিকর content। আগে authenticate করো, `limits`-সহ `upload.single()` শুধু ওই route-এ দাও, magic bytes যাচাই করো, `sharp` দিয়ে re-encode করো, storage key server-এ তৈরি করো, `nosniff` দিয়ে serve করো, আর `LIMIT_FILE_SIZE`-কে 413-এ map করো।""",
         ex_en=r"""
             - **Why both checks:** the `fileFilter` check runs before bytes are stored and rejects obvious junk cheaply; the magic-byte check runs on the actual content. Neither alone is enough; re-encoding is the strongest guarantee that what you store is really an image.
             - **CPU cost:** image decoding/encoding is CPU-heavy; `sharp` does it in native threads, but you should still rate-limit uploads and cap pixel dimensions to avoid decompression bombs.
@@ -545,6 +557,8 @@ QUESTIONS = [
         a_bn=r"""
             `203.0.113.7`। `trust proxy: 1` Express-কে ঠিক একটি hop বিশ্বাস করতে বলে: একমাত্র trusted proxy যে address যোগ করেছে (ডান দিকের শেষ entry) সেটাই নেয়। তার বাঁ দিকের যেকোনো কিছু client দিয়েছে এবং নকল হতে পারে।
         """,
+        quick_en=r"""`203.0.113.7`: with `trust proxy` set to 1, Express trusts exactly one hop and takes the rightmost address, the one NGINX appended. Anything to its left came from the client and can be forged.""",
+        quick_bn=r"""`203.0.113.7`: `trust proxy` 1 হলে Express ঠিক একটা hop বিশ্বাস করে আর সবচেয়ে ডানের address নেয়, যেটা NGINX যোগ করেছে। তার বাঁয়ের সবকিছু client দিয়েছে, তাই সেটা জাল হতে পারে।""",
         ex_en=r"""
             Verified with Express 5.3 + supertest:
 

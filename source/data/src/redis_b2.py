@@ -54,6 +54,8 @@ QUESTIONS = [
 
             বিপরীতে, **write-through**-এ প্রতিটা write-এ cache আর database দুটোতেই একসাথে লেখা হয় — cache সবসময় warm থাকে, কিন্তু write ধীর হয়। **Write-behind**-এ আগে cache-এ লেখা হয়, পরে asynchronously database-এ flush হয় — write দ্রুত, কিন্তু flush-এর আগে cache fail করলে data হারানোর ঝুঁকি।
         """,
+        quick_en=r"""In cache-aside the app reads Redis first; on a miss it loads from the DB, stores the result with a TTL and returns it; on writes it updates the DB and deletes the key. Write-through updates cache and DB together on every write; write-behind writes the cache first and flushes later, risking data loss.""",
+        quick_bn=r"""Cache-aside-এ app আগে Redis পড়ে; miss হলে DB থেকে এনে TTL-সহ cache-এ রাখে আর return করে; write-এর সময় DB update করে key delete করে। Write-through প্রতিটা write-এ cache আর DB একসাথে update করে; write-behind আগে cache-এ লেখে, পরে DB-তে flush করে, তাই data হারানোর ঝুঁকি থাকে।""",
         ex_en=r"""
             - **TTL is your safety net:** even with delete-on-write, some invalidations will be missed (bugs, failed deletes, other services writing to the DB). A TTL bounds how stale data can get.
             - **First request is slow:** a cold cache (after deploy or restart) sends traffic to the DB; warm critical keys or protect against stampedes.
@@ -129,6 +131,8 @@ QUESTIONS = [
 
             যে data স্বাভাবিকভাবে key-based আর সামান্য loss সহ্য করতে পারে — session, rate-limit counter, leaderboard, real-time presence — সেগুলোর জন্য Redis primary store *হতে পারে*। Order, payment বা relational কিছুর জন্য আমি PostgreSQL বা MongoDB-কেই source of truth রাখি আর পাশে Redis ব্যবহার করি।
         """,
+        quick_en=r"""Redis keeps everything in RAM, is accessed by key, has configurable durability and no rollback; PostgreSQL and MongoDB keep data on disk with rich queries and stronger durability. Redis can be the primary store for key-based, loss-tolerant data like sessions or counters, but not for orders or payments.""",
+        quick_bn=r"""Redis সব data RAM-এ রাখে, key দিয়ে access হয়, durability configurable আর rollback নেই; PostgreSQL আর MongoDB disk-এ data রাখে, rich query আর শক্ত durability দেয়। Session বা counter-এর মতো key-based, সামান্য loss সহ্য করা যায় এমন data-র primary store Redis হতে পারে, কিন্তু order বা payment-এর জন্য না।""",
         ex_en=r"""
             - **Redis 8 narrows the gap a little:** the built-in Query Engine adds secondary indexing, full-text and vector search over hashes and JSON documents. It's powerful for search use cases, but it doesn't replace relational modelling, constraints or multi-row ACID transactions.
             - **Cost thinking:** 100 GB of RAM costs far more than 100 GB of SSD, so "put everything in Redis" rarely makes sense economically.
@@ -167,6 +171,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`KEYS` walks every key in the database in a single command. Because command execution is single-threaded, all other clients wait until it finishes — with millions of keys that can be hundreds of milliseconds or more. Use the cursor-based `SCAN` instead.""",
         a_bn=r"""`KEYS` একটাই command-এ database-এর প্রতিটা key ঘুরে দেখে। Command execution single-threaded বলে এটা শেষ না হওয়া পর্যন্ত বাকি সব client অপেক্ষা করে — লাখো key থাকলে সেটা কয়েকশো millisecond বা তারও বেশি হতে পারে। বদলে cursor-based `SCAN` ব্যবহার করো।""",
+        quick_en=r"""`KEYS` scans the whole keyspace in one blocking O(N) call, and because commands run on a single thread, every other client waits until it finishes. Use the cursor-based `SCAN` with `MATCH` instead.""",
+        quick_bn=r"""`KEYS` একটাই blocking O(N) call-এ পুরো keyspace scan করে, আর command একটা thread-এ চলে বলে শেষ না হওয়া পর্যন্ত বাকি সব client অপেক্ষা করে। এর বদলে cursor-based `SCAN` আর `MATCH` ব্যবহার করো।""",
         ex_en=r"""
             The Redis docs explicitly warn against using `KEYS` in regular application code. `SCAN cursor MATCH session:* COUNT 1000` returns a small batch and a new cursor each time, so other commands run in between. Its guarantees are weaker: a key may be returned more than once, and keys added or removed during the scan may or may not appear — so make your processing idempotent. In node-redis v5+, `scanIterator()` yields **arrays of keys** per batch, which pairs nicely with `UNLINK` or `MGET`.
 
@@ -220,6 +226,8 @@ QUESTIONS = [
 
             **3. Recommendation:** `product:{id}`-এর জন্য delete-on-write, category আর search page-এর জন্য versioned key, অন্য service-এর জন্য outbox-চালিত event, আর safety net হিসেবে সব জায়গায় ছোট TTL। Cached দাম আর DB-র দাম sample করে মিলিয়ে monitor করো।
         """,
+        quick_en=r"""Delete `product:{id}` right after the DB commit, use versioned keys for category and search pages (bump a version with `INCR` so old pages simply expire), publish a change event so other services invalidate their own caches, and keep a short TTL everywhere as a safety net.""",
+        quick_bn=r"""DB commit-এর ঠিক পরে `product:{id}` delete করো, category আর search page-এর জন্য versioned key রাখো (`INCR` দিয়ে version বাড়াও, পুরনো page নিজেই expire হবে), অন্য service যেন নিজের cache invalidate করে সেজন্য change event publish করো, আর সব জায়গায় safety net হিসেবে ছোট TTL রাখো।""",
         ex_en=r"""
             - **Order matters:** write the DB first, then invalidate. Invalidating first lets a concurrent reader re-cache the old value before the DB commit.
             - **Why an outbox?** If the app commits to the DB and crashes before publishing the event, invalidation is lost. Writing the event into an outbox table in the same DB transaction, then relaying it, makes delivery reliable.
@@ -279,6 +287,8 @@ QUESTIONS = [
 
             আমার পছন্দ: **(a) Pub/Sub** — typing indicator ক্ষণস্থায়ী, একটা হারালে ক্ষতি নেই। **(b) Consumer group সহ Stream** (খুব সাধারণ কিছুর জন্য `BLMOVE` সহ List; Node-এ BullMQ-এর মতো library এই কাজে Redis-এর ওপর তৈরি)। **(c) Stream** — প্রতিটা service নিজস্ব consumer group পায়, তাই প্রতিটা service আলাদাভাবে প্রতিটা event দেখে আর downtime-এর পর replay করতে পারে।
         """,
+        quick_en=r"""Pub/Sub is a fire-and-forget broadcast to whoever is connected, a List is a simple one-consumer queue, and a Stream is a persistent log with consumer groups and acks. Use Pub/Sub for typing indicators, a Stream (or a `BLMOVE` list) for the email job queue, and a Stream for the order-events log.""",
+        quick_bn=r"""Pub/Sub শুধু সেই মুহূর্তে যুক্ত থাকা subscriber-দের কাছে বার্তা ছড়িয়ে দেয়, কিছু জমা রাখে না; List হলো একজন consumer-এর জন্য সহজ queue; আর Stream হলো জমা থাকা log, যেখানে consumer group আর ack আছে। তাই typing indicator-এর জন্য Pub/Sub, email পাঠানোর job queue-তে Stream (বা `BLMOVE` list), আর order event-এর log-এর জন্যও Stream।""",
         ex_en=r"""
             - **Delivery semantics:** Pub/Sub is at-most-once; Streams with consumer groups give at-least-once, so consumers must be **idempotent** (the same message can be delivered again after a crash).
             - **Fan-out vs work-sharing:** in Streams, *different* consumer groups each get every message (fan-out); consumers *within* one group share the work.
@@ -341,6 +351,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`ZRANGE lb:weekly 0 2 REV WITHSCORES`. Sorted sets are ordered by ascending score; `REV` (Redis 6.2+) reverses the order so index 0 is the highest score.""",
         a_bn=r"""`ZRANGE lb:weekly 0 2 REV WITHSCORES`। Sorted set ascending score অনুযায়ী সাজানো থাকে; `REV` (Redis 6.2+) ক্রম উল্টে দেয়, ফলে index 0 হয় সবচেয়ে বেশি score।""",
+        quick_en=r"""`ZRANGE lb:weekly 0 2 REV WITHSCORES`: a sorted set is ordered by ascending score, and `REV` (Redis 6.2+) reverses it so index 0 is the highest score.""",
+        quick_bn=r"""`ZRANGE lb:weekly 0 2 REV WITHSCORES`: sorted set ascending score-এ সাজানো থাকে, আর `REV` (Redis 6.2+) সেটা উল্টে দেয়, ফলে index 0 হয় সর্বোচ্চ score।""",
         ex_en=r"""
             - **A** returns the *lowest* three scores.
             - **C** is the tempting one: it returns the right three players, but in ascending order — the third-best comes first. You'd have to reverse it in code.
@@ -394,6 +406,8 @@ QUESTIONS = [
 
             পুরোটা Lua script হিসেবে চালানোয় check-and-add atomic হয় — দুইটা concurrent request দুজনেই "3-এর মধ্যে 2" দেখে একসাথে ঢুকে পড়তে পারে না। Client চুপ হয়ে গেলে key নিজে থেকেই expire হয়।
         """,
+        quick_en=r"""One sorted set per client, each request scored by its timestamp. In one Lua script: read server `TIME`, remove entries older than the window, count with `ZCARD`, and if under the limit `ZADD` plus `PEXPIRE`, else compute `retryAfterMs` from the oldest entry. The script makes it atomic; O(log N) per call.""",
+        quick_bn=r"""প্রতি client-এর জন্য একটা sorted set, যেখানে প্রতিটা request তার timestamp দিয়ে score করা। একটা Lua script-এ: server `TIME` নাও, window-এর চেয়ে পুরনো entry মুছো, `ZCARD` দিয়ে গোনো, limit-এর নিচে থাকলে `ZADD` আর `PEXPIRE`, নইলে সবচেয়ে পুরনো entry থেকে `retryAfterMs` বের করো। Script-এর কারণে কাজটা atomic; প্রতি call-এ O(log N)।""",
         ex_en=r"""
             - **Why Lua and not `MULTI`?** `MULTI` can't branch on an intermediate result (count < limit). A script runs atomically and can make decisions.
             - **Unique members:** if two requests share a timestamp and you use the timestamp as the member, `ZADD` overwrites instead of adding. Use a request id (UUID).
@@ -491,6 +505,8 @@ QUESTIONS = [
 
             সমাধান: প্রতিবার lock নেওয়ার সময় random token, atomic `SET ... NX PX`, আর **compare-and-delete** দিয়ে release — Redis 8.4+-এ `DELEX key IFEQ token`, পুরনো version-এ ছোট একটা Lua script — যাতে তুমি শুধু নিজের lock-ই মুছতে পারো।
         """,
+        quick_en=r"""`SETNX` then a separate `EXPIRE` isn't atomic, so a crash between them leaves a lock with no TTL; the constant value plus `DEL` in `finally` can delete another instance's lock; and the TTL is shorter than the job. Fix: a random token, `SET key token NX PX ttl`, and compare-and-delete (`DELEX ... IFEQ` on 8.4+, or Lua).""",
+        quick_bn=r"""`SETNX`-এর পরে আলাদা `EXPIRE` atomic না, তাই মাঝখানে crash হলে lock TTL ছাড়াই থেকে যায়; constant value আর `finally`-র `DEL` অন্য instance-এর lock মুছে দিতে পারে; আর TTL job-এর চেয়ে ছোট। Fix: random token, `SET key token NX PX ttl`, আর compare-and-delete (8.4+-এ `DELEX ... IFEQ`, নইলে Lua)।""",
         ex_en=r"""
             - **Why compare-and-delete must be atomic:** doing `GET` then `DEL` from Node has the same race — the lock can expire and be re-acquired between your two commands. Lua (or `DELEX`) runs both steps inside Redis.
             - **`SETNX` is a legacy command:** the docs treat it as deprecated in favour of `SET` with `NX`.

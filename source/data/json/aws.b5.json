@@ -63,6 +63,10 @@
    "aws-024",
    "aws-032"
   ],
+  "quickAnswer": {
+   "en": "Identity first: MFA on root, no root or long-lived keys, IAM Identity Center for people and roles for workloads. Then CloudTrail and GuardDuty for visibility, AWS WAF on CloudFront or the ALB, private databases, KMS encryption at rest plus TLS in transit, and IMDSv2 with patching on instances.",
+   "bn": "আগে identity: root-এ MFA, root বা long-lived key নয়, মানুষের জন্য IAM Identity Center আর workload-এর জন্য role। তারপর visibility-র জন্য CloudTrail আর GuardDuty, CloudFront বা ALB-তে AWS WAF, private database, at rest KMS encryption আর in transit TLS, আর instance-এ IMDSv2 ও patching।"
+  },
   "commonMistakes": {
    "en": "Thinking GuardDuty *blocks* attacks (it detects; WAF and security groups block), confusing CloudTrail (API audit) with CloudWatch Logs (application logs), or enabling SSE-KMS on a hot bucket without Bucket Keys.",
    "bn": "GuardDuty attack *block* করে ভাবা (এটা detect করে; block করে WAF আর security group), CloudTrail (API audit) আর CloudWatch Logs (application log) গুলিয়ে ফেলা, বা Bucket Keys ছাড়া ব্যস্ত bucket-এ SSE-KMS চালু করা।"
@@ -146,6 +150,10 @@
    "aws-021",
    "aws-023"
   ],
+  "quickAnswer": {
+   "en": "Rolling replaces tasks in batches (cheap and the ECS default, but versions mix), blue/green runs a full new copy and switches traffic for instant rollback (double capacity), and canary shifts a small share first with alarm-based rollback. Immutable images plus IaC make every release reproducible and reviewable.",
+   "bn": "Rolling ধাপে ধাপে task বদলায় (সস্তা আর ECS-এর default, কিন্তু দুই version একসাথে চলে), blue/green পুরো নতুন copy চালিয়ে traffic switch করে আর সাথে সাথে rollback দেয় (দ্বিগুণ capacity), আর canary আগে অল্প traffic পাঠায়, alarm বাজলে rollback করে। Immutable image আর IaC প্রতিটা release-কে reproducible আর review-যোগ্য করে।"
+  },
   "commonMistakes": {
    "en": "Deploying a breaking schema migration together with a blue/green switch, calling \"rolling\" zero-risk, or relying on manual rollback with no alarms.",
    "bn": "Blue/green switch-এর সাথে একসাথে breaking schema migration deploy করা, \"rolling\"-কে ঝুঁকিহীন বলা, বা alarm ছাড়া manual rollback-এর উপর নির্ভর করা।"
@@ -206,6 +214,10 @@
    "aws-010",
    "aws-031"
   ],
+  "quickAnswer": {
+   "en": "An API Gateway REST API with API keys, usage plans, request validation and an associated AWS WAF web ACL. Only REST APIs have these API-management features; HTTP APIs are cheaper, with native JWT authorizers, but lack usage plans and request validation.",
+   "bn": "API key, usage plan, request validation আর AWS WAF web ACL-সহ একটা API Gateway REST API। এই API-management feature-গুলো শুধু REST API-তে আছে; HTTP API সস্তা আর native JWT authorizer আছে, কিন্তু usage plan আর request validation নেই।"
+  },
   "options": [
    {
     "en": "An API Gateway HTTP API with a JWT authorizer, because it's cheaper, faster and supports usage plans",
@@ -295,6 +307,10 @@
    "aws-023",
    "aws-031"
   ],
+  "quickAnswer": {
+   "en": "Advanced: warm standby for the payment path, backup and restore for reporting. Aurora Global Database (lag in seconds) meets the 1-minute RPO, DynamoDB global tables, S3 replication and cross-account backups protect the rest, and Route 53 or Application Recovery Controller switches to a scaled-down copy in the DR Region.",
+   "bn": "Advanced: payment path-এর জন্য warm standby, reporting-এর জন্য backup and restore। Aurora Global Database (lag কয়েক second) 1 মিনিটের RPO পূরণ করে, DynamoDB global table, S3 replication আর cross-account backup বাকি data রক্ষা করে, আর Route 53 বা Application Recovery Controller DR Region-এর ছোট copy-তে traffic সরিয়ে দেয়।"
+  },
   "commonMistakes": {
    "en": "Saying \"Multi-AZ is our DR\", treating replication as a backup (it replicates deletes and corruption too), choosing automatic DNS failover for a payment ledger without fencing, or never testing the plan.",
    "bn": "\"Multi-AZ-ই আমাদের DR\" বলা, replication-কে backup ভাবা (এটা delete আর corruption-ও replicate করে), fencing ছাড়া payment ledger-এ automatic DNS failover বেছে নেওয়া, বা plan কখনো test না করা।"
@@ -373,6 +389,10 @@
    "aws-025",
    "aws-030"
   ],
+  "quickAnswer": {
+   "en": "Advanced: save the order and its event atomically with a transactional outbox, publish to EventBridge or SNS, and fan out to one SQS queue per consumer with Lambda. Make every consumer idempotent, send poison messages to DLQs with partial batch responses, and handle ordering with versioned updates or FIFO queues per order.",
+   "bn": "Advanced: transactional outbox দিয়ে order আর তার event একসাথে atomic-ভাবে save করো, EventBridge বা SNS-এ publish করো, আর প্রতিটা consumer-এর জন্য আলাদা SQS queue ও Lambda-তে fan out করো। প্রতিটা consumer idempotent রাখো, partial batch response-সহ poison message DLQ-তে পাঠাও, আর ordering সামলাও versioned update বা order-প্রতি FIFO queue দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Assuming SQS standard or EventBridge delivers exactly once, using one shared queue for all consumers, setting the visibility timeout shorter than the function timeout, or throwing an error for the whole batch when one message fails.",
    "bn": "SQS standard বা EventBridge exactly-once deliver করে ধরে নেওয়া, সব consumer-এর জন্য একটাই shared queue, function timeout-এর চেয়ে কম visibility timeout, বা একটা message fail করলে পুরো batch-এর জন্য error throw করা।"
@@ -447,6 +467,10 @@
    "aws-024",
    "aws-027"
   ],
+  "quickAnswer": {
+   "en": "Advanced: split workloads into accounts by OU (management, security with log archive and audit, infrastructure, prod and non-prod, sandbox) and replace IAM users with IAM Identity Center and MFA. SCPs cap the maximum permissions, centralised CloudTrail and Config feed a locked log account, and RCPs build a data perimeter.",
+   "bn": "Advanced: workload-গুলো OU অনুযায়ী আলাদা account-এ ভাগ করো (management, log archive ও audit-সহ security, infrastructure, prod আর non-prod, sandbox), আর IAM user বাদ দিয়ে MFA-সহ IAM Identity Center ব্যবহার করো। SCP সর্বোচ্চ permission-এর সীমা টানে, centralised CloudTrail আর Config একটা locked log account-এ যায়, আর RCP দিয়ে data perimeter বানাও।"
+  },
   "commonMistakes": {
    "en": "Running workloads in the management account, treating SCPs as permission grants, region-deny SCPs that break IAM or CloudFront, or keeping shared IAM users \"just for now\" after Identity Center is live.",
    "bn": "Management account-এ workload চালানো, SCP-কে permission দেওয়ার মাধ্যম ভাবা, এমন region-deny SCP যা IAM বা CloudFront ভেঙে দেয়, বা Identity Center চালু হওয়ার পরেও shared IAM user \"আপাতত\" রেখে দেওয়া।"

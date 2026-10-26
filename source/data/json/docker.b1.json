@@ -59,6 +59,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "A VM virtualises hardware: a hypervisor runs full guest operating systems, each with its own kernel. A container is an isolated Linux process that shares the host kernel, isolated with namespaces (what it sees) and limited with cgroups (what it uses), so it starts fast but isolates less strongly than a VM.",
+   "bn": "VM hardware virtualize করে: hypervisor পুরো guest OS চালায়, প্রত্যেকটার নিজস্ব kernel থাকে। Container হলো host kernel share করা একটা isolated Linux process; namespaces ঠিক করে সে কী দেখবে আর cgroups ঠিক করে কতটা ব্যবহার করবে। তাই container দ্রুত start হয়, কিন্তু isolation VM-এর চেয়ে দুর্বল।"
+  },
   "commonMistakes": {
    "en": "Calling containers \"lightweight VMs with their own kernel\", claiming containers are automatically as secure as VMs, or thinking Docker Desktop runs Linux containers natively on macOS.",
    "bn": "Container-কে \"নিজস্ব kernel-সহ lightweight VM\" বলা, container মানেই VM-এর মতো secure ধরে নেওয়া, অথবা ভাবা যে Docker Desktop macOS-এ সরাসরি (VM ছাড়া) Linux container চালায়।"
@@ -127,6 +131,10 @@
   "related": [
    "docker-001"
   ],
+  "quickAnswer": {
+   "en": "An image is a read-only, layered template (filesystem plus metadata) built from a Dockerfile. A container is a running or stopped instance of it with a thin writable layer on top; that layer is lost on `docker rm`, so persistent data belongs in volumes.",
+   "bn": "Image হলো Dockerfile থেকে build করা read-only, layer-ভিত্তিক template (filesystem আর metadata)। Container হলো তার একটা running বা stopped instance, যার উপরে একটা পাতলা writable layer থাকে। `docker rm` করলে ওই layer মুছে যায়, তাই persistent data volume-এ রাখতে হয়।"
+  },
   "commonMistakes": {
    "en": "Saying a container \"modifies the image\", or assuming `docker stop` deletes data (stop keeps the writable layer; `docker rm` deletes it).",
    "bn": "Container \"image পরিবর্তন করে\" বলা, অথবা ধরে নেওয়া যে `docker stop` করলে data মুছে যায় (stop করলে writable layer থেকে যায়; `docker rm` করলে মুছে যায়)।"
@@ -182,6 +190,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`ADD` can also fetch remote URLs and Git repositories and auto-extracts local tar archives, so `COPY` is the recommended default for plain local files. Use `ADD` only when you actually want those extra features.",
+   "bn": "`ADD` remote URL আর Git repository থেকেও file আনতে পারে, আর local tar archive নিজে থেকে extract করে; তাই সাধারণ local file-এর জন্য `COPY`-ই default। ওই বাড়তি feature সত্যিই লাগলে তবেই `ADD` ব্যবহার করো।"
+  },
   "options": [
    {
     "en": "`ADD` can also fetch remote URLs/Git repositories and auto-extracts local tar archives, so `COPY` is preferred for plain local files",
@@ -249,6 +261,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`EXPOSE` is documentation/metadata only: without `-p` nothing is published on the host. Publish with `-p 8080:3000` (host:container), or use `-P` to map every exposed port to a random host port.",
+   "bn": "`EXPOSE` শুধু documentation/metadata; `-p` না দিলে host-এ কিছুই publish হয় না। Publish করতে `-p 8080:3000` (host:container) দাও, অথবা `-P` দিলে সব exposed port random একটা host port-এ map হয়।"
+  },
   "options": [
    {
     "en": "Port 3000 is published on the host, so `http://localhost:3000` works from the host",
@@ -285,7 +301,7 @@
    "dockerignore",
    "buildkit"
   ],
-  "technologyVersion": "Docker Engine 29 / BuildKit (Dockerfile syntax 1.x), Node.js 24 LTS",
+  "technologyVersion": "Docker Engine 29 / BuildKit (Dockerfile syntax 1.x), Node.js 24 (Maintenance LTS)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -332,6 +348,10 @@
   "related": [
    "docker-002"
   ],
+  "quickAnswer": {
+   "en": "`COPY . .` comes before `npm install`, so any source change invalidates that layer and every layer after it. Copy `package.json` and the lockfile first, run `npm ci`, then copy the source; also add a `.dockerignore` and an npm cache mount.",
+   "bn": "`COPY . .` আছে `npm install`-এর আগে, তাই source-এর যেকোনো পরিবর্তনে ওই layer আর তার পরের সব layer invalid হয়ে যায়। আগে `package.json` আর lockfile copy করে `npm ci` চালাও, তারপর source copy করো; সাথে `.dockerignore` আর npm cache mount যোগ করো।"
+  },
   "commonMistakes": {
    "en": "Copying the host `node_modules` into the image, using `npm install` (which can change the lockfile) in CI, and putting rarely-changing steps after `COPY . .`.",
    "bn": "Host-এর `node_modules` image-এ copy করা, CI-তে `npm install` ব্যবহার করা (এটা lockfile বদলে দিতে পারে), আর কম বদলায় এমন step-গুলো `COPY . .`-এর পরে রাখা।"
@@ -408,6 +428,10 @@
   "related": [
    "docker-012"
   ],
+  "quickAnswer": {
+   "en": "It runs `node worker.js`. With exec-form `ENTRYPOINT`, `CMD` only supplies default arguments, and arguments after the image name replace `CMD`, not the entrypoint (replacing that needs `--entrypoint`).",
+   "bn": "এটা `node worker.js` চালাবে। Exec-form `ENTRYPOINT` থাকলে `CMD` শুধু default argument দেয়, আর image name-এর পরের argument `CMD`-কে replace করে, entrypoint-কে না (entrypoint বদলাতে `--entrypoint` লাগে)।"
+  },
   "code": {
    "language": "dockerfile",
    "source": "FROM node:24-alpine\nWORKDIR /app\nCOPY . .\nENTRYPOINT [\"node\"]\nCMD [\"server.js\"]"
@@ -499,6 +523,10 @@
   "related": [
    "docker-012"
   ],
+  "quickAnswer": {
+   "en": "For the build-time npm token, use a BuildKit secret mount (`RUN --mount=type=secret`), never `ENV`, `ARG` or copy-then-delete. For the runtime DB password, keep the image credential-free and inject it at start via Compose `secrets:` files or a secret manager.",
+   "bn": "Build-time npm token-এর জন্য BuildKit secret mount (`RUN --mount=type=secret`) ব্যবহার করো; `ENV`, `ARG` বা copy করে পরে delete করা কখনো না। Runtime DB password-এর জন্য image-এ কোনো credential রাখবে না, container start-এর সময় Compose-এর `secrets:` file বা secret manager দিয়ে inject করো।"
+  },
   "commonMistakes": {
    "en": "Passing tokens with `--build-arg`, baking `.env` into the image with `COPY . .`, deleting a secret file in a later layer, or printing env vars in startup logs.",
    "bn": "`--build-arg` দিয়ে token পাঠানো, `COPY . .` দিয়ে `.env` image-এ ঢুকিয়ে ফেলা, পরের layer-এ secret file delete করা, অথবা startup log-এ env var print করা।"
@@ -583,6 +611,10 @@
    "docker-023",
    "docker-012"
   ],
+  "quickAnswer": {
+   "en": "Build once, then promote the same image by digest through every environment. CI builds changed services with buildx and a remote cache, tags by Git SHA, adds SBOM, provenance and signatures, and gates on CVEs and tests; rollback is redeploying the previous digest with no rebuild.",
+   "bn": "একবার build করো, তারপর একই image digest দিয়ে প্রতিটা environment-এ promote করো। CI buildx আর remote cache দিয়ে শুধু বদলানো service build করে, Git SHA দিয়ে tag দেয়, SBOM, provenance আর signature যোগ করে, আর CVE ও test দিয়ে gate করে; rollback মানে rebuild ছাড়াই আগের digest আবার deploy করা।"
+  },
   "commonMistakes": {
    "en": "Rebuilding the image separately for each environment, deploying mutable tags, baking environment config into images, and having no fast rollback path.",
    "bn": "প্রতিটা environment-এর জন্য আলাদা করে image rebuild করা, বদলানো যায় এমন tag deploy করা, environment config image-এর ভেতরে রেখে দেওয়া, আর দ্রুত rollback-এর কোনো পথ না রাখা।"

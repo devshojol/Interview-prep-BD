@@ -57,6 +57,10 @@
    "drizzle-004",
    "drizzle-021"
   ],
+  "quickAnswer": {
+   "en": "The delete is never awaited, and Drizzle builders are lazy thenables that send SQL only when awaited (or `.execute()` is called), so the other sessions are never revoked. Fix it by awaiting the delete, ideally with `.returning()` to see what was removed.",
+   "bn": "Delete-টা `await` করা হয়নি, আর Drizzle builder হলো lazy thenable — `await` (বা `.execute()`) না করলে SQL পাঠায়ই না, তাই অন্য session-গুলো revoke হয় না। Fix: delete-টা `await` করো, সম্ভব হলে `.returning()` দিয়ে দেখো কী মুছলো।"
+  },
   "commonMistakes": {
    "en": "Assuming the query runs as soon as it's built; \"fixing\" it with `void db.delete(...)` (still never executes); testing only the returned `{ ok: true }`.",
    "bn": "ভাবা যে query তৈরি হলেই চলে; `void db.delete(...)` দিয়ে \"fix\" করা (তখনও execute হয় না); শুধু return করা `{ ok: true }` test করা।"
@@ -135,6 +139,10 @@
    "drizzle-012",
    "drizzle-014"
   ],
+  "quickAnswer": {
+   "en": "A foreign key (`.references()`) is a database constraint that PostgreSQL enforces on every write; `relations()` is app-level metadata that only powers nested `db.query` results and generates no SQL. They're independent, and most apps use both.",
+   "bn": "Foreign key (`.references()`) হলো database constraint, যেটা PostgreSQL প্রতিটা write-এ check করে; `relations()` হলো app-level metadata, যেটা শুধু `db.query`-এর nested result-এর কাজে লাগে আর কোনো SQL তৈরি করে না। দুটো স্বাধীন, আর বেশিরভাগ app-এ দুটোই ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Thinking `relations()` creates foreign keys; skipping FKs because \"the ORM handles relations\"; forgetting to index FK columns.",
    "bn": "ভাবা যে `relations()` foreign key তৈরি করে; \"ORM তো relation সামলায়\" ভেবে FK বাদ দেওয়া; FK column-এ index দিতে ভুলে যাওয়া।"
@@ -204,6 +212,10 @@
    "drizzle-008",
    "drizzle-031"
   ],
+  "quickAnswer": {
+   "en": "Raw SQL through `pg` gives full control but untyped results and string-built dynamic queries; Drizzle's builder is typed, composable and parameterised; the `sql` tag is the escape hatch for expressions the builder lacks, still with bound parameters. Use the builder by default and `sql` for the special cases.",
+   "bn": "`pg` দিয়ে raw SQL-এ পুরো control থাকে, কিন্তু result untyped আর dynamic query string জোড়া দিয়ে বানাতে হয়; Drizzle-এর builder typed, composable আর parameterised; `sql` tag হলো builder যা পারে না তার escape hatch, সেখানেও value bound parameter থাকে। Default হিসেবে builder, বিশেষ ক্ষেত্রে `sql`।"
+  },
   "commonMistakes": {
    "en": "Believing an ORM means you can't write SQL; trusting `sql<number>` without `.mapWith(Number)` for bigint results; concatenating strings for dynamic filters in raw `pg` code.",
    "bn": "ভাবা যে ORM ব্যবহার করলে SQL লেখা যায় না; bigint result-এর জন্য `.mapWith(Number)` ছাড়া `sql<number>`-এর উপর ভরসা করা; raw `pg` code-এ dynamic filter-এর জন্য string জোড়া লাগানো।"
@@ -274,6 +286,10 @@
    "drizzle-010",
    "drizzle-032"
   ],
+  "quickAnswer": {
+   "en": "Use an `authorId` FK with `onDelete: 'cascade'`, a composite `uniqueIndex` on `(authorId, slug)`, an index on `author_id` (PostgreSQL doesn't index FKs) and a partial index on `published_at` where `published = true`. `post_tags` gets a composite primary key, cascade from posts and restrict from tags.",
+   "bn": "`onDelete: 'cascade'`-সহ `authorId` FK, `(authorId, slug)`-এ composite `uniqueIndex`, `author_id`-এ একটা index (PostgreSQL FK-তে নিজে index বানায় না), আর `published = true` শর্তে `published_at`-এ partial index। `post_tags`-এ composite primary key, posts থেকে cascade আর tags থেকে restrict।"
+  },
   "commonMistakes": {
    "en": "Making `slug` globally unique when the rule is per author; assuming FKs are indexed automatically; cascading deletes from tags into posts; using the deprecated object form for the third `pgTable` argument.",
    "bn": "নিয়ম যেখানে author অনুযায়ী, সেখানে `slug`-কে globally unique করা; ধরে নেওয়া যে FK নিজে থেকে index হয়; tag থেকে post-এ cascading delete; `pgTable`-এর তৃতীয় argument-এ deprecated object রূপ ব্যবহার করা।"
@@ -347,6 +363,10 @@
    "drizzle-014",
    "drizzle-015"
   ],
+  "quickAnswer": {
+   "en": "`leftJoin` posts with `published = true` inside the join's ON clause (a WHERE would drop Karim), use `count(posts.id)` so users without posts get 0, `groupBy(users.id)`, and order by `desc(count(posts.id))` then `asc(users.name)`. Result: Nadia 2, Rahim 1, Karim 0.",
+   "bn": "posts-কে `leftJoin` করি আর `published = true` শর্তটা join-এর ON-এ রাখি (WHERE-এ রাখলে Karim বাদ পড়ে), `count(posts.id)` দিই যাতে post ছাড়া user 0 পায়, `groupBy(users.id)` করি, তারপর `desc(count(posts.id))` আর `asc(users.name)` দিয়ে sort। Result: Nadia 2, Rahim 1, Karim 0।"
+  },
   "commonMistakes": {
    "en": "Putting `eq(posts.published, true)` in `.where()` after a left join; using `count()` (counts the null row as 1); using `innerJoin`, which drops users with no posts.",
    "bn": "Left join-এর পরে `eq(posts.published, true)` `.where()`-এ দেওয়া; `count()` ব্যবহার করা (null row-কেও 1 গোনে); `innerJoin` ব্যবহার করা, যেটা post ছাড়া user বাদ দেয়।"
@@ -422,6 +442,10 @@
    "drizzle-015",
    "drizzle-027"
   ],
+  "quickAnswer": {
+   "en": "Define `relations()` from users to posts to `postTags` to tags, pass tables and relations as `schema` to `drizzle()`, then call `db.query.users.findMany()` with `columns`, a callback `where` and nested `with` options. Drizzle builds the whole typed tree in one SQL statement.",
+   "bn": "users থেকে posts, `postTags` হয়ে tags পর্যন্ত `relations()` define করি, table আর relation দুটোই `schema` হিসেবে `drizzle()`-এ দিই, তারপর `columns`, callback `where` আর nested `with` দিয়ে `db.query.users.findMany()` call করি। Drizzle পুরো typed tree একটাই SQL statement-এ বানায়।"
+  },
   "commonMistakes": {
    "en": "Defining relations but not including them in the `schema` passed to `drizzle()`; mixing v2 object-style `where` into 0.45 code; loading full nested graphs for list pages.",
    "bn": "Relation define করে `drizzle()`-এ দেওয়া `schema`-তে না রাখা; 0.45-এর code-এ v2-এর object-style `where` মিশিয়ে ফেলা; list page-এর জন্য পুরো nested graph load করা।"
@@ -482,6 +506,10 @@
    "drizzle-014",
    "drizzle-028"
   ],
+  "quickAnswer": {
+   "en": "Exactly one: Drizzle compiles the relational query into a single SQL statement with lateral subqueries and `json_agg`, then maps the JSON into typed objects, so there's no N+1.",
+   "bn": "ঠিক একটা: Drizzle relational query-কে lateral subquery আর `json_agg` দিয়ে একটাই SQL statement-এ compile করে, তারপর JSON-কে typed object-এ map করে — তাই কোনো N+1 হয় না।"
+  },
   "options": [
    {
     "en": "One for the users, then one per user to load their posts (N+1)",
@@ -557,6 +585,10 @@
    "drizzle-025",
    "nest-032"
   ],
+  "quickAnswer": {
+   "en": "Run everything in `db.transaction(async (tx) => ...)` and use `tx` for every query. Debit with one guarded `UPDATE ... WHERE id = from AND balance >= amount RETURNING`, throw `InsufficientFundsError` if no row returns, call `tx.rollback()` if the credit finds no receiver, then insert the transfer row.",
+   "bn": "সব কাজ `db.transaction(async (tx) => ...)`-এর ভেতরে, আর প্রতিটা query `tx` দিয়ে। Debit করি একটাই guarded `UPDATE ... WHERE id = from AND balance >= amount RETURNING` দিয়ে, কোনো row না ফিরলে `InsufficientFundsError` throw করি, receiver না পেলে `tx.rollback()`, তারপর transfer row insert।"
+  },
   "commonMistakes": {
    "en": "Using `db` instead of `tx` inside the callback; reading the balance into JS and writing it back; using JavaScript numbers (floats) for money; catching errors inside the callback and not rethrowing, which commits a half-done transfer.",
    "bn": "Callback-এর ভেতরে `tx`-এর বদলে `db` ব্যবহার করা; balance JS-এ পড়ে আবার লিখে দেওয়া; টাকার জন্য JavaScript number (float) ব্যবহার করা; callback-এর ভেতরে error ধরে আবার throw না করা, ফলে অর্ধেক হওয়া transfer commit হয়ে যায়।"

@@ -45,6 +45,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "It sets a group of security-related response headers, such as `Content-Security-Policy`, `Strict-Transport-Security` and `X-Content-Type-Options: nosniff`, and removes `X-Powered-By`. It doesn't validate input, rate-limit or turn on HTTPS.",
+   "bn": "এটা security-সংক্রান্ত একগুচ্ছ response header set করে, যেমন `Content-Security-Policy`, `Strict-Transport-Security` আর `X-Content-Type-Options: nosniff`, আর `X-Powered-By` সরিয়ে দেয়। এটা input validate করে না, rate limit করে না, HTTPS-ও চালু করে না।"
+  },
   "options": [
    {
     "en": "It validates and sanitises request bodies to prevent SQL injection and XSS",
@@ -129,6 +133,10 @@
    "express-023",
    "express-009"
   ],
+  "quickAnswer": {
+   "en": "Authentication answers \"who are you?\": middleware verifies a session, JWT or API key and sets `req.user`; failure is `401`. Authorization answers \"what may you do?\": role checks per route and ownership checks per object (to prevent IDOR); failure is `403`, or `404` to hide that the resource exists.",
+   "bn": "Authentication-এর প্রশ্ন \"তুমি কে?\": middleware session, JWT বা API key যাচাই করে `req.user` set করে; fail করলে `401`। Authorization-এর প্রশ্ন \"তুমি কী করতে পারো?\": route-এ role check আর প্রতিটা object-এ ownership check (IDOR ঠেকাতে); fail করলে `403`, বা resource আছে কিনা লুকাতে `404`।"
+  },
   "commonMistakes": {
    "en": "Returning `403` for a missing token (should be `401`), or thinking role checks alone are enough authorization.",
    "bn": "Token না থাকলে `403` return করা (হওয়া উচিত `401`), অথবা শুধু role check-কেই যথেষ্ট authorization মনে করা।"
@@ -203,6 +211,10 @@
    "express-019",
    "express-024"
   ],
+  "quickAnswer": {
+   "en": "`authenticate` parses `Bearer <token>`, verifies it with pinned `algorithms`, `issuer` and `audience`, returns `401` with `WWW-Authenticate` (`TOKEN_EXPIRED` or `INVALID_TOKEN`) on failure, and calls `next()` outside the `try`. `requireRole` is a factory: `401` without `req.user`, `403` for a wrong role, else `next()`.",
+   "bn": "`authenticate` `Bearer <token>` parse করে, pinned `algorithms`, `issuer` আর `audience` দিয়ে `jwt.verify` চালায়, fail করলে `WWW-Authenticate`-সহ `401` দেয় (`TOKEN_EXPIRED` বা `INVALID_TOKEN`), আর `next()` call করে `try`-এর বাইরে। `requireRole` একটা factory: `req.user` না থাকলে `401`, role না মিললে `403`, নইলে `next()`।"
+  },
   "commonMistakes": {
    "en": "Using `jwt.decode()` instead of `jwt.verify()` (no signature check), not pinning algorithms, or returning `403` for an expired token.",
    "bn": "`jwt.verify()`-এর বদলে `jwt.decode()` ব্যবহার করা (signature check হয় না), algorithm pin না করা, অথবা expired token-এর জন্য `403` return করা।"
@@ -281,6 +293,10 @@
    "express-019",
    "express-023"
   ],
+  "quickAnswer": {
+   "en": "Sessions keep an opaque ID in an `httpOnly` cookie and the data in a store like Redis: instant revocation, but a lookup per request and CSRF protection needed. JWTs need no lookup and suit many services or mobile clients, but are hard to revoke early; for a typical first-party web app I choose sessions.",
+   "bn": "Session-এ `httpOnly` cookie-তে থাকে একটা opaque ID আর data থাকে Redis-এর মতো store-এ: সাথে সাথে revoke করা যায়, কিন্তু প্রতি request-এ lookup আর CSRF protection লাগে। JWT-তে lookup লাগে না, অনেক service বা mobile client-এর জন্য সুবিধাজনক, কিন্তু মেয়াদের আগে revoke করা কঠিন; সাধারণ first-party web app-এ আমি session বেছে নিই।"
+  },
   "commonMistakes": {
    "en": "Claiming JWTs are \"more secure\", storing JWTs in `localStorage` by default, or using express-session's `MemoryStore` in production.",
    "bn": "JWT-কে \"বেশি নিরাপদ\" দাবি করা, default-ভাবে `localStorage`-এ JWT রাখা, অথবা production-এ express-session-এর `MemoryStore` ব্যবহার করা।"
@@ -355,6 +371,10 @@
    "express-010",
    "express-007"
   ],
+  "quickAnswer": {
+   "en": "Normal CPU, slow worsening and \"a restart fixes it\" point to a leaked resource, most likely pool connections never released when an error skips `client.release()`. Confirm with the pool's `waitingCount` and `pg_stat_activity`, release in `finally`, and set `connectionTimeoutMillis` and statement timeouts to fail fast.",
+   "bn": "CPU স্বাভাবিক, ধীরে ধীরে খারাপ হওয়া আর \"restart দিলে ঠিক হয়\" মানে কোনো resource leak, সম্ভবত pool-এর connection, যেটা error হলে `client.release()` skip হওয়ায় ফেরত যায় না। Pool-এর `waitingCount` আর `pg_stat_activity` দিয়ে নিশ্চিত হও, `finally`-তে release করো, আর দ্রুত fail করতে `connectionTimeoutMillis` ও statement timeout দাও।"
+  },
   "commonMistakes": {
    "en": "Increasing NGINX's timeout or the pool size (the leak just takes longer), or scheduling automatic restarts as the \"fix\".",
    "bn": "NGINX-এর timeout বা pool size বাড়ানো (leak শুধু একটু দেরিতে ধরা দেয়), অথবা স্বয়ংক্রিয় restart-কেই \"fix\" হিসেবে চালু করা।"
@@ -390,7 +410,7 @@
    "dependency-injection",
    "integration-tests"
   ],
-  "technologyVersion": "Express 5.x; Node.js 24 LTS / 26 (node:test); supertest 7.x",
+  "technologyVersion": "Express 5.x; Node.js 26 LTS / 24 (node:test); supertest 7.x",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -434,6 +454,10 @@
    "express-023",
    "express-012"
   ],
+  "quickAnswer": {
+   "en": "Use an app factory, `createApp({ ordersRepo, verifyToken })`, that returns the app without `listen()` and takes its dependencies as parameters, so tests inject in-memory fakes. supertest's `request(app)` needs no fixed port; with `node:test`, build a fresh app per test and assert status, body and what the fake saved.",
+   "bn": "একটা app factory ব্যবহার করো, `createApp({ ordersRepo, verifyToken })`, যেটা `listen()` ছাড়া app return করে আর dependency parameter হিসেবে নেয়, তাই test-এ in-memory fake দেওয়া যায়। supertest-এর `request(app)`-এ fixed port লাগে না; `node:test`-এ প্রতি test-এ নতুন app বানাও আর status, body ও fake-এ কী save হলো assert করো।"
+  },
   "commonMistakes": {
    "en": "Calling `app.listen()` inside the module under test (port conflicts, open handles), sharing one app/fake across tests, or asserting only status codes.",
    "bn": "Test করা module-এর ভেতরেই `app.listen()` call করা (port conflict, খোলা handle), সব test-এ একটাই app/fake share করা, অথবা শুধু status code assert করা।"

@@ -57,6 +57,10 @@
    "css-011",
    "css-029"
   ],
+  "quickAnswer": {
+   "en": "`*:focus { outline: none; }` makes keyboard focus invisible and fails WCAG 2.4.7 Focus Visible. Remove it and style `:focus-visible` instead, which browsers show for keyboard navigation but usually not for mouse clicks, with a clear outline at 3:1 contrast.",
+   "bn": "`*:focus { outline: none; }` keyboard focus অদৃশ্য করে দেয়, যা WCAG 2.4.7 Focus Visible ভাঙে। এটা মুছে `:focus-visible` style করো, যেটা browser keyboard navigation-এ দেখায় কিন্তু mouse click-এ সাধারণত দেখায় না, সাথে 3:1 contrast-এর স্পষ্ট outline।"
+  },
   "commonMistakes": {
    "en": "Removing outlines globally, replacing them with a colour change only (not visible enough), or relying on `box-shadow` alone for focus.",
    "bn": "Global-ভাবে outline সরিয়ে দেওয়া, শুধু রং বদলে দেওয়া (যথেষ্ট দৃশ্যমান নয়), অথবা focus-এর জন্য শুধু `box-shadow`-এর উপর নির্ভর করা।"
@@ -123,6 +127,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "4.5:1 for normal text (WCAG 1.4.3). Large text, at least 24px regular or about 18.7px bold, needs 3:1, and 7:1 is the stricter AAA level.",
+   "bn": "সাধারণ text-এর জন্য 4.5:1 (WCAG 1.4.3)। বড় text, অর্থাৎ কমপক্ষে 24px regular বা প্রায় 18.7px bold, তার জন্য 3:1, আর 7:1 হলো আরও কড়া AAA level।"
+  },
   "options": [
    {
     "en": "3:1",
@@ -202,6 +210,10 @@
    "css-004",
    "css-027"
   ],
+  "quickAnswer": {
+   "en": "Three causes: there's no `top` inset; `overflow-x: hidden` makes `.page` a scroll container, so the sidebar sticks to the wrong scroller; and flex stretch makes `.filters` as tall as the list. Add `top: 16px`, use `overflow-x: clip` (or fix the overflow) and `align-self: flex-start`.",
+   "bn": "তিনটা কারণ: `top` inset নেই; `overflow-x: hidden` `.page`-কে scroll container বানায়, তাই sidebar ভুল scroller-এ আটকাতে চায়; আর flex stretch `.filters`-কে list-এর সমান লম্বা করে দেয়। `top: 16px` দাও, `overflow-x: clip` ব্যবহার করো (বা overflow-এর কারণ ঠিক করো), আর `align-self: flex-start` দাও।"
+  },
   "commonMistakes": {
    "en": "Only adding `top: 0`, switching to `position: fixed` (which breaks the layout), or adding `overflow: hidden` to more ancestors to \"contain\" it.",
    "bn": "শুধু `top: 0` যোগ করা, `position: fixed`-এ বদলে ফেলা (যাতে layout ভেঙে যায়), অথবা \"ধরে রাখতে\" আরও ancestor-এ `overflow: hidden` যোগ করা।"
@@ -285,6 +297,10 @@
    "css-007",
    "css-032"
   ],
+  "quickAnswer": {
+   "en": "`font-size: clamp(1.5rem, 1.0714rem + 1.9048vw, 2.5rem)`: a linear `rem` + `vw` value that is 24px at 360px and 40px at 1200px. Pure `vw` ignores the user's font size and zoom, so keeping a `rem` part matters for accessibility.",
+   "bn": "`font-size: clamp(1.5rem, 1.0714rem + 1.9048vw, 2.5rem)`: একটা linear `rem` + `vw` value, যা 360px-এ 24px আর 1200px-এ 40px। শুধু `vw` দিলে user-এর font size আর zoom উপেক্ষিত হয়, তাই accessibility-র জন্য একটা `rem` অংশ রাখা জরুরি।"
+  },
   "commonMistakes": {
    "en": "Using `font-size: 5vw` with no bounds, using `px` for the clamp limits (ignores user font settings), or making body text as fluid as headings.",
    "bn": "কোনো সীমা ছাড়া `font-size: 5vw` ব্যবহার করা, clamp-এর সীমায় `px` ব্যবহার করা (user-এর font setting উপেক্ষা করে), অথবা body text-কেও heading-এর মতো fluid করা।"
@@ -341,6 +357,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "A is `.card .title`, B is `.card.featured` and C is `.sidebar .card`. A space after `&` means descendant, no space means the same element, and `&` can appear anywhere, including at the end.",
+   "bn": "A হলো `.card .title`, B হলো `.card.featured`, আর C হলো `.sidebar .card`। `&`-এর পরে space মানে descendant, space না থাকলে একই element, আর `&` যেকোনো জায়গায় বসতে পারে, শেষেও।"
+  },
   "code": {
    "language": "css",
    "source": ".card {\n  padding: 1rem;\n\n  & .title { font-weight: 700; }      /* A */\n  &.featured { border-color: gold; }  /* B */\n  .sidebar & { padding: 0.5rem; }     /* C */\n}"
@@ -429,6 +449,10 @@
    "css-030",
    "css-022"
   ],
+  "quickAnswer": {
+   "en": "Use Baseline plus your own analytics: ship widely available features (nesting, `:has()`, size queries, layers, subgrid) freely, use newly available ones like style queries and `@scope` as enhancements, and keep limited ones like anchor positioning behind `@supports` with a working fallback.",
+   "bn": "Baseline আর নিজের analytics মিলিয়ে ঠিক করি: widely available feature (nesting, `:has()`, size query, layer, subgrid) নির্দ্বিধায় ship করি, style query বা `@scope`-এর মতো newly available feature enhancement হিসেবে দিই, আর anchor positioning-এর মতো limited feature কার্যকর fallback-সহ `@supports`-এর পেছনে রাখি।"
+  },
   "commonMistakes": {
    "en": "Treating \"works in my Chrome\" as \"safe to ship\", shipping anchor positioning without a fallback, or avoiding all modern CSS out of caution even when it's widely available.",
    "bn": "\"আমার Chrome-এ চলে\"-কে \"ship করা নিরাপদ\" ধরে নেওয়া, fallback ছাড়া anchor positioning ship করা, অথবা widely available হওয়া সত্ত্বেও অতিরিক্ত সাবধানতায় সব আধুনিক CSS এড়িয়ে চলা।"
@@ -502,6 +526,10 @@
    "css-010",
    "css-018"
   ],
+  "quickAnswer": {
+   "en": "`display: none` and `hidden` remove the element completely; `visibility: hidden` keeps its space but hides it from everyone; `opacity: 0` still takes clicks, focus and screen readers; a visually-hidden class stays readable by screen readers; `aria-hidden=\"true\"` hides it only from assistive tech.",
+   "bn": "`display: none` আর `hidden` element-কে পুরোপুরি সরিয়ে দেয়; `visibility: hidden` জায়গা রাখে কিন্তু সবার কাছ থেকে লুকায়; `opacity: 0`-এ click, focus আর screen reader সব চলে; visually-hidden class screen reader পড়তে পারে; `aria-hidden=\"true\"` শুধু assistive tech থেকে লুকায়।"
+  },
   "commonMistakes": {
    "en": "Using `display: none` for screen-reader-only text, hiding focusable elements with `opacity: 0` or `aria-hidden`, and expecting the `hidden` attribute to beat an author `display` rule.",
    "bn": "Screen reader-এর জন্য রাখা text-এ `display: none` ব্যবহার করা, focus করা যায় এমন element `opacity: 0` বা `aria-hidden` দিয়ে লুকানো, আর ভাবা যে `hidden` attribute author-এর `display` rule-কে হারাবে।"
@@ -580,6 +608,10 @@
    "css-021",
    "css-007"
   ],
+  "quickAnswer": {
+   "en": "This is advanced: mobile-first media queries for the page, container queries so the card adapts to its slot, and a fluid `clamp()` type scale in `rem`. Use `:lang(bn)` for Bangla fonts with taller line-height and no letter-spacing, subset WOFF2 fonts, and test both languages at 320px.",
+   "bn": "এটা advanced বিষয়: page-এর জন্য mobile-first media query, card যাতে নিজের জায়গা অনুযায়ী বদলায় সেজন্য container query, আর `rem`-এ fluid `clamp()` type scale। Bangla font-এর জন্য `:lang(bn)` দিয়ে বেশি line-height আর letter-spacing ছাড়া style, subset করা WOFF2 font, আর 320px-এ দুই ভাষাতেই test।"
+  },
   "commonMistakes": {
    "en": "Using only viewport media queries for components, one global `line-height` tuned for Latin, letter-spacing on Bangla headings, shipping a full multi-script font file to every page, or testing only with English placeholder text.",
    "bn": "Component-এর জন্য শুধু viewport media query ব্যবহার করা, Latin-এর জন্য ঠিক করা একটাই global `line-height`, Bangla heading-এ letter-spacing, প্রতিটা page-এ পুরো multi-script font file পাঠানো, অথবা শুধু English placeholder text দিয়ে test করা।"

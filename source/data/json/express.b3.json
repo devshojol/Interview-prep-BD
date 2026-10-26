@@ -45,6 +45,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Fix it on the server: the two ports are different origins, so the API must return `Access-Control-Allow-Origin: http://localhost:5173` (and handle preflight), which the `cors` middleware does. The browser enforces CORS, but the permission can only come from the API's response headers.",
+   "bn": "Server-এ ঠিক করতে হবে: দুটো আলাদা port মানে আলাদা origin, তাই API-কে `Access-Control-Allow-Origin: http://localhost:5173` পাঠাতে হবে (আর preflight সামলাতে হবে), যেটা `cors` middleware করে দেয়। CORS browser enforce করে, কিন্তু অনুমতি আসতে পারে শুধু API-র response header থেকে।"
+  },
   "options": [
    {
     "en": "In the React app, add `mode: 'no-cors'` to the `fetch` call",
@@ -129,6 +133,10 @@
    "express-017",
    "express-024"
   ],
+  "quickAnswer": {
+   "en": "Set `httpOnly` (JavaScript can't read it, so XSS can't simply steal it), `secure` (HTTPS only), `sameSite: 'lax'` or `'strict'` (not sent on most cross-site requests, which helps against CSRF), a limited `maxAge`, and a narrow `path`/`domain`, ideally with the `__Host-` prefix. Store only an opaque session ID in it.",
+   "bn": "`httpOnly` (JavaScript পড়তে পারে না, তাই XSS সহজে চুরি করতে পারে না), `secure` (শুধু HTTPS), `sameSite: 'lax'` বা `'strict'` (বেশিরভাগ cross-site request-এ যায় না, যা CSRF ঠেকাতে সাহায্য করে), সীমিত `maxAge`, আর সংকীর্ণ `path`/`domain`, পারলে `__Host-` prefix-সহ। Cookie-তে শুধু একটা opaque session ID রাখো।"
+  },
   "commonMistakes": {
    "en": "Thinking `httpOnly` prevents XSS (it only stops cookie theft — the attacker can still act as the user from the page), or storing user roles in an unsigned cookie.",
    "bn": "`httpOnly` XSS আটকায় মনে করা (এটা শুধু cookie চুরি আটকায় — attacker তবুও page থেকে user হয়ে কাজ করতে পারে), অথবা unsigned cookie-তে user role রাখা।"
@@ -202,6 +210,10 @@
    "express-015",
    "express-016"
   ],
+  "quickAnswer": {
+   "en": "Keep `credentials: 'include'` on the client, because a cross-origin `fetch` doesn't send cookies by default. On the server, credentialed requests can't use `Access-Control-Allow-Origin: *`, so use an allow-list, `cors({ origin: ['https://app.example.com'], credentials: true })`, registered before the routes.",
+   "bn": "Client-এ `credentials: 'include'` রেখে দাও, কারণ cross-origin `fetch` default-এ cookie পাঠায় না। Server-এ credential-সহ request-এ `Access-Control-Allow-Origin: *` চলে না, তাই route-এর আগে register করা একটা allow-list ব্যবহার করো: `cors({ origin: ['https://app.example.com'], credentials: true })`।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it with `origin: true` (reflects every origin with credentials), or setting `SameSite=None` on all cookies without understanding same-site.",
    "bn": "`origin: true` দিয়ে \"ঠিক\" করা (credential সহ সব origin reflect করে), অথবা same-site না বুঝেই সব cookie-তে `SameSite=None` দেওয়া।"
@@ -285,6 +297,10 @@
    "express-014",
    "express-020"
   ],
+  "quickAnswer": {
+   "en": "Layer it: a coarse NGINX `limit_req` at the edge plus `express-rate-limit` with a strict limiter on login only. Use a Redis store so the 4 instances share counters, set `trust proxy` correctly to get the real client IP, key by IP and email while counting failures, and return `429` with `Retry-After`.",
+   "bn": "কয়েক layer-এ করো: edge-এ NGINX-এর মোটা দাগের `limit_req`, আর app-এ শুধু login-এর জন্য কড়া `express-rate-limit`। Redis store ব্যবহার করো যাতে 4টা instance একই counter share করে, আসল client IP পেতে `trust proxy` ঠিকভাবে set করো, failure গুনে IP আর email মিলিয়ে key বানাও, আর `Retry-After`-সহ `429` দাও।"
+  },
   "commonMistakes": {
    "en": "Using the default memory store on multiple instances, forgetting `trust proxy` (everyone shares one IP), or applying the strict login limit to the whole API.",
    "bn": "একাধিক instance-এ default memory store ব্যবহার করা, `trust proxy` ভুলে যাওয়া (সবাই একটি IP share করে), অথবা login-এর কড়া limit পুরো API-তে লাগিয়ে দেওয়া।"
@@ -363,6 +379,10 @@
    "express-023",
    "express-016"
   ],
+  "quickAnswer": {
+   "en": "A short-lived JWT access token (5–15 min) kept in memory and sent as a Bearer header, plus a long-lived opaque refresh token, stored hashed, in an `httpOnly`, `Secure`, `SameSite=Strict` cookie scoped to the refresh path. Rotate it on every refresh, revoke its whole family on reuse, delete it on logout.",
+   "bn": "স্বল্পমেয়াদি JWT access token (5–15 মিনিট) memory-তে রাখো আর Bearer header-এ পাঠাও; দীর্ঘমেয়াদি opaque refresh token DB-তে hash করে রাখো আর refresh path-এ সীমিত `httpOnly`, `Secure`, `SameSite=Strict` cookie-তে পাঠাও। প্রতি refresh-এ rotate করো, পুরোনো token আবার এলে পুরো family revoke করো, logout-এ মুছে দাও।"
+  },
   "commonMistakes": {
    "en": "Storing tokens in `localStorage`, issuing long-lived (days) access tokens, using a JWT refresh token that can't be revoked, or never rotating refresh tokens.",
    "bn": "`localStorage`-এ token রাখা, দীর্ঘ আয়ুর (কয়েক দিন) access token দেওয়া, revoke করা যায় না এমন JWT refresh token ব্যবহার করা, অথবা refresh token কখনো rotate না করা।"
@@ -441,6 +461,10 @@
    "express-018",
    "express-019"
   ],
+  "quickAnswer": {
+   "en": "It's credential stuffing, so per-IP limits can't stop it. Right now: block at the edge (WAF and bot rules, challenges), cap login concurrency, and revoke sessions and force resets for taken-over accounts; afterwards add per-account limits in Redis, MFA or passkeys, breached-password checks and login-failure alerts.",
+   "bn": "এটা credential stuffing, তাই per-IP limit দিয়ে থামানো যাবে না। এখনই: edge-এ block করো (WAF, bot rule, challenge), login-এর concurrency সীমিত করো, আর দখল হওয়া account-এর session revoke করে password reset বাধ্যতামূলক করো; পরে Redis-এ per-account limit, MFA বা passkey, breached-password check আর login-failure alert যোগ করো।"
+  },
   "commonMistakes": {
    "en": "Only tightening the per-IP limit, permanently locking accounts after N failures (enables mass lockouts), or forgetting to revoke sessions of already-compromised accounts.",
    "bn": "শুধু per-IP limit আরও কড়া করা, N বার ব্যর্থ হলে account চিরতরে lock করা (গণ-lockout সম্ভব করে), অথবা ইতিমধ্যে compromise হওয়া account-এর session revoke করতে ভুলে যাওয়া।"

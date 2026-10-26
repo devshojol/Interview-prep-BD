@@ -58,6 +58,10 @@
    "mongo-015",
    "mongo-023"
   ],
+  "quickAnswer": {
+   "en": "An index is a separate sorted B-tree of field values that point to documents, so MongoDB can do an `IXSCAN` instead of reading every document (`COLLSCAN`) and can return results already sorted. The cost is disk and RAM, plus slower writes, because every insert, update and delete must update every index.",
+   "bn": "Index হলো field value-এর একটা আলাদা sorted B-tree, যেটা document-গুলোকে point করে; তাই MongoDB সব document না পড়ে (`COLLSCAN`) সরাসরি `IXSCAN` করতে পারে, আর result আগে থেকেই sorted দিতে পারে। খরচ হলো disk আর RAM, আর write ধীর হয়, কারণ প্রতিটি insert, update, delete-এ সব index update করতে হয়।"
+  },
   "commonMistakes": {
    "en": "Indexing every field \"just in case\"; assuming MongoDB will efficiently combine many single-field indexes instead of using one well-designed compound index.",
    "bn": "\"যদি লাগে\" ভেবে প্রতিটি field-এ index দেওয়া; ধরে নেওয়া যে MongoDB একটা ভালোভাবে design করা compound index-এর বদলে অনেকগুলো single-field index দক্ষভাবে মিলিয়ে নেবে।"
@@ -126,6 +130,10 @@
    "mongo-001",
    "mongo-013"
   ],
+  "quickAnswer": {
+   "en": "Store together what is read together: embed child data that belongs to the parent, is read with it and stays bounded (order items, a user's few addresses). Reference it by `_id` when it is large or unbounded, shared by many parents, or updated on its own (comments, chat messages, author profiles).",
+   "bn": "যে data একসাথে read হয়, সেটা একসাথে রাখো: child data parent-এর অংশ হলে, parent-এর সাথে read হলে আর bounded থাকলে embed করো (order-এর item, user-এর কয়েকটা address)। Data বড় বা unbounded হলে, অনেক parent share করলে, বা আলাদাভাবে update হলে `_id` দিয়ে reference করো (comment, chat message, author profile)।"
+  },
   "commonMistakes": {
    "en": "Normalising everything like in SQL and then joining on every request, or embedding everything (e.g. all of a user's orders inside the user document) until it hits the 16 MB limit.",
    "bn": "SQL-এর মতো সব কিছু normalise করে প্রতিটি request-এ join করা, অথবা সব কিছু embed করা (যেমন একজন user-এর সব order user document-এর ভেতরে) যতক্ষণ না 16 MB limit-এ পৌঁছায়।"
@@ -194,6 +202,10 @@
   "related": [
    "mongo-031"
   ],
+  "quickAnswer": {
+   "en": "A replica set is a group of `mongod` servers with the same data: the primary takes all writes and logs them in the oplog, and secondaries replay that oplog asynchronously. If the primary is unreachable for over 10 seconds (the default), a secondary wins a majority election and drivers switch to it automatically.",
+   "bn": "Replica set হলো একই data রাখা কয়েকটা `mongod` server-এর group: primary সব write নেয় আর oplog-এ লিখে রাখে, secondary-গুলো asynchronously সেই oplog apply করে। Primary 10 second-এর (default) বেশি unreachable থাকলে একটা secondary majority vote পেয়ে নতুন primary হয়, আর driver নিজে থেকেই সেটার সাথে যুক্ত হয়।"
+  },
   "commonMistakes": {
    "en": "Thinking secondaries are always perfectly in sync, or that a replica set protects you from accidental deletes.",
    "bn": "ভাবা যে secondary সবসময় পুরোপুরি sync-এ থাকে, অথবা replica set ভুল করে delete হওয়া থেকে রক্ষা করে।"
@@ -253,6 +265,10 @@
   "related": [
    "mongo-008"
   ],
+  "quickAnswer": {
+   "en": "Put a TTL index on a `Date` field (`createdAt` with `expireAfterSeconds: 300`) so MongoDB deletes old OTPs automatically. But the TTL monitor runs about every 60 seconds and can lag, so the verify query must still check the 5-minute window itself; TTL is clean-up, not the security check.",
+   "bn": "একটা `Date` field-এ TTL index দাও (`createdAt`, `expireAfterSeconds: 300`), তাহলে MongoDB পুরনো OTP নিজে থেকেই delete করবে। কিন্তু TTL monitor প্রায় প্রতি 60 second-এ চলে আর দেরিও হতে পারে, তাই verify করার query-তে 5 মিনিটের সময়টা নিজে check করতে হবে; TTL শুধু clean-up, security check না।"
+  },
   "commonMistakes": {
    "en": "Relying on TTL for exact-time security decisions; storing `createdAt` as an ISO string; trying to add TTL to a compound index.",
    "bn": "Exact সময়ের security সিদ্ধান্তের জন্য TTL-এর ওপর নির্ভর করা; `createdAt` ISO string হিসেবে রাখা; compound index-এ TTL যোগ করার চেষ্টা করা।"
@@ -317,6 +333,10 @@
    "mongo-007",
    "mongo-008"
   ],
+  "quickAnswer": {
+   "en": "The insert fails with E11000, because a unique index stores a missing `username` as `null`, so only one document may lack it. The fix is a partial unique index with `partialFilterExpression: { username: { $type: \"string\" } }`.",
+   "bn": "Insert E11000 error দিয়ে fail করে, কারণ unique index-এ missing `username` `null` হিসেবে থাকে, তাই কেবল একটা document-এই field-টা না থাকতে পারে। সমাধান হলো `partialFilterExpression: { username: { $type: \"string\" } }` দিয়ে একটা partial unique index।"
+  },
   "code": {
    "language": "javascript",
    "source": "db.users.createIndex(\n  { username: 1 },\n  { unique: true, partialFilterExpression: { username: { $type: \"string\" } } }\n)"
@@ -405,6 +425,10 @@
    "mongo-009",
    "mongo-013"
   ],
+  "quickAnswer": {
+   "en": "Embed the order items in the order document, each with `productId` plus a snapshot of name, SKU, unit price, quantity and discount at purchase time, along with an address snapshot and computed totals. An order is a historical record, so copying the price is correct, and items are bounded, so one read shows the whole order.",
+   "bn": "Order document-এর ভেতরেই item-গুলো embed করো, প্রতিটিতে `productId`-এর সাথে কেনার সময়ের name, SKU, unit price, quantity আর discount-এর snapshot, সাথে address snapshot আর হিসাব করা total। Order একটা ঐতিহাসিক record, তাই price copy করে রাখাই ঠিক; আর item সংখ্যা bounded, তাই এক read-এই পুরো order দেখানো যায়।"
+  },
   "commonMistakes": {
    "en": "Normalising order items into a separate collection by reflex, storing only `productId` and joining for the price, or keeping an ever-growing `orders` array in the user document.",
    "bn": "অভ্যাসবশত order item আলাদা collection-এ normalise করা, শুধু `productId` রেখে দামের জন্য join করা, অথবা user document-এ ক্রমাগত বাড়তে থাকা `orders` array রাখা।"
@@ -469,6 +493,10 @@
   "related": [
    "mongo-012"
   ],
+  "quickAnswer": {
+   "en": "Use `$setWindowFields` twice: first partition by shop, sort by day and `$sum` the amount over a window from the first document to the current one (running total); then sort by amount descending and add `$rank`. Unlike `$group` it keeps every document; finish with `$sort` and a `$project` that formats the day.",
+   "bn": "দুইবার `$setWindowFields` ব্যবহার করো: প্রথমবার shop অনুযায়ী partition, day অনুযায়ী sort, আর প্রথম document থেকে current document পর্যন্ত window-তে amount-এর `$sum` (running total); দ্বিতীয়বার amount উল্টো ক্রমে sort করে `$rank`। `$group`-এর মতো এটা document কমায় না; শেষে `$sort` আর day format করার জন্য `$project`।"
+  },
   "commonMistakes": {
    "en": "Using `$group` (which collapses rows), forgetting the `window` bounds for a running total, or trying to use two different `sortBy` orders in one stage.",
    "bn": "`$group` ব্যবহার করা (এতে row একত্র হয়ে যায়), running total-এর জন্য `window`-এর সীমা ভুলে যাওয়া, অথবা একটা stage-এ দুইটা ভিন্ন `sortBy` order ব্যবহারের চেষ্টা করা।"
@@ -552,6 +580,10 @@
    "mongo-010",
    "mongo-031"
   ],
+  "quickAnswer": {
+   "en": "Don't restore over production: in a separate cluster, restore the 02:00 dump and replay the oplog up to just before the delete (`--oplogLimit`), then `mongorestore` the missing orders back (it only inserts). Prevent it with point-in-time backups, restore drills, least privilege and guards against empty filters.",
+   "bn": "Production-এর ওপর restore করবে না: আলাদা একটা cluster-এ 02:00-এর dump restore করো, delete-এর ঠিক আগ পর্যন্ত oplog replay করো (`--oplogLimit`), তারপর হারানো order-গুলো `mongorestore` দিয়ে ফেরত আনো (এটা শুধু insert করে)। ভবিষ্যতের জন্য point-in-time backup, নিয়মিত restore drill, least privilege আর empty filter আটকানোর guard রাখো।"
+  },
   "commonMistakes": {
    "en": "Restoring the nightly dump directly over production (losing 12 hours of orders plus everything after 14:05); assuming replica set members are backups; never having tested a restore.",
    "bn": "Nightly dump সরাসরি production-এর ওপর restore করা (12 ঘণ্টার order আর 14:05-এর পরের সব হারানো); replica set member-কে backup মনে করা; কখনো restore test না করা।"

@@ -1,0 +1,750 @@
+# React Native (with Expo) — batch 5 (rn-033..rn-040)
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools"))
+from qb import Q, save  # noqa: E402
+
+R_ARCH = ("reactnative.dev — About the New Architecture", "https://reactnative.dev/architecture/landing-page")
+R_HERMES = ("reactnative.dev — Using Hermes", "https://reactnative.dev/docs/hermes")
+R_ANIM = ("reactnative.dev — Animations", "https://reactnative.dev/docs/animations")
+R_PERF = ("reactnative.dev — Performance Overview", "https://reactnative.dev/docs/performance")
+R_REA_GLOSSARY = ("Reanimated — Glossary of terms", "https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/glossary/")
+R_RUNTIME = ("Expo — Runtime versions and updates", "https://docs.expo.dev/eas-update/runtime-versions/")
+R_ROLLBACK = ("Expo — Rollbacks", "https://docs.expo.dev/eas-update/rollbacks/")
+R_ERR_RECOVERY = ("Expo — Error recovery", "https://docs.expo.dev/eas-update/error-recovery/")
+R_MODULE_API = ("Expo — Native Modules API reference", "https://docs.expo.dev/modules/module-api/")
+R_CNG = ("Expo — Continuous Native Generation (CNG)", "https://docs.expo.dev/workflow/continuous-native-generation/")
+R_PLUGINS = ("Expo — Config plugins introduction", "https://docs.expo.dev/config-plugins/introduction/")
+R_PUSH_SETUP = ("Expo — Push notifications setup", "https://docs.expo.dev/push-notifications/push-notifications-setup/")
+R_NOTIF = ("Expo — Notifications (expo-notifications)", "https://docs.expo.dev/versions/latest/sdk/notifications/")
+R_PUSH_SEND = ("Expo — Send notifications with the Expo Push Service", "https://docs.expo.dev/push-notifications/sending-notifications/")
+R_DEVTOOLS = ("reactnative.dev — React Native DevTools", "https://reactnative.dev/docs/react-native-devtools")
+R_EXPO_IMAGE = ("Expo — Image (expo-image)", "https://docs.expo.dev/versions/latest/sdk/image/")
+R_UNIT = ("Expo — Unit testing with Jest", "https://docs.expo.dev/develop/unit-testing/")
+R_RNTL = ("React Native Testing Library (GitHub)", "https://github.com/callstack/react-native-testing-library")
+R_MAESTRO = ("Maestro (GitHub)", "https://github.com/mobile-dev-inc/maestro")
+R_EAS_JSON = ("Expo — Configure EAS Build with eas.json", "https://docs.expo.dev/build/eas-json/")
+R_EAS_ENV = ("Expo — Environment variables in EAS", "https://docs.expo.dev/eas/environment-variables/")
+R_VARIANTS = ("Expo — Install app variants on the same device", "https://docs.expo.dev/build-reference/variants/")
+
+QUESTIONS = [
+    # ------------------------------------------------------------------ rn-033
+    Q(
+        id="rn-033", sub="Architecture", diff="hard", type="conceptual",
+        prio="high", market="both", mins=6,
+        tags=["new-architecture", "jsi", "fabric", "turbomodules", "hermes"],
+        ver="React Native 0.88, Expo SDK 58 (New Architecture only since 0.82)", vs=True, status="stable",
+        q_en=r"""Explain React Native's New Architecture: what are JSI, Fabric, TurboModules and "bridgeless" mode, and what problems of the old bridge do they solve? Where does Hermes V1 fit in?""",
+        q_bn=r"""React Native-এর New Architecture ব্যাখ্যা করো: JSI, Fabric, TurboModules আর "bridgeless" mode কী, আর পুরোনো bridge-এর কোন সমস্যাগুলো এরা সমাধান করে? Hermes V1 এখানে কোথায় আসে?""",
+        a_en=r"""
+            In the **legacy architecture** (history now), JavaScript and native code talked over an asynchronous **bridge**: every call and every UI update was serialised to JSON, batched, and sent across. That meant no synchronous calls, serialisation overhead, every native module initialised at startup, and layout that could flicker because JS couldn't measure synchronously.
+
+            The New Architecture replaces that with four pieces:
+
+            - **JSI (JavaScript Interface):** a C++ API that lets the JS engine hold references to native (host) objects and call their methods directly, synchronously if needed, with no JSON round trip.
+            - **Fabric:** the new renderer. The shadow tree lives in C++, so layout can be read synchronously (`useLayoutEffect` measurements work without a flash) and it supports React's concurrent features such as transitions and Suspense.
+            - **TurboModules:** native modules built on JSI, loaded lazily on first use and typed through **Codegen** from a TypeScript spec, so JS and native agree on the signatures.
+            - **Bridgeless mode:** the bridge isn't created at all; everything goes through JSI.
+
+            Since React Native 0.82 the app runs **only** on the New Architecture; the legacy one can't be enabled any more. **Hermes** is the JS engine underneath JSI: it precompiles JS to bytecode at build time for faster startup and lower memory, and **Hermes V1** has been the default engine since 0.84.
+        """,
+        a_bn=r"""
+            **Legacy architecture**-এ (এখন শুধু ইতিহাস) JavaScript আর native code একটা asynchronous **bridge** দিয়ে কথা বলত: প্রতিটা call আর প্রতিটা UI update JSON-এ serialise হয়ে, batch হয়ে ওপারে যেত। ফলে synchronous call করা যেত না, serialisation-এর খরচ ছিল, app start-এর সময় সব native module initialise হতো, আর JS synchronously measure করতে পারত না বলে layout মাঝে মাঝে flicker করত।
+
+            New Architecture এর জায়গায় চারটা অংশ আনে:
+
+            - **JSI (JavaScript Interface):** একটা C++ API, যেটা দিয়ে JS engine সরাসরি native (host) object-এর reference রাখতে আর তাদের method call করতে পারে, দরকার হলে synchronously, কোনো JSON round trip ছাড়া।
+            - **Fabric:** নতুন renderer। Shadow tree থাকে C++-এ, তাই layout synchronously পড়া যায় (`useLayoutEffect`-এ measurement flash ছাড়াই কাজ করে), আর transition, Suspense-এর মতো React-এর concurrent feature support করে।
+            - **TurboModules:** JSI-এর ওপর বানানো native module, যেগুলো প্রথমবার ব্যবহারের সময় lazily load হয় আর TypeScript spec থেকে **Codegen** দিয়ে typed হয়, ফলে JS আর native-এর signature মিলে থাকে।
+            - **Bridgeless mode:** bridge আর তৈরিই হয় না; সবকিছু JSI দিয়ে চলে।
+
+            React Native 0.82 থেকে app **শুধু** New Architecture-এ চলে; legacy architecture আর চালু করা যায় না। JSI-এর নিচে JS engine হলো **Hermes**: এটা build-এর সময় JS-কে bytecode-এ precompile করে, ফলে startup দ্রুত হয় আর memory কম লাগে। 0.84 থেকে **Hermes V1** default engine।
+        """,
+        quick_en=r"""The old async JSON bridge is gone: JSI lets JS call native objects directly (even synchronously), Fabric is the C++ renderer with sync layout and concurrent React support, TurboModules are lazy, Codegen-typed native modules, and bridgeless means no bridge at all. Since 0.82 it's the only architecture; Hermes V1 is the default engine.""",
+        quick_bn=r"""পুরোনো async JSON bridge আর নেই: JSI দিয়ে JS সরাসরি (দরকারে synchronously) native object call করে, Fabric হলো sync layout আর concurrent React support-সহ C++ renderer, TurboModules হলো lazy load হওয়া, Codegen দিয়ে typed native module, আর bridgeless মানে bridge-ই নেই। 0.82 থেকে এটাই একমাত্র architecture; default engine Hermes V1।""",
+        ex_en=r"""
+            - **Why synchronous matters:** with the bridge, measuring a view or reading a native value always needed a callback, so the first frame could render in the wrong place. Fabric + JSI let React lay out, measure and commit in one pass.
+            - **Threads still exist.** JSI doesn't make everything synchronous; long native work should still be async (`AsyncFunction` in Expo modules) so it doesn't block the JS thread. And heavy JS still blocks touch handling and JS-driven animations.
+            - **Lazy TurboModules** help startup: a module you never touch is never initialised.
+            - **Codegen** generates the C++/Java/Objective-C glue from a typed spec, catching type mismatches at build time instead of as runtime crashes.
+            - **Library compatibility:** during the migration years (0.68–0.81) libraries could still use the old APIs through interop layers. On 0.82+ a library has to support the New Architecture; check it before adding it (the React Native Directory shows this).
+            - **Hermes:** bytecode precompilation cuts parse time on startup; `global.HermesInternal` tells you it's running. JavaScriptCore is now community-maintained, not the default.
+        """,
+        ex_bn=r"""
+            - **Synchronous কেন জরুরি:** bridge-এর যুগে কোনো view measure করা বা native value পড়তে সবসময় callback লাগত, তাই প্রথম frame ভুল জায়গায় render হতে পারত। Fabric + JSI থাকায় React এক pass-এই layout, measure আর commit করতে পারে।
+            - **Thread এখনো আছে।** JSI সবকিছু synchronous করে দেয় না; লম্বা native কাজ async রাখতে হয় (Expo module-এ `AsyncFunction`), যাতে JS thread block না হয়। আর ভারী JS এখনো touch handling আর JS-চালিত animation block করে।
+            - **Lazy TurboModules** startup-এ সাহায্য করে: যে module কখনো ছোঁয়া হয় না, সেটা কখনো initialise-ই হয় না।
+            - **Codegen** typed spec থেকে C++/Java/Objective-C glue code বানায়, তাই type mismatch runtime crash না হয়ে build-এর সময়ই ধরা পড়ে।
+            - **Library compatibility:** migration-এর বছরগুলোতে (0.68–0.81) library-গুলো interop layer দিয়ে পুরোনো API ব্যবহার করতে পারত। 0.82+ এ library-কে New Architecture support করতেই হবে; যোগ করার আগে যাচাই করো (React Native Directory-তে এটা দেখা যায়)।
+            - **Hermes:** bytecode precompile করায় startup-এ parse time কমে; `global.HermesInternal` দিয়ে বোঝা যায় Hermes চলছে কি না। JavaScriptCore এখন community-maintained, default না।
+        """,
+        tip_en=r"""Start with the bridge's three pain points (async-only, JSON serialisation, eager module init), then map each New Architecture piece to the pain it removes. Ending with "since 0.82 it's the only option, so I check library support first" shows you work with it in practice.""",
+        tip_bn=r"""Bridge-এর তিনটা সমস্যা দিয়ে শুরু করো (শুধু async, JSON serialisation, সব module আগেভাগে init), তারপর New Architecture-এর প্রতিটা অংশ কোন সমস্যা দূর করে সেটা মিলিয়ে দেখাও। শেষে "0.82 থেকে এটাই একমাত্র option, তাই আমি আগে library support যাচাই করি" বললে বোঝা যায় তুমি বাস্তবে এটা নিয়ে কাজ করো।""",
+        mist_en=r"""Describing the bridge as how React Native works today, or saying JSI makes every native call synchronous and therefore "threads don't matter any more". Heavy work still has to stay off the JS and UI threads.""",
+        mist_bn=r"""Bridge-কে আজকের React Native-এর কাজের পদ্ধতি হিসেবে বর্ণনা করা, অথবা বলা যে JSI প্রতিটা native call synchronous করে দেয় তাই "thread আর কোনো ব্যাপার না"। ভারী কাজ এখনো JS আর UI thread থেকে দূরে রাখতে হয়।""",
+        code=r"""
+            // Check the engine at runtime (true on Hermes)
+            const isHermes = () => !!(global as any).HermesInternal;
+
+            // A TurboModule spec in TypeScript; Codegen generates the native glue from it
+            // specs/NativeDeviceInfo.ts
+            import type { TurboModule } from 'react-native';
+            import { TurboModuleRegistry } from 'react-native';
+
+            export interface Spec extends TurboModule {
+              getBatteryLevel(): number;            // synchronous via JSI
+              getFreeDiskSpace(): Promise<number>;  // async
+            }
+
+            export default TurboModuleRegistry.getEnforcing<Spec>('NativeDeviceInfo');
+        """,
+        lang="typescript",
+        follow=[
+            ("Why can measuring a view with `useLayoutEffect` avoid a visual flash on Fabric but not on the old bridge?", "Fabric-এ `useLayoutEffect` দিয়ে view measure করলে কেন visual flash এড়ানো যায়, কিন্তু পুরোনো bridge-এ কেন যেত না?"),
+            ("What would you check before adding a third-party native library to an RN 0.88 app?", "RN 0.88 app-এ third-party native library যোগ করার আগে তুমি কী কী যাচাই করবে?"),
+            ("If you need native code in an Expo app, would you write a TurboModule or an Expo module?", "Expo app-এ native code লাগলে তুমি TurboModule লিখবে নাকি Expo module?"),
+        ],
+        related=["rn-036", "rn-034", "rn-001", "rn-038"],
+        refs=[R_ARCH, R_HERMES],
+    ),
+    # ------------------------------------------------------------------ rn-034
+    Q(
+        id="rn-034", sub="Animations", diff="hard", type="mcq",
+        prio="high", market="both", mins=4,
+        tags=["reanimated", "animations", "ui-thread", "js-thread", "native-driver"],
+        ver="React Native 0.88, Reanimated 4.7 (Expo SDK 58)", vs=True, status="stable",
+        q_en=r"""A card's slide-in animation is started, and right after that the screen runs 500 ms of synchronous JavaScript (parsing a big JSON response). Which implementation keeps the slide moving smoothly while the JS thread is busy?""",
+        q_bn=r"""একটা card-এর slide-in animation শুরু হলো, আর ঠিক তার পরেই screen-টা 500 ms ধরে synchronous JavaScript চালায় (একটা বড় JSON response parse করে)। কোন implementation-এ JS thread ব্যস্ত থাকার সময়েও slide মসৃণভাবে চলতে থাকবে?""",
+        options=[
+            ("`Animated.timing` on a `width` value with `useNativeDriver: false`", "`useNativeDriver: false` দিয়ে একটা `width` value-তে `Animated.timing`"),
+            ("A Reanimated shared value animated with `withTiming`, mapped to `transform: [{ translateX }]` in `useAnimatedStyle`", "`withTiming` দিয়ে animate করা একটা Reanimated shared value, যেটা `useAnimatedStyle`-এ `transform: [{ translateX }]`-এ map করা"),
+            ("A `setInterval` every 16 ms that calls `setState` to move the card a few pixels", "প্রতি 16 ms-এ একটা `setInterval`, যেটা `setState` call করে card-কে কয়েক pixel সরায়"),
+            ("`Animated.timing` on a `height` value with `useNativeDriver: true`", "`useNativeDriver: true` দিয়ে একটা `height` value-তে `Animated.timing`"),
+        ],
+        correct=1,
+        a_en=r"""**B** (the Reanimated shared value + `withTiming` driving `translateX` in `useAnimatedStyle`). Once started, Reanimated runs the animation as a worklet on the **UI thread**: each frame is computed and applied there, so a blocked JS thread doesn't stop it.""",
+        a_bn=r"""**B** (Reanimated shared value + `withTiming`, যেটা `useAnimatedStyle`-এ `translateX` চালায়)। একবার শুরু হলে Reanimated animation-টা worklet হিসেবে **UI thread**-এ চালায়: প্রতিটা frame সেখানেই হিসাব হয় আর apply হয়, তাই JS thread block থাকলেও animation থামে না।""",
+        quick_en=r"""The Reanimated version: a shared value animated with `withTiming` and mapped to `translateX` in `useAnimatedStyle`. Its frames are computed on the UI thread by worklets, so 500 ms of blocked JS doesn't freeze it; the JS-driven options all stall.""",
+        quick_bn=r"""Reanimated-এর version-টা: `withTiming` দিয়ে animate করা shared value, যেটা `useAnimatedStyle`-এ `translateX`-এ map করা। এর frame-গুলো worklet দিয়ে UI thread-এ হিসাব হয়, তাই 500 ms JS block থাকলেও এটা আটকায় না; JS-চালিত বাকি option-গুলো থেমে যায়।""",
+        ex_en=r"""
+            - **A** (`Animated.timing` on `width`, `useNativeDriver: false`): the next value is calculated in JS on every frame and sent to native. While JS is parsing JSON, no frames are produced, so the card freezes and then jumps.
+            - **C** (`setInterval` + `setState`): the worst option. Every frame is a React re-render on the JS thread; the timer can't even fire while JS is busy.
+            - **D** (`height` with `useNativeDriver: true`) is the tempting one, because the native driver does run on the UI thread. But the native driver only supports non-layout props such as `transform` and `opacity`; animating `height` with it throws an error. With `transform` instead of `height` it would also be smooth.
+            - **Why B works:** `useSharedValue`, `withTiming` and `useAnimatedStyle` run as worklets on the UI thread. Two caveats: the animation must be *started* before the JS thread blocks, and any callback that touches React state must hop back with `scheduleOnRN` from `react-native-worklets` (older code uses `runOnJS`).
+            - The real fix is still to move the heavy work: parse smaller pages, do it after the transition, or move it off the JS thread.
+        """,
+        ex_bn=r"""
+            - **A** (`width`-এ `Animated.timing`, `useNativeDriver: false`): প্রতিটা frame-এর পরের value JS-এ হিসাব হয়ে native-এ পাঠানো হয়। JS যখন JSON parse করছে, তখন কোনো frame তৈরি হয় না, তাই card আটকে যায় তারপর লাফ দেয়।
+            - **C** (`setInterval` + `setState`): সবচেয়ে খারাপ option। প্রতিটা frame JS thread-এ একটা React re-render; JS ব্যস্ত থাকলে timer fire-ই করতে পারে না।
+            - **D** (`useNativeDriver: true` দিয়ে `height`) লোভনীয় উত্তর, কারণ native driver সত্যিই UI thread-এ চলে। কিন্তু native driver শুধু layout-এর বাইরের prop support করে, যেমন `transform` আর `opacity`; এটা দিয়ে `height` animate করলে error হয়। `height`-এর বদলে `transform` হলে এটাও মসৃণ হতো।
+            - **B কেন কাজ করে:** `useSharedValue`, `withTiming` আর `useAnimatedStyle` worklet হিসেবে UI thread-এ চলে। দুইটা সতর্কতা: JS thread block হওয়ার *আগে* animation শুরু হতে হবে, আর যে callback React state ছোঁয় সেটাকে `react-native-worklets`-এর `scheduleOnRN` দিয়ে JS-এ ফেরত পাঠাতে হয় (পুরোনো code-এ `runOnJS` দেখা যায়)।
+            - আসল সমাধান তবু ভারী কাজ সরানো: ছোট page-এ parse করা, transition-এর পরে করা, বা JS thread থেকে সরিয়ে নেওয়া।
+        """,
+        tip_en=r"""Frame the answer around "who computes each frame": JS thread (Animated without the native driver, setState loops) or UI thread (native driver for transform/opacity, Reanimated worklets). Then name the native driver's layout-prop limitation; interviewers like that detail.""",
+        tip_bn=r"""উত্তরটা সাজাও "প্রতিটা frame কে হিসাব করে" প্রশ্ন দিয়ে: JS thread (native driver ছাড়া Animated, setState loop) নাকি UI thread (transform/opacity-র জন্য native driver, Reanimated worklet)। তারপর native driver-এর layout prop-এর সীমাবদ্ধতাটা বলো; interviewer-রা এই detail পছন্দ করে।""",
+        mist_en=r"""Believing `useNativeDriver: true` works for any style, or that Reanimated makes a blocked JS thread harmless. Touch handlers, navigation and state updates still wait for JS.""",
+        mist_bn=r"""ভাবা যে `useNativeDriver: true` যেকোনো style-এ কাজ করে, বা Reanimated থাকলে JS thread block হওয়া আর কোনো সমস্যা না। Touch handler, navigation আর state update তখনও JS-এর জন্য অপেক্ষা করে।""",
+        code=r"""
+            import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+            import { useEffect } from 'react';
+
+            export function SlideInCard({ children }: { children: React.ReactNode }) {
+              const x = useSharedValue(-300);
+
+              useEffect(() => {
+                x.value = withTiming(0, { duration: 600 }); // runs on the UI thread
+              }, []);
+
+              const style = useAnimatedStyle(() => ({
+                transform: [{ translateX: x.value }],
+              }));
+
+              return <Animated.View style={style}>{children}</Animated.View>;
+            }
+        """,
+        lang="tsx",
+        follow=[
+            ("How do you update React state when a Reanimated animation finishes?", "Reanimated animation শেষ হলে React state কীভাবে update করবে?"),
+            ("Why are gestures with Gesture Handler plus Reanimated smoother than `onPanResponderMove` + `setState`?", "Gesture Handler আর Reanimated দিয়ে বানানো gesture কেন `onPanResponderMove` + `setState`-এর চেয়ে মসৃণ?"),
+        ],
+        related=["rn-033", "rn-038", "rn-016"],
+        refs=[R_REA_GLOSSARY, R_ANIM, R_PERF],
+    ),
+    # ------------------------------------------------------------------ rn-035
+    Q(
+        id="rn-035", sub="EAS Update", diff="extreme", type="scenario",
+        prio="high", market="both", mins=12,
+        tags=["eas-update", "ota", "runtime-version", "rollback", "incident"],
+        ver="Expo SDK 58, eas-cli 25.x, expo-updates ~58", vs=True, status="stable",
+        q_en=r"""Advanced: your team published an EAS Update to the `production` channel and crash reports exploded within minutes. The new JS calls a native module (`react-native-mmkv`) that was added last week, but most users are on the store build from a month ago. `app.json` has `"runtimeVersion": "1.0.0"`, unchanged for months. What happened, how do you stop the bleeding right now, and how do you make sure it can't happen again?""",
+        q_bn=r"""Advanced: তোমার team `production` channel-এ একটা EAS Update publish করেছে, আর কয়েক মিনিটের মধ্যে crash report হু হু করে বাড়ছে। নতুন JS একটা native module (`react-native-mmkv`) call করে, যেটা গত সপ্তাহে যোগ করা হয়েছে, কিন্তু বেশিরভাগ user এক মাস আগের store build-এ আছে। `app.json`-এ `"runtimeVersion": "1.0.0"`, কয়েক মাস ধরে বদলানো হয়নি। কী হয়েছে, এখনই ক্ষতি থামাবে কীভাবে, আর ভবিষ্যতে যেন আর না হয় তার জন্য কী করবে?""",
+        a_en=r"""
+            **What happened:** EAS Update only ships JS and assets. It delivers an update to every build on that channel whose **runtime version matches**. Adding MMKV changed the native code, but the runtime version stayed `1.0.0`, so month-old builds (without MMKV compiled in) accepted the update, and the first call into the missing native module crashed the app.
+
+            **Stop the bleeding (minutes):**
+            1. Run `eas update:rollback` and republish the last known-good update to `production` (or roll back to the update embedded in the build). Clients pick it up on their next update check.
+            2. Check crash rates per update ID to confirm the rollback is spreading. Don't rely on `expo-updates`' built-in error recovery: it only catches fatal errors early in launch, and Expo's docs say it isn't a full safety net.
+            3. Ship the MMKV feature properly: new store build with a new runtime version, and only then updates that use it.
+
+            **Prevent it:**
+            - Use `runtimeVersion: { policy: "fingerprint" }`, which changes the runtime version whenever anything that can affect native code changes. Old builds then never receive incompatible JS. (`appVersion` works too, but only if every native change bumps the version.)
+            - Publish to `production` with a staged rollout (`eas update --rollout-percentage=10`) after testing the update on a **store-identical build** via a `preview`/staging channel.
+            - Add a CI check: if the fingerprint changed, block `eas update` and require `eas build` instead.
+        """,
+        a_bn=r"""
+            **কী হয়েছে:** EAS Update শুধু JS আর asset পাঠায়। ওই channel-এর যে build-গুলোর **runtime version মেলে**, তাদের সবাইকে update দেয়। MMKV যোগ করায় native code বদলেছে, কিন্তু runtime version `1.0.0`-ই থেকে গেছে, তাই এক মাস আগের build (যেখানে MMKV compile করা নেই) update-টা নিয়ে নিয়েছে, আর না-থাকা native module-এ প্রথম call-এই app crash করেছে।
+
+            **এখনই ক্ষতি থামানো (কয়েক মিনিটে):**
+            1. `eas update:rollback` চালিয়ে শেষ ভালো update-টা `production`-এ আবার publish করো (অথবা build-এ embedded update-এ ফিরে যাও)। Client-রা পরের update check-এ সেটা পেয়ে যাবে।
+            2. Update ID অনুযায়ী crash rate দেখে নিশ্চিত হও যে rollback ছড়াচ্ছে। `expo-updates`-এর built-in error recovery-র ওপর ভরসা করো না: এটা শুধু launch-এর শুরুর দিকের fatal error ধরে, আর Expo-র docs নিজেই বলে এটা পুরো safety net না।
+            3. MMKV feature-টা ঠিকভাবে ship করো: নতুন runtime version-সহ নতুন store build, তারপরই সেটা ব্যবহার করা update।
+
+            **ভবিষ্যতে ঠেকানো:**
+            - `runtimeVersion: { policy: "fingerprint" }` ব্যবহার করো, যেটা native code-কে প্রভাবিত করতে পারে এমন কিছু বদলালেই runtime version বদলে দেয়। তখন পুরোনো build কখনো incompatible JS পায় না। (`appVersion`-ও চলে, কিন্তু শুধু যদি প্রতিটা native পরিবর্তনে version বাড়ানো হয়।)
+            - Store-এর মতো হুবহু একটা build-এ `preview`/staging channel দিয়ে update test করার পর staged rollout (`eas update --rollout-percentage=10`) দিয়ে `production`-এ publish করো।
+            - CI-তে একটা check রাখো: fingerprint বদলালে `eas update` আটকে দিয়ে `eas build` বাধ্যতামূলক করো।
+        """,
+        quick_en=r"""The update's JS needed MMKV's native code, but the runtime version wasn't bumped, so old builds accepted it and crashed. Roll back now with `eas update:rollback`, ship MMKV in a new store build, and switch to the `fingerprint` runtime policy plus staged rollouts so incompatible JS can't reach old binaries.""",
+        quick_bn=r"""Update-এর JS-এর MMKV-এর native code দরকার ছিল, কিন্তু runtime version বাড়ানো হয়নি, তাই পুরোনো build update নিয়ে crash করেছে। এখনই `eas update:rollback` দিয়ে ফিরে যাও, MMKV নতুন store build-এ ship করো, আর `fingerprint` runtime policy ও staged rollout চালু করো যাতে incompatible JS পুরোনো binary-তে পৌঁছাতে না পারে।""",
+        ex_en=r"""
+            - **The mental model:** a store build = native binary + embedded JS. An update replaces only the JS/assets, and `runtimeVersion` is the contract that says "this JS is compatible with that binary". A manual string like `"1.0.0"` is only safe if humans never forget to bump it.
+            - **`fingerprint` trade-off:** it hashes native-affecting inputs (dependencies with native code, config plugins, native config), so incompatible updates become very unlikely, at the cost of more frequent store builds.
+            - **Rollback caveats:** rolling back is unsafe if the bad update already migrated persistent data (SQLite schema, MMKV/AsyncStorage keys) in a non-backward-compatible way. Then you fix forward with JS that understands both shapes.
+            - **Error recovery limits:** per Expo's docs, errors more than ~10 seconds after first render aren't caught, and after content has appeared `expo-updates` only fixes forward. Checking for updates soon after launch helps a fix reach users quickly.
+            - **Defensive JS (optional):** for optional native features, `requireOptionalNativeModule` returns `null` instead of throwing when a module is missing, so JS can hide the feature. That's a band-aid; the runtime version is the real guard.
+            - **Postmortem:** add "native dependency changed?" to the release checklist, and make CI compare fingerprints automatically.
+        """,
+        ex_bn=r"""
+            - **মূল mental model:** একটা store build = native binary + embedded JS। Update শুধু JS/asset বদলায়, আর `runtimeVersion` হলো চুক্তি যেটা বলে "এই JS ওই binary-র সাথে compatible"। `"1.0.0"`-এর মতো manual string ততক্ষণই নিরাপদ, যতক্ষণ মানুষ এটা বাড়াতে ভোলে না।
+            - **`fingerprint`-এর trade-off:** এটা native-কে প্রভাবিত করে এমন input (native code-সহ dependency, config plugin, native config) hash করে, তাই incompatible update প্রায় অসম্ভব হয়ে যায়, বিনিময়ে store build একটু বেশি ঘন ঘন করতে হয়।
+            - **Rollback-এর সতর্কতা:** খারাপ update যদি persistent data (SQLite schema, MMKV/AsyncStorage key) এমনভাবে migrate করে ফেলে যেটা backward-compatible না, তাহলে rollback নিরাপদ না। তখন দুই রকম data-ই বোঝে এমন JS দিয়ে fix forward করতে হয়।
+            - **Error recovery-র সীমা:** Expo-র docs অনুযায়ী প্রথম render-এর ~10 সেকেন্ড পরের error ধরা হয় না, আর content দেখানোর পরে `expo-updates` শুধু fix forward করে। Launch-এর পরপরই update check করলে fix দ্রুত user-দের কাছে পৌঁছায়।
+            - **Defensive JS (ঐচ্ছিক):** optional native feature-এর জন্য `requireOptionalNativeModule` module না থাকলে throw না করে `null` return করে, ফলে JS feature-টা লুকিয়ে রাখতে পারে। সেটা জোড়াতালি; আসল পাহারাদার runtime version।
+            - **Postmortem:** release checklist-এ "native dependency বদলেছে?" যোগ করো, আর CI-কে দিয়ে fingerprint তুলনা automatic করাও।
+        """,
+        tip_en=r"""Structure it like an incident: diagnosis (runtime version contract broken), mitigation (rollback/republish, verify per update ID), fix (new binary), prevention (fingerprint policy, staging channel, staged rollout, CI gate). Saying "rollback can be unsafe if data was migrated" signals real production experience.""",
+        tip_bn=r"""Incident-এর মতো সাজাও: diagnosis (runtime version-এর চুক্তি ভেঙেছে), mitigation (rollback/republish, update ID দিয়ে যাচাই), fix (নতুন binary), prevention (fingerprint policy, staging channel, staged rollout, CI gate)। "Data migrate হয়ে গেলে rollback নিরাপদ না" বললে বোঝা যায় তোমার সত্যিকারের production অভিজ্ঞতা আছে।""",
+        mist_en=r"""Thinking an OTA update can add or change native modules, permissions or app.json native settings. Those always need a new store build; updates are JS and assets only.""",
+        mist_bn=r"""ভাবা যে OTA update দিয়ে native module, permission বা app.json-এর native setting যোগ বা বদলানো যায়। এগুলোর জন্য সবসময় নতুন store build লাগে; update মানে শুধু JS আর asset।""",
+        code=r"""
+            # 1. Stop the bleeding: republish the last good update (interactive)
+            eas update:rollback
+
+            # 2. app.json -> make native changes change the runtime version automatically
+            #    "runtimeVersion": { "policy": "fingerprint" }
+
+            # 3. Ship the native change as a new binary
+            eas build --profile production --platform all
+
+            # 4. Future JS-only updates: test on preview, then roll out gradually
+            eas update --channel preview --message "Cart fix"
+            eas update --channel production --message "Cart fix" --rollout-percentage=10
+            eas update:edit   # raise the percentage once crash rates look normal
+        """,
+        lang="bash",
+        follow=[
+            ("When is rolling back an update unsafe, and what do you do instead?", "কখন update rollback করা নিরাপদ না, আর তখন তুমি কী করো?"),
+            ("Compare the `appVersion` and `fingerprint` runtime version policies.", "`appVersion` আর `fingerprint` runtime version policy তুলনা করো।"),
+            ("How do channels and branches relate in EAS Update?", "EAS Update-এ channel আর branch-এর সম্পর্ক কী?"),
+        ],
+        related=["rn-040", "rn-036", "rn-006", "rn-007"],
+        refs=[R_RUNTIME, R_ROLLBACK, R_ERR_RECOVERY],
+    ),
+    # ------------------------------------------------------------------ rn-036
+    Q(
+        id="rn-036", sub="Native Code", diff="hard", type="conceptual",
+        prio="medium", market="both", mins=6,
+        tags=["expo-modules", "config-plugins", "cng", "prebuild", "native-modules"],
+        ver="Expo SDK 58, React Native 0.88", vs=True, status="stable",
+        q_en=r"""In an Expo app, when do you actually need native code, and how do you add it? Explain the Expo Modules API, config plugins and Continuous Native Generation (`npx expo prebuild`), and why the team shouldn't hand-edit the `ios/` and `android/` folders.""",
+        q_bn=r"""একটা Expo app-এ আসলে কখন native code লাগে, আর সেটা কীভাবে যোগ করবে? Expo Modules API, config plugin আর Continuous Native Generation (`npx expo prebuild`) ব্যাখ্যা করো, আর team-এর কেন `ios/` আর `android/` folder হাতে edit করা উচিত না।""",
+        a_en=r"""
+            You need native code when JavaScript can't reach what you need: a platform API with no existing library, a vendor SDK that only ships for iOS/Android (say a Bluetooth printer SDK), a native UI view, or CPU-heavy work that's too slow in JS. First I look for a maintained library that supports the New Architecture and ships a config plugin; often that's enough.
+
+            If not, there are two tools:
+
+            - **Expo Modules API:** write a module in **Swift and Kotlin** with a small DSL (`Name`, `Function`, `AsyncFunction`, `Events`, `View`). `npx create-expo-module@latest --local` scaffolds it inside the app, and JS loads it with `requireNativeModule('Printer')`. It's built on JSI/TurboModule infrastructure, so it works with the New Architecture.
+            - **Config plugins:** functions that modify native project files (Info.plist, AndroidManifest, Gradle, entitlements) when the native projects are generated, e.g. adding a permission string.
+
+            **CNG (Continuous Native Generation):** `ios/` and `android/` are generated from `app.json`/`app.config.ts` + plugins by `npx expo prebuild` (EAS Build runs it for you). Treat them as build output and usually git-ignore them. Hand edits are lost on the next `prebuild --clean`, nobody can review them as config, and SDK upgrades become painful. Put every native change in config or a plugin so it's reproducible.
+        """,
+        a_bn=r"""
+            Native code তখনই লাগে যখন JavaScript দিয়ে দরকারি জিনিসটা পাওয়া যায় না: কোনো platform API যার library নেই, শুধু iOS/Android-এর জন্য দেওয়া কোনো vendor SDK (ধরো একটা Bluetooth printer SDK), একটা native UI view, বা CPU-heavy কাজ যেটা JS-এ খুব ধীর। আমি আগে এমন একটা maintained library খুঁজি যেটা New Architecture support করে আর config plugin দেয়; প্রায়ই সেটাই যথেষ্ট।
+
+            না পেলে দুইটা tool আছে:
+
+            - **Expo Modules API:** **Swift আর Kotlin**-এ একটা ছোট DSL (`Name`, `Function`, `AsyncFunction`, `Events`, `View`) দিয়ে module লেখা। `npx create-expo-module@latest --local` app-এর ভেতরেই এর scaffold বানায়, আর JS এটা load করে `requireNativeModule('Printer')` দিয়ে। এটা JSI/TurboModule infrastructure-এর ওপর বানানো, তাই New Architecture-এ কাজ করে।
+            - **Config plugins:** native project তৈরি হওয়ার সময় native file (Info.plist, AndroidManifest, Gradle, entitlements) বদলানোর function, যেমন একটা permission string যোগ করা।
+
+            **CNG (Continuous Native Generation):** `ios/` আর `android/` তৈরি হয় `app.json`/`app.config.ts` + plugin থেকে, `npx expo prebuild` দিয়ে (EAS Build নিজেই এটা চালায়)। এগুলোকে build output হিসেবে দেখো, সাধারণত git-ignore করো। হাতে edit করলে পরের `prebuild --clean`-এ সেটা হারিয়ে যায়, config হিসেবে কেউ review করতে পারে না, আর SDK upgrade কষ্টকর হয়ে যায়। প্রতিটা native পরিবর্তন config বা plugin-এ রাখো, যাতে বারবার একইভাবে তৈরি করা যায়।
+        """,
+        quick_en=r"""Write native code only when no maintained library covers the platform API, vendor SDK or native view you need. Use the Expo Modules API (Swift/Kotlin) for the code and config plugins for native config; `ios/`/`android/` are regenerated by `npx expo prebuild`, so hand edits get lost and make upgrades painful.""",
+        quick_bn=r"""Native code তখনই লেখো যখন দরকারি platform API, vendor SDK বা native view-এর জন্য কোনো maintained library নেই। Code-এর জন্য Expo Modules API (Swift/Kotlin), native config-এর জন্য config plugin; `ios/`/`android/` `npx expo prebuild` দিয়ে আবার তৈরি হয়, তাই হাতে করা edit হারিয়ে যায় আর upgrade কষ্টকর হয়।""",
+        ex_en=r"""
+            - **Native changes mean a new binary.** Adding a module or plugin changes the runtime, so you need a new development build and a new store build; it can't ship as an EAS Update, and it won't run in Expo Go.
+            - **Expo module vs Turbo Native Module:** both work on the New Architecture. Expo modules give a Swift/Kotlin-first DSL, auto-linking and easy config plugins; Turbo Native Modules use Codegen from a TS spec and are the React Native core approach. In an Expo app, the Expo Modules API is usually less boilerplate.
+            - **Async by default for slow work:** use `AsyncFunction` for anything that does I/O, so it runs off the JS thread and returns a Promise.
+            - **Config plugin details:** plugins run at prebuild time, receive the Expo config, and use "mods" such as `withInfoPlist` or `withAndroidManifest`. They should be idempotent, since prebuild may run many times.
+            - **Escape hatch:** you *can* commit `ios/`/`android/` and edit them (a "bare" project), but then you own those files during every upgrade. Most teams are better off staying on CNG.
+            - **Legacy note:** `react-native link` is long gone; autolinking handles native dependencies.
+        """,
+        ex_bn=r"""
+            - **Native পরিবর্তন মানে নতুন binary।** Module বা plugin যোগ করলে runtime বদলায়, তাই নতুন development build আর নতুন store build লাগে; এটা EAS Update হিসেবে ship করা যায় না, আর Expo Go-তে চলবে না।
+            - **Expo module বনাম Turbo Native Module:** দুটোই New Architecture-এ চলে। Expo module দেয় Swift/Kotlin-কেন্দ্রিক DSL, autolinking আর সহজ config plugin; Turbo Native Module TS spec থেকে Codegen ব্যবহার করে, এটা React Native core-এর পদ্ধতি। Expo app-এ সাধারণত Expo Modules API-তে boilerplate কম।
+            - **ধীর কাজ default-ভাবে async:** I/O করে এমন যেকোনো কিছুর জন্য `AsyncFunction` ব্যবহার করো, যাতে এটা JS thread-এর বাইরে চলে আর Promise return করে।
+            - **Config plugin-এর detail:** plugin prebuild-এর সময় চলে, Expo config পায়, আর `withInfoPlist` বা `withAndroidManifest`-এর মতো "mod" ব্যবহার করে। এগুলো idempotent হওয়া উচিত, কারণ prebuild অনেকবার চলতে পারে।
+            - **Escape hatch:** চাইলে `ios/`/`android/` commit করে edit করা *যায়* (একটা "bare" project), কিন্তু তখন প্রতিটা upgrade-এ ওই file-গুলোর দায়িত্ব তোমার। বেশিরভাগ team-এর জন্য CNG-তে থাকাই ভালো।
+            - **Legacy note:** `react-native link` বহু আগেই বাদ; native dependency এখন autolinking সামলায়।
+        """,
+        tip_en=r"""Give a decision ladder: existing library with config plugin → local Expo module → (rarely) committed native folders. Then explain CNG in one sentence: "native projects are build artifacts generated from config". That shows you can keep a team on smooth SDK upgrades.""",
+        tip_bn=r"""একটা decision ladder দাও: config plugin-সহ existing library → local Expo module → (কদাচিৎ) commit করা native folder। তারপর এক বাক্যে CNG বলো: "native project হলো config থেকে তৈরি build artifact"। এতে বোঝা যায় তুমি team-কে মসৃণ SDK upgrade-এর পথে রাখতে পারো।""",
+        mist_en=r"""Opening Xcode/Android Studio and editing `Info.plist` or `AndroidManifest.xml` directly in a CNG project; the change disappears on the next prebuild or EAS Build and nobody knows why the permission is missing.""",
+        mist_bn=r"""CNG project-এ Xcode/Android Studio খুলে সরাসরি `Info.plist` বা `AndroidManifest.xml` edit করা; পরের prebuild বা EAS Build-এ পরিবর্তনটা হারিয়ে যায়, আর কেউ বুঝতে পারে না permission কেন নেই।""",
+        code=r"""
+            // plugins/withPrinter.js — a config plugin (runs at prebuild time)
+            const { withInfoPlist, AndroidConfig } = require('expo/config-plugins');
+
+            module.exports = function withPrinter(config, { bluetoothReason }) {
+              config = withInfoPlist(config, (cfg) => {
+                cfg.modResults.NSBluetoothAlwaysUsageDescription = bluetoothReason;
+                return cfg;
+              });
+              return AndroidConfig.Permissions.withPermissions(config, [
+                'android.permission.BLUETOOTH_CONNECT',
+              ]);
+            };
+
+            // app.json
+            // "plugins": [["./plugins/withPrinter", { "bluetoothReason": "Print receipts on your Bluetooth printer" }]]
+
+            // JS side of a local Expo module (created with: npx create-expo-module@latest --local)
+            import { requireNativeModule } from 'expo-modules-core';
+            const Printer = requireNativeModule('Printer');
+            await Printer.printText('Order #1042');
+        """,
+        lang="javascript",
+        extra=[dict(lang="text", src=r"""
+            // modules/printer/android/src/main/java/expo/modules/printer/PrinterModule.kt
+            package expo.modules.printer
+
+            import expo.modules.kotlin.modules.Module
+            import expo.modules.kotlin.modules.ModuleDefinition
+
+            class PrinterModule : Module() {
+              override fun definition() = ModuleDefinition {
+                Name("Printer")
+
+                Function("isSupported") { true }
+
+                AsyncFunction("printText") { text: String ->
+                  // call the vendor's Android SDK here (off the JS thread)
+                }
+              }
+            }
+        """, label_en="Kotlin side of the Expo module", label_bn="Expo module-এর Kotlin অংশ")],
+        follow=[
+            ("Why can't a new native module be shipped with EAS Update?", "নতুন native module কেন EAS Update দিয়ে ship করা যায় না?"),
+            ("What makes a config plugin safe to run many times?", "কোন জিনিসটা একটা config plugin-কে বারবার চালানোর জন্য নিরাপদ করে?"),
+        ],
+        related=["rn-033", "rn-035", "rn-006", "rn-007"],
+        refs=[R_MODULE_API, R_PLUGINS, R_CNG],
+    ),
+    # ------------------------------------------------------------------ rn-037
+    Q(
+        id="rn-037", sub="Push Notifications", diff="medium", type="scenario",
+        prio="high", market="both", mins=7,
+        tags=["push-notifications", "expo-notifications", "fcm", "apns", "deep-linking"],
+        ver="Expo SDK 58 (expo-notifications ~58, Expo Router)", vs=True, status="stable",
+        q_en=r"""You need order-status push notifications in an Expo Router app: when the user taps "Your order has shipped", the app should open `/orders/42`. Walk through the setup: permission, tokens (Expo push token vs FCM/APNs), sending from the backend, handling the tap, and how you test it.""",
+        q_bn=r"""একটা Expo Router app-এ order-status push notification লাগবে: user "Your order has shipped"-এ tap করলে app `/orders/42` খুলবে। পুরো setup ধাপে ধাপে বলো: permission, token (Expo push token বনাম FCM/APNs), backend থেকে পাঠানো, tap handle করা, আর কীভাবে test করবে।""",
+        a_en=r"""
+            1. **Credentials and build:** push needs a **development build** (remote push doesn't work in Expo Go on Android since SDK 53). Configure FCM V1 credentials for Android and let EAS manage the APNs key for iOS.
+            2. **Permission:** on Android create a notification channel first, then call `getPermissionsAsync()` / `requestPermissionsAsync()`. I ask in context (e.g. right after the first order: "Get shipping updates?") rather than on first launch, because a denied iOS prompt can't be shown again; the user has to go to Settings.
+            3. **Token:** `getExpoPushTokenAsync({ projectId })` returns an **Expo push token**. The Expo Push Service forwards to FCM/APNs for me, so the backend uses one API for both platforms. (If I need FCM/APNs directly, `getDevicePushTokenAsync()` gives the native token.) Send the token to the backend with the user ID and refresh it on each launch.
+            4. **Send:** the backend posts `{ to, title, body, data: { url: '/orders/42' } }` to the Expo push API, then checks **push receipts**; a `DeviceNotRegistered` error means delete that token.
+            5. **Handle taps:** `addNotificationResponseReceivedListener` for taps while running, plus `getLastNotificationResponseAsync()` for a cold start, then `router.push(data.url)`.
+            6. **Test** on a physical device (or an emulator with Google Play services / a recent iOS Simulator), with the app in foreground, background and killed.
+        """,
+        a_bn=r"""
+            1. **Credential আর build:** push-এর জন্য **development build** লাগে (SDK 53 থেকে Android-এ Expo Go-তে remote push কাজ করে না)। Android-এর জন্য FCM V1 credential configure করো, আর iOS-এর APNs key EAS-কে manage করতে দাও।
+            2. **Permission:** Android-এ আগে একটা notification channel তৈরি করো, তারপর `getPermissionsAsync()` / `requestPermissionsAsync()` call করো। আমি প্রসঙ্গ বুঝে জিজ্ঞেস করি (যেমন প্রথম order-এর ঠিক পরে: "Shipping update পেতে চান?"), প্রথম launch-এ না, কারণ iOS-এ একবার deny করলে prompt আর দেখানো যায় না; user-কে Settings-এ যেতে হয়।
+            3. **Token:** `getExpoPushTokenAsync({ projectId })` একটা **Expo push token** দেয়। Expo Push Service আমার হয়ে FCM/APNs-এ পাঠিয়ে দেয়, তাই backend দুই platform-এর জন্য একটাই API ব্যবহার করে। (সরাসরি FCM/APNs লাগলে `getDevicePushTokenAsync()` native token দেয়।) Token-টা user ID-সহ backend-এ পাঠাও, আর প্রতি launch-এ refresh করো।
+            4. **পাঠানো:** backend Expo push API-তে `{ to, title, body, data: { url: '/orders/42' } }` post করে, তারপর **push receipt** check করে; `DeviceNotRegistered` error মানে ওই token মুছে ফেলো।
+            5. **Tap handle করা:** app চলার সময়ের tap-এর জন্য `addNotificationResponseReceivedListener`, আর cold start-এর জন্য `getLastNotificationResponseAsync()`, তারপর `router.push(data.url)`।
+            6. **Test** করো physical device-এ (অথবা Google Play services-সহ emulator / সাম্প্রতিক iOS Simulator-এ), app foreground, background আর বন্ধ, তিন অবস্থাতেই।
+        """,
+        quick_en=r"""Use a development build, ask permission in context (Android channel first), get an Expo push token with `getExpoPushTokenAsync({ projectId })` and store it on the backend, which sends via the Expo Push Service (FCM/APNs underneath) with `data.url`. On tap, read the response and `router.push(url)`; test on real devices in all app states.""",
+        quick_bn=r"""Development build ব্যবহার করো, প্রসঙ্গ বুঝে permission চাও (Android-এ আগে channel), `getExpoPushTokenAsync({ projectId })` দিয়ে Expo push token নিয়ে backend-এ রাখো; backend Expo Push Service (নিচে FCM/APNs) দিয়ে `data.url`-সহ পাঠায়। Tap হলে response পড়ে `router.push(url)` করো; real device-এ app-এর সব অবস্থায় test করো।""",
+        ex_en=r"""
+            - **Foreground behaviour:** by default a notification that arrives while the app is open isn't shown. `setNotificationHandler` decides; in current versions use `shouldShowBanner` / `shouldShowList` (the old `shouldShowAlert` is deprecated).
+            - **Cold start:** the tap listener isn't registered yet when the app is launched by the tap, which is why you also read the last response on mount.
+            - **Validate the URL:** only navigate to in-app paths you expect (e.g. starting with `/orders/`); a push payload is input like any other.
+            - **Tokens change:** reinstall, restore to a new phone or clearing data issues a new token. Store tokens per device, upsert on launch, and remove dead ones from receipts.
+            - **Don't send sensitive data in the payload:** it can appear on the lock screen. Send an ID and let the app fetch details after auth.
+            - **Android 13+** requires the runtime `POST_NOTIFICATIONS` permission, which is why the channel/permission order matters.
+        """,
+        ex_bn=r"""
+            - **Foreground-এ আচরণ:** default-ভাবে app খোলা থাকা অবস্থায় আসা notification দেখানো হয় না। `setNotificationHandler` এটা ঠিক করে; বর্তমান version-এ `shouldShowBanner` / `shouldShowList` ব্যবহার করো (পুরোনো `shouldShowAlert` deprecated)।
+            - **Cold start:** tap দিয়ে app launch হলে তখনও tap listener register হয়নি, এজন্যই mount-এর সময় last response-ও পড়তে হয়।
+            - **URL যাচাই করো:** শুধু প্রত্যাশিত in-app path-এ navigate করো (যেমন `/orders/` দিয়ে শুরু); push payload-ও অন্য যেকোনো input-এর মতোই।
+            - **Token বদলায়:** reinstall, নতুন phone-এ restore বা data clear করলে নতুন token আসে। প্রতি device-এর token রাখো, launch-এ upsert করো, আর receipt দেখে মরা token সরিয়ে দাও।
+            - **Payload-এ sensitive data পাঠিয়ো না:** এটা lock screen-এ দেখা যেতে পারে। শুধু একটা ID পাঠাও, auth-এর পরে app detail fetch করুক।
+            - **Android 13+**-এ runtime `POST_NOTIFICATIONS` permission লাগে, এজন্যই channel/permission-এর ক্রম গুরুত্বপূর্ণ।
+        """,
+        tip_en=r"""Walk the lifecycle in order: credentials → permission → token → send → receipts → tap → test. Mentioning cold-start handling and receipt-based token cleanup shows you've shipped push, not just read the docs.""",
+        tip_bn=r"""Lifecycle-টা ক্রমানুসারে বলো: credential → permission → token → send → receipt → tap → test। Cold-start handling আর receipt দেখে token পরিষ্কার করার কথা বললে বোঝা যায় তুমি সত্যিই push ship করেছ, শুধু docs পড়োনি।""",
+        mist_en=r"""Testing only in Expo Go or only with the app in the foreground, and asking for notification permission on the very first screen before the user sees any value.""",
+        mist_bn=r"""শুধু Expo Go-তে বা শুধু app foreground-এ রেখে test করা, আর user কোনো উপকার দেখার আগেই একদম প্রথম screen-এ notification permission চাওয়া।""",
+        code=r"""
+            import * as Notifications from 'expo-notifications';
+            import Constants from 'expo-constants';
+            import { router } from 'expo-router';
+            import { useEffect } from 'react';
+            import { Platform } from 'react-native';
+
+            Notifications.setNotificationHandler({
+              handleNotification: async () => ({
+                shouldShowBanner: true, shouldShowList: true,
+                shouldPlaySound: false, shouldSetBadge: false,
+              }),
+            });
+
+            export async function registerForPushAsync(): Promise<string | null> {
+              if (Platform.OS === 'android') {
+                await Notifications.setNotificationChannelAsync('orders', {
+                  name: 'Order updates', importance: Notifications.AndroidImportance.DEFAULT,
+                });
+              }
+              let { status } = await Notifications.getPermissionsAsync();
+              if (status !== 'granted') ({ status } = await Notifications.requestPermissionsAsync());
+              if (status !== 'granted') return null;
+
+              const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+              return (await Notifications.getExpoPushTokenAsync({ projectId })).data; // send to backend
+            }
+
+            export function useNotificationDeepLinks() {
+              useEffect(() => {
+                let active = true;
+                const open = (n: Notifications.Notification) => {
+                  const url = n.request.content.data?.url;
+                  if (typeof url === 'string' && url.startsWith('/orders/')) router.push(url);
+                };
+                Notifications.getLastNotificationResponseAsync().then((r) => {
+                  if (active && r) open(r.notification); // cold start
+                });
+                const sub = Notifications.addNotificationResponseReceivedListener((r) => open(r.notification));
+                return () => { active = false; sub.remove(); };
+              }, []);
+            }
+        """,
+        lang="tsx",
+        follow=[
+            ("Why might a notification be received but not displayed while the app is open?", "App খোলা অবস্থায় notification receive হলেও কেন দেখা নাও যেতে পারে?"),
+            ("When would you skip the Expo Push Service and send to FCM/APNs directly?", "কখন তুমি Expo Push Service বাদ দিয়ে সরাসরি FCM/APNs-এ পাঠাবে?"),
+        ],
+        related=["rn-020", "rn-007", "rn-017"],
+        refs=[R_PUSH_SETUP, R_NOTIF, R_PUSH_SEND],
+    ),
+    # ------------------------------------------------------------------ rn-038
+    Q(
+        id="rn-038", sub="Performance", diff="extreme", type="scenario",
+        prio="high", market="both", mins=15,
+        tags=["performance", "profiling", "devtools", "re-renders", "startup"],
+        ver="React Native 0.88, Expo SDK 58 (React Native DevTools)", vs=True, status="stable",
+        q_en=r"""Advanced: production incident. Users on low-end Android phones report that the product details screen is janky: scrolling stutters, the "Add to cart" button reacts late, and the app takes long to start. iPhones and the team's flagship test phones feel fine. How do you investigate and fix it?""",
+        q_bn=r"""Advanced: production incident। কম দামের Android phone-এর user-রা বলছে product details screen আটকে আটকে চলে: scroll থেমে থেমে যায়, "Add to cart" button দেরিতে সাড়া দেয়, আর app start হতেও অনেক সময় লাগে। iPhone আর team-এর দামি test phone-এ সব ঠিক লাগে। কীভাবে investigate আর fix করবে?""",
+        a_en=r"""
+            **1. Reproduce honestly.** Use a real low-end Android device and a **release** build (dev mode adds checks and is much slower, so it lies in both directions). Note which thread is struggling: a stuck button means the **JS thread** is busy; stuttering scroll with a free JS thread points to the **UI thread** (huge images, overdraw, heavy views).
+
+            **2. Measure before changing anything.**
+            - **React Native DevTools → Performance** (0.83+): a timeline of JS execution, React tracks and network. Long JS tasks show up immediately.
+            - **React Profiler**: which components re-render on scroll or on each price/stock tick, and why.
+            - On Android, the system profiler (Android Studio / Perfetto) for UI thread frames and memory.
+
+            **3. Typical culprits and fixes.**
+            - **Images:** 3000 px product photos decoded into memory on a 720 px phone. Request sized images from the CDN and use `expo-image` (caching, placeholders, `recyclingKey` in lists).
+            - **Re-renders:** a context or store holding the whole cart re-renders the entire screen on every change. Use selectors (Zustand) or split contexts, memoise rows and stable callbacks (or let React Compiler do it).
+            - **Lists:** "related products" in a `ScrollView` + `map` renders everything; use `FlatList`/FlashList v2.
+            - **Heavy JS in render:** formatting/sorting big arrays on every render; compute once, memoise, or do it on the server. Remove `console.log` noise in production.
+            - **Startup:** big synchronous work before the first screen (loading all data, eager imports, large JSON). Defer non-critical work with `requestIdleCallback` or after navigation (`InteractionManager` is gone), lazy-load heavy screens, and keep Hermes bytecode in release builds.
+
+            **4. Verify and guard.** Re-measure on the same device, then add a performance budget (startup time, frame drops) to release checks and monitor real-user metrics so it doesn't regress.
+        """,
+        a_bn=r"""
+            **১. সৎভাবে reproduce করো।** সত্যিকারের কম দামের Android device আর **release** build ব্যবহার করো (dev mode-এ বাড়তি check থাকে আর অনেক ধীর, তাই এটা দুই দিকেই ভুল ছবি দেয়)। খেয়াল করো কোন thread কষ্ট পাচ্ছে: button আটকে থাকা মানে **JS thread** ব্যস্ত; JS thread ফাঁকা থাকা অবস্থায় scroll থেমে থেমে গেলে সমস্যা **UI thread**-এ (বিশাল image, overdraw, ভারী view)।
+
+            **২. কিছু বদলানোর আগে মাপো।**
+            - **React Native DevTools → Performance** (0.83+): JS execution, React track আর network-এর একটা timeline। লম্বা JS task সাথে সাথে চোখে পড়ে।
+            - **React Profiler**: scroll-এ বা প্রতিটা price/stock পরিবর্তনে কোন component re-render হচ্ছে, আর কেন।
+            - Android-এ UI thread-এর frame আর memory দেখতে system profiler (Android Studio / Perfetto)।
+
+            **৩. সাধারণ অপরাধী আর সমাধান।**
+            - **Image:** 720 px-এর phone-এ 3000 px product photo memory-তে decode হচ্ছে। CDN থেকে মাপমতো image আনো আর `expo-image` ব্যবহার করো (caching, placeholder, list-এ `recyclingKey`)।
+            - **Re-render:** পুরো cart রাখা একটা context বা store প্রতিটা পরিবর্তনে পুরো screen re-render করায়। Selector (Zustand) বা আলাদা context ব্যবহার করো, row memoise করো আর callback stable রাখো (অথবা React Compiler-কে করতে দাও)।
+            - **List:** "related products" `ScrollView` + `map`-এ সবকিছু render করে; `FlatList`/FlashList v2 ব্যবহার করো।
+            - **Render-এ ভারী JS:** প্রতি render-এ বড় array format/sort করা; একবার হিসাব করো, memoise করো, বা server-এ করো। Production-এ `console.log`-এর আবর্জনা সরাও।
+            - **Startup:** প্রথম screen-এর আগে বড় synchronous কাজ (সব data load, eager import, বড় JSON)। জরুরি না এমন কাজ `requestIdleCallback` দিয়ে বা navigation-এর পরে পিছিয়ে দাও (`InteractionManager` আর নেই), ভারী screen lazy-load করো, আর release build-এ Hermes bytecode রাখো।
+
+            **৪. যাচাই আর পাহারা।** একই device-এ আবার মাপো, তারপর release check-এ একটা performance budget (startup time, frame drop) যোগ করো আর real-user metric monitor করো যাতে আবার খারাপ না হয়।
+        """,
+        quick_en=r"""Reproduce on a low-end Android release build and profile (React Native DevTools Performance panel, React Profiler, Android profiler) to find whether the JS or UI thread is the bottleneck. Usual fixes: right-sized images with `expo-image`, fewer re-renders, virtualised lists, deferred startup work.""",
+        quick_bn=r"""সত্যিকারের কম দামের Android-এ release build দিয়ে reproduce করো, তারপর React Native DevTools (Performance panel, React Profiler) আর Android profiler দিয়ে মাপো যে bottleneck JS thread-এ নাকি UI thread-এ। সাধারণ সমাধান: `expo-image` দিয়ে মাপমতো image, selector/memoisation দিয়ে কম re-render, virtualised list, আর startup-এর কাজ পিছিয়ে দেওয়া।""",
+        ex_en=r"""
+            - **Why low-end Android specifically:** slower CPUs make every millisecond of JS count several times over, and less RAM means big bitmaps trigger garbage collection pauses or out-of-memory crashes. Flagship phones hide all of this.
+            - **Frame budget:** at 60 Hz you have ~16.7 ms per frame. A 100 ms JS task means touches and JS-driven updates wait for six frames.
+            - **Image math:** a 3000×3000 image decoded as RGBA takes about 36 MB of memory regardless of its file size. Downsizing at the source fixes both bandwidth and memory.
+            - **Don't optimise blind:** `memo` everywhere adds comparison cost and noise. Fix what the profiler shows, one change at a time, and re-measure.
+            - **Animations:** if a sticky header or image carousel animates in JS, move it to Reanimated/native driver so it stays smooth even when JS is busy.
+            - **Startup specifics:** measure cold start to first meaningful screen; check bundle size for heavy dependencies (date/locale libraries, unused icon sets), and keep the splash screen up only until critical data is ready.
+        """,
+        ex_bn=r"""
+            - **বিশেষ করে কম দামের Android কেন:** ধীর CPU-তে JS-এর প্রতিটা millisecond কয়েক গুণ ভারী হয়ে যায়, আর কম RAM মানে বড় bitmap garbage collection-এর বিরতি বা out-of-memory crash ঘটায়। দামি phone এসব লুকিয়ে রাখে।
+            - **Frame budget:** 60 Hz-এ প্রতি frame-এ ~16.7 ms সময় পাওয়া যায়। 100 ms-এর একটা JS task মানে touch আর JS-চালিত update ছয়টা frame অপেক্ষা করে।
+            - **Image-এর হিসাব:** একটা 3000×3000 image RGBA হিসেবে decode হলে file size যাই হোক, memory-তে প্রায় 36 MB নেয়। Source-এই ছোট করলে bandwidth আর memory দুটোই ঠিক হয়।
+            - **অন্ধভাবে optimise কোরো না:** সব জায়গায় `memo` দিলে তুলনার খরচ আর জটিলতা বাড়ে। Profiler যা দেখায় সেটা ঠিক করো, একবারে একটা পরিবর্তন, তারপর আবার মাপো।
+            - **Animation:** sticky header বা image carousel যদি JS-এ animate হয়, সেটাকে Reanimated/native driver-এ নাও, যাতে JS ব্যস্ত থাকলেও মসৃণ থাকে।
+            - **Startup-এর খুঁটিনাটি:** cold start থেকে প্রথম কাজের screen পর্যন্ত সময় মাপো; ভারী dependency (date/locale library, অব্যবহৃত icon set)-এর জন্য bundle size দেখো, আর জরুরি data তৈরি না হওয়া পর্যন্তই splash screen রাখো।
+        """,
+        tip_en=r"""Lead with method, not tricks: reproduce on the right device and build → identify the thread → profile → fix the top offender → re-measure → add a guard. Interviewers grading extreme questions want that loop more than a list of `memo` tips.""",
+        tip_bn=r"""কৌশল না, পদ্ধতি দিয়ে শুরু করো: সঠিক device আর build-এ reproduce → কোন thread চিহ্নিত করো → profile → সবচেয়ে বড় অপরাধী ঠিক করো → আবার মাপো → পাহারা বসাও। Extreme প্রশ্নে interviewer `memo`-র টিপসের তালিকার চেয়ে এই loop-টাই বেশি শুনতে চায়।""",
+        mist_en=r"""Profiling in development mode on a fast phone or simulator, then "fixing" things that weren't the bottleneck, such as wrapping every component in `memo` while 4K images keep exhausting memory.""",
+        mist_bn=r"""দ্রুত phone বা simulator-এ development mode-এ profile করা, তারপর যেগুলো bottleneck না সেগুলো "ঠিক" করা, যেমন প্রতিটা component `memo`-তে মোড়ানো, অথচ 4K image memory শেষ করেই যাচ্ছে।""",
+        code=r"""
+            import { Image } from 'expo-image';
+            import { memo } from 'react';
+            import { useCartStore } from '@/features/cart/store';
+
+            // Subscribe to one number, not the whole cart object
+            function CartBadge() {
+              const count = useCartStore((s) => s.items.length);
+              return <Badge value={count} />;
+            }
+
+            // Right-sized, cached image; recyclingKey matters inside recycled list cells
+            const RelatedProduct = memo(function RelatedProduct({ item }: { item: Product }) {
+              return (
+                <Image
+                  source={{ uri: `${item.imageUrl}?w=320` }}
+                  placeholder={{ blurhash: item.blurhash }}
+                  recyclingKey={item.id}
+                  style={{ width: 160, height: 160 }}
+                  contentFit="cover"
+                />
+              );
+            });
+        """,
+        lang="tsx",
+        follow=[
+            ("How do you tell a JS-thread problem from a UI-thread problem?", "JS thread-এর সমস্যা আর UI thread-এর সমস্যা কীভাবে আলাদা করে চিনবে?"),
+            ("What would you measure to prove startup time improved?", "Startup time যে উন্নত হয়েছে তা প্রমাণ করতে কী মাপবে?"),
+            ("Why can development builds show performance problems that don't exist in release?", "Development build কেন এমন performance সমস্যা দেখাতে পারে যেটা release-এ নেই?"),
+        ],
+        related=["rn-016", "rn-014", "rn-034", "rn-028", "react-014"],
+        refs=[R_DEVTOOLS, R_PERF, R_EXPO_IMAGE],
+    ),
+    # ------------------------------------------------------------------ rn-039
+    Q(
+        id="rn-039", sub="Testing", diff="easy", type="conceptual",
+        prio="medium", market="both", mins=4,
+        tags=["testing", "jest", "rntl", "maestro", "detox"],
+        ver="Expo SDK 58 (jest-expo), React Native Testing Library 14", vs=True, status="stable",
+        q_en=r"""How do you test a React Native app? Explain unit/component tests with Jest and React Native Testing Library (queries like `getByRole`, `userEvent`), what you mock, and where end-to-end tools such as Maestro or Detox fit.""",
+        q_bn=r"""একটা React Native app কীভাবে test করো? Jest আর React Native Testing Library দিয়ে unit/component test (যেমন `getByRole`-এর মতো query, `userEvent`), কী mock করো, আর Maestro বা Detox-এর মতো end-to-end tool কোথায় লাগে, ব্যাখ্যা করো।""",
+        a_en=r"""
+            I use two layers:
+
+            - **Jest + React Native Testing Library (RNTL)** for logic and components. In an Expo app the `jest-expo` preset sets up the transforms and mocks many Expo native modules. RNTL renders components in Node (no device) and lets me test what the user sees: find elements by role and accessible name (`getByRole('button', { name: 'Log in' })`), interact with `userEvent` (`type`, `press`), and assert on the result. In RNTL 14 `render` and `userEvent` calls are awaited.
+            - **End-to-end (E2E)** on a real build in an emulator/device for the few critical journeys: login, checkout, push-tap. **Maestro** uses simple YAML flows and works with any build; **Detox** is a JS-based gray-box framework that waits for the app to go idle.
+
+            **What to mock:** the network (a mock server or mocked fetch layer), native modules that Jest can't run (secure store, notifications, camera), time, and navigation when testing a screen in isolation. I don't mock the component's own children or state; that tests implementation details.
+        """,
+        a_bn=r"""
+            আমি দুইটা স্তর ব্যবহার করি:
+
+            - **Jest + React Native Testing Library (RNTL)** logic আর component-এর জন্য। Expo app-এ `jest-expo` preset transform set up করে আর অনেক Expo native module mock করে দেয়। RNTL component-কে Node-এ (device ছাড়া) render করে, আর user যা দেখে সেটাই test করতে দেয়: role আর accessible name দিয়ে element খোঁজা (`getByRole('button', { name: 'Log in' })`), `userEvent` দিয়ে interact করা (`type`, `press`), তারপর ফলাফল assert করা। RNTL 14-এ `render` আর `userEvent` call-গুলো await করতে হয়।
+            - **End-to-end (E2E)** test চলে emulator/device-এ আসল build-এর ওপর, শুধু কয়েকটা critical journey-র জন্য: login, checkout, push-tap। **Maestro** সহজ YAML flow ব্যবহার করে আর যেকোনো build-এ চলে; **Detox** হলো JS-ভিত্তিক gray-box framework, যেটা app idle হওয়া পর্যন্ত অপেক্ষা করে।
+
+            **কী mock করি:** network (mock server বা mock করা fetch layer), যেসব native module Jest চালাতে পারে না (secure store, notification, camera), সময়, আর একটা screen আলাদাভাবে test করার সময় navigation। Component-এর নিজের children বা state mock করি না; সেটা implementation detail test করা।
+        """,
+        quick_en=r"""Jest with the `jest-expo` preset plus React Native Testing Library for component tests: query by role and accessible name, interact with `userEvent`, assert what the user sees, and mock only the network and native modules. Cover a few critical journeys end to end on a real build with Maestro or Detox.""",
+        quick_bn=r"""Component test-এর জন্য `jest-expo` preset-সহ Jest আর React Native Testing Library: role আর accessible name দিয়ে query, `userEvent` দিয়ে interact, user যা দেখে সেটা assert, আর mock শুধু network ও native module। কয়েকটা critical journey আসল build-এ Maestro বা Detox দিয়ে end-to-end cover করো।""",
+        ex_en=r"""
+            - **Query priority:** `getByRole` → `getByLabelText` → `getByText` → `getByTestId` as a last resort. Role-based queries also push you to add proper accessibility props, which helps real users.
+            - **`userEvent` vs `fireEvent`:** `userEvent` simulates the realistic sequence of events (focus, press in/out, text changes), so it catches more bugs.
+            - **`findBy*`** waits for async UI (data loaded, toast shown); `getBy*` throws immediately if the element isn't there; `queryBy*` returns `null` for "should not exist" checks.
+            - **Unit tests are cheap, E2E is expensive and flaky-prone**, so keep the pyramid: many fast unit/component tests, a handful of E2E flows on CI against a preview build.
+            - **What RNTL can't catch:** native crashes, real layout and keyboard behaviour, push delivery. That's what E2E and manual device testing are for.
+        """,
+        ex_bn=r"""
+            - **Query-র অগ্রাধিকার:** `getByRole` → `getByLabelText` → `getByText` → একদম শেষ উপায় হিসেবে `getByTestId`। Role-ভিত্তিক query তোমাকে ঠিকঠাক accessibility prop দিতে বাধ্য করে, যেটা আসল user-দেরও কাজে লাগে।
+            - **`userEvent` বনাম `fireEvent`:** `userEvent` বাস্তবসম্মত event-এর ধারা simulate করে (focus, press in/out, text change), তাই বেশি bug ধরে।
+            - **`findBy*`** async UI-এর জন্য অপেক্ষা করে (data load, toast দেখা); element না থাকলে `getBy*` সাথে সাথে throw করে; "থাকা উচিত না" check করতে `queryBy*` `null` return করে।
+            - **Unit test সস্তা, E2E দামি আর flaky হওয়ার ঝুঁকি বেশি**, তাই pyramid মেনে চলো: অনেক দ্রুত unit/component test, আর CI-তে preview build-এর ওপর হাতে গোনা কয়েকটা E2E flow।
+            - **RNTL যা ধরতে পারে না:** native crash, আসল layout আর keyboard-এর আচরণ, push delivery। এগুলোর জন্যই E2E আর device-এ manual testing।
+        """,
+        tip_en=r"""Say "I test behaviour the user sees, not implementation", show one `getByRole` + `userEvent` test, and explain the pyramid in one line. Naming what each layer can't catch shows maturity.""",
+        tip_bn=r"""বলো "আমি implementation না, user যা দেখে সেই behaviour test করি", একটা `getByRole` + `userEvent` test দেখাও, আর এক লাইনে pyramid ব্যাখ্যা করো। প্রতিটা স্তর কী ধরতে পারে না সেটা বললে পরিপক্বতা বোঝা যায়।""",
+        mist_en=r"""Finding everything by `testID`, snapshot-testing whole screens as the main strategy, or mocking so much that the test only checks the mocks.""",
+        mist_bn=r"""সবকিছু `testID` দিয়ে খোঁজা, পুরো screen-এর snapshot test-কে প্রধান কৌশল বানানো, বা এত mock করা যে test শুধু mock-গুলোকেই যাচাই করে।""",
+        code=r"""
+            // LoginForm.test.tsx  (package.json: "jest": { "preset": "jest-expo" })
+            import { render, screen, userEvent } from '@testing-library/react-native';
+            import { LoginForm } from './LoginForm';
+
+            test('submits the typed credentials', async () => {
+              const onSubmit = jest.fn();
+              const user = userEvent.setup();
+              await render(<LoginForm onSubmit={onSubmit} />);
+
+              await user.type(screen.getByLabelText('Email'), 'rafi@example.com');
+              await user.type(screen.getByLabelText('Password'), 'secret123');
+              await user.press(screen.getByRole('button', { name: 'Log in' }));
+
+              expect(onSubmit).toHaveBeenCalledWith('rafi@example.com', 'secret123');
+            });
+        """,
+        lang="tsx",
+        extra=[dict(lang="yaml", src=r"""
+            # .maestro/login.yaml — an E2E flow against a real build
+            appId: com.example.shopbd
+            ---
+            - launchApp
+            - tapOn: "Email"
+            - inputText: "rafi@example.com"
+            - tapOn: "Password"
+            - inputText: "secret123"
+            - tapOn: "Log in"
+            - assertVisible: "Welcome"
+        """, label_en="Maestro E2E flow", label_bn="Maestro E2E flow")],
+        follow=[
+            ("When would you use `findByText` instead of `getByText`?", "কখন `getByText`-এর বদলে `findByText` ব্যবহার করবে?"),
+            ("How would you test a screen that reads from `expo-secure-store`?", "`expo-secure-store` থেকে পড়ে এমন একটা screen কীভাবে test করবে?"),
+        ],
+        related=["rn-015", "rn-008", "react-020"],
+        refs=[R_UNIT, R_RNTL, R_MAESTRO],
+    ),
+    # ------------------------------------------------------------------ rn-040
+    Q(
+        id="rn-040", sub="App Architecture", diff="extreme", type="architecture",
+        prio="high", market="international", mins=20,
+        tags=["architecture", "eas", "ci-cd", "environments", "monitoring"],
+        ver="Expo SDK 58, React Native 0.88, eas-cli 25.x", vs=True, status="stable",
+        q_en=r"""Advanced: you're the lead on a new production e-commerce app built with Expo. Describe the architecture: folder structure, data layer (server state, offline data, secrets), environment configuration per build profile, CI/CD with EAS Build/Submit/Update, how releases reach users safely, and monitoring.""",
+        q_bn=r"""Advanced: Expo দিয়ে বানানো একটা নতুন production e-commerce app-এর lead তুমি। Architecture বর্ণনা করো: folder structure, data layer (server state, offline data, secret), প্রতিটা build profile-এর environment configuration, EAS Build/Submit/Update দিয়ে CI/CD, release কীভাবে নিরাপদে user-দের কাছে পৌঁছায়, আর monitoring।""",
+        a_en=r"""
+            **Structure (feature-first):**
+            - `src/app/`: Expo Router routes only, kept thin (layouts, screens that compose feature components).
+            - `src/features/<cart|catalog|orders|auth>/`: components, hooks, API calls, DB queries and tests for one feature.
+            - `src/shared/`: design system, API client, storage, utilities. Path aliases (`@/features/...`) and strict TypeScript.
+
+            **Data layer:**
+            - **Server state:** TanStack Query (caching, retries, background refetch, pagination), with a typed API client that handles auth refresh.
+            - **Offline data:** `expo-sqlite` (optionally with Drizzle) for the catalog cache, cart and an outbox of pending writes, synced when online.
+            - **Client state:** small Zustand stores for UI state; no server data duplicated in them.
+            - **Secrets:** tokens in `expo-secure-store`; nothing secret in `EXPO_PUBLIC_` variables, because they're bundled into the JS.
+
+            **Environments:** `app.config.ts` reads `APP_VARIANT` to set name, bundle ID/package and icon, so dev, preview and production install side by side. `eas.json` profiles set `channel` and `environment`; EAS environment variables provide `EXPO_PUBLIC_API_URL` per environment.
+
+            **CI/CD:** every PR runs lint, typecheck and Jest. Merge to main → `eas update --channel preview` for QA. Native change (fingerprint changed) → `eas build`; release tag → `eas build --profile production --auto-submit`. JS-only hotfixes go out through `eas update` with a staged rollout.
+
+            **Safety and monitoring:** `runtimeVersion` with the `fingerprint` policy, staged rollouts on the stores and for updates, crash and performance monitoring (e.g. Sentry) with source maps uploaded for every build and update, and a feature-flag service for risky features.
+        """,
+        a_bn=r"""
+            **Structure (feature-first):**
+            - `src/app/`: শুধু Expo Router route, পাতলা রাখা (layout, আর feature component জুড়ে বানানো screen)।
+            - `src/features/<cart|catalog|orders|auth>/`: একটা feature-এর component, hook, API call, DB query আর test।
+            - `src/shared/`: design system, API client, storage, utility। Path alias (`@/features/...`) আর strict TypeScript।
+
+            **Data layer:**
+            - **Server state:** TanStack Query (caching, retry, background refetch, pagination), সাথে একটা typed API client যেটা auth refresh সামলায়।
+            - **Offline data:** catalog cache, cart আর pending write-এর outbox-এর জন্য `expo-sqlite` (চাইলে Drizzle-সহ), online হলে sync হয়।
+            - **Client state:** UI state-এর জন্য ছোট Zustand store; এগুলোতে server data duplicate করা হয় না।
+            - **Secret:** token থাকে `expo-secure-store`-এ; `EXPO_PUBLIC_` variable-এ গোপন কিছু না, কারণ এগুলো JS bundle-এ ঢুকে যায়।
+
+            **Environment:** `app.config.ts` `APP_VARIANT` পড়ে name, bundle ID/package আর icon ঠিক করে, ফলে dev, preview আর production পাশাপাশি install করা যায়। `eas.json`-এর profile `channel` আর `environment` set করে; EAS environment variable প্রতিটা environment-এর জন্য `EXPO_PUBLIC_API_URL` দেয়।
+
+            **CI/CD:** প্রতিটা PR-এ lint, typecheck আর Jest চলে। main-এ merge → QA-র জন্য `eas update --channel preview`। Native পরিবর্তন (fingerprint বদলেছে) → `eas build`; release tag → `eas build --profile production --auto-submit`। শুধু-JS hotfix যায় staged rollout-সহ `eas update` দিয়ে।
+
+            **নিরাপত্তা আর monitoring:** `fingerprint` policy-সহ `runtimeVersion`, store আর update দুই জায়গাতেই staged rollout, crash আর performance monitoring (যেমন Sentry), প্রতিটা build ও update-এর source map upload-সহ, আর ঝুঁকিপূর্ণ feature-এর জন্য feature-flag service।
+        """,
+        quick_en=r"""Feature-first folders with thin Expo Router routes; TanStack Query for server state, SQLite offline, secure-store for tokens. Variants via `app.config.ts` + EAS environments, CI that builds only when the native fingerprint changes and otherwise ships staged EAS Updates, plus crash monitoring with source maps.""",
+        quick_bn=r"""Feature-first folder আর পাতলা Expo Router route; server state-এ TanStack Query, offline data-য় SQLite, ছোট Zustand store, token-এর জন্য secure-store। `app.config.ts` + EAS environment দিয়ে profile অনুযায়ী variant, CI শুধু native fingerprint বদলালে build করে নইলে staged EAS Update পাঠায়, সাথে source map-সহ crash monitoring।""",
+        ex_en=r"""
+            - **Why feature-first:** a team of several developers can own `cart` or `orders` end to end; deleting a feature is deleting a folder. Routes stay thin so moving a screen doesn't move business logic.
+            - **One source of truth per kind of data:** server data in the Query cache (or SQLite for offline), UI state in Zustand. Copying API responses into a global store creates sync bugs.
+            - **Channels vs "release channels":** EAS uses **channels** (set on the build) pointing at **branches** (where updates are published). "Release channels" were the old classic-updates concept; don't design around them.
+            - **Store releases:** Google Play staged rollout and App Store phased release limit the blast radius of a bad binary, the same way `--rollout-percentage` does for updates.
+            - **Failure scenarios to plan for:** API down (cached data + offline banner), bad update (rollback, see rn-035), token theft (short-lived access tokens, refresh rotation), forced upgrade (a minimum-supported-version check at launch).
+            - **Trade-off:** this is a lot of setup for a small MVP. I'd start with routes + TanStack Query + EAS Build/Update with two profiles, and add SQLite offline sync, flags and rollouts as the user base grows.
+        """,
+        ex_bn=r"""
+            - **কেন feature-first:** কয়েকজন developer-এর team-এ কেউ `cart` বা `orders` পুরোটা নিজের দায়িত্বে নিতে পারে; একটা feature মুছে ফেলা মানে একটা folder মুছে ফেলা। Route পাতলা থাকে, তাই একটা screen সরালে business logic সরাতে হয় না।
+            - **প্রতি ধরনের data-র একটাই source of truth:** server data Query cache-এ (offline-এর জন্য SQLite-এ), UI state Zustand-এ। API response global store-এ copy করলে sync bug তৈরি হয়।
+            - **Channel বনাম "release channel":** EAS ব্যবহার করে **channel** (build-এ set করা), যেটা **branch**-কে নির্দেশ করে (যেখানে update publish হয়)। "Release channel" ছিল পুরোনো classic update-এর ধারণা; এর ওপর ভিত্তি করে design কোরো না।
+            - **Store release:** Google Play staged rollout আর App Store phased release খারাপ binary-র ক্ষতির পরিধি সীমিত রাখে, update-এর জন্য `--rollout-percentage` যেমন করে।
+            - **যেসব failure-এর জন্য পরিকল্পনা লাগে:** API down (cache করা data + offline banner), খারাপ update (rollback, rn-035 দেখো), token চুরি (স্বল্পমেয়াদি access token, refresh rotation), বাধ্যতামূলক upgrade (launch-এ minimum-supported-version check)।
+            - **Trade-off:** ছোট MVP-র জন্য এটা অনেক setup। আমি শুরু করতাম route + TanStack Query + দুইটা profile-সহ EAS Build/Update দিয়ে, আর user বাড়ার সাথে সাথে SQLite offline sync, flag আর rollout যোগ করতাম।
+        """,
+        tip_en=r"""Draw it as layers (routes → features → shared → native), then follow one change from PR to user's phone: CI checks → preview update → fingerprint decides build vs update → staged rollout → monitoring. Closing with "what I'd cut for an MVP" shows judgement.""",
+        tip_bn=r"""Layer হিসেবে আঁকো (route → feature → shared → native), তারপর একটা পরিবর্তনকে PR থেকে user-এর phone পর্যন্ত অনুসরণ করো: CI check → preview update → fingerprint ঠিক করে build নাকি update → staged rollout → monitoring। শেষে "MVP-তে আমি কী বাদ দিতাম" বললে তোমার বিচারবুদ্ধি বোঝা যায়।""",
+        mist_en=r"""Putting API keys or other secrets in `EXPO_PUBLIC_` variables or app.json `extra`, and publishing OTA updates straight to production without a preview channel or staged rollout.""",
+        mist_bn=r"""API key বা অন্য secret `EXPO_PUBLIC_` variable বা app.json-এর `extra`-তে রাখা, আর কোনো preview channel বা staged rollout ছাড়াই সরাসরি production-এ OTA update publish করা।""",
+        code=r"""
+            // app.config.ts — one codebase, three installable variants
+            import type { ExpoConfig, ConfigContext } from 'expo/config';
+
+            const variant = process.env.APP_VARIANT ?? 'production';
+            const isProd = variant === 'production';
+            const id = isProd ? 'com.example.shopbd' : `com.example.shopbd.${variant}`;
+
+            export default ({ config }: ConfigContext): ExpoConfig => ({
+              ...config,
+              name: isProd ? 'ShopBD' : `ShopBD (${variant})`,
+              slug: 'shopbd',
+              ios: { ...config.ios, bundleIdentifier: id },
+              android: { ...config.android, package: id },
+              runtimeVersion: { policy: 'fingerprint' },
+            });
+            // APP_VARIANT=development -> name "ShopBD (development)", id "com.example.shopbd.development"
+            // APP_VARIANT unset       -> name "ShopBD", id "com.example.shopbd"
+        """,
+        lang="typescript",
+        extra=[dict(lang="json", src=r"""
+            {
+              "cli": { "version": ">= 25.0.0", "appVersionSource": "remote" },
+              "build": {
+                "development": {
+                  "developmentClient": true,
+                  "distribution": "internal",
+                  "channel": "development",
+                  "environment": "development",
+                  "env": { "APP_VARIANT": "development" }
+                },
+                "preview": {
+                  "distribution": "internal",
+                  "channel": "preview",
+                  "environment": "preview",
+                  "env": { "APP_VARIANT": "preview" }
+                },
+                "production": {
+                  "channel": "production",
+                  "environment": "production",
+                  "autoIncrement": true
+                }
+              },
+              "submit": { "production": {} }
+            }
+        """, label_en="eas.json build profiles", label_bn="eas.json-এর build profile")],
+        follow=[
+            ("How do you force users on a very old binary to upgrade?", "খুব পুরোনো binary-তে থাকা user-দের upgrade করতে বাধ্য করবে কীভাবে?"),
+            ("Why should server data live in the TanStack Query cache rather than a global Zustand store?", "Server data কেন global Zustand store-এ না রেখে TanStack Query cache-এ রাখা উচিত?"),
+            ("Which secrets can safely live in the app, and which must stay on the backend?", "কোন secret app-এ নিরাপদে রাখা যায়, আর কোনগুলো অবশ্যই backend-এ থাকতে হবে?"),
+        ],
+        related=["rn-035", "rn-027", "rn-028", "rn-030", "rn-006"],
+        refs=[R_EAS_JSON, R_EAS_ENV, R_VARIANTS],
+    ),
+]
+
+save("reactnative", "b5", QUESTIONS)

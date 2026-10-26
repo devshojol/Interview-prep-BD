@@ -39,6 +39,8 @@ QUESTIONS = [
         a_bn=r"""
             Server-এ ঠিক করতে হবে। CORS browser enforce করে, কিন্তু *অনুমতি* আসতে হয় API-র response header থেকে। দুটো URL আলাদা origin (port আলাদা), তাই API-কে `Access-Control-Allow-Origin: http://localhost:5173` দিয়ে উত্তর দিতে হবে (আর preflight request handle করতে হবে) — `cors` middleware এটা করে দেয়।
         """,
+        quick_en=r"""Fix it on the server: the two ports are different origins, so the API must return `Access-Control-Allow-Origin: http://localhost:5173` (and handle preflight), which the `cors` middleware does. The browser enforces CORS, but the permission can only come from the API's response headers.""",
+        quick_bn=r"""Server-এ ঠিক করতে হবে: দুটো আলাদা port মানে আলাদা origin, তাই API-কে `Access-Control-Allow-Origin: http://localhost:5173` পাঠাতে হবে (আর preflight সামলাতে হবে), যেটা `cors` middleware করে দেয়। CORS browser enforce করে, কিন্তু অনুমতি আসতে পারে শুধু API-র response header থেকে।""",
         ex_en=r"""
             - **Option A is the tempting trap:** `no-cors` doesn't bypass anything — it gives you an *opaque* response whose body and status you can't read, so your code still fails.
             - **Option C:** `Access-Control-Allow-*` are *response* headers; sending them from the client does nothing (and may trigger a preflight).
@@ -85,6 +87,8 @@ QUESTIONS = [
 
             Cookie-তে শুধু একটি opaque session ID (বা signed value) থাকা উচিত, যাচাই ছাড়া বিশ্বাস করা কোনো user data কখনো নয়।
         """,
+        quick_en=r"""Set `httpOnly` (JavaScript can't read it, so XSS can't simply steal it), `secure` (HTTPS only), `sameSite: 'lax'` or `'strict'` (not sent on most cross-site requests, which helps against CSRF), a limited `maxAge`, and a narrow `path`/`domain`, ideally with the `__Host-` prefix. Store only an opaque session ID in it.""",
+        quick_bn=r"""`httpOnly` (JavaScript পড়তে পারে না, তাই XSS সহজে চুরি করতে পারে না), `secure` (শুধু HTTPS), `sameSite: 'lax'` বা `'strict'` (বেশিরভাগ cross-site request-এ যায় না, যা CSRF ঠেকাতে সাহায্য করে), সীমিত `maxAge`, আর সংকীর্ণ `path`/`domain`, পারলে `__Host-` prefix-সহ। Cookie-তে শুধু একটা opaque session ID রাখো।""",
         ex_en=r"""
             - **Same-site vs same-origin:** `app.example.com` and `api.example.com` are different *origins* (CORS applies) but the same *site* (`example.com`), so `SameSite=Lax` cookies are still sent between them.
             - **Browsers default to `Lax`** when `SameSite` is missing in modern Chromium-based browsers, but set it explicitly — behaviour differs across browsers and versions.
@@ -158,6 +162,8 @@ QUESTIONS = [
 
             Server-এ fix: একটি স্পষ্ট allow-list, `cors({ origin: ['https://app.example.com'], credentials: true })`। Middleware তখন মিলে যাওয়া origin echo করে, `Vary: Origin` যোগ করে, আর অন্য যেকোনো origin-এর জন্য `Access-Control-Allow-Origin` বাদ দেয়, ফলে browser সেই response block করে। Route-এর আগে `app.use()` দিয়ে register করো, যাতে preflight `OPTIONS` request-ও handle হয়।
         """,
+        quick_en=r"""Keep `credentials: 'include'` on the client, because a cross-origin `fetch` doesn't send cookies by default. On the server, credentialed requests can't use `Access-Control-Allow-Origin: *`, so use an allow-list, `cors({ origin: ['https://app.example.com'], credentials: true })`, registered before the routes.""",
+        quick_bn=r"""Client-এ `credentials: 'include'` রেখে দাও, কারণ cross-origin `fetch` default-এ cookie পাঠায় না। Server-এ credential-সহ request-এ `Access-Control-Allow-Origin: *` চলে না, তাই route-এর আগে register করা একটা allow-list ব্যবহার করো: `cors({ origin: ['https://app.example.com'], credentials: true })`।""",
         ex_en=r"""
             - **Why `*` is forbidden with credentials:** otherwise any website could make a logged-in user's browser call your API *with their cookies* and read the response.
             - **Never reflect any origin blindly** (`origin: true` or echoing `req.headers.origin`) together with `credentials: true` — that recreates the same hole. Use a fixed list or a strict function.
@@ -246,6 +252,8 @@ QUESTIONS = [
             - **ভালো response:** `Retry-After` আর standard `RateLimit` header সহ `429`; account থাকুক বা না থাকুক একই সাধারণ message।
             - **Failure mode:** Redis down হলে কী হবে ঠিক করো — fail open (availability) নাকি closed (security) — আর timeout set করো।
         """,
+        quick_en=r"""Layer it: a coarse NGINX `limit_req` at the edge plus `express-rate-limit` with a strict limiter on login only. Use a Redis store so the 4 instances share counters, set `trust proxy` correctly to get the real client IP, key by IP and email while counting failures, and return `429` with `Retry-After`.""",
+        quick_bn=r"""কয়েক layer-এ করো: edge-এ NGINX-এর মোটা দাগের `limit_req`, আর app-এ শুধু login-এর জন্য কড়া `express-rate-limit`। Redis store ব্যবহার করো যাতে 4টা instance একই counter share করে, আসল client IP পেতে `trust proxy` ঠিকভাবে set করো, failure গুনে IP আর email মিলিয়ে key বানাও, আর `Retry-After`-সহ `429` দাও।""",
         ex_en=r"""
             - **Order matters:** `express.json()` must run before the limiter if the key uses `req.body.email`.
             - **Account-only keys cut both ways:** limiting per account across all IPs stops distributed guessing but lets an attacker lock a victim out. Combining `ip:account` with a separate, softer per-account limit (or CAPTCHA/progressive delay instead of a hard block) balances both.
@@ -326,6 +334,8 @@ QUESTIONS = [
             - **Logout:** refresh token record মুছে cookie clear করো। Access token কয়েক মিনিটে মরে যায়; তাৎক্ষণিক revocation লাগলে (যেমন ban হওয়া user) Redis-এ `jti`-র স্বল্পমেয়াদি deny-list রাখো বা user-এর `tokenVersion` check করো।
             - **Password change / "সব জায়গা থেকে logout":** user-এর সব refresh token revoke করো।
         """,
+        quick_en=r"""A short-lived JWT access token (5–15 min) kept in memory and sent as a Bearer header, plus a long-lived opaque refresh token, stored hashed, in an `httpOnly`, `Secure`, `SameSite=Strict` cookie scoped to the refresh path. Rotate it on every refresh, revoke its whole family on reuse, delete it on logout.""",
+        quick_bn=r"""স্বল্পমেয়াদি JWT access token (5–15 মিনিট) memory-তে রাখো আর Bearer header-এ পাঠাও; দীর্ঘমেয়াদি opaque refresh token DB-তে hash করে রাখো আর refresh path-এ সীমিত `httpOnly`, `Secure`, `SameSite=Strict` cookie-তে পাঠাও। প্রতি refresh-এ rotate করো, পুরোনো token আবার এলে পুরো family revoke করো, logout-এ মুছে দাও।""",
         ex_en=r"""
             - **Why `SameSite=Strict` works here:** `app.example.com` and `api.example.com` are the same *site*, so the browser still sends the cookie on the SPA's `fetch` to `/auth/refresh` (with `credentials: 'include'`). Add an Origin check or CSRF token on the refresh endpoint as defence in depth.
             - **Why opaque refresh tokens:** they must be revocable and looked up anyway, so a JWT's self-contained nature buys nothing — and hashing them means a DB leak doesn't leak usable tokens.
@@ -436,6 +446,8 @@ QUESTIONS = [
             - **সস্তা ও নিরাপদ login path:** অজানা user আর ভুল password-এর জন্য হুবহু একই response ও কাছাকাছি সময়; attack load মাথায় রেখে capacity-সহ শক্ত password hashing (argon2id/bcrypt)।
             - **Detection:** login failure ratio, নতুন device-এ login, account প্রতি login, impossible travel-এর উপর dashboard আর alert।
         """,
+        quick_en=r"""It's credential stuffing, so per-IP limits can't stop it. Right now: block at the edge (WAF and bot rules, challenges), cap login concurrency, and revoke sessions and force resets for taken-over accounts; afterwards add per-account limits in Redis, MFA or passkeys, breached-password checks and login-failure alerts.""",
+        quick_bn=r"""এটা credential stuffing, তাই per-IP limit দিয়ে থামানো যাবে না। এখনই: edge-এ block করো (WAF, bot rule, challenge), login-এর concurrency সীমিত করো, আর দখল হওয়া account-এর session revoke করে password reset বাধ্যতামূলক করো; পরে Redis-এ per-account limit, MFA বা passkey, breached-password check আর login-failure alert যোগ করো।""",
         ex_en=r"""
             - **Why per-IP limits fail:** 40,000 attempts / 15,000 IPs ≈ 3 attempts per IP per minute — below any sane per-IP threshold. The useful dimensions are per account, per ASN/subnet and global failure ratios.
             - **Why the DB is at 95%:** every attempt does a user lookup plus an expensive password hash. Rejecting at the edge, caching "unknown email" lookups briefly, and capping concurrency protect shared resources; password hashing should run off the main thread (bcrypt/argon2 native bindings use the thread pool) so the API stays responsive.

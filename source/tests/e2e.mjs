@@ -32,7 +32,7 @@ const bank = (page) => page.evaluate(() => window.QBANK.map((q) => ({ id: q.id, 
   await page.waitForSelector('.hero');
   check('App opens from file:// and renders the dashboard', await page.locator('.hero h1').isVisible());
   const total = await page.evaluate(() => window.QBANK.length);
-  check('Question bank loaded', total === 584, total + ' questions');
+  check('Question bank loaded', total === 834, total + ' questions');
   const v = await page.evaluate(() => window.InterviewPrep.validate());
   check('Runtime validator reports no errors/warnings', v.errors.length === 0 && v.warnings.length === 0, v.errors.length + ' errors, ' + v.warnings.length + ' warnings');
   const statTotal = await page.locator('.stat', { hasText: 'Total questions' }).locator('.stat__value').textContent();
@@ -84,7 +84,7 @@ const bank = (page) => page.evaluate(() => window.QBANK.map((q) => ({ id: q.id, 
   await page.selectOption('#f-tech', '');
   await page.waitForTimeout(150);
   const count = async () => parseInt((await page.locator('.results-count strong').first().textContent()).trim(), 10);
-  check('Explorer shows all questions with no filters', (await count()) === 584);
+  check('Explorer shows all questions with no filters', (await count()) === 834);
   await page.fill('#f-q', 'closure');
   await page.waitForTimeout(400);
   const en = await count();
@@ -119,7 +119,7 @@ const bank = (page) => page.evaluate(() => window.QBANK.map((q) => ({ id: q.id, 
   check('Market filter works', (await count()) === exp3, (await count()) + ' vs ' + exp3);
   await page.click('text=Clear all filters');
   await page.waitForTimeout(200);
-  check('Clear all filters resets the count', (await count()) === 584);
+  check('Clear all filters resets the count', (await count()) === 834);
   await page.selectOption('#f-sort', 'diffDesc');
   await page.waitForTimeout(200);
   const firstDiff = await page.locator('.q-item').first().locator('.badge--extreme').count();

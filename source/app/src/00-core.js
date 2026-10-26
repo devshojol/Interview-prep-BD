@@ -15,7 +15,8 @@
   const VERIFIED_AT = '2026-10-12';
   const DIFFS = ['easy', 'medium', 'hard', 'extreme'];
   const POINTS = { easy: 1, medium: 2, hard: 3, extreme: 4 };
-  const TYPES = ['conceptual', 'output', 'coding', 'debugging', 'scenario', 'comparison', 'system-design', 'query', 'architecture', 'security-performance', 'mcq'];
+  const TYPES = ['conceptual', 'output', 'coding', 'debugging', 'scenario', 'comparison', 'system-design', 'query', 'architecture', 'security-performance', 'mcq', 'quick', 'behavioral'];
+  const SHORT_TYPES = ['quick', 'behavioral']; // the answer itself is short; no separate quick answer
   const MARKETS = ['both', 'bangladesh', 'international'];
   const PRIORITIES = ['high', 'medium', 'low'];
   const RESULTS = ['correct', 'partial', 'incorrect', 'skipped'];
@@ -35,7 +36,9 @@
       desc: { en: 'Hooks, rendering, reconciliation, Server Components, Actions, performance and debugging.', bn: 'Hook, rendering, reconciliation, Server Component, Action, performance এবং debugging।' } },
     { id: 'nextjs', name: 'Next.js', short: 'Nx', color: '#E5E7EB', group: 'frontend', version: 'Next.js 16.4', docs: 'https://nextjs.org/docs',
       desc: { en: 'App Router, rendering strategies, Cache Components, Server Actions, proxy.ts and deployment.', bn: 'App Router, rendering strategy, Cache Components, Server Action, proxy.ts এবং deployment।' } },
-    { id: 'nodejs', name: 'Node.js', short: 'No', color: '#7CC66A', group: 'backend', version: 'Node.js 24 LTS · 26 Current', docs: 'https://nodejs.org/docs/latest/api/',
+    { id: 'reactnative', name: 'React Native', short: 'RN', color: '#4FC3F7', group: 'mobile', version: 'React Native 0.88 · Expo SDK 58', docs: 'https://reactnative.dev/docs/getting-started',
+      desc: { en: 'Core components, styling, lists, Expo Router navigation, storage with expo-sqlite, EAS builds and OTA updates, performance and the New Architecture.', bn: 'Core component, styling, list, Expo Router navigation, expo-sqlite দিয়ে storage, EAS build ও OTA update, performance আর New Architecture।' } },
+    { id: 'nodejs', name: 'Node.js', short: 'No', color: '#7CC66A', group: 'backend', version: 'Node.js 26 LTS · 24 Maintenance', docs: 'https://nodejs.org/docs/latest/api/',
       desc: { en: 'V8, libuv, the event loop, streams, workers, modules, error handling and scalability.', bn: 'V8, libuv, event loop, stream, worker, module, error handling এবং scalability।' } },
     { id: 'express', name: 'Express.js', short: 'Ex', color: '#C9D1D9', group: 'backend', version: 'Express 5.3', docs: 'https://expressjs.com/',
       desc: { en: 'Routing, middleware, REST APIs, auth, validation, security headers and error handling.', bn: 'Routing, middleware, REST API, auth, validation, security header এবং error handling।' } },
@@ -61,9 +64,11 @@
       desc: { en: 'Reverse proxy, load balancing, TLS, caching, rate limiting and 502/504 debugging.', bn: 'Reverse proxy, load balancing, TLS, caching, rate limiting এবং 502/504 debugging।' } },
     { id: 'aws', name: 'AWS', short: 'AWS', color: '#FF9F2E', group: 'devops', version: 'Current AWS services', docs: 'https://docs.aws.amazon.com/',
       desc: { en: 'IAM, EC2, S3, RDS, VPC, load balancing, Lambda, monitoring and architecture.', bn: 'IAM, EC2, S3, RDS, VPC, load balancing, Lambda, monitoring এবং architecture।' } },
+    { id: 'behavioral', name: 'Behavioural & Projects', short: 'HR', color: '#F59EBF', group: 'career', version: 'Interview skills', docs: '',
+      desc: { en: 'Introducing yourself, walking through your projects, teamwork, mistakes, pressure and the questions to ask back.', bn: 'নিজের পরিচয়, নিজের project ব্যাখ্যা, teamwork, ভুল, চাপ সামলানো আর interviewer-কে কী প্রশ্ন করবে।' } },
   ];
   const TECH_MAP = new Map(TECHS.map((t) => [t.id, t]));
-  const TECH_GROUPS = ['frontend', 'backend', 'database', 'devops', 'ai'];
+  const TECH_GROUPS = ['frontend', 'mobile', 'backend', 'database', 'devops', 'ai', 'career'];
 
   /* Verified version table (shown on the Versions & Sources page) */
   const VERSIONS = [
@@ -72,9 +77,10 @@
     { tech: 'JavaScript', version: 'ECMAScript 2026 (approved 2026-06-30)', note: 'Math.sumPrecise, Iterator.concat, Error.isError, Map upsert, Uint8Array base64/hex, JSON.rawJSON.', url: 'https://tc39.es/ecma262/' },
     { tech: 'React', version: '19.3.0', note: 'Stable <ViewTransition>, Fragment refs, browser(); React Compiler 1.0.', url: 'https://react.dev/blog' },
     { tech: 'Next.js', version: '16.4.0', note: 'Cache Components recommended (default for new apps), proxy.ts replaces middleware.ts, Turbopack default. Next 17 not yet released.', url: 'https://nextjs.org/blog/next-16-4' },
-    { tech: 'Node.js', version: '24.21.0 (Active LTS "Krypton") · 26.11.1 (Current)', note: 'v26 becomes LTS on 2026-10-28; v22 Maintenance LTS until 2027-04-30; annual releases from v27.', url: 'https://nodejs.org/en/about/previous-releases' },
+    { tech: 'React Native', version: '0.88.0 (React 19.3) · Expo SDK 58', note: 'New Architecture only since 0.82; Hermes V1 default since 0.84. Expo SDK 58 bundles RN 0.88; libSQL support removed from expo-sqlite. Checked 2026-10-26.', url: 'https://reactnative.dev/blog' },
+    { tech: 'Node.js', version: '26.12.1 (Active LTS from 2026-10-28) · 24.22.1 (Maintenance LTS "Krypton")', note: 'v24 entered Maintenance on 2026-10-20 (EOL 2028-04-30); v22 Maintenance LTS until 2027-04-30; annual releases from v27 (alpha from 2026-10-28). Re-checked 2026-10-26.', url: 'https://nodejs.org/en/about/previous-releases' },
     { tech: 'Express', version: '5.3.0', note: 'Express 5 is the npm default; Node.js 18+.', url: 'https://expressjs.com/en/guide/migrating-5.html' },
-    { tech: 'NestJS', version: '12.1.3', note: 'ESM core packages, Standard Schema validation, Node 20.19+/22.12+.', url: 'https://docs.nestjs.com/' },
+    { tech: 'NestJS', version: '12.2.0 (content written against 12.1)', note: 'ESM core packages, Standard Schema validation, Node 20.19+/22.12+.', url: 'https://docs.nestjs.com/' },
     { tech: 'MongoDB', version: '9.0 (server) · Node driver 7.7', note: '9.0.0 released 2026-09-28.', url: 'https://www.mongodb.com/docs/manual/release-notes/9.0/' },
     { tech: 'Mongoose', version: '9.11.1', note: 'Pre hooks without next(), promise-only APIs, Node 20.19+.', url: 'https://mongoosejs.com/docs/migrating_to_9.html' },
     { tech: 'PostgreSQL', version: '18 (18.6) · 19 in beta', note: 'uuidv7(), virtual generated columns, skip scan, AIO, OLD/NEW in RETURNING.', url: 'https://www.postgresql.org/docs/release/18.0/' },

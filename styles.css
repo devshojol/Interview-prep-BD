@@ -591,6 +591,8 @@ input, textarea { caret-color: var(--primary); }
 .callout--tip { border-color: color-mix(in srgb, var(--secondary) 35%, transparent); background: var(--secondary-soft); }
 .callout--warn { border-color: color-mix(in srgb, var(--hard) 40%, transparent); background: var(--hard-soft); }
 .callout--info { border-color: var(--border); background: var(--card-2); }
+.callout--quick { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: var(--primary-soft); }
+.callout--quick .prose { font-size: 1.02rem; }
 .callout__title { font-weight: 700; font-size: .85rem; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 
 /* Code */

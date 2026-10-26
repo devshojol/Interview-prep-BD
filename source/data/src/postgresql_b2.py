@@ -46,6 +46,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The `DELETE` really runs. `EXPLAIN` alone only plans the statement; `EXPLAIN ANALYZE` **executes** it to measure actual row counts and timings, so its side effects (deleted rows, fired triggers) are real. To analyse a write safely, wrap it: `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`.""",
         a_bn=r"""`DELETE` সত্যিই চলবে। শুধু `EXPLAIN` statement-টার plan বানায়; কিন্তু `EXPLAIN ANALYZE` আসল row সংখ্যা আর timing মাপার জন্য statement-টা **execute** করে, তাই এর side effect (row মুছে যাওয়া, trigger চলা) সত্যিকারের। কোনো write নিরাপদে analyse করতে চাইলে এভাবে মুড়ে নাও: `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`।""",
+        quick_en=r"""The `DELETE` really runs and the rows are gone: `EXPLAIN ANALYZE` executes the statement to measure real timings. To inspect a write safely, wrap it in `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`.""",
+        quick_bn=r"""`DELETE` সত্যিই চলে আর row-গুলো মুছে যায়: আসল timing মাপতে `EXPLAIN ANALYZE` statement-টা execute করে। কোনো write নিরাপদে দেখতে চাইলে `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`-এর ভেতরে চালাও।""",
         ex_en=r"""
             - `EXPLAIN` → estimated plan: `cost=startup..total`, estimated `rows`, `width`.
             - `EXPLAIN ANALYZE` → also `actual time`, actual `rows`, and `loops`. Comparing estimated vs actual rows is the fastest way to spot bad statistics.
@@ -88,6 +90,8 @@ QUESTIONS = [
 
             সবচেয়ে বড় সুবিধা হলো `jsonb` indexing (GIN) আর containment `@>`, key-exists `?`-এর মতো operator support করে। আমি default-ভাবে `jsonb` ব্যবহার করি; মূল text হুবহু রাখা সত্যিই দরকার হলে তবেই `json`।
         """,
+        quick_en=r"""`json` keeps the exact input text (whitespace, key order, duplicate keys) and re-parses it on every read; `jsonb` stores a parsed binary form that is faster to query and supports GIN indexes and operators like `@>`. Use `jsonb` unless you must keep the original text.""",
+        quick_bn=r"""`json` হুবহু input text রাখে (whitespace, key order, duplicate key) আর প্রতিবার পড়ার সময় আবার parse করে; `jsonb` parse করা binary রূপে রাখে, তাই query দ্রুত হয় আর GIN index ও `@>`-এর মতো operator চলে। মূল text রাখার দরকার না থাকলে `jsonb` নাও।""",
         ex_en=r"""
             When **not** to use JSONB:
             - Core fields you filter, join, sort, or constrain on all the time (price, status, customer_id) belong in real columns: you get types, `NOT NULL`/`CHECK`/foreign keys, and proper planner statistics.
@@ -147,6 +151,8 @@ QUESTIONS = [
 
             সহজ নিয়ম: portable, per-database backup আর major version-এর মধ্যে migration-এর জন্য `pg_dump`; production disaster recovery-র জন্য physical backup + WAL archiving। আর restore test না করা পর্যন্ত backup আসলে backup না।
         """,
+        quick_en=r"""`pg_dump` makes a logical backup of one database from a consistent snapshot without blocking normal reads and writes; use `-Fc` so `pg_restore` can restore selectively and in parallel. `pg_basebackup` copies the whole cluster physically, for replicas and point-in-time recovery with WAL. Always test the restore.""",
+        quick_bn=r"""`pg_dump` একটা database-এর logical backup নেয় consistent snapshot থেকে, সাধারণ read/write block না করে; `-Fc` দিলে `pg_restore` বেছে বেছে আর parallel-এ restore করতে পারে। `pg_basebackup` পুরো cluster-এর physical copy নেয়, replica আর WAL দিয়ে point-in-time recovery-র জন্য। Restore সবসময় test করো।""",
         ex_en=r"""
             - `pg_dump` does not include cluster-wide objects such as roles and tablespaces — dump them with `pg_dumpall --globals-only`.
             - It takes `ACCESS SHARE` locks, so it doesn't block DML, but it does block DDL like `ALTER TABLE`/`DROP TABLE` on dumped tables, and it holds a long transaction (which delays VACUUM cleanup) on big databases.
@@ -203,6 +209,8 @@ QUESTIONS = [
             - **UUID শুধু দরকার হলে** (DB-র বাইরে id তৈরি হয়, বিভিন্ন system-এর data merge করতে হয়, অনুমান-অযোগ্য public id লাগে)। তখন **`uuidv7()`** (PG18-এ নতুন) বেছে নাও: এটা time-ordered, তাই insert B-tree-র "ডান প্রান্তে" গিয়ে পড়ে, ঠিক `bigint`-এর মতো। `gen_random_uuid()` (v4) পুরোপুরি random, তাই insert এলোমেলো index page-এ পড়ে — বড় table-এ বেশি page split, cache hit কম, WAL বেশি।
             - **Generated column:** PG18-এ default হলো **virtual** — read-এর সময় হিসাব হয়, storage লাগে না। Value-টা index করতে হলে (PG18 virtual generated column index করতে পারে না) বা expression প্রতিবার হিসাব করা ব্যয়বহুল হলে `STORED` ব্যবহার করো।
         """,
+        quick_en=r"""Prefer `GENERATED ALWAYS AS IDENTITY` over legacy `serial`. Use UUIDs only when you need them, and then PG18's time-ordered `uuidv7()` over random `gen_random_uuid()` for index locality. Generated columns are virtual by default in PG18; use `STORED` when you need to index the value.""",
+        quick_bn=r"""Legacy `serial`-এর বদলে `GENERATED ALWAYS AS IDENTITY` নাও। UUID শুধু দরকার হলে নাও, আর তখন index locality-র জন্য random `gen_random_uuid()`-এর বদলে PG18-এর time-ordered `uuidv7()`। PG18-এ generated column default-ভাবে virtual; value-টার index লাগলে `STORED` দাও।""",
         ex_en=r"""
             - `bigint` identity is still the smallest and fastest key (8 bytes vs 16 for a UUID). A common pattern is a `bigint` internal key plus a UUID public id.
             - UUIDv7 embeds the creation time; `uuid_extract_timestamp(id)` returns it. Don't use it where revealing creation time is a privacy problem.
@@ -269,6 +277,8 @@ QUESTIONS = [
             - **GiST / SP-GiST:** geometric আর range data — overlap (`&&`), nearest-neighbour (`<->`), PostGIS, আর `EXCLUDE` constraint (যেমন booking overlap করতে পারবে না)।
             - **BRIN (Block Range INdex):** বিশাল, append-only table যেখানে column-এর value physical order মেনে চলে — যেমন events/log table-এর `created_at`। প্রতি block range-এর min/max রাখে, তাই খুবই ছোট।
         """,
+        quick_en=r"""B-tree is the default for equality, ranges, sorting and uniqueness; Hash is equality only. GIN handles "contains" searches (`jsonb`, arrays, full-text, trigrams), GiST/SP-GiST handle geometric and range data like overlaps, and BRIN is a tiny index for huge append-only tables ordered by a column like `created_at`.""",
+        quick_bn=r"""B-tree হলো default: equality, range, sorting আর uniqueness-এর জন্য; Hash শুধু equality। GIN "contains" ধরনের search সামলায় (`jsonb`, array, full-text, trigram), GiST/SP-GiST geometric আর range data (যেমন overlap), আর BRIN হলো `created_at`-এর মতো column-এ সাজানো বিশাল append-only table-এর জন্য খুব ছোট index।""",
         ex_en=r"""
             - BRIN only works well when values correlate with physical row order; after lots of updates or out-of-order inserts it degrades into scanning most of the table. Check `pg_stats.correlation` for the column.
             - For `jsonb`, the `jsonb_path_ops` GIN operator class is smaller and faster for `@>` but doesn't support key-exists operators (`?`, `?|`, `?&`); the default `jsonb_ops` does.
@@ -336,6 +346,8 @@ QUESTIONS = [
 
             আমি আরেকটু এগোব: বেশিরভাগ query যদি soft-deleted user বাদ দেয়, তাহলে একটা **partial index** (`WHERE deleted_at IS NULL`) ছোট হয়। Covering index (`INCLUDE (...)`) দিলে index-only scan-ও সম্ভব, তবে শুধু তখনই যখন query যত column পড়ে সবগুলো index-এ থাকে।
         """,
+        quick_en=r"""The query filters on `lower(email)` but the index stores plain `email`, so PostgreSQL computes the function for every row and scans the table. Fix: an expression index on `(lower(email))`, created `CONCURRENTLY` and made `UNIQUE` if emails must be unique case-insensitively, then `ANALYZE`.""",
+        quick_bn=r"""Query filter করছে `lower(email)` দিয়ে, কিন্তু index-এ আছে সাধারণ `email`, তাই PostgreSQL প্রতিটা row-এর জন্য function হিসাব করে পুরো table scan করে। Fix: `(lower(email))`-এর ওপর expression index, `CONCURRENTLY` দিয়ে বানাও, case-insensitive unique দরকার হলে `UNIQUE` করো, তারপর `ANALYZE`।""",
         ex_en=r"""
             - The expression in the query must match the index expression (`lower(email)`, not `upper(email)` or `lower(trim(email))`).
             - Use `CONCURRENTLY` on a live table so writes aren't blocked during the build. It can't run inside a transaction block, and a failed build leaves an `INVALID` index you must drop and recreate.
@@ -423,6 +435,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Since PostgreSQL 12, a non-recursive, side-effect-free CTE that is referenced only once is **inlined** like a subquery. The planner sees `created_at > ... AND customer_id = 42` together and can use the `(customer_id, created_at)` index.""",
         a_bn=r"""PostgreSQL 12 থেকে, non-recursive আর side-effect-free CTE যদি মাত্র একবার reference হয়, তাহলে সেটা subquery-র মতো **inline** হয়ে যায়। Planner `created_at > ... AND customer_id = 42` একসাথে দেখে, তাই `(customer_id, created_at)` index ব্যবহার করতে পারে।""",
+        quick_en=r"""It is inlined into the outer query: since PostgreSQL 12 a non-recursive, side-effect-free CTE referenced once is treated like a subquery. So the planner sees both conditions together and can use the `(customer_id, created_at)` index.""",
+        quick_bn=r"""এটা outer query-র ভেতরে inline হয়ে যায়: PostgreSQL 12 থেকে non-recursive, side-effect ছাড়া আর একবার reference করা CTE subquery-র মতো ধরা হয়। তাই planner দুটো condition একসাথে দেখে আর `(customer_id, created_at)` index ব্যবহার করতে পারে।""",
         ex_en=r"""
             The first option was true **before PostgreSQL 12** — CTEs were always materialized, and many old blog posts still describe them as optimization fences. That's why it's tempting.
 
@@ -501,6 +515,8 @@ QUESTIONS = [
             - `attrs->'tags' ? '5g'` দেখে array-তে `5g` string আছে কিনা। Fridge-এর `tags` key নেই, তাই `attrs->'tags'` NULL, ফলাফলও NULL (খালি দেখায়)।
             - `DESC NULLS LAST`: PostgreSQL-এ NULL-কে সব value-এর চেয়ে বড় ধরা হয়, তাই শুধু `DESC` দিলে fridge **প্রথমে** চলে আসত।
         """,
+        quick_en=r"""Filter with containment `attrs @> '{"brand": "Walton"}'` so the GIN index can be used, read fields with `->>`, cast `(attrs->>'ram_gb')::int` so sorting is numeric, and test the tag with `attrs->'tags' ? '5g'`. Sort `DESC NULLS LAST`, because NULLs sort first under plain `DESC`.""",
+        quick_bn=r"""`attrs @> '{"brand": "Walton"}'` containment দিয়ে filter করো যাতে GIN index কাজে লাগে, field পড়ো `->>` দিয়ে, `(attrs->>'ram_gb')::int` cast করো যাতে sorting সংখ্যা হিসেবে হয়, আর tag দেখো `attrs->'tags' ? '5g'` দিয়ে। `DESC NULLS LAST` দাও, কারণ শুধু `DESC`-এ NULL সবার আগে আসে।""",
         ex_en=r"""
             - **Index caveat:** a range filter like `(attrs->>'ram_gb')::int >= 8` can't use the GIN index. If that's a hot query, add a B-tree expression index on `((attrs->>'ram_gb')::int)` — or promote `ram_gb` to a real column.
             - `jsonb_path_ops` supports `@>`, `@?`, and `@@` but **not** `?`. If you filter with `attrs ? 'ram_gb'`, use the default `jsonb_ops` class.

@@ -45,6 +45,8 @@ QUESTIONS = [
 
             কোনো middleware যদি response-ও না দেয়, `next()`-ও call না করে, তাহলে request ঝুলে থাকে। সাধারণ উদাহরণ: `express.json()` ও `express.static()`-এর মতো built-in, `helmet` ও `cors`-এর মতো third-party, আর আমার নিজের auth বা logging middleware।
         """,
+        quick_en=r"""Middleware is a function `(req, res, next)` that Express runs, in registration order, for each matching request. Each one can change `req`/`res`, end the response, or call `next()` (or `next(err)` to jump to error handlers); if it does neither, the request hangs.""",
+        quick_bn=r"""Middleware হলো `(req, res, next)` signature-এর একটা function, যেটা Express প্রতিটা matching request-এ register করার ক্রম অনুযায়ী চালায়। প্রতিটা middleware `req`/`res` বদলাতে পারে, response শেষ করতে পারে, বা `next()` call করতে পারে (অথবা error handler-এ যেতে `next(err)`); কোনোটাই না করলে request ঝুলে থাকে।""",
         ex_en=r"""
             - **Mount paths:** `app.use('/api', mw)` runs `mw` for every path that *starts with* `/api`; `app.get('/x', mw)` matches only that method and path.
             - **Order is the whole game:** body parsers and security middleware go first, routes in the middle, the 404 handler and error handler last.
@@ -113,6 +115,8 @@ QUESTIONS = [
         a_bn=r"""
             `app.get('/{*splat}', handler)`। Express 5 path-to-regexp v8 ব্যবহার করে, যেখানে wildcard-এর একটি নাম থাকতে হয় (`*splat`), আর brace-এর ভেতরে রাখলে সেটা optional হয় — ফলে এটা `/` এবং যেকোনো গভীর path দুটোই মেলায়।
         """,
+        quick_en=r"""`app.get('/{*splat}', handler)`: Express 5 (path-to-regexp v8) requires a named wildcard like `*splat`, and the braces make it optional, so it also matches `/`. `'*'` and `'/*'` throw at startup, and `'/*splat'` doesn't match `/` itself.""",
+        quick_bn=r"""`app.get('/{*splat}', handler)`: Express 5 (path-to-regexp v8)-এ wildcard-এর নাম লাগে, যেমন `*splat`, আর brace দিলে সেটা optional হয়, তাই `/`-ও match করে। `'*'` আর `'/*'` startup-এই throw করে, আর `'/*splat'` শুধু `/` match করে না।""",
         ex_en=r"""
             - `'*'` and `'/*'` are Express 4 syntax. In Express 5 they **throw at startup** (`Missing parameter name`), so the app won't even boot — verified on Express 5.3.
             - `'/*splat'` is the tempting answer: it's valid, but it requires at least one character after `/`, so a request for `/` itself doesn't match.
@@ -157,6 +161,8 @@ QUESTIONS = [
             - `req.query` এখন একটি **getter** — এটা reassign করা যায় না, আর default parser **`'simple'`**, তাই `?filter[price]=10`-এর মতো nested syntax একটি flat key `'filter[price]'` হিসেবেই থাকে।
             - `req.param(name)` সরিয়ে দেওয়া হয়েছে; নির্দিষ্ট object-টাই ব্যবহার করো।
         """,
+        quick_en=r"""`req.params` holds path values (`/users/:id`), `req.query` the parsed query string, and `req.body` the parsed body, which exists only if a parser like `express.json()` ran. In Express 5, `req.body` is `undefined` without a parser, `req.query` is a read-only getter with the simple parser, and `req.param()` is removed.""",
+        quick_bn=r"""`req.params`-এ থাকে route path-এর value (`/users/:id`), `req.query`-তে parse করা query string, আর `req.body`-তে parse করা body, যেটা শুধু `express.json()`-এর মতো parser চললেই থাকে। Express 5-এ parser ছাড়া `req.body` হয় `undefined`, `req.query` simple parser-সহ read-only getter, আর `req.param()` বাদ দেওয়া হয়েছে।""",
         ex_en=r"""
             - **Everything is a string:** `req.params.id` and `req.query.page` must be converted and validated (`Number(...)`, a zod schema) before use.
             - **`req.query` is recomputed on access**, so `req.query.page = 1` is silently lost and `req.query = {...}` throws a `TypeError` in strict-mode code (ES modules). Store parsed/validated values in `res.locals` or a custom property such as `req.validated`.
@@ -221,6 +227,8 @@ QUESTIONS = [
 
             Fix: এই ক্রমে register করো — security/global middleware → body parser → authentication → route → 404 handler → error handler। Router-এর সাথে একসাথে `authenticate` mount করলে (`app.use('/api', authenticate, apiRouter)`) dependency-টাও স্পষ্ট হয়।
         """,
+        quick_en=r"""Both are middleware-order bugs: the router is mounted before `express.json()`, so `req.body` is still `undefined` (Express 5), and `authenticate` comes after the router, so it never runs for those routes. Register global middleware → body parser → auth → routes → 404 → error handler.""",
+        quick_bn=r"""দুটোই middleware order-এর bug: router `express.json()`-এর আগে mount করা, তাই `req.body` তখনো `undefined` (Express 5), আর `authenticate` router-এর পরে, তাই ওই route-গুলোতে এটা কখনো চলেই না। Order হবে: global middleware → body parser → auth → route → 404 → error handler।""",
         ex_en=r"""
             - **How to spot order bugs quickly:** read `app.use` calls top to bottom and ask "has X already happened when this runs?" Logging `req.body` at the start of the handler or setting `DEBUG=express:*,router` also shows which layers ran.
             - **Body parser scope:** you can apply `express.json()` only where needed (e.g. `apiRouter.use(express.json())`) — but it must still come before the handlers that read `req.body`.
@@ -313,6 +321,8 @@ QUESTIONS = [
         a_bn=r"""
             Express এটা forward করবে। Express 5-এ কোনো route handler বা middleware rejected promise return করলে (যে `async` function throw করে বা rejection-এর জন্য await করে), Express rejection value দিয়ে `next(err)` call করে, ফলে error-handling middleware 500 JSON response পাঠায়।
         """,
+        quick_en=r"""Express 5 forwards it: when an `async` handler returns a rejected promise, Express calls `next(err)` with the rejection value, so the error-handling middleware sends the 500 JSON response instead of the request crashing or hanging.""",
+        quick_bn=r"""Express 5 এটা forward করে: `async` handler rejected promise return করলে Express rejection-এর value দিয়ে `next(err)` call করে, তাই crash বা ঝুলে থাকার বদলে error-handling middleware 500 JSON response পাঠায়।""",
         ex_en=r"""
             Options A and B describe **Express 4**: it ignored the returned promise, so the rejection was unhandled — which on Node 15+ crashes the process, and on older setups left the request hanging. That's why Express 4 code used `try/catch` + `next(err)` in every handler or wrappers like `express-async-handler`. In Express 5 those wrappers are unnecessary.
 
@@ -365,6 +375,8 @@ QUESTIONS = [
             - **কোনো leak নয়:** 5xx-এ client শুধু "Internal Server Error" দেখে; আসল error, stack আর request ID যায় log-এ।
             - **ক্রম ও edge case:** একটি 404 handler (`AppError` তৈরি করে), তারপর 4-argument error handler, সবার শেষে register করা; `res.headersSent` true হলে `next(err)` দিয়ে Express-এর default handler-কে দাও, যাতে সে connection বন্ধ করে।
         """,
+        quick_en=r"""Throw a custom `AppError` (status, code, safe message) from handlers and handle everything in one 4-argument error middleware registered last, which also maps library errors (Zod → 400, duplicate key → 409). Express 5 forwards async errors, so no try/catch in handlers; unknown errors get a generic 500, details go to logs.""",
+        quick_bn=r"""Handler থেকে একটা custom `AppError` (status, code, নিরাপদ message) throw করো, আর সবকিছু শেষে register করা একটা 4-argument error middleware-এ সামলাও, যেটা library error-ও map করে (Zod → 400, duplicate key → 409)। Express 5 async error নিজেই forward করে, তাই handler-এ try/catch লাগে না; অজানা error-এ generic 500 যায়, বিস্তারিত log-এ।""",
         ex_en=r"""
             - **Why stable `code`s:** clients (mobile apps, frontends) branch on `code`, not on message text — messages can be translated or reworded without breaking them.
             - **Logging policy:** 4xx are usually `warn` or not logged individually (they're client mistakes); 5xx are `error` with the full error object and `cause` chain.
@@ -465,7 +477,7 @@ QUESTIONS = [
         id="express-007", sub="Deployment", diff="extreme", type="system-design",
         prio="high", market="international", mins=20,
         tags=["system-design", "architecture", "multi-tenant", "scalability", "observability", "express-5"],
-        ver="Express 5.x; Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Express 5.x; Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""Design the backend for a multi-tenant B2B SaaS REST API built with Express 5: about 3,000 requests per second at peak, strict tenant data isolation, 99.9% availability, and a small team that must ship features quickly. Describe the application structure, the middleware stack, how it scales, and how you'd operate it in production.""",
         q_bn=r"""Express 5 দিয়ে একটি multi-tenant B2B SaaS REST API-এর backend design করো: peak-এ প্রায় প্রতি সেকেন্ডে 3,000 request, কঠোর tenant data isolation, 99.9% availability, আর একটি ছোট team যাদের দ্রুত feature ship করতে হবে। Application structure, middleware stack, কীভাবে scale করবে, আর production-এ কীভাবে চালাবে — বর্ণনা করো।""",
         a_en=r"""
@@ -494,6 +506,8 @@ QUESTIONS = [
 
             **Operations:** health/readiness endpoint আর graceful shutdown; structured log, metric (RED: rate, errors, duration) আর request ID সহ OpenTelemetry trace; SLO-ভিত্তিক alert; expand/contract migration সহ zero-downtime rolling deploy; feature flag; CI-তে OpenAPI contract test; dependency আর container scanning।
         """,
+        quick_en=r"""A modular monolith (routes → controllers → services → repositories) built by an app factory, with an ordered middleware stack ending in auth, tenant resolution from the token, validation and errors. Isolate tenants with `tenant_id` scoping plus PostgreSQL RLS; scale with stateless containers, Redis, replicas and queues.""",
+        quick_bn=r"""App factory দিয়ে তৈরি একটা modular monolith (route → controller → service → repository), যার middleware stack নির্দিষ্ট ক্রমে চলে এবং শেষ দিকে থাকে auth, token থেকে tenant resolve, validation আর central error handler। Tenant আলাদা রাখো `tenant_id` scoping আর PostgreSQL RLS দিয়ে; scale করো stateless container, Redis, read replica ও queue দিয়ে।""",
         ex_en=r"""
             **Capacity sanity check:** 3,000 rps across, say, 6–10 instances is a few hundred rps per Node process — comfortable for I/O-bound handlers if nothing blocks the event loop. The database is usually the bottleneck, so caching hot reads and keeping queries indexed matters more than the framework.
 

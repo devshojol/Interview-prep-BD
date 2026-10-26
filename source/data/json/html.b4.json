@@ -58,6 +58,10 @@
    "html-018",
    "html-030"
   ],
+  "quickAnswer": {
+   "en": "`loading=\"lazy\"` delays fetching an image or iframe until it's near the viewport, saving data on content further down. Never use it on above-the-fold or LCP images, because it delays them; give the hero `fetchpriority=\"high\"` and always set `width`/`height`.",
+   "bn": "`loading=\"lazy\"` image বা iframe-এর fetch পিছিয়ে দেয় যতক্ষণ না সেটা viewport-এর কাছে আসে, ফলে নিচের content-এ data বাঁচে। Above-the-fold বা LCP image-এ কখনো দিও না, কারণ তাতে সেটা দেরিতে আসে; hero-তে `fetchpriority=\"high\"` দাও আর সবসময় `width`/`height` দাও।"
+  },
   "commonMistakes": {
    "en": "Adding `loading=\"lazy\"` to every image via a global component default (including the hero), and omitting `width`/`height`.",
    "bn": "Global component default দিয়ে সব image-এ (hero-সহ) `loading=\"lazy\"` দিয়ে দেওয়া, আর `width`/`height` বাদ দেওয়া।"
@@ -126,6 +130,10 @@
    "html-001",
    "html-003"
   ],
+  "quickAnswer": {
+   "en": "It's div soup with fake controls: no landmarks, a clickable `<div>` logo without `alt`, an `<a>` without `href`, a skipped heading level, a button inside a link, `<br>` for spacing and duplicate `id`s. Fix it with landmarks, real `<a href>`/`<button>`, `<h2>`, CSS spacing and classes.",
+   "bn": "এটা নকল control-ভরা div soup: landmark নেই, `alt` ছাড়া clickable `<div>` logo, `href` ছাড়া `<a>`, heading level লাফানো, link-এর ভেতরে button, spacing-এর জন্য `<br>`, আর duplicate `id`। Landmark, আসল `<a href>`/`<button>`, `<h2>`, CSS spacing আর class দিয়ে ঠিক করো।"
+  },
   "commonMistakes": {
    "en": "Fixing only what's visible (spacing), adding `role=\"button\"` and `tabindex=\"0\"` to the `<div>` instead of using a native element, or keeping the `<h4>` \"because the design says so\".",
    "bn": "শুধু চোখে পড়া জিনিস (spacing) ঠিক করা, native element ব্যবহার না করে `<div>`-এ `role=\"button\"` আর `tabindex=\"0\"` যোগ করা, অথবা \"design-এ এমনই আছে\" বলে `<h4>` রেখে দেওয়া।"
@@ -209,6 +217,10 @@
    "html-027",
    "html-019"
   ],
+  "quickAnswer": {
+   "en": "The URL's `q` and the API's `name`/`url` go into `innerHTML`, so `onerror` handlers run (reflected and stored XSS), and `q` isn't encoded in the fetch URL. Fix: `textContent` and `createElement`, only `http:`/`https:` links, and `URLSearchParams` for the query.",
+   "bn": "URL-এর `q` আর API-র `name`/`url` সরাসরি `innerHTML`-এ যায়, তাই `onerror` handler চলে (reflected আর stored XSS), আর fetch URL-এ `q` encode করা হয় না। সমাধান: `textContent` আর `createElement`, শুধু `http:`/`https:` link, আর query-র জন্য `URLSearchParams`।"
+  },
   "commonMistakes": {
    "en": "Escaping only `<script>` with a regex, assuming \"`<script>` via `innerHTML` doesn't run, so we're safe\", or forgetting `javascript:` URLs.",
    "bn": "Regex দিয়ে শুধু `<script>` escape করা, \"`innerHTML` দিয়ে `<script>` চলে না, তাই আমরা নিরাপদ\" ভেবে নেওয়া, অথবা `javascript:` URL-এর কথা ভুলে যাওয়া।"
@@ -280,6 +292,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`<link rel=\"preload\" as=\"image\" type=\"image/avif\" … fetchpriority=\"high\">`. It puts the CSS background's URL into the HTML, so the preload scanner starts the fetch in parallel with `main.css`; preconnect only warms the connection and still waits for the CSS.",
+   "bn": "`<link rel=\"preload\" as=\"image\" type=\"image/avif\" … fetchpriority=\"high\">`। এটা CSS background-এর URL HTML-এ নিয়ে আসে, তাই preload scanner `main.css`-এর সাথে parallel-এ fetch শুরু করে; preconnect শুধু connection আগে খোলে, ছবির জন্য তবু CSS-এর অপেক্ষা করতে হয়।"
+  },
   "options": [
    {
     "en": "`<link rel=\"preconnect\" href=\"https://img.dokan-cdn.example\">`",
@@ -360,6 +376,10 @@
    "html-031",
    "html-003"
   ],
+  "quickAnswer": {
+   "en": "If a native element already has the semantics and behaviour you need, use it instead of ARIA, because ARIA only changes what assistive tech is told and adds no behaviour. ARIA is for states, relationships, live updates and custom widgets HTML doesn't have.",
+   "bn": "যে native element-এ দরকারি semantics আর behaviour আগে থেকেই আছে, ARIA-র বদলে সেটাই ব্যবহার করো, কারণ ARIA শুধু assistive tech-কে কী বলা হবে সেটা বদলায়, কোনো behaviour যোগ করে না। ARIA দরকার state, relationship, live update আর HTML-এ নেই এমন custom widget-এর জন্য।"
+  },
   "commonMistakes": {
    "en": "Thinking `role=\"button\"` makes an element keyboard-accessible, sprinkling `aria-label` everywhere, or using ARIA to \"fix\" problems that a native element would avoid.",
    "bn": "`role=\"button\"` দিলেই element keyboard-accessible হয়ে যায় ভাবা, সব জায়গায় `aria-label` ছিটিয়ে দেওয়া, অথবা native element ব্যবহার করলে যে সমস্যা হতোই না, তা ARIA দিয়ে \"ঠিক\" করার চেষ্টা করা।"
@@ -416,6 +436,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`form.submit()` skips constraint validation and doesn't fire the `submit` event, so the `fetch` handler never runs and the browser does a normal GET submission. Use `form.requestSubmit()`, which behaves like clicking the submit button.",
+   "bn": "`form.submit()` constraint validation বাদ দেয় আর `submit` event fire করে না, তাই `fetch` handler চলেই না, browser একটা সাধারণ GET submission করে ফেলে। `form.requestSubmit()` ব্যবহার করো, এটা submit button click করার মতোই কাজ করে।"
+  },
   "code": {
    "language": "html",
    "source": "<form id=\"profile\">\n  <label for=\"name\">Name</label>\n  <input id=\"name\" name=\"name\" required>\n  <button type=\"submit\">Save</button>\n</form>\n\n<script type=\"module\">\n  const form = document.getElementById('profile');\n\n  form.addEventListener('submit', async (event) => {\n    event.preventDefault();\n    await fetch('/api/profile', { method: 'POST', body: new FormData(form) });\n    showToast('Saved');\n  });\n\n  document.addEventListener('keydown', (event) => {\n    if ((event.ctrlKey || event.metaKey) && event.key === 's') {\n      event.preventDefault();\n      form.submit();\n    }\n  });\n</script>"
@@ -500,6 +524,10 @@
    "html-023",
    "html-019"
   ],
+  "quickAnswer": {
+   "en": "`<p>Hello</p><div>World</div><p></p>`, `3`, then `<tbody><tr><td>1</td></tr></tbody>`. The parser closes the open `<p>` when it meets `<div>`, turns the stray `</p>` into an empty `<p></p>`, and adds an implicit `<tbody>` for the `<tr>`.",
+   "bn": "Output: `<p>Hello</p><div>World</div><p></p>`, `3`, তারপর `<tbody><tr><td>1</td></tr></tbody>`। `<div>` পেলে parser খোলা `<p>` বন্ধ করে দেয়, বাড়তি `</p>`-কে একটা খালি `<p></p>` বানায়, আর `<tr>`-এর জন্য implicit `<tbody>` যোগ করে।"
+  },
   "commonMistakes": {
    "en": "Expecting the markup to be preserved as written, expecting an exception for invalid HTML, or missing the extra empty paragraph.",
    "bn": "যেভাবে লেখা হয়েছে markup সেভাবেই থাকবে বলে আশা করা, invalid HTML-এর জন্য exception আশা করা, অথবা বাড়তি খালি paragraph-টা খেয়াল না করা।"
@@ -574,6 +602,10 @@
    "html-019",
    "html-030"
   ],
+  "quickAnswer": {
+   "en": "This is advanced: the page renders far more DOM than anyone can see. Profile on a throttled CPU, then stop rendering it all with server-side filtering and pagination or virtualization, plus debounced filtering, slimmer rows, one delegated listener and `table-layout: fixed`.",
+   "bn": "এটা advanced বিষয়: page-টা দেখার চেয়ে অনেক বেশি DOM render করছে। Throttled CPU-তে profile করি, তারপর server-side filtering আর pagination বা virtualization দিয়ে সব render করা বন্ধ করি; সাথে debounced filtering, হালকা row, একটা delegated listener আর `table-layout: fixed`।"
+  },
   "commonMistakes": {
    "en": "Jumping straight to `will-change` or micro-optimising selectors, memoising components while still rendering 15,000 rows, or assuming `content-visibility` reduces memory.",
    "bn": "সরাসরি `will-change` বা selector-এর ছোটখাটো optimisation-এ ঝাঁপিয়ে পড়া, 15,000 row render করা বজায় রেখে component memoise করা, অথবা ধরে নেওয়া যে `content-visibility` memory কমায়।"

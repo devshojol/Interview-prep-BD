@@ -56,6 +56,10 @@
   "related": [
    "js-005"
   ],
+  "quickAnswer": {
+   "en": "It prints `object object function number undefined`. `typeof null` is `\"object\"` because of an old bug kept for compatibility, arrays are ordinary objects, functions get the special `\"function\"` result, and `NaN` is still a `number`.",
+   "bn": "Output হলো `object object function number undefined`। `typeof null` `\"object\"` দেয় একটা পুরনো bug-এর কারণে, যেটা compatibility-র জন্য রেখে দেওয়া হয়েছে; array সাধারণ object, function-এর জন্য আলাদা `\"function\"` আসে, আর `NaN`-ও `number` type-এরই value।"
+  },
   "commonMistakes": {
    "en": "Writing `if (typeof data === 'object')` and then reading `data.length` — it crashes when `data` is `null`. Also using the global `isNaN()` instead of `Number.isNaN()`.",
    "bn": "`if (typeof data === 'object')` লিখে তারপর `data.length` পড়া — `data` যদি `null` হয় তাহলে crash করবে। আরেকটা ভুল হলো `Number.isNaN()`-এর বদলে global `isNaN()` ব্যবহার করা।"
@@ -148,6 +152,10 @@
    "js-025",
    "js-003"
   ],
+  "quickAnswer": {
+   "en": "Output: `5`, `undefined`, `undefined`, `TypeError`, `6 10`. The function declaration `add` is hoisted with its body, but `var total` and `var multiply` are hoisted as `undefined`, so calling `multiply` before its assignment throws a `TypeError`.",
+   "bn": "Output: `5`, `undefined`, `undefined`, `TypeError`, `6 10`। Function declaration `add` body-সহ hoist হয়, কিন্তু `var total` আর `var multiply` hoist হয় `undefined` হিসেবে, তাই assignment-এর আগে `multiply` call করলে `TypeError` হয়।"
+  },
   "commonMistakes": {
    "en": "Saying the code \"physically moves to the top\", or assuming function expressions are hoisted like function declarations.",
    "bn": "Code \"physically উপরে চলে যায়\" বলা, অথবা ধরে নেওয়া যে function expression-ও function declaration-এর মতো body সহ hoist হয়।"
@@ -218,6 +226,10 @@
    "js-004",
    "js-016"
   ],
+  "quickAnswer": {
+   "en": "The `var` loop prints `var 3` three times and the `let` loop prints `let 0`, `let 1`, `let 2`. The callbacks run after the loop and close over the variable, not its value: `var` has one shared `i` (already `3`), while `let` creates a new `j` for every iteration.",
+   "bn": "`var` loop তিনবার `var 3` print করে, আর `let` loop print করে `let 0`, `let 1`, `let 2`। Callback-গুলো loop শেষ হওয়ার পরে চলে এবং value নয়, variable-টাকেই মনে রাখে: `var`-এ পুরো loop-এ একটাই `i` (তখন `3`), আর `let` প্রতিটা iteration-এ নতুন `j` তৈরি করে।"
+  },
   "commonMistakes": {
    "en": "Saying the `var` loop prints `0 1 2` \"because setTimeout has 0 delay\", or thinking `let` works because it is \"not hoisted\".",
    "bn": "\"setTimeout-এর delay 0, তাই `var` loop `0 1 2` print করবে\" — এমন ভাবা, অথবা মনে করা `let` কাজ করে কারণ এটা \"hoist হয় না\"।"
@@ -294,6 +306,10 @@
    "js-025",
    "js-022"
   ],
+  "quickAnswer": {
+   "en": "A closure is a function that keeps access to the variables of the scope it was created in, even after that outer function has returned. That's how a returned counter function can keep its own private `count`.",
+   "bn": "Closure হলো এমন একটা function, যেটা যে scope-এ তৈরি হয়েছে সেই scope-এর variable-গুলো outer function return করার পরেও ব্যবহার করতে পারে। এজন্যই return করা একটা counter function নিজের private `count` মনে রাখতে পারে।"
+  },
   "commonMistakes": {
    "en": "Defining a closure as \"a function inside a function\" (nesting alone isn't the point — the retained scope is), or believing closures copy values at creation time.",
    "bn": "Closure-কে শুধু \"function-এর ভেতরে function\" বলা (nesting মূল কথা নয় — scope ধরে রাখাটাই আসল), অথবা ভাবা যে closure তৈরি হওয়ার সময় value copy করে রাখে।"
@@ -361,6 +377,10 @@
   "related": [
    "js-001"
   ],
+  "quickAnswer": {
+   "en": "Output: `12`, `3`, `10`, `2`, `[object Object]`, `1,23`, `true false`, `false true`, `true true`. `+` concatenates as soon as one side becomes a string, other arithmetic converts to numbers, and `==` converts types before comparing while `===` doesn't.",
+   "bn": "Output: `12`, `3`, `10`, `2`, `[object Object]`, `1,23`, `true false`, `false true`, `true true`। একদিকে string পেলেই `+` জোড়া লাগায়, বাকি arithmetic operator number-এ convert করে, আর `==` compare করার আগে type convert করে, `===` করে না।"
+  },
   "commonMistakes": {
    "en": "Expecting `'5' - 2` to be `'52'`, or thinking `[] + {}` throws an error. Another trap: using `arr.includes(NaN)` vs `arr.indexOf(NaN)` — `includes` finds `NaN`, `indexOf` does not.",
    "bn": "`'5' - 2`-এর ফল `'52'` আশা করা, অথবা ভাবা `[] + {}` error throw করবে। আরেকটা ফাঁদ: `arr.includes(NaN)` আর `arr.indexOf(NaN)` — `includes` `NaN` খুঁজে পায়, `indexOf` পায় না।"
@@ -429,6 +449,10 @@
   "related": [
    "js-015"
   ],
+  "quickAnswer": {
+   "en": "An arrow function has no own `this` (it uses the `this` of the surrounding scope), no `arguments`, and can't be used with `new`. So I avoid arrows for object or class methods that need the caller's `this`, for constructors and for DOM handlers that use `this`, but I use them for callbacks inside methods.",
+   "bn": "Arrow function-এর নিজের `this` নেই (চারপাশের scope-এর `this` ব্যবহার করে), `arguments` নেই, আর `new` দিয়ে চালানো যায় না। তাই caller-এর `this` লাগে এমন object/class method, constructor বা `this` ব্যবহার করা DOM handler-এ আমি arrow লিখি না, কিন্তু method-এর ভেতরের callback-এ arrow-ই ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Saying arrow functions \"bind `this` to the object they are defined in\" — they don't bind anything; an arrow in an object literal does not see that object as `this`.",
    "bn": "বলা যে arrow function \"যে object-এ define করা, সেই object-এ `this` bind করে\" — আসলে arrow কিছুই bind করে না; object literal-এর ভেতরের arrow সেই object-কে `this` হিসেবে দেখে না।"
@@ -494,6 +518,10 @@
    "js-013",
    "js-014"
   ],
+  "quickAnswer": {
+   "en": "`[1, 100, 40, 5]` and `[5, 1, 100, 40]`. Without a compare function `toSorted()` compares elements as strings and returns a new array, while `reverse()` mutates `scores` in place.",
+   "bn": "`[1, 100, 40, 5]` আর `[5, 1, 100, 40]`। Compare function না দিলে `toSorted()` element-গুলোকে string হিসেবে compare করে এবং নতুন array return করে, আর `reverse()` `scores`-কেই বদলে দেয়।"
+  },
   "commonMistakes": {
    "en": "Using `arr.sort()` on numbers without a comparator, or calling `sort()` on an array you don't own (props/state) instead of `toSorted()` or `[...arr].sort()`.",
    "bn": "Comparator ছাড়া number-এর array-তে `arr.sort()` ব্যবহার করা, অথবা নিজের নয় এমন array-তে (props/state) `toSorted()` বা `[...arr].sort()`-এর বদলে সরাসরি `sort()` call করা।"

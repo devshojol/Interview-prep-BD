@@ -1,0 +1,559 @@
+[
+ {
+  "id": "mongoose-q01",
+  "subtopic": "Mongoose vs Native Driver",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "odm",
+   "basics",
+   "schema",
+   "validation"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Mongoose, and why do people use it with MongoDB?",
+   "bn": "Mongoose কী, আর MongoDB-র সাথে মানুষ এটা কেন ব্যবহার করে?"
+  },
+  "answer": {
+   "en": "Mongoose is an ODM (Object Data Modeling) library for MongoDB in Node.js, built on top of the official driver. It adds schemas with types, casting, validation and defaults, plus middleware, `populate()` and a model-based API, so your data keeps a consistent shape even though MongoDB itself doesn't force one.",
+   "bn": "Mongoose হলো Node.js-এ MongoDB-র জন্য একটা ODM (Object Data Modeling) library, যেটা official driver-এর ওপর তৈরি। এটা type, casting, validation আর default-সহ schema দেয়, সাথে middleware, `populate()` আর model-ভিত্তিক API; তাই MongoDB নিজে কোনো shape force না করলেও তোমার data-র shape consistent থাকে।"
+  },
+  "explanation": {
+   "en": "The schema lives only in your app: writes made by other tools or by the native driver skip Mongoose's validation.",
+   "bn": "Schema শুধু তোমার app-এই থাকে: অন্য tool বা native driver দিয়ে করা write Mongoose-এর validation এড়িয়ে যায়।"
+  },
+  "interviewTip": {
+   "en": "Say \"ODM on top of the driver\" and name two things it adds, such as validation and `populate()`.",
+   "bn": "বলো \"driver-এর ওপর একটা ODM\", আর এটা যোগ করে এমন দুইটা জিনিসের নাম বলো, যেমন validation আর `populate()`।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Getting Started",
+    "url": "https://mongoosejs.com/docs/index.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use the native driver instead?",
+    "bn": "কখন এর বদলে native driver ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-020",
+   "mongoose-001"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const User = mongoose.model(\"User\", new mongoose.Schema({\n  name: { type: String, required: true }, age: Number,\n}));\nconst u = await User.create({ name: \"Rafi\", age: \"25\" });\nconsole.log(u.age, typeof u.age);  // → 25 'number' (cast from \"25\")\nawait User.create({ age: 30 });     // → ValidationError: ... Path `name` is required."
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q02",
+  "subtopic": "Connections",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "connect",
+   "connection-pool",
+   "startup"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you connect to MongoDB with Mongoose, and where should you do it?",
+   "bn": "Mongoose দিয়ে MongoDB-তে কীভাবে connect করবে, আর সেটা কোথায় করা উচিত?"
+  },
+  "answer": {
+   "en": "Call `await mongoose.connect(uri)` once when the app starts, before it accepts requests. Models created with `mongoose.model()` use this default connection, and Mongoose keeps a connection pool, so you never connect per request. Use `mongoose.createConnection()` only when you need several databases.",
+   "bn": "App start হওয়ার সময় একবার, request নেওয়ার আগেই, `await mongoose.connect(uri)` call করো। `mongoose.model()` দিয়ে বানানো model এই default connection ব্যবহার করে, আর Mongoose একটা connection pool রাখে, তাই প্রতি request-এ connect করতে হয় না। একাধিক database লাগলে তবেই `mongoose.createConnection()` ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "Keep the URI in an environment variable, never in the code. A model registered on a connection that never opens doesn't fail at once: its operations buffer and then time out.",
+   "bn": "URI environment variable-এ রাখো, code-এ কখনো না। যে connection কখনো খোলে না, তাতে register করা model সাথে সাথে fail করে না: operation-গুলো buffer হয়ে থাকে, তারপর timeout হয়।"
+  },
+  "interviewTip": {
+   "en": "Mention \"connect once at startup, reuse the pool\": that's the point most juniors miss.",
+   "bn": "বলো \"startup-এ একবার connect, তারপর pool reuse\": বেশিরভাগ junior এই কথাটাই বাদ দেয়।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Connections",
+    "url": "https://mongoosejs.com/docs/connections.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to queries sent before the connection is open?",
+    "bn": "Connection খোলার আগেই query পাঠালে কী হয়?"
+   }
+  ],
+  "related": [
+   "mongoose-029"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "import mongoose from \"mongoose\";\n\nawait mongoose.connect(process.env.MONGODB_URI);  // e.g. mongodb://127.0.0.1:27017/shop\nconsole.log(mongoose.connection.readyState);       // → 1 (connected)\nmongoose.connection.on(\"error\", (err) => console.error(err));\napp.listen(3000);"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q03",
+  "subtopic": "Documents & Queries",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "find",
+   "findone",
+   "findbyid",
+   "queries"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between `find()`, `findOne()` and `findById()` in Mongoose?",
+   "bn": "Mongoose-এ `find()`, `findOne()` আর `findById()`-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "`find(filter)` returns an array of all matching documents, or an empty array. `findOne(filter)` returns the first match or `null`. `findById(id)` is a shortcut for `findOne({ _id: id })` that also casts a string id to an `ObjectId`.",
+   "bn": "`find(filter)` match করা সব document-এর একটা array দেয়, কিছু না পেলে empty array। `findOne(filter)` প্রথম match-টা দেয়, না পেলে `null`। `findById(id)` হলো `findOne({ _id: id })`-এর shortcut, যেটা string id-কে `ObjectId`-তে cast-ও করে।"
+  },
+  "explanation": {
+   "en": "Without a `sort()`, \"first\" in `findOne` just means the first one MongoDB finds. An invalid id string like `\"abc\"` makes `findById` throw a `CastError`.",
+   "bn": "`sort()` না দিলে `findOne`-এর \"প্রথম\" মানে শুধু MongoDB যেটা আগে পায়। `\"abc\"`-এর মতো ভুল id string দিলে `findById` একটা `CastError` throw করে।"
+  },
+  "interviewTip": {
+   "en": "Give the return value of each one, including the empty case (`[]` or `null`).",
+   "bn": "প্রতিটার return value বলো, কিছু না পাওয়ার case-সহ (`[]` বা `null`)।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Queries",
+    "url": "https://mongoosejs.com/docs/queries.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How do you return a 404 neatly when `findById` finds nothing?",
+    "bn": "`findById` কিছু না পেলে সুন্দরভাবে 404 কীভাবে দেবে?"
+   }
+  ],
+  "related": [
+   "mongoose-005",
+   "mongoose-011"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "await User.find({ age: { $gte: 18 } });   // → [doc, doc, ...] or []\nawait User.findOne({ email: \"a@x.com\" }); // → doc or null\nawait User.findById(\"6709a1f2c3d4e5f601234567\"); // → doc or null"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q04",
+  "subtopic": "Schemas & Models",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "timestamps",
+   "createdat",
+   "updatedat",
+   "schema-options"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does the `timestamps` schema option do in Mongoose?",
+   "bn": "Mongoose-এ `timestamps` schema option কী করে?"
+  },
+  "answer": {
+   "en": "`{ timestamps: true }` makes Mongoose add `createdAt` and `updatedAt` `Date` fields. Both are set when the document is created, and `updatedAt` is refreshed on `save()` and on update queries such as `updateOne()` and `findOneAndUpdate()`.",
+   "bn": "`{ timestamps: true }` দিলে Mongoose `createdAt` আর `updatedAt` নামে দুইটা `Date` field যোগ করে। Document তৈরির সময় দুটোই set হয়, আর `save()` এবং `updateOne()`, `findOneAndUpdate()`-এর মতো update query-তে `updatedAt` নতুন করে set হয়।"
+  },
+  "explanation": {
+   "en": "Writes through the native driver (`Post.collection.updateOne(...)`) bypass Mongoose, so `updatedAt` isn't touched. You can rename the fields: `timestamps: { createdAt: \"created_at\" }`.",
+   "bn": "Native driver দিয়ে write করলে (`Post.collection.updateOne(...)`) Mongoose বাদ পড়ে, তাই `updatedAt` বদলায় না। Field-এর নামও বদলানো যায়: `timestamps: { createdAt: \"created_at\" }`।"
+  },
+  "interviewTip": {
+   "en": "Say which operations update `updatedAt`, and name the native-driver exception.",
+   "bn": "কোন কোন operation-এ `updatedAt` update হয় সেটা বলো, আর native driver-এর ব্যতিক্রমটা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Timestamps",
+    "url": "https://mongoosejs.com/docs/timestamps.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you add a timestamp only when a status changes?",
+    "bn": "শুধু status বদলালে একটা timestamp কীভাবে যোগ করবে?"
+   }
+  ],
+  "related": [
+   "mongoose-002"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const Post = mongoose.model(\"Post\", new mongoose.Schema({ title: String }, { timestamps: true }));\nconst p = await Post.create({ title: \"Hi\" });  // createdAt === updatedAt\nawait Post.updateOne({ _id: p._id }, { title: \"Hello\" });\n// → updatedAt moves forward, createdAt stays the same"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q05",
+  "subtopic": "Virtuals",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "virtuals",
+   "computed-fields",
+   "tojson"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is a virtual in Mongoose?",
+   "bn": "Mongoose-এ virtual কী?"
+  },
+  "answer": {
+   "en": "A virtual is a computed property defined on the schema that is not stored in MongoDB, like `fullName` built from `firstName` and `lastName`. You can read it on documents, but you can't query or sort by it, and it isn't in JSON output unless you set `toJSON: { virtuals: true }`.",
+   "bn": "Virtual হলো schema-তে define করা একটা computed property, যেটা MongoDB-তে store হয় না, যেমন `firstName` আর `lastName` থেকে বানানো `fullName`। Document-এ এটা পড়া যায়, কিন্তু এটা দিয়ে query বা sort করা যায় না, আর `toJSON: { virtuals: true }` না দিলে JSON output-এ আসে না।"
+  },
+  "explanation": {
+   "en": "Use a regular function for the getter so `this` is the document. Virtuals are also missing from `.lean()` results, because those are plain objects.",
+   "bn": "Getter-এ সাধারণ function ব্যবহার করো, যাতে `this` document হয়। `.lean()` result-এও virtual থাকে না, কারণ সেগুলো plain object।"
+  },
+  "interviewTip": {
+   "en": "Say \"computed, not stored, not queryable\" and mention the `toJSON` option.",
+   "bn": "বলো \"computed, store হয় না, query করা যায় না\", আর `toJSON` option-টা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Virtuals",
+    "url": "https://mongoosejs.com/docs/tutorials/virtuals.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is virtual populate?",
+    "bn": "Virtual populate কী?"
+   }
+  ],
+  "related": [
+   "mongoose-007",
+   "mongoose-028"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const personSchema = new mongoose.Schema({ firstName: String, lastName: String });\npersonSchema.virtual(\"fullName\").get(function () {\n  return `${this.firstName} ${this.lastName}`;\n});\nconst p = await Person.create({ firstName: \"Nusrat\", lastName: \"Jahan\" });\nconsole.log(p.fullName);  // → Nusrat Jahan (stored fields: _id, firstName, lastName, __v)"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q06",
+  "subtopic": "Middleware & Hooks",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "middleware",
+   "pre-save",
+   "post-save",
+   "hooks",
+   "mongoose-9"
+  ],
+  "technologyVersion": "Mongoose 9.x (pre hooks get no next())",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What are `pre` and `post` middleware (hooks) in Mongoose, and how do you write one in Mongoose 9?",
+   "bn": "Mongoose-এ `pre` আর `post` middleware (hook) কী, আর Mongoose 9-এ কীভাবে লিখবে?"
+  },
+  "answer": {
+   "en": "Middleware are functions that run before (`pre`) or after (`post`) an operation such as `save`, `validate`, `deleteOne`, `find` or `aggregate`. In Mongoose 9 pre hooks no longer receive `next()`: write an `async function` and `throw` to stop the operation. Use a regular function so `this` is the document (or the query, in query middleware).",
+   "bn": "Middleware হলো এমন function, যেটা `save`, `validate`, `deleteOne`, `find` বা `aggregate`-এর মতো কোনো operation-এর আগে (`pre`) বা পরে (`post`) চলে। Mongoose 9-এ pre hook আর `next()` পায় না: একটা `async function` লেখো, আর operation থামাতে `throw` করো। সাধারণ function ব্যবহার করো, যাতে `this` হয় document (query middleware-এ query)।"
+  },
+  "explanation": {
+   "en": "`save` hooks don't run for `updateOne()` or `findByIdAndUpdate()`: those trigger query middleware instead. That's why a password-hashing hook can be skipped by an update query.",
+   "bn": "`updateOne()` বা `findByIdAndUpdate()`-এ `save` hook চলে না: এগুলো query middleware trigger করে। এজন্যই update query দিয়ে password-hashing hook এড়িয়ে যাওয়া সম্ভব।"
+  },
+  "interviewTip": {
+   "en": "Mention the Mongoose 9 change (no `next()`) and the document vs query middleware split.",
+   "bn": "Mongoose 9-এর পরিবর্তনটা (`next()` নেই) আর document বনাম query middleware-এর ভাগটা উল্লেখ করো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Middleware",
+    "url": "https://mongoosejs.com/docs/middleware.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which hook runs for `findOneAndUpdate()`?",
+    "bn": "`findOneAndUpdate()`-এ কোন hook চলে?"
+   }
+  ],
+  "related": [
+   "mongoose-013",
+   "mongoose-014"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "userSchema.pre(\"save\", async function () {\n  if (!this.isModified(\"password\")) return;\n  this.password = await bcrypt.hash(this.password, 10);\n});\nuserSchema.post(\"save\", function (doc) {\n  console.log(\"saved\", doc.email);\n});"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q07",
+  "subtopic": "Documents & Queries",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "select",
+   "projection",
+   "select-false",
+   "security"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you hide a field like `password` from query results in Mongoose?",
+   "bn": "Mongoose-এ query result থেকে `password`-এর মতো একটা field কীভাবে লুকাবে?"
+  },
+  "answer": {
+   "en": "Set `select: false` on the schema path, so every query leaves that field out by default. When you really need it, such as at login, opt back in with `.select(\"+password\")`. For one-off projections, `.select(\"name email\")` includes fields and `.select(\"-field\")` excludes them.",
+   "bn": "Schema path-এ `select: false` দাও, তাহলে default-ভাবে কোনো query সেই field আনবে না। সত্যিই দরকার হলে, যেমন login-এর সময়, `.select(\"+password\")` দিয়ে আবার আনো। এক-আধবারের projection-এর জন্য `.select(\"name email\")` field include করে আর `.select(\"-field\")` বাদ দেয়।"
+  },
+  "explanation": {
+   "en": "`select: false` protects every route at once; remembering `.select(\"-password\")` in each route is easy to forget. For API responses, a `toJSON` transform or an explicit response object adds another layer.",
+   "bn": "`select: false` একসাথে সব route-কে রক্ষা করে; প্রতিটি route-এ `.select(\"-password\")` মনে রাখা সহজেই ভুলে যাওয়া যায়। API response-এর জন্য `toJSON` transform বা আলাদা response object আরেকটা স্তর যোগ করে।"
+  },
+  "interviewTip": {
+   "en": "Show `select: false` plus `+password` at login: it shows you think about security by default.",
+   "bn": "`select: false` আর login-এ `+password` দেখাও: এতে বোঝা যায় তুমি শুরু থেকেই security নিয়ে ভাবো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose API — Query",
+    "url": "https://mongoosejs.com/docs/api/query.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you hide fields from populated documents?",
+    "bn": "Populate করা document থেকে field কীভাবে লুকাবে?"
+   }
+  ],
+  "related": [
+   "mongoose-026",
+   "mongoose-002"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const userSchema = new mongoose.Schema({\n  name: String, email: String, password: { type: String, select: false },\n});\nawait User.findOne({ email }).lean();                    // → { _id, name, email, __v }\nawait User.findOne({ email }).select(\"+password\").lean(); // → also has password\nawait User.findOne({ email }).select(\"name -_id\").lean(); // → { name: 'Rafi' }"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q08",
+  "subtopic": "CRUD",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "findoneandupdate",
+   "findbyidandupdate",
+   "returndocument",
+   "mongoose-9"
+  ],
+  "technologyVersion": "Mongoose 9.x (`new` deprecated since 9.2)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "Why does `findByIdAndUpdate()` return the old document, and how do you get the updated one?",
+   "bn": "`findByIdAndUpdate()` কেন পুরনো document return করে, আর update হওয়া document কীভাবে পাবে?"
+  },
+  "answer": {
+   "en": "By default `findOneAndUpdate()` and `findByIdAndUpdate()` return the document as it was **before** the update. Pass `{ returnDocument: \"after\" }` to get the updated one; the older `new: true` option does the same but is deprecated since Mongoose 9.2. Add `runValidators: true` if the update should be validated.",
+   "bn": "Default-ভাবে `findOneAndUpdate()` আর `findByIdAndUpdate()` update-এর **আগের** document return করে। Update হওয়া document পেতে `{ returnDocument: \"after\" }` দাও; পুরনো `new: true` option-ও একই কাজ করে, কিন্তু Mongoose 9.2 থেকে deprecated। Update validate করাতে চাইলে `runValidators: true` যোগ করো।"
+  },
+  "explanation": {
+   "en": "If no document matches, both forms return `null`, so the route should still answer 404.",
+   "bn": "কোনো document match না করলে দুই ক্ষেত্রেই `null` আসে, তাই route-কে তখনও 404 দিতে হবে।"
+  },
+  "interviewTip": {
+   "en": "Name the current option (`returnDocument: \"after\"`) and say that `new: true` is the legacy spelling.",
+   "bn": "এখনকার option-টা (`returnDocument: \"after\"`) বলো, আর বলো যে `new: true` পুরনো লেখা।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — How to Use findOneAndUpdate()",
+    "url": "https://mongoosejs.com/docs/tutorials/findoneandupdate.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Does `findByIdAndUpdate()` run `pre('save')` hooks?",
+    "bn": "`findByIdAndUpdate()` কি `pre('save')` hook চালায়?"
+   }
+  ],
+  "related": [
+   "mongoose-012",
+   "mongo-021"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "// { name: \"Pen\", price: 10 }\n(await Product.findByIdAndUpdate(id, { price: 15 })).price;  // → 10 (before)\n(await Product.findByIdAndUpdate(id, { price: 20 },\n  { returnDocument: \"after\", runValidators: true })).price;  // → 20 (after)"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q09",
+  "subtopic": "Documents & Queries",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "subdocuments",
+   "arrays",
+   "positional-operator",
+   "save"
+  ],
+  "technologyVersion": "Mongoose 9.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you add, change and remove items in an array of subdocuments in Mongoose?",
+   "bn": "Mongoose-এ subdocument-এর array-তে item কীভাবে যোগ, পরিবর্তন আর মুছবে?"
+  },
+  "answer": {
+   "en": "Define the array with a child schema (`items: [itemSchema]`), so each item gets its own `_id`, casting and validation. On a loaded document, `push()` a new item, find one with `doc.items.id(itemId)`, change it or call `deleteOne()` on it, then `save()`. For one atomic change without loading, use `updateOne` with the positional `$` operator.",
+   "bn": "Array-টা একটা child schema দিয়ে define করো (`items: [itemSchema]`), তাহলে প্রতিটি item নিজের `_id`, casting আর validation পায়। Load করা document-এ নতুন item `push()` করো, `doc.items.id(itemId)` দিয়ে একটা item খুঁজে বদলাও বা তার ওপর `deleteOne()` call করো, তারপর `save()`। Load না করে একটা atomic পরিবর্তনের জন্য positional `$` operator-সহ `updateOne` ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "The load-modify-`save()` path runs subdocument validation and hooks but is read-modify-write, so concurrent edits can overwrite each other; the `$inc` path is atomic but skips `save` hooks.",
+   "bn": "Load করে বদলে `save()` করলে subdocument validation আর hook চলে, কিন্তু এটা read-modify-write, তাই একসাথে কয়েকজন edit করলে একে অপরের লেখা overwrite হতে পারে; `$inc`-এর পথ atomic, কিন্তু `save` hook চলে না।"
+  },
+  "interviewTip": {
+   "en": "Show both paths and say when you'd pick each one: rich edits vs a hot counter.",
+   "bn": "দুইটা পথই দেখাও, আর কখন কোনটা নেবে সেটা বলো: বিস্তারিত edit বনাম ঘনঘন বদলানো counter।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Subdocuments",
+    "url": "https://mongoosejs.com/docs/subdocs.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you move the array into its own collection instead?",
+    "bn": "কখন array-টা আলাদা collection-এ সরিয়ে নেবে?"
+   }
+  ],
+  "related": [
+   "mongoose-004",
+   "mongoose-025"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const order = await Order.findById(orderId);\norder.items.push({ sku: \"C\", qty: 1 });\norder.items.id(itemId).qty = 5;\nawait order.save();\n// atomic, without loading the order:\nawait Order.updateOne({ _id: orderId, \"items._id\": itemId }, { $inc: { \"items.$.qty\": 1 } });"
+  },
+  "technology": "mongoose"
+ },
+ {
+  "id": "mongoose-q10",
+  "subtopic": "Schemas & Models",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "typescript",
+   "inferschematype",
+   "hydrateddocument",
+   "types"
+  ],
+  "technologyVersion": "Mongoose 9.x with TypeScript",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you type a Mongoose model in TypeScript without writing the interface twice?",
+   "bn": "Interface দুইবার না লিখে TypeScript-এ একটা Mongoose model-এর type কীভাবে দেবে?"
+  },
+  "answer": {
+   "en": "Let Mongoose infer the type from the schema: `InferSchemaType<typeof userSchema>` gives the plain data shape, and `model(\"User\", userSchema)` is typed automatically. `HydratedDocument<User>` is the type of a loaded document with `save()` and other document methods. A hand-written interface also works, but it can drift from the schema.",
+   "bn": "Schema থেকেই Mongoose-কে type বের করতে দাও: `InferSchemaType<typeof userSchema>` plain data-র shape দেয়, আর `model(\"User\", userSchema)` নিজে থেকেই typed হয়। `HydratedDocument<User>` হলো load করা document-এর type, যেখানে `save()` আর অন্য document method থাকে। হাতে লেখা interface-ও চলে, কিন্তু সেটা schema থেকে আলাদা হয়ে যেতে পারে।"
+  },
+  "explanation": {
+   "en": "A required field becomes a non-optional type; fields without `required` become optional and may be `null`. Instance methods and statics need extra generic parameters on `Schema`/`model`.",
+   "bn": "Required field non-optional type হয়; `required` ছাড়া field optional হয় আর `null`-ও হতে পারে। Instance method আর static-এর জন্য `Schema`/`model`-এ বাড়তি generic parameter দিতে হয়।"
+  },
+  "interviewTip": {
+   "en": "Say \"single source of truth: the schema\" and name `InferSchemaType` and `HydratedDocument`.",
+   "bn": "বলো \"একটাই source of truth: schema\", আর `InferSchemaType` ও `HydratedDocument`-এর নাম বলো।"
+  },
+  "references": [
+   {
+    "title": "Mongoose — Schemas in TypeScript",
+    "url": "https://mongoosejs.com/docs/typescript/schemas.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you type an instance method like `comparePassword`?",
+    "bn": "`comparePassword`-এর মতো একটা instance method-এর type কীভাবে দেবে?"
+   }
+  ],
+  "related": [
+   "mongoose-001",
+   "mongoose-008"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "import { Schema, model, InferSchemaType, HydratedDocument } from \"mongoose\";\n\nconst userSchema = new Schema({ name: { type: String, required: true }, age: Number });\ntype User = InferSchemaType<typeof userSchema>;   // name: string, age optional\nconst UserModel = model(\"User\", userSchema);\nconst u: HydratedDocument<User> | null = await UserModel.findById(id);"
+  },
+  "technology": "mongoose"
+ }
+]

@@ -50,6 +50,8 @@ QUESTIONS = [
 
             **শুধু LLM-কে prompt করা নয় কেন?** এটা তোমার private বা সাম্প্রতিক data জানে না, আর আত্মবিশ্বাসের সাথে বানিয়ে বলতে পারে। **Fine-tune নয় কেন?** Fine-tuning style, format বা আচরণ শেখাতে ভালো, কিন্তু বদলাতে থাকা তথ্য রাখার জন্য দুর্বল উপায় — প্রতিটা policy update-এ আবার train করতে হবে, আর model যা "মনে রাখে" তা সহজে cite বা permission-check করা যায় না। RAG জ্ঞানকে এমন database-এ রাখে যেটা update করা যায়, user permission দিয়ে filter করা যায় আর cite করা যায়।
         """,
+        quick_en=r"""RAG retrieves the most relevant chunks from your own data and puts them into the LLM's prompt, so it answers from them, ideally with citations. It beats plain prompting because the LLM doesn't know your private or recent data, and beats fine-tuning for facts because you can update, permission-filter and cite the data.""",
+        quick_bn=r"""RAG তোমার নিজের data থেকে সবচেয়ে relevant chunk খুঁজে LLM-এর prompt-এ দেয়, যাতে LLM সেগুলো থেকে উত্তর দেয়, পারলে citation-সহ। শুধু prompt করার চেয়ে ভালো, কারণ LLM তোমার private বা সাম্প্রতিক data জানে না; আর fact রাখার জন্য fine-tuning-এর চেয়ে ভালো, কারণ data update, permission filter আর cite করা যায়।""",
         ex_en=r"""
             - **RAG reduces hallucination but doesn't eliminate it:** if retrieval returns the wrong chunks, the LLM answers confidently from the wrong context. Retrieval quality is usually the bottleneck.
             - **Context window ≠ solution:** stuffing everything into a huge context is slow, expensive and often less accurate than good retrieval.
@@ -111,6 +113,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Use pgvector. It adds a `vector` type, distance operators and ANN indexes to PostgreSQL, so embeddings live next to your products — with joins, filters, transactions and your existing backups. 200,000 vectors is well within its comfort zone.""",
         a_bn=r"""pgvector ব্যবহার করো। এটা PostgreSQL-এ একটা `vector` type, distance operator আর ANN index যোগ করে, ফলে embedding তোমার product-এর পাশেই থাকে — join, filter, transaction আর বিদ্যমান backup সহ। 200,000 vector এর জন্য একেবারেই স্বচ্ছন্দ পরিসর।""",
+        quick_en=r"""Enable pgvector, add a `vector` column with an HNSW index and query it with SQL. The embeddings then live next to your products with joins, filters, transactions and your existing backups, and 200,000 vectors is well within its comfort zone.""",
+        quick_bn=r"""pgvector চালু করো, HNSW index-সহ একটা `vector` column যোগ করো, আর SQL দিয়ে query করো। তাতে embedding product-এর পাশেই থাকে, join, filter, transaction আর আগের backup-সহ, আর 200,000 vector এর জন্য একদম সহজ কাজ।""",
         ex_en=r"""
             - **Option A** works for a demo but every query loads and scans all vectors in Node — slow, memory-hungry and impossible to filter efficiently.
             - **Option B** is false: with pgvector, PostgreSQL stores and indexes vectors well. A dedicated vector database (Pinecone, Qdrant, Weaviate, Milvus…) becomes attractive at much larger scale, with heavy filtered-search needs, or when you want managed vector-specific features — not as a default.
@@ -168,6 +172,8 @@ QUESTIONS = [
 
             প্রতিটা পরিবর্তনের আগে-পরে — chunk size, embedding model, `ef_search`, hybrid weight — আমি এগুলো track করি, যাতে উন্নতি অনুমান নয়, মাপা হয়।
         """,
+        quick_en=r"""Build a golden set of real questions labelled with the right documents. Recall@k checks whether the relevant documents appear in the top k (here, with one relevant doc per query, 2/3 ≈ 0.67); MRR averages 1/rank of the first relevant result (≈ 0.44). Track both before and after every change.""",
+        quick_bn=r"""আসল প্রশ্ন আর তাদের সঠিক document দিয়ে label করা একটা golden set বানাও। Recall@k দেখে relevant document top k-তে আসছে কিনা (এখানে প্রতি query-তে একটা relevant doc, তাই 2/3 ≈ 0.67); MRR প্রথম relevant result-এর 1/rank-এর গড় (≈ 0.44)। প্রতিটা change-এর আগে-পরে দুটোই মাপো।""",
         ex_en=r"""
             - **Building the golden set:** start with 50–200 real queries from logs or support tickets, include both Bangla and English (and Banglish if users type it), and include hard cases. Label which chunks or documents answer each one.
             - **Other metrics:** precision@k (how much of the top k is relevant — matters for LLM context budget), nDCG (handles graded relevance and multiple relevant docs).
@@ -243,6 +249,8 @@ QUESTIONS = [
 
             সমাধান: একটাই shared model constant (আর এটা নিশ্চিত করতে একটা `embedding_model` column), `vector_cosine_ops` সহ HNSW index, আর `ORDER BY embedding <=> $1 LIMIT 5` — similarity শুধু `SELECT` list-এ হিসাব করা।
         """,
+        quick_en=r"""Documents are embedded with `kb-embed-v2` but queries with `kb-embed-v1`, so distances are meaningless even though nothing errors. The index uses `vector_l2_ops` while the query uses `<=>`, and `ORDER BY similarity DESC` can't use an index anyway. Fix: one model, `vector_cosine_ops`, and `ORDER BY embedding <=> $1 LIMIT k`.""",
+        quick_bn=r"""Document embed হচ্ছে `kb-embed-v2` দিয়ে কিন্তু query `kb-embed-v1` দিয়ে, তাই কোনো error না হলেও distance অর্থহীন। Index `vector_l2_ops`-এ, অথচ query `<=>` ব্যবহার করে, আর `ORDER BY similarity DESC` এমনিতেও index ব্যবহার করতে পারে না। Fix: একটাই model, `vector_cosine_ops`, আর `ORDER BY embedding <=> $1 LIMIT k`।""",
         ex_en=r"""
             - **Why no error for bug 1:** pgvector only checks dimensions. Two models with equal dimensions are a silent failure — that's why storing the model name/version per row and checking it in queries is valuable.
             - **Verify with `EXPLAIN`:** a healthy query plan shows `Index Scan using ..._embedding_idx` with `Order By: (embedding <=> ...)`; the buggy one shows `Sort` over a sequential scan.
@@ -339,6 +347,8 @@ QUESTIONS = [
 
             **4. বাড়তি — incident শনাক্তকরণ:** এক ঘণ্টার মধ্যে অনেক নতুন ticket একটা centroid-এর চারপাশে জড়ো হলে on-call-কে alert দাও; প্রায়ই এটা একটা outage (যেমন payment gateway down)।
         """,
+        quick_en=r"""Embed each cleaned ticket (subject plus first message) with a multilingual model, search the nearest recent open tickets filtered by product or channel, and show those above a similarity threshold as possible duplicates. Tune the threshold on labelled pairs, and start with suggestions rather than auto-merging.""",
+        quick_bn=r"""প্রতিটা পরিষ্কার করা ticket (subject আর প্রথম message) multilingual model দিয়ে embed করো, product বা channel দিয়ে filter করে সাম্প্রতিক open ticket-এর মধ্যে সবচেয়ে কাছেরগুলো খোঁজো, আর similarity threshold-এর ওপরে থাকলে possible duplicate হিসেবে দেখাও। Label করা pair দিয়ে threshold ঠিক করো, আর auto-merge না করে suggestion দিয়ে শুরু করো।""",
         ex_en=r"""
             - **Short tickets are hard:** "not working" is similar to everything. Combine similarity with metadata (same product, same error code) or require a minimum text length.
             - **Banglish:** many users write romanised Bangla ("payment hocche na"); test the model on it and consider adding keyword features.
@@ -402,6 +412,8 @@ QUESTIONS = [
 
             **সমাধান:** tenant নাও auth থেকে; সবকিছু parameterise করো; tenant দিয়ে filter করো SQL-এর **ভেতরেই**; per-transaction setting-ভিত্তিক PostgreSQL **row-level security** যোগ করো, যাতে database নিজেই অন্য tenant-এর row দিতে অস্বীকার করে; iterative index scan (বা tenant-ভিত্তিক partition) চালু করো যাতে filter করা search-ও যথেষ্ট row দেয়; audit-এর জন্য retrieval log করো।
         """,
+        quick_en=r"""The tenant id comes from the request body, retrieval isn't filtered by tenant (a prompt instruction isn't a security boundary), and `category` is interpolated into the SQL. Fix: tenant from auth, parameterised SQL, a tenant filter inside the query, row-level security, and iterative scans so filtered searches still return enough rows.""",
+        quick_bn=r"""Tenant id request body থেকে আসছে, retrieval-এ tenant filter নেই (prompt-এর নির্দেশ security boundary না), আর `category` সরাসরি SQL-এ বসানো হচ্ছে। Fix: auth থেকে tenant, parameterised SQL, query-র ভেতরেই tenant filter, row-level security, আর iterative scan যাতে filter-সহ search-ও যথেষ্ট row দেয়।""",
         ex_en=r"""
             - **RLS caveats:** superusers and roles with `BYPASSRLS` always bypass RLS, and the table owner bypasses it unless you use `FORCE ROW LEVEL SECURITY` — so the app should connect as a dedicated, unprivileged non-owner role. Use `set_config(..., true)` inside a transaction so the tenant setting can't leak to the next request on a pooled connection.
             - **Document-level permissions:** within a tenant, HR or finance documents may be restricted to some groups — store ACLs on chunks and filter on them too.
@@ -519,6 +531,8 @@ QUESTIONS = [
 
             **প্রথমে যা চেষ্টা করব:** half-precision HNSW index (সস্তা, ফেরত নেওয়া যায়), একটা sample-এ exact search-এর বিপরীতে recall@10 মাপব; তবুও বড় হলে re-ranking সহ binary quantisation; আর dimension কমানোকে দীর্ঘমেয়াদি re-embedding project হিসেবে plan করব।
         """,
+        quick_en=r"""10M × 1536-dim float32 vectors is ≈ 61.5 GB before the HNSW graph, so the index no longer fits in RAM. Try a `halfvec` index first (about half the size, little recall loss), then binary quantisation with re-ranking, fewer dimensions, partitioning and cleanup, measuring recall against exact search each time.""",
+        quick_bn=r"""10M × 1536-dim float32 vector মানে HNSW graph ছাড়াই ≈ 61.5 GB, তাই index আর RAM-এ ধরে না। আগে `halfvec` index চেষ্টা করো (প্রায় অর্ধেক size, recall সামান্য কমে), তারপর re-ranking-সহ binary quantisation, কম dimension, partitioning আর cleanup; প্রতিবার exact search-এর সাথে recall মেপে দেখো।""",
         ex_en=r"""
             - **Index limits:** pgvector can index `vector` up to 2,000 dimensions and `halfvec` up to 4,000 — another reason half precision matters for large models (e.g. 3,072 dims).
             - **Build speed:** raise `maintenance_work_mem` (pgvector logs a notice when the graph no longer fits) and `max_parallel_maintenance_workers`; build on a quiet primary, and use `CREATE INDEX CONCURRENTLY` to avoid blocking writes.
@@ -606,6 +620,8 @@ QUESTIONS = [
 
             **সব স্তরের জন্য নিয়ম:** tenant id শুধু authentication থেকে আসবে; tenant-ভিত্তিক quota আর rate limit; প্রতি tenant-এ embedding model version track করা; সম্পূর্ণ deletion (source file, chunk, vector, cache, আর backup-retention policy); tenant-ভিত্তিক audit log; CI-তে automated cross-tenant leakage test।
         """,
+        quick_en=r"""There are three isolation models: a shared index filtered by `tenant_id` with row-level security (cheap, but leak and recall risks), a partition or namespace per tenant, or a dedicated database per tenant (strongest, costliest). Tier them: pooled for small tenants, partitions for mid-size, silos for large or regulated ones.""",
+        quick_bn=r"""Isolation-এর তিনটা model: `tenant_id` দিয়ে filter করা shared index আর row-level security (সস্তা, কিন্তু leak আর recall-এর ঝুঁকি), প্রতি tenant-এ আলাদা partition বা namespace, অথবা প্রতি tenant-এ আলাদা database (সবচেয়ে শক্ত, সবচেয়ে দামি)। Tier করো: ছোট tenant pooled, মাঝারি tenant partition-এ, বড় বা regulated tenant silo-তে।""",
         ex_en=r"""
             - **Why tiers:** 5,000 silos is an operations nightmare; one pooled index with a 2-million-document tenant next to 4,000 tiny ones gives poor filtered recall and noisy-neighbour latency. Tiering matches cost to customer value and risk.
             - **Data residency & compliance:** regulated customers may require data to stay in a specific region or under their own encryption keys — only silos (or region-specific pools) satisfy that cleanly.

@@ -60,6 +60,10 @@
   "related": [
    "react-002"
   ],
+  "quickAnswer": {
+   "en": "Context fixes prop drilling: passing data like theme or user through many components that don't need it. Create it with `createContext(default)`, provide it in React 19 with `<ThemeContext value={...}>`, and read the nearest value with `useContext` or `use`.",
+   "bn": "Context prop drilling-এর সমস্যা মেটায়: theme বা user-এর মতো data এমন অনেক component-এর ভেতর দিয়ে পাঠানো, যাদের সেটা লাগে না। `createContext(default)` দিয়ে বানাও, React 19-এ `<ThemeContext value={...}>` দিয়ে provide করো, আর `useContext` বা `use` দিয়ে সবচেয়ে কাছের value পড়ো।"
+  },
   "commonMistakes": {
    "en": "Putting all app state into one giant context, or forgetting that without a provider the default value is used silently.",
    "bn": "পুরো app-এর state একটা বিশাল context-এ রেখে দেওয়া, অথবা ভুলে যাওয়া যে provider না থাকলে চুপচাপ default value ব্যবহার হয়।"
@@ -120,6 +124,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Accept `ref` as a regular prop and pass it to the `<input>`: since React 19, function components receive `ref` like any other prop, so `forwardRef` is no longer needed.",
+   "bn": "`ref`-কে সাধারণ prop হিসেবে নিয়ে `<input>`-এ পাঠিয়ে দাও: React 19 থেকে function component অন্য prop-এর মতোই `ref` পায়, তাই `forwardRef` আর লাগে না।"
+  },
   "options": [
    {
     "en": "Wrap it in `forwardRef`, because function components can't receive `ref`",
@@ -186,6 +194,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`./Chart` must have a default export, and a `<Suspense>` boundary above `<Chart />` shows a fallback while its code downloads. `lazy` expects a promise for a module whose default export is a component.",
+   "bn": "`./Chart`-এ একটা default export থাকতে হবে, আর code download হওয়ার সময় `<Chart />`-এর উপরের `<Suspense>` boundary fallback দেখায়। `lazy` এমন একটা module-এর promise চায় যার default export একটা component।"
+  },
   "options": [
    {
     "en": "`./Chart` must provide a default export, and a `<Suspense>` boundary above `<Chart />` shows a fallback while the code loads",
@@ -265,6 +277,10 @@
   "related": [
    "react-008"
   ],
+  "quickAnswer": {
+   "en": "RTK is the official way to write Redux: `configureStore` creates the store, `createSlice` generates reducers and actions (with Immer), and components use `useSelector`/`useDispatch`. Use it for large, often-changing shared client state; RTK Query or TanStack Query for server data; Context for theme.",
+   "bn": "RTK হলো Redux লেখার official উপায়: `configureStore` store বানায়, `createSlice` (Immer-সহ) reducer আর action তৈরি করে, আর component `useSelector`/`useDispatch` ব্যবহার করে। বড়, ঘনঘন বদলানো shared client state-এর জন্য এটা নিই; server data-র জন্য RTK Query বা TanStack Query, আর theme-এর মতো সহজ value-র জন্য Context।"
+  },
   "commonMistakes": {
    "en": "Writing hand-made action types/switch reducers in new code (pre-RTK style), storing server cache in slices with manual loading flags, or returning new objects from selectors.",
    "bn": "নতুন code-এ হাতে action type/switch reducer লেখা (RTK-এর আগের style), হাতে loading flag দিয়ে server cache slice-এ রাখা, অথবা selector থেকে নতুন object return করা।"
@@ -333,6 +349,10 @@
    "react-007",
    "react-015"
   ],
+  "quickAnswer": {
+   "en": "It's an infinite effect loop: `filters` is a new object every render, so the dependency always changes, the fetch sets state, and that renders again. Build the query inside the effect, depend on the primitive `category`, and abort the old request in the cleanup.",
+   "bn": "এটা একটা infinite effect loop: প্রতি render-এ `filters` নতুন object, তাই dependency সবসময় বদলায়, fetch state set করে, আর আবার render হয়। Query-টা effect-এর ভেতরে বানাও, শুধু primitive `category`-র উপর depend করো, আর cleanup-এ পুরনো request abort করো।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it with an empty dependency array (now the list never updates when `category` changes) or with `JSON.stringify(filters)` hacks instead of depending on the real primitives.",
    "bn": "খালি dependency array দিয়ে \"ঠিক\" করা (তখন `category` বদলালেও list আর update হয় না), অথবা আসল primitive-এর উপর নির্ভর না করে `JSON.stringify(filters)`-এর মতো hack ব্যবহার করা।"
@@ -398,6 +418,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "An error thrown while a child component is rendering. Error boundaries catch errors during rendering (and in lifecycles/effects) of the tree below them, not in event handlers, `setTimeout` callbacks or their own fallback.",
+   "bn": "Child component render হওয়ার সময় throw হওয়া error। Error boundary নিচের tree-র rendering (আর lifecycle/effect)-এর error ধরে; event handler, `setTimeout` callback বা নিজের fallback-এর error ধরে না।"
+  },
   "options": [
    {
     "en": "An error thrown inside a button's `onClick` handler",
@@ -481,6 +505,10 @@
    "react-008",
    "react-014"
   ],
+  "quickAnswer": {
+   "en": "One context holds everything and its value is a new object every render, so each keystroke re-renders every consumer. Move `searchText` into `SearchBox`, split contexts by concern, and memoize each value (or use a store with selectors).",
+   "bn": "একটা context-এ সবকিছু রাখা, আর প্রতি render-এ তার value নতুন object, তাই প্রতি keystroke-এ সব consumer re-render হয়। `searchText`-কে `SearchBox`-এ নিয়ে যাও, concern অনুযায়ী context ভাগ করো, আর প্রতিটা value memoize করো (বা selector-সহ store ব্যবহার করো)।"
+  },
   "commonMistakes": {
    "en": "Wrapping consumers in `memo` (doesn't stop context re-renders), or only adding `useMemo` while `searchText` stays in the same context (the value still changes on every keystroke).",
    "bn": "Consumer-দের `memo`-তে wrap করা (context re-render থামায় না), অথবা `searchText` একই context-এ রেখে শুধু `useMemo` যোগ করা (তখনো প্রতিটা keystroke-এ value বদলায়)।"
@@ -564,6 +592,10 @@
    "react-024",
    "react-025"
   ],
+  "quickAnswer": {
+   "en": "Treat it as an INP problem: reproduce with CPU throttling, profile the interaction in the Performance panel and React Profiler, then fix the real cause. Typical fixes are splitting context, memoizing, a transition for the filter, virtualising the table or moving heavy work off the main thread.",
+   "bn": "এটাকে INP সমস্যা হিসেবে দেখো: CPU throttling দিয়ে reproduce করো, Performance panel আর React Profiler-এ interaction profile করো, তারপর আসল কারণ ঠিক করো। সাধারণ সমাধান: context ভাগ করা, memoize করা, filter-কে transition-এ রাখা, table virtualise করা, বা ভারী কাজ main thread থেকে সরানো।"
+  },
   "commonMistakes": {
    "en": "Jumping straight to \"add `useMemo` everywhere\" without profiling, profiling only in development on a fast laptop, or assuming the Profiler works in a normal production build.",
    "bn": "Profile না করেই সরাসরি \"সব জায়গায় `useMemo` দাও\" বলা, শুধু দ্রুত laptop-এ development mode-এ profile করা, অথবা ভাবা যে সাধারণ production build-এ Profiler কাজ করে।"

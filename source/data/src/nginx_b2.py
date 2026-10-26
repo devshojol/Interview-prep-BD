@@ -105,6 +105,8 @@ QUESTIONS = [
 
             App নিজে `127.0.0.1`-এ bind থাকে, তাই public প্রবেশপথ একটাই, NGINX।
         """,
+        quick_en=r"""Add an `upstream` for `127.0.0.1:3000` and a `server` with `listen 80`, `server_name api.example.com`, `client_max_body_size 10m` and per-site logs. Then `proxy_pass` to the upstream, set `Host`, `X-Real-IP`, `X-Forwarded-For` and `X-Forwarded-Proto`, and enable `trust proxy` in Express.""",
+        quick_bn=r"""`127.0.0.1:3000`-এর জন্য একটা `upstream` বানাও, আর একটা `server`-এ `listen 80`, `server_name api.example.com`, `client_max_body_size 10m` আর site-এর আলাদা log দাও। তারপর upstream-এ `proxy_pass` করো, `Host`, `X-Real-IP`, `X-Forwarded-For` আর `X-Forwarded-Proto` header set করো, আর Express-এ `trust proxy` চালু করো।""",
         ex_en=r"""
             - **Check your version:** distribution packages (e.g. Ubuntu LTS) often ship an older NGINX than 1.30. Run `nginx -v`. On versions before 1.29.7 you must add `keepalive` plus `proxy_http_version 1.1` and `proxy_set_header Connection ""` yourself, as in the extra block. The official `nginx.org` repositories provide current stable and mainline builds.
             - **Firewall:** allow only 80/443 (and SSH) publicly, e.g. `ufw allow 'Nginx Full'`. Port 3000 should never be open.
@@ -190,6 +192,8 @@ QUESTIONS = [
 
             আলাদা একটা `location /assets/ { try_files $uri =404; }` রাখো। নইলে কোনো chunk না থাকলে `index.html` ফেরত যাবে, আর browser পরিষ্কার 404-এর বদলে বিভ্রান্তিকর MIME-type বা "Unexpected token '<'" error দেবে। `/api/` আলাদাভাবে proxy করো, যাতে API-র 404 API-র 404-ই থাকে।
         """,
+        quick_en=r"""On refresh the browser asks NGINX for `/dashboard/settings`, which isn't a file, so `try_files $uri =404` returns 404. Use `try_files $uri $uri/ /index.html;` so the SPA router handles it, but keep `try_files $uri =404` for `/assets/` so missing chunks still return 404.""",
+        quick_bn=r"""Refresh করলে browser NGINX-এর কাছে `/dashboard/settings` চায়, এমন কোনো file নেই, তাই `try_files $uri =404` 404 দেয়। `try_files $uri $uri/ /index.html;` দাও যাতে SPA router route-টা সামলায়, তবে `/assets/`-এর জন্য `try_files $uri =404` রাখো, যাতে হারানো chunk-এ 404-ই আসে।""",
         ex_en=r"""
             - **Why the error is confusing without the assets rule:** after a new deploy, old hashed chunks are deleted. A user with the old `index.html` asks for `/assets/index-abc123.js`, gets HTML back, and the app crashes with a cryptic error.
             - **True 404 pages:** with this fallback, NGINX never returns 404 for unknown routes. The SPA should render its own "Not found" page. For SEO-critical sites, consider SSR or prerendering so crawlers get real status codes.
@@ -234,6 +238,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""The graceful old/new worker hand-off is correct. `reload` sends **SIGHUP** to the master. The master parses and validates the new configuration and opens any new listen sockets. If everything is fine, it starts **new workers** with the new config and asks the **old workers to shut down gracefully**: they stop accepting new connections, finish in-flight requests and exit. If the config is invalid, the master logs the error and keeps running the old config.""",
         a_bn=r"""পুরনো/নতুন worker-এর graceful হাতবদলের উত্তরটাই সঠিক। `reload` master-কে **SIGHUP** পাঠায়। Master নতুন configuration parse ও validate করে, আর নতুন কোনো listen socket থাকলে খোলে। সব ঠিক থাকলে নতুন config দিয়ে **নতুন worker** চালু করে, আর **পুরনো worker-দের gracefully বন্ধ হতে** বলে: তারা নতুন connection নেওয়া বন্ধ করে, চলমান request শেষ করে, তারপর exit করে। Config ভুল হলে master error log করে আর পুরনো config-ই চালাতে থাকে।""",
+        quick_en=r"""The master validates the new config; if it's valid, it starts new workers with it and tells the old workers to finish their in-flight requests and exit. If the config is invalid, NGINX logs the error and keeps running the old one.""",
+        quick_bn=r"""Master নতুন config যাচাই করে; ঠিক থাকলে নতুন config দিয়ে নতুন worker চালু করে, আর পুরনো worker-দের চলমান request শেষ করে বের হয়ে যেতে বলে। Config ভুল হলে NGINX error log করে আর পুরনো config দিয়েই চলতে থাকে।""",
         ex_en=r"""
             The "stops all workers immediately" option describes a **restart** (`systemctl restart nginx`), which briefly drops connections. That's why you reload, not restart, for config and certificate changes.
 
@@ -272,6 +278,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""NGINX tries `/var/www/app/static/static/logo.png`. With `root`, the path is **root + the full request URI**, so the `/static/` prefix is appended again. Fix it with `root /var/www/app;` (preferred here, because the location matches the end of the path), or with `alias /var/www/app/static/;`, which **replaces** the matched location prefix with the alias path.""",
         a_bn=r"""NGINX খুলতে চেষ্টা করছে `/var/www/app/static/static/logo.png`। `root` দিলে path হয় **root + পুরো request URI**, তাই `/static/` prefix আবার যোগ হয়ে যায়। সমাধান হলো `root /var/www/app;` (এখানে এটাই ভালো, কারণ location path-এর শেষ অংশের সাথে মেলে), অথবা `alias /var/www/app/static/;`, যেটা মিলে যাওয়া location prefix-কে alias path দিয়ে **replace** করে।""",
+        quick_en=r"""`/var/www/app/static/static/logo.png`: `root` appends the full request URI, so `/static/` is added a second time. Use `root /var/www/app;`, or `alias /var/www/app/static/;`, which replaces the matched prefix.""",
+        quick_bn=r"""`/var/www/app/static/static/logo.png`: `root` পুরো request URI যোগ করে, তাই `/static/` দুইবার চলে আসে। `root /var/www/app;` দাও, অথবা `alias /var/www/app/static/;`, যেটা match হওয়া prefix-টা replace করে।""",
         ex_en=r"""
             The tempting wrong answer is `/var/www/app/static/logo.png`, from the mental model of "root points at the folder for this location". That's how `alias` behaves, not `root`.
 
@@ -321,6 +329,8 @@ QUESTIONS = [
 
             Express-এ set করো **`app.set('trust proxy', 1)`** (ঠিক একটা hop, অর্থাৎ NGINX-কে trust করো)। তখন `req.ip` আসে `X-Forwarded-For` থেকে, আর `req.protocol`/`req.secure` আসে `X-Forwarded-Proto` থেকে। এতে per-user rate limiting, HTTPS redirect আর `secure` session cookie ঠিক হয়ে যায় (request HTTP মনে করলে express-session secure cookie পাঠায় না)।
         """,
+        quick_en=r"""To Express, NGINX is the client, so pass `Host $host`, `X-Real-IP`, `X-Forwarded-For $proxy_add_x_forwarded_for` and `X-Forwarded-Proto $scheme`. Then set `app.set('trust proxy', 1)` so `req.ip` and `req.secure` use those headers.""",
+        quick_bn=r"""Express-এর কাছে NGINX-ই client, তাই `Host $host`, `X-Real-IP`, `X-Forwarded-For $proxy_add_x_forwarded_for` আর `X-Forwarded-Proto $scheme` পাঠাও। তারপর `app.set('trust proxy', 1)` দাও, যাতে `req.ip` আর `req.secure` এই header-গুলো থেকে আসে।""",
         ex_en=r"""
             - **These headers are client-controlled.** Anyone can send `X-Forwarded-For: 1.2.3.4`. Only trust as many hops as you really have. `trust proxy: true` trusts the whole chain, so a client can spoof its IP and bypass rate limits or IP allow-lists, especially if the app port is reachable directly.
             - **More hops (CDN → NGINX → app):** either trust the exact number of hops or a list of proxy CIDRs. Alternatively, resolve the real IP in NGINX with the `realip` module (`set_real_ip_from` the CDN's ranges) and pass a clean `X-Real-IP`.
@@ -438,6 +448,8 @@ QUESTIONS = [
 
             TLS terminate হয় NGINX-এ (client-দের জন্য `wss://`), আর backend localhost-এ সাধারণ `ws://`-এ কথা বলে।
         """,
+        quick_en=r"""`Upgrade` and `Connection` are hop-by-hop headers, so set them explicitly (`Upgrade $http_upgrade`, plus a `map` for `Connection`) or Node sees a plain GET. The 60-second drops come from the default `proxy_read_timeout`: raise it for this location and send WebSocket pings.""",
+        quick_bn=r"""`Upgrade` আর `Connection` hop-by-hop header, তাই এগুলো নিজে set করতে হয় (`Upgrade $http_upgrade`, আর `Connection`-এর জন্য একটা `map`), না হলে Node একটা সাধারণ GET দেখে। ৬০ সেকেন্ডে connection কাটে default `proxy_read_timeout`-এর কারণে: এই location-এ সেটা বাড়াও আর WebSocket ping পাঠাও।""",
         ex_en=r"""
             - **Version note:** the official docs mark `proxy_http_version 1.1` as needed only before 1.29.7, so keeping it is harmless and makes the config portable to older servers.
             - **HTTP/2 on the server is fine.** Browsers open the WebSocket over its own HTTP/1.1 connection, so `http2 on;` doesn't break the upgrade.
@@ -549,6 +561,8 @@ QUESTIONS = [
             - **B (যেকোনো version):** URL একটা variable-এ রাখো (`set $api_backend http://api:3000; proxy_pass $api_backend;`)। এতে NGINX request-এর সময় `resolver` দিয়ে resolve করে, `valid=` মেনে। এর আরেকটা সুবিধা: `api` container এখনো না থাকলেও NGINX start হতে পারে। এটা ছাড়া startup-এ `host not found in upstream` আসত।
             - **ব্যবহারিক বিকল্প:** প্রতিটা deploy-এর অংশ হিসেবে NGINX reload করো (`docker compose exec nginx nginx -s reload`)।
         """,
+        quick_en=r"""Inside the NGINX container `localhost` is NGINX itself, so use the service name `api`. NGINX resolves that name once at load, so a recreated `api` gets a new IP NGINX doesn't know; use `server api:3000 resolve;` in a zoned upstream with `resolver 127.0.0.11` (1.27.3+), or a variable in `proxy_pass`.""",
+        quick_bn=r"""NGINX container-এর ভেতরে `localhost` মানে NGINX নিজেই, তাই service name `api` ব্যবহার করো। NGINX নামটা config load-এর সময় একবারই resolve করে, তাই `api` নতুন করে তৈরি হলে তার নতুন IP NGINX জানে না; `resolver 127.0.0.11`-সহ zone-ওয়ালা upstream-এ `server api:3000 resolve;` দাও (1.27.3+), অথবা `proxy_pass`-এ একটা variable ব্যবহার করো।""",
         ex_en=r"""
             **A 502 checklist for containers:**
             - The app listens on `127.0.0.1` inside **its** container → bind to `0.0.0.0`.
@@ -624,6 +638,8 @@ QUESTIONS = [
             - **Statistical significance:** কম traffic-এর ৫% error লুকিয়ে রাখতে পারে। যথেষ্ট সময় ধরে চালাও, বা synthetic traffic ব্যবহার করো।
             - **কখন অন্য উপায়:** NGINX canary request routing দিয়ে ভাগ করে। Business logic নিয়ে পরীক্ষার জন্য app-এর ভেতরের feature flag প্রায়ই ভালো।
         """,
+        quick_en=r"""Use two upstreams (stable and canary) and `split_clients` on a stable user ID plus a salt to send 5% to v2, with a `map` on a cookie so QA can force it. Log the variant to compare errors, ramp or roll back by changing the percentage and reloading, and keep both versions schema-compatible.""",
+        quick_bn=r"""দুটো upstream রাখো (stable আর canary), আর stable user ID ও একটা salt-এর উপর `split_clients` দিয়ে 5% user-কে v2-তে পাঠাও; একটা cookie-র উপর `map` দিয়ে QA জোর করে v2 নিতে পারবে। Variant log করে error তুলনা করো, percentage বদলে reload দিয়ে ramp বা rollback করো, আর দুই version-কে একই schema-র সাথে compatible রাখো।""",
         ex_en=r"""
             **Blue/green vs canary:** blue/green switches 100% of traffic at once (fast and simple, but every user sees a bad release). A canary limits the blast radius to a slice of users and needs per-variant metrics to be useful.
 

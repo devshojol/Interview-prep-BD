@@ -53,6 +53,10 @@
    "nest-003",
    "nest-019"
   ],
+  "quickAnswer": {
+   "en": "A module is a class with `@Module()` that groups one feature's code, and Nest builds the dependency graph from the root `AppModule`. `controllers` handle requests, `providers` are services that stay private by default, `exports` shares some of them, and `imports` pulls in other modules' exported providers.",
+   "bn": "Module হলো `@Module()` decorator দেওয়া একটা class, যেটা একটা feature-এর code একসাথে রাখে; root `AppModule` থেকে Nest পুরো dependency graph তৈরি করে। `controllers` request handle করে, `providers` হলো service যেগুলো default-এ private, `exports` দিয়ে কিছু provider বাইরে share করা যায়, আর `imports` দিয়ে অন্য module-এর exported provider আনা হয়।"
+  },
   "commonMistakes": {
    "en": "Re-declaring another module's service in your own `providers` instead of importing the module; marking every module `@Global()`; thinking `imports` takes classes like services.",
    "bn": "Module import না করে অন্য module-এর service নিজের `providers`-এ আবার declare করা; সব module-কে `@Global()` করে ফেলা; ভাবা যে `imports`-এ service-এর মতো class দেওয়া যায়।"
@@ -123,6 +127,10 @@
    "nest-006",
    "nest-008"
   ],
+  "quickAnswer": {
+   "en": "Keep the controller thin: `@Controller('users')` with `@Get`, `@Post`, `@Patch(':id')` and `@Delete(':id')`, `ParseIntPipe` on the id so `/users/abc` gets a 400, and a validated DTO as the body. The service throws `NotFoundException` for the 404, and `@HttpCode(204)` makes `DELETE` reply with no body.",
+   "bn": "Controller পাতলা রাখি: `@Controller('users')`-এ `@Get`, `@Post`, `@Patch(':id')`, `@Delete(':id')`, id-তে `ParseIntPipe` যাতে `/users/abc` 400 পায়, আর body-তে validated DTO। 404-এর জন্য service `NotFoundException` throw করে, আর `@HttpCode(204)` দিলে `DELETE` কোনো body ছাড়াই উত্তর দেয়।"
+  },
   "commonMistakes": {
    "en": "Using `@Param('id') id: number` and assuming it's a number (it's a string); putting database logic in the controller; using `@Res()` and forgetting to send a response, which hangs the request.",
    "bn": "`@Param('id') id: number` লিখে ধরে নেওয়া যে এটা number (আসলে string); controller-এ database logic রাখা; `@Res()` ব্যবহার করে response পাঠাতে ভুলে যাওয়া, ফলে request hang হয়ে থাকে।"
@@ -196,6 +204,10 @@
    "nest-004",
    "nest-018"
   ],
+  "quickAnswer": {
+   "en": "A provider is anything Nest's IoC container can create and inject, usually an `@Injectable()` service. You list it in a module's `providers` and declare it in the constructor; Nest reads the parameter types from decorator metadata, creates the instance (once by default) and passes it in, so you never call `new`.",
+   "bn": "Provider হলো যেকোনো কিছু যেটা Nest-এর IoC container তৈরি করে inject করতে পারে, সাধারণত `@Injectable()` দেওয়া একটা service। Module-এর `providers`-এ রেখে constructor-এ declare করলেই Nest decorator metadata থেকে type পড়ে instance বানায় (default-এ একবার) আর pass করে দেয়, তাই নিজে কখনো `new` করতে হয় না।"
+  },
   "commonMistakes": {
    "en": "Creating services manually with `new`; using `import type` for injected classes; trying to inject a TypeScript interface without a token.",
    "bn": "`new` দিয়ে নিজে service তৈরি করা; inject করা class-এর জন্য `import type` ব্যবহার করা; token ছাড়া TypeScript interface inject করার চেষ্টা করা।"
@@ -254,6 +266,10 @@
    "nest-003",
    "nest-023"
   ],
+  "quickAnswer": {
+   "en": "One shared singleton (`Scope.DEFAULT`): Nest creates a single instance at bootstrap, and every consumer in every module that imports the provider's module gets that same instance.",
+   "bn": "একটাই shared singleton (`Scope.DEFAULT`): bootstrap-এর সময় Nest একটা instance তৈরি করে, আর provider-এর module import করা সব module-এর সব consumer সেই একই instance পায়।"
+  },
   "options": [
    {
     "en": "A new instance is created for every incoming request (`Scope.REQUEST`)",
@@ -324,6 +340,10 @@
    "nest-002",
    "nest-016"
   ],
+  "quickAnswer": {
+   "en": "`{\"type\":\"string\",\"next\":\"21\"}`. Query values always arrive as strings, `: number` is compile-time only, and `ValidationPipe` without `transform: true` returns the original value, so `\"2\" + 1` is string concatenation.",
+   "bn": "`{\"type\":\"string\",\"next\":\"21\"}`। Query value সবসময় string হয়ে আসে, `: number` শুধু compile-time-এর জিনিস, আর `transform: true` ছাড়া `ValidationPipe` original value-ই ফেরত দেয় — তাই `\"2\" + 1` string concatenation হয়ে যায়।"
+  },
   "code": {
    "language": "typescript",
    "source": "@Controller('products')\nexport class ProductsController {\n  @Get()\n  list(@Query('page') page: number) {\n    return { type: typeof page, next: page + 1 };\n  }\n}"
@@ -399,6 +419,10 @@
    "nest-016",
    "nest-017"
   ],
+  "quickAnswer": {
+   "en": "Because interfaces are erased at compile time, while classes exist at runtime. `ValidationPipe` needs that class: `class-transformer` turns the plain body into an instance and `class-validator` reads decorators like `@IsEmail()` from it.",
+   "bn": "কারণ interface compile-এর পরে মুছে যায়, কিন্তু class runtime-এও থাকে। `ValidationPipe`-এর সেই class দরকার: `class-transformer` plain body-কে instance বানায়, আর `class-validator` তার উপর লাগানো `@IsEmail()`-এর মতো decorator পড়ে।"
+  },
   "options": [
    {
     "en": "Classes are serialised to JSON faster than interfaces",
@@ -474,6 +498,10 @@
    "nest-015",
    "nest-021"
   ],
+  "quickAnswer": {
+   "en": "A guard is a `CanActivate` class that decides whether a request may reach the handler, the standard place for auth checks. If `canActivate()` returns `false`, Nest throws `ForbiddenException` (403 \"Forbidden resource\"); throw `UnauthorizedException` yourself if you want 401.",
+   "bn": "Guard হলো `CanActivate` implement করা একটা class, যেটা ঠিক করে request handler পর্যন্ত যাবে কি না — auth check-এর স্বাভাবিক জায়গা। `canActivate()` `false` দিলে Nest `ForbiddenException` throw করে (403 \"Forbidden resource\"); 401 চাইলে নিজেকেই `UnauthorizedException` throw করতে হয়।"
+  },
   "commonMistakes": {
    "en": "Expecting `false` to produce 401; registering a guard that needs dependencies with `useGlobalGuards(new Guard())`; reading the validated DTO inside a guard (pipes haven't run yet).",
    "bn": "ভাবা যে `false` দিলে 401 আসবে; dependency লাগে এমন guard `useGlobalGuards(new Guard())` দিয়ে register করা; guard-এর ভেতরে validated DTO পড়ার চেষ্টা করা (pipe তখনো চলেনি)।"
@@ -538,6 +566,10 @@
    "nest-002",
    "nest-025"
   ],
+  "quickAnswer": {
+   "en": "`/users/missing` returns 404 `{\"message\":\"User 42 not found\",\"error\":\"Not Found\",\"statusCode\":404}` and `/users/crash` returns 500 `{\"statusCode\":500,\"message\":\"Internal server error\"}`. The built-in filter sends `HttpException` responses as they are but hides unknown errors behind a generic 500.",
+   "bn": "`/users/missing` দেয় 404 `{\"message\":\"User 42 not found\",\"error\":\"Not Found\",\"statusCode\":404}`, আর `/users/crash` দেয় 500 `{\"statusCode\":500,\"message\":\"Internal server error\"}`। Built-in exception filter `HttpException`-এর response যেমন আছে তেমন পাঠায়, কিন্তু অজানা error-এর message লুকিয়ে generic 500 দেয়।"
+  },
   "commonMistakes": {
    "en": "Expecting the raw `Error` message in the response; returning error objects with status 200 instead of throwing; catching errors in every controller with try/catch instead of using filters.",
    "bn": "ভাবা যে raw `Error`-এর message response-এ যাবে; throw না করে status 200 দিয়ে error object return করা; filter ব্যবহার না করে প্রতিটা controller-এ try/catch দিয়ে error ধরা।"

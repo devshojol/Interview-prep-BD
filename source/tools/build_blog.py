@@ -9,7 +9,9 @@ Standard library only. The practice app (index.html + app.js + questions.js) doe
 anything written here; the blog only links into it.
 
 Source of truth
-    content/site.json         site name, description, default author, production origin
+    content/site.json         site name, description, default author, production origin, and
+                              basePath (URL path the site is served under, used by 404.html when
+                              there is no origin; BASE_PATH overrides it)
     content/blog/*.md         one article per file: frontmatter + safe Markdown subset
                               (fields: title, description, publishedAt, category, [slug, seoTitle, updatedAt,
                               tags, practice, lang, translationKey, author, draft, featured, coverImage,
@@ -75,7 +77,15 @@ def load_site(content_dir):
             raise ContentError(f'SITE_URL / site.json origin must be an https URL without query or fragment, got {origin!r}')
         origin = f'https://{u.netloc.lower()}{u.path.rstrip("/")}'
     site['origin'] = origin
-    site['base_path'] = (urlsplit(origin).path if origin else '') + '/'
+    if origin:
+        site['base_path'] = urlsplit(origin).path + '/'
+    else:
+        # 404.html is served at arbitrary depths, so it needs absolute links even in a preview build.
+        # A sub-path host (e.g. GitHub Pages project sites) needs that path here.
+        base = (os.environ.get('BASE_PATH') or site.get('basePath') or '').strip().strip('/')
+        if base and not re.fullmatch(r"[A-Za-z0-9._~/-]+", base):
+            raise ContentError(f'BASE_PATH / site.json basePath must be a plain URL path, got {base!r}')
+        site['base_path'] = '/' + base + '/' if base else '/'
     return site
 
 

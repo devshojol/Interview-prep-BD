@@ -69,6 +69,8 @@ QUESTIONS = [
             - **Bucket-এ CORS rule লাগবে**, যেটা তোমার frontend origin থেকে `PUT` allow করে; নাহলে browser request block করবে।
             - Presigned PUT **size range enforce করতে পারে না**, তাই declared size-এর 5 MB check শুধু পরামর্শমূলক। Upload-এর পরে যাচাই করো ("confirm" endpoint-এ `HeadObject`, বা S3 event → Lambda)। শক্তভাবে enforce করতে **presigned POST** ব্যবহার করো, সাথে `content-length-range` condition (`@aws-sdk/s3-presigned-post`)।
         """,
+        quick_en=r"""The server validates the type and size, builds the key under `uploads/<userId>/` itself and signs a `PutObjectCommand` with `getSignedUrl` (`expiresIn: 300`, Content-Type signed); the browser then PUTs straight to S3. A presigned PUT can't enforce size, so verify after upload or use a presigned POST.""",
+        quick_bn=r"""Server type আর size validate করে, `uploads/<userId>/`-এর নিচে key নিজেই বানায়, আর `getSignedUrl` দিয়ে একটা `PutObjectCommand` sign করে (`expiresIn: 300`, Content-Type signed); তারপর browser সরাসরি S3-তে PUT করে। Presigned PUT size enforce করতে পারে না, তাই upload-এর পরে verify করো বা presigned POST ব্যবহার করো।""",
         ex_en=r"""
             - **Why presigned uploads:** large files never pass through your Node process, so there's no memory or bandwidth pressure on the API and no 6 MB Lambda payload limit. S3 handles the scaling.
             - **Never let the client choose the key.** Generating it server-side (`uploads/<userId>/<uuid>.<ext>`) stops users from overwriting each other's files or writing outside their prefix.
@@ -212,6 +214,8 @@ QUESTIONS = [
 
             কোনো `s3:*` বা `Resource: "*"` নেই। যা লেখা নেই, সেটা implicitly deny। Bucket যদি customer managed key দিয়ে SSE-KMS ব্যবহার করে, তাহলে role-এর ওই key-তে `kms:GenerateDataKey` (upload-এর জন্য) আর `kms:Decrypt` (download-এর জন্য) লাগবে। এগুলো না থাকলে S3 policy ঠিক থাকলেও AccessDenied আসে।
         """,
+        quick_en=r"""Use two statements: `s3:ListBucket` on the bucket ARN with an `s3:prefix` condition for `uploads/`, and `s3:GetObject`, `s3:PutObject` and `s3:DeleteObject` on `arn:aws:s3:::acme-media/uploads/*`. Everything else is implicitly denied; with SSE-KMS the role also needs `kms:GenerateDataKey` and `kms:Decrypt`.""",
+        quick_bn=r"""দুটো statement লাগে: bucket ARN-এ `s3:ListBucket`, সাথে `uploads/`-এর জন্য `s3:prefix` condition; আর `arn:aws:s3:::acme-media/uploads/*`-এ `s3:GetObject`, `s3:PutObject` ও `s3:DeleteObject`। বাকি সব নিজে থেকেই deny; SSE-KMS থাকলে role-এর `kms:GenerateDataKey` আর `kms:Decrypt`-ও লাগবে।""",
         ex_en=r"""
             - **The #1 bug** is putting `ListBucket` on `arn:aws:s3:::acme-media/*` or `GetObject` on `arn:aws:s3:::acme-media`. The ARN level must match the action.
             - Versioned buckets: `s3:GetObjectVersion` and `s3:DeleteObjectVersion` are separate actions. Add them only if the app really needs version-level access.
@@ -284,6 +288,8 @@ QUESTIONS = [
 
             আমার নিয়ম: যে credential rotate হওয়া উচিত (database password, partner-দের সাথে শেয়ার করা key), সেটা Secrets Manager-এ। সাধারণ configuration আর কালেভদ্রে বদলায় এমন secret Parameter Store-এ। ECS task definition আর Lambda দুটো থেকেই পড়তে পারে।
         """,
+        quick_en=r"""Keep secrets out of `.env` files, images and user data: store them in a managed service, give the app's IAM role read access, and load them at startup. Secrets Manager has built-in rotation and replication but costs per secret; Parameter Store `SecureString` is cheap hierarchical config with no built-in rotation.""",
+        quick_bn=r"""Secret কখনো `.env`, image বা user data-তে রেখো না: managed service-এ রাখো, app-এর IAM role-কে read access দাও, আর startup-এ load করো। Secrets Manager-এ built-in rotation আর replication আছে কিন্তু প্রতি secret-এ খরচ; Parameter Store-এর `SecureString` সস্তা hierarchical config, কিন্তু built-in rotation নেই।""",
         ex_en=r"""
             - **ECS `secrets`** in a task definition (`valueFrom` = a secret or parameter ARN) are injected as environment variables when the container *starts*. After a rotation, running tasks still hold the old value until they're redeployed. Apps that must pick up rotations immediately should fetch at runtime with a short cache.
             - **Rotation without downtime:** use the alternating-users strategy, or make the app retry with a fresh fetch on an authentication failure, so the brief window where `AWSPREVIOUS` is still in use doesn't cause errors.
@@ -356,6 +362,8 @@ QUESTIONS = [
 
             কোথায় কী: **ALB** কমপক্ষে দুইটা AZ-এর public subnet-এ। **App server / ECS task** private app subnet-এ। **RDS** private DB subnet-এ (AZ জুড়ে একটা DB subnet group), আর তার security group 5432 শুধু app-এর security group থেকে allow করে।
         """,
+        quick_en=r"""A subnet is public only because its route table sends `0.0.0.0/0` to an Internet Gateway; private subnets reach out through a NAT Gateway and reach AWS services privately through VPC endpoints. Put the ALB in public subnets, and app servers and RDS in private subnets across at least two AZs.""",
+        quick_bn=r"""Subnet public হয় শুধু তখনই, যখন তার route table `0.0.0.0/0`-কে Internet Gateway-তে পাঠায়; private subnet বাইরে যায় NAT Gateway দিয়ে, আর AWS service-এ private-ভাবে যায় VPC endpoint দিয়ে। ALB রাখো public subnet-এ, আর app server ও RDS রাখো অন্তত দুটো AZ জুড়ে private subnet-এ।""",
         ex_en=r"""
             - **The default VPC** has only public subnets. It's fine for learning, but don't run production databases there.
             - **Cost trap:** private instances pulling large objects from S3 or images from ECR through the NAT Gateway pay NAT processing on every GB. An S3 gateway endpoint removes that cost for S3 traffic. Also keep each AZ's private route table pointing at the NAT in the *same* AZ to avoid cross-AZ charges.
@@ -422,6 +430,8 @@ QUESTIONS = [
         a_bn=r"""
             Option 2। **Multi-AZ** অন্য AZ-এর একটা standby-তে *synchronously* replicate করে। Primary বা তার AZ fail করলে RDS নিজে থেকে failover করে (সাধারণত এক-দুই মিনিটের মধ্যে), আর DNS endpoint একই থাকে, তাই app শুধু reconnect করে। Commit হওয়া transaction আগে থেকেই standby-তে আছে, তাই কিছুই হারায় না।
         """,
+        quick_en=r"""Enable Multi-AZ: it keeps a synchronously replicated standby in another AZ and fails over automatically behind the same endpoint, so committed transactions aren't lost. An RDS read replica is asynchronous and promoting it is manual, and a point-in-time restore creates a new instance.""",
+        quick_bn=r"""Multi-AZ চালু করো: এটা অন্য AZ-এ synchronous-ভাবে replicate হওয়া একটা standby রাখে আর একই endpoint-এর পেছনে নিজে থেকে failover করে, তাই committed transaction হারায় না। RDS read replica asynchronous আর তাকে promote করতে হয় হাতে, আর point-in-time restore নতুন instance বানায়।""",
         ex_en=r"""
             - **Option 1 is the tempting one.** RDS read replicas use *asynchronous* replication, so recent writes can be lost, and promoting an RDS read replica is a manual action. Replicas are for scaling reads and for cross-Region DR. (Aurora is different: Aurora Replicas in other AZs are automatic failover targets.)
             - Option 3: point-in-time restore creates a **new** instance with a new endpoint and takes time. It's for recovering from bad deletes or corruption, not for HA. Automated backups allow restores to within roughly the last five minutes, with up to 35 days of retention.
@@ -464,6 +474,8 @@ QUESTIONS = [
         a_bn=r"""
             Option 2। **ALB** layer 7-এ কাজ করে, তাই host, path, header আর query string পড়তে পারে। `/api/*`-কে Express target group-এ পাঠায়, default rule দিয়ে বাকিটা Next.js-এ; ACM certificate দিয়ে TLS terminate করে; আর **প্রতিটা target group-এর জন্য health check** চালায় (যেমন `GET /healthz`-কে 200 দিতে হবে), ফলে unhealthy target-এ traffic যাওয়া বন্ধ হয়।
         """,
+        quick_en=r"""An Application Load Balancer with an HTTPS listener (ACM certificate) and path-based rules: `/api/*` goes to the Express target group, everything else to Next.js, each with its own health check. An NLB works at layer 4, so it can't route by path.""",
+        quick_bn=r"""HTTPS listener (ACM certificate) আর path-based rule-সহ একটা Application Load Balancer: `/api/*` যাবে Express target group-এ, বাকি সব Next.js-এ, আর প্রতিটা group-এর নিজস্ব health check থাকবে। NLB layer 4-এ কাজ করে, তাই path দেখে route করতে পারে না।""",
         ex_en=r"""
             - **Option 1 is the tempting one** because NLBs are "faster". But an NLB works at layer 4 (TCP/UDP/TLS) and never sees URL paths, so it can't do path routing. Use an NLB for extreme throughput or very low latency, static IPs per AZ (Elastic IPs), non-HTTP protocols, preserving client IPs at the TCP level, or exposing a service through PrivateLink.
             - Option 3: a Gateway Load Balancer is for inserting third-party virtual appliances, like firewalls, into the traffic path.

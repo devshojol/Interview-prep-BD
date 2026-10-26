@@ -47,6 +47,10 @@
   "related": [
    "docker-023"
   ],
+  "quickAnswer": {
+   "en": "`ARG` exists only during the build (unless copied into an `ENV`), while `ENV` is stored in the image and present in every container. Build-arg values can show up in history and provenance, and `ENV` in `docker inspect`, so neither is safe for secrets; use BuildKit secret mounts.",
+   "bn": "`ARG` শুধু build-এর সময় থাকে (`ENV`-এ copy না করলে), আর `ENV` image-এ থেকে যায়, প্রতিটা container-এ পাওয়া যায়। Build-arg-এর value history আর provenance-এ, আর `ENV` `docker inspect`-এ দেখা যায়, তাই কোনোটাই secret-এর জন্য নিরাপদ না; secret-এর জন্য BuildKit secret mount ব্যবহার করো।"
+  },
   "options": [
    {
     "en": "`ARG` values are automatically available to the running container as environment variables",
@@ -120,6 +124,10 @@
   "related": [
    "docker-016"
   ],
+  "quickAnswer": {
+   "en": "`version:` is obsolete: modern Compose ignores it with a warning and validates against the Compose Specification. Run `docker compose up` (the CLI plugin), because the old Python `docker-compose` v1 is end-of-life, and simply delete the `version:` line.",
+   "bn": "`version:` এখন obsolete: আধুনিক Compose এটা warning দিয়ে ignore করে আর Compose Specification অনুযায়ী validate করে। `docker compose up` (CLI plugin) চালাও, কারণ পুরনো Python `docker-compose` v1 end-of-life; আর `version:` line-টা মুছে দাও।"
+  },
   "options": [
    {
     "en": "The file won't run until you delete `version:`, because Compose v5 rejects it",
@@ -204,6 +212,10 @@
    "docker-005",
    "docker-016"
   ],
+  "quickAnswer": {
+   "en": "Inside the `api` container, `localhost` is the api container itself, not Postgres. Use the service name as the host (`db:5432`), which Compose's DNS resolves, and add a healthcheck with `depends_on: condition: service_healthy` so the API doesn't race the database on startup.",
+   "bn": "`api` container-এর ভেতরে `localhost` মানে api container নিজেই, Postgres না। Host হিসেবে service name (`db:5432`) দাও, Compose-এর DNS এটা resolve করে। সাথে healthcheck আর `depends_on: condition: service_healthy` দাও, যাতে startup-এ API database-এর আগে দৌড়ে না যায়।"
+  },
   "commonMistakes": {
    "en": "Using the host-mapped port instead of the container port, using container IP addresses (they change on recreate), or switching everything to `network_mode: host` to \"fix\" it.",
    "bn": "Container port-এর বদলে host-এ map করা port ব্যবহার করা, container-এর IP address ব্যবহার করা (recreate করলে বদলে যায়), অথবা \"ঠিক\" করতে সবকিছু `network_mode: host`-এ নিয়ে যাওয়া।"
@@ -239,7 +251,7 @@
    "read-only",
    "hardening"
   ],
-  "technologyVersion": "Docker Engine 29, Node.js 24 LTS images",
+  "technologyVersion": "Docker Engine 29, Node.js 24 (Maintenance LTS) images",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -287,6 +299,10 @@
    "docker-014",
    "docker-015"
   ],
+  "quickAnswer": {
+   "en": "Without user-namespace remapping or rootless mode, root in a container is UID 0 on the host too, so a compromised app can do far more damage, especially after a container escape. Run as the image's `node` user (`COPY --chown`, `USER node`) and add a read-only filesystem, `cap_drop: [ALL]` and `no-new-privileges`.",
+   "bn": "User-namespace remapping বা rootless mode ছাড়া container-এর root আর host-এর root একই UID 0, তাই app hack হলে অনেক বেশি ক্ষতি হতে পারে, বিশেষ করে container escape হলে। Image-এর `node` user দিয়ে চালাও (`COPY --chown`, `USER node`), সাথে read-only filesystem, `cap_drop: [ALL]` আর `no-new-privileges` দাও।"
+  },
   "commonMistakes": {
    "en": "Thinking \"it's in a container, so root is harmless\", adding `USER node` but leaving writable directories owned by root (runtime `EACCES`), or running containers with `--privileged` to fix permission errors.",
    "bn": "ভাবা যে \"container-এর ভেতরে আছে, তাই root ক্ষতিকর না\", `USER node` যোগ করে writable directory-গুলো root-এর ownership-এ রেখে দেওয়া (runtime-এ `EACCES`), অথবা permission error ঠিক করতে `--privileged` দিয়ে container চালানো।"
@@ -366,6 +382,10 @@
    "docker-016",
    "docker-015"
   ],
+  "quickAnswer": {
+   "en": "A health check is a command Docker runs inside the container on a schedule (exit 0 means healthy), giving a healthy or unhealthy status. Compose's `service_healthy` and deploy scripts use it, but standalone Docker doesn't restart an unhealthy container: restart policies only react to the process exiting.",
+   "bn": "Health check হলো একটা command, যেটা Docker নির্দিষ্ট সময় পরপর container-এর ভেতরে চালায় (exit 0 মানে healthy), আর তা থেকে status healthy বা unhealthy হয়। Compose-এর `service_healthy` আর deploy script এটা ব্যবহার করে, কিন্তু standalone Docker unhealthy container restart করে না; restart policy শুধু process exit করলে কাজ করে।"
+  },
   "commonMistakes": {
    "en": "Using `curl` in a slim image that doesn't contain it (the check always fails), assuming `restart: always` handles unhealthy containers, and making the health endpoint depend on every downstream service.",
    "bn": "যে slim image-এ `curl` নেই সেখানে `curl` দিয়ে check লেখা (check সবসময় fail করে), ধরে নেওয়া যে `restart: always` unhealthy container সামলায়, আর health endpoint-কে সব downstream service-এর উপর নির্ভরশীল করে ফেলা।"
@@ -430,6 +450,10 @@
   "related": [
    "docker-018"
   ],
+  "quickAnswer": {
+   "en": "With `unless-stopped`, a container you stopped manually stays stopped after a daemon or host restart, while `always` brings it back. Both restart on any exit; `on-failure` restarts only on a non-zero exit code.",
+   "bn": "`unless-stopped`-এ হাতে stop করা container daemon বা host restart-এর পরেও বন্ধ থাকে, কিন্তু `always` সেটা আবার চালু করে। দুটোই যেকোনো exit-এ restart করে; `on-failure` শুধু non-zero exit code-এ restart করে।"
+  },
   "options": [
    {
     "en": "With `unless-stopped`, a container you stopped manually stays stopped even after the Docker daemon or host restarts; with `always`, it is started again when the daemon restarts",
@@ -514,6 +538,10 @@
    "docker-010",
    "docker-005"
   ],
+  "quickAnswer": {
+   "en": "On a user-defined bridge, Docker's embedded DNS (`127.0.0.11`) resolves container and service names; the default bridge has no name-based DNS, and host networking shares the host's stack with no isolation. To isolate a database, attach it only to an `internal: true` network shared with the API and publish no port.",
+   "bn": "User-defined bridge-এ Docker-এর embedded DNS (`127.0.0.11`) container আর service name resolve করে; default bridge-এ name দিয়ে DNS নেই, আর host networking host-এর network stack share করে, কোনো isolation থাকে না। Database isolate করতে সেটাকে শুধু API-র সাথে share করা একটা `internal: true` network-এ রাখো, কোনো port publish কোরো না।"
+  },
   "commonMistakes": {
    "en": "Assuming the default bridge resolves container names, publishing database ports \"just for debugging\" on a server, and hard-coding container IPs.",
    "bn": "ধরে নেওয়া যে default bridge container name resolve করে, server-এ \"শুধু debugging-এর জন্য\" database port publish করা, আর container-এর IP hard-code করা।"
@@ -583,6 +611,10 @@
    "docker-012",
    "docker-030"
   ],
+  "quickAnswer": {
+   "en": "The cache mount persists between builds on the same builder and is never part of the image. It pays off when the layer cache misses (the lockfile changed): `npm ci` still runs, but it reuses packages already downloaded into `/root/.npm`.",
+   "bn": "Cache mount একই builder-এ এক build থেকে আরেক build-এ থেকে যায়, কিন্তু কখনো image-এর অংশ হয় না। Layer cache miss করলে (lockfile বদলালে) এর লাভ বোঝা যায়: `npm ci` আবার চলে, কিন্তু `/root/.npm`-এ আগে download হওয়া package reuse করে।"
+  },
   "options": [
    {
     "en": "The contents of `/root/.npm` are committed into the image layer, making the image larger but `docker pull` faster",

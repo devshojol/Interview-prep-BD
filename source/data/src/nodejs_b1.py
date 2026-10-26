@@ -22,7 +22,7 @@ QUESTIONS = [
         id="node-001", sub="Node.js Runtime", diff="easy", type="conceptual",
         prio="high", market="both", mins=3,
         tags=["runtime", "v8", "libuv", "non-blocking-io", "event-loop"],
-        ver="Node.js 24 LTS / 26 (version-independent concept)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24 (version-independent concept)", vs=False, status="stable",
         q_en=r"""What is Node.js, and how can a single-threaded JavaScript runtime handle thousands of concurrent connections?""",
         q_bn=r"""Node.js কী? JavaScript একটি single thread-এ চললেও Node.js কীভাবে একসাথে হাজার হাজার connection handle করতে পারে?""",
         a_en=r"""
@@ -39,6 +39,8 @@ QUESTIONS = [
 
             তাই একটি thread দিয়েই হাজার হাজার connection serve করা যায়, কারণ thread-টি শুধু ছোট ছোট callback চালায়। Trade-off হলো: লম্বা কোনো synchronous CPU কাজ চললে *সব* request আটকে যায়।
         """,
+        quick_en=r"""Node.js is a server-side JavaScript runtime built on V8 (runs the JavaScript) and libuv (event loop and async I/O). Your code runs on one main thread that never waits for I/O: the OS or libuv's thread pool waits, and the event loop runs the callbacks, so long synchronous CPU work blocks every request.""",
+        quick_bn=r"""Node.js হলো server-side JavaScript runtime, যেটা V8 (JavaScript চালায়) আর libuv (event loop ও async I/O) দিয়ে তৈরি। আমাদের code একটা main thread-এ চলে, যেটা I/O-এর জন্য অপেক্ষা করে না: অপেক্ষাটা করে OS বা libuv-এর thread pool, আর event loop callback চালায়; তাই লম্বা synchronous CPU কাজ সব request আটকে দেয়।""",
         ex_en=r"""
             - **"Single-threaded" refers to JavaScript execution**, not the whole process. A Node process also has V8 background threads (GC, compilation) and the libuv thread pool.
             - **Layers:** your code → core modules (`http`, `fs`, `stream`) → C++ bindings → V8 / libuv → OS.
@@ -69,7 +71,7 @@ QUESTIONS = [
         id="node-002", sub="Event Loop", diff="easy", type="output",
         prio="high", market="bangladesh", mins=3,
         tags=["event-loop", "nexttick", "microtasks", "settimeout", "output"],
-        ver="Node.js 24 LTS / 26 (behaviour unchanged across versions)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24 (behaviour unchanged across versions)", vs=False, status="stable",
         q_en=r"""What does this script print? It is saved as `order.js` (CommonJS — no `"type": "module"` in package.json) and run with `node order.js`.""",
         q_bn=r"""এই script কী print করবে? এটি `order.js` নামে save করা (CommonJS — package.json-এ `"type": "module"` নেই) এবং `node order.js` দিয়ে run করা হয়েছে।""",
         a_en=r"""
@@ -82,6 +84,8 @@ QUESTIONS = [
 
             প্রথমে synchronous code চলে (`A`, `E`)। Main script শেষ হলে Node আগে `process.nextTick` queue খালি করে (`D`), তারপর Promise microtask queue (`C`)। দুটো queue খালি হওয়ার পরই event loop timers phase-এ গিয়ে `setTimeout`-এর callback চালায় (`B`)।
         """,
+        quick_en=r"""It prints `A`, `E`, `D`, `C`, `B`. Synchronous code runs first, then Node drains the `process.nextTick` queue (`D`), then the Promise microtasks (`C`), and only then does the event loop reach the timers phase for `setTimeout` (`B`).""",
+        quick_bn=r"""Print হবে `A`, `E`, `D`, `C`, `B`। আগে synchronous code চলে, তারপর Node `process.nextTick` queue খালি করে (`D`), তারপর Promise microtask (`C`), আর এরপরই event loop timers phase-এ গিয়ে `setTimeout` চালায় (`B`)।""",
         ex_en=r"""
             Step by step:
 
@@ -143,9 +147,9 @@ QUESTIONS = [
         id="node-003", sub="Node.js Runtime", diff="easy", type="mcq",
         prio="medium", market="both", mins=2,
         tags=["built-ins", "fetch", "node-test", "env-file", "tooling"],
-        ver="Node.js 24 LTS / 26", vs=True, status="stable",
-        q_en=r"""In a new Node.js 24 LTS project, which of these tasks still requires a third-party npm package?""",
-        q_bn=r"""একটি নতুন Node.js 24 LTS project-এ নিচের কোন কাজের জন্য এখনও third-party npm package লাগবে?""",
+        ver="Node.js 26 LTS / 24", vs=True, status="stable",
+        q_en=r"""In a new Node.js 26 LTS project, which of these tasks still requires a third-party npm package?""",
+        q_bn=r"""একটি নতুন Node.js 26 LTS project-এ নিচের কোন কাজের জন্য এখনও third-party npm package লাগবে?""",
         options=[
             ("Making HTTP requests with `fetch()`", "`fetch()` দিয়ে HTTP request পাঠানো"),
             ("Running unit tests with a test runner and assertions", "Test runner ও assertion দিয়ে unit test চালানো"),
@@ -159,6 +163,8 @@ QUESTIONS = [
         a_bn=r"""
             সঠিক উত্তর PostgreSQL-এ connect করা। Node.js-এর সাথে কোনো PostgreSQL client আসে না, তাই `pg`-এর মতো driver (বা তার উপর কোনো ORM) install করতে হয়। বাকি তিনটি built-in: global `fetch()`, `node:assert` সহ `node:test` runner, আর `--env-file` বা `process.loadEnvFile()` দিয়ে `.env` load করা।
         """,
+        quick_en=r"""Connecting to PostgreSQL: Node ships no PostgreSQL client, so you still install a driver such as `pg`. HTTP requests (`fetch()`), unit tests (`node:test` with `node:assert`) and `.env` loading (`--env-file` or `process.loadEnvFile()`) are all built in.""",
+        quick_bn=r"""PostgreSQL-এ connect করা: Node-এ কোনো PostgreSQL client নেই, তাই `pg`-এর মতো driver install করতেই হয়। HTTP request (`fetch()`), unit test (`node:test` আর `node:assert`) আর `.env` load করা (`--env-file` বা `process.loadEnvFile()`) সবই built-in।""",
         ex_en=r"""
             - `fetch` (built on undici) is a stable global since Node 21.
             - `node --test` with `node:test` and `node:assert` has been stable since Node 20; it supports mocking, coverage and watch mode.
@@ -184,7 +190,7 @@ QUESTIONS = [
         id="node-004", sub="Event Loop", diff="medium", type="output",
         prio="high", market="both", mins=4,
         tags=["event-loop", "setimmediate", "settimeout", "phases", "output"],
-        ver="Node.js 24 LTS / 26 (behaviour unchanged across versions)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24 (behaviour unchanged across versions)", vs=False, status="stable",
         q_en=r"""What does this CommonJS script print, and is the order guaranteed? Explain how the event loop phases decide it.""",
         q_bn=r"""এই CommonJS script কী print করবে, আর এই order কি guaranteed? Event loop-এর phase-গুলো কীভাবে এটা ঠিক করে ব্যাখ্যা করো।""",
         a_en=r"""
@@ -201,6 +207,8 @@ QUESTIONS = [
 
             কিন্তু main module-এর top level-এ `setTimeout(fn, 0)` বনাম `setImmediate`-এর order **deterministic নয়** — এটা process-এর timing-এর উপর নির্ভর করে।
         """,
+        quick_en=r"""It prints `sync`, `nextTick`, `promise`, `immediate`, `timeout`, and inside an I/O callback the order is guaranteed: after the poll phase Node drains nextTicks and promises, then the check phase (`setImmediate`) runs before the next timers phase. At the top level, `setTimeout` 0 vs `setImmediate` is not deterministic.""",
+        quick_bn=r"""Print হবে `sync`, `nextTick`, `promise`, `immediate`, `timeout`, আর I/O callback-এর ভেতরে এই order নিশ্চিত: poll phase-এর পরে Node nextTick আর promise queue খালি করে, তারপর পরের timers phase-এর আগেই check phase (`setImmediate`) চলে। Top level-এ কিন্তু `setTimeout` 0 আর `setImmediate`-এর order নিশ্চিত নয়।""",
         ex_en=r"""
             Event loop phases in order: **timers** (`setTimeout`/`setInterval`) → **pending callbacks** (some deferred system errors) → idle/prepare (internal) → **poll** (I/O callbacks, waits for I/O) → **check** (`setImmediate`) → **close callbacks** (`'close'` events).
 
@@ -259,7 +267,7 @@ QUESTIONS = [
         id="node-005", sub="Streams", diff="medium", type="conceptual",
         prio="high", market="both", mins=5,
         tags=["streams", "backpressure", "highwatermark", "pipeline", "drain"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""What is backpressure in Node.js streams, and how do you handle it correctly?""",
         q_bn=r"""Node.js stream-এ backpressure কী, আর এটা সঠিকভাবে কীভাবে handle করতে হয়?""",
         a_en=r"""
@@ -276,6 +284,8 @@ QUESTIONS = [
 
             বাস্তবে আমি কাজটা Node-কেই করতে দিই: `node:stream/promises`-এর `pipeline()` (বা `.pipe()`) নিজে থেকেই readable-কে pause করে এবং `'drain'` হলে আবার resume করে; আর `pipeline` error propagate করে এবং failure হলে সব stream destroy করে। শুধু নিজে loop-এ লিখলে `write()`/`'drain'` manually handle করি।
         """,
+        quick_en=r"""Backpressure is when data is produced faster than it can be consumed, so chunks pile up in memory. `write()` returns `false` once the buffer passes `highWaterMark`, and you wait for `'drain'`; in practice `pipeline()` from `node:stream/promises` does this for you and also handles errors and cleanup.""",
+        quick_bn=r"""Backpressure হলো যখন data যত দ্রুত তৈরি হচ্ছে তত দ্রুত consume হচ্ছে না, ফলে chunk-গুলো memory-তে জমতে থাকে। Buffer `highWaterMark` পার হলে `write()` `false` return করে, তখন `'drain'` event-এর জন্য অপেক্ষা করতে হয়; বাস্তবে `node:stream/promises`-এর `pipeline()` এটা নিজেই করে, সাথে error আর cleanup-ও সামলায়।""",
         ex_en=r"""
             - **`highWaterMark` is a threshold, not a hard limit.** `write()` still accepts data after returning `false`; ignoring the return value is exactly how memory explodes. Byte streams default to 64 KiB in current Node versions (16 KiB in older ones); object-mode streams count objects (16).
             - **Readable side:** a paused readable stops calling `_read()` once its buffer is full, which in turn stops reading from the source (e.g. the TCP socket's receive window fills up, so the client slows down).
@@ -323,7 +333,7 @@ QUESTIONS = [
         id="node-006", sub="Performance & Scalability", diff="hard", type="scenario",
         prio="high", market="both", mins=10,
         tags=["event-loop-lag", "cpu-profiling", "production-debugging", "performance", "redos"],
-        ver="Node.js 24 LTS / 26", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24", vs=False, status="stable",
         q_en=r"""A Node.js API's p99 latency jumps from about 80 ms to 4 s a few times an hour. During those spikes one CPU core is at 100%, health checks time out, but database metrics look normal. How do you find and fix the cause?""",
         q_bn=r"""একটি Node.js API-এর p99 latency ঘণ্টায় কয়েকবার প্রায় 80 ms থেকে 4 s-এ লাফ দেয়। ওই spike-এর সময় একটি CPU core 100%-এ থাকে, health check timeout হয়, কিন্তু database metric স্বাভাবিক। তুমি কীভাবে কারণ খুঁজে বের করবে এবং ঠিক করবে?""",
         a_en=r"""
@@ -348,6 +358,8 @@ QUESTIONS = [
             4. **মূল কারণ ঠিক করা।** Input size সীমিত করা ও pagination, async/streaming API ব্যবহার, regex পুনর্লিখন, আর এড়ানো যায় না এমন CPU কাজ worker pool-এ (`worker_threads` বা job queue) সরানো।
             5. **ভবিষ্যতে আটকানো।** Loop delay-এর উপর alert, request size limit ও timeout যোগ করা, আর hot endpoint-গুলোর জন্য CI-তে load test রাখা।
         """,
+        quick_en=r"""It's event-loop blocking: one pegged core, everything slow at once and a healthy database mean synchronous code is hogging the main thread. Confirm it with event-loop delay metrics, find the hot path with a CPU profile, then bound inputs, use async APIs, or move CPU work to worker threads or a queue.""",
+        quick_bn=r"""এটা event loop block হওয়ার লক্ষণ: একটা core 100%, সব request একসাথে slow, অথচ database ঠিক আছে, মানে কোনো synchronous code main thread আটকে রাখছে। Event-loop delay metric দিয়ে নিশ্চিত হও, CPU profile দিয়ে hot path খুঁজে বের করো, তারপর input সীমিত করো, async API ব্যবহার করো, অথবা CPU কাজ worker thread বা queue-তে সরাও।""",
         ex_en=r"""
             - **Why health checks fail:** the health endpoint is just another callback on the same blocked loop. Orchestrators may then restart a healthy-but-busy pod, making the incident worse.
             - **Event-loop delay vs utilization:** delay tells you how late timers fire (user-visible latency); utilization tells you how busy the loop is. High utilization with low delay is fine; high delay is the alarm.
@@ -406,7 +418,7 @@ QUESTIONS = [
         id="node-007", sub="Asynchronous Programming", diff="extreme", type="system-design",
         prio="high", market="international", mins=20,
         tags=["job-queue", "workers", "idempotency", "retries", "bullmq", "system-design"],
-        ver="Node.js 24 LTS / 26; BullMQ 5+ (example)", vs=False, status="stable",
+        ver="Node.js 26 LTS / 24; BullMQ 5+ (example)", vs=False, status="stable",
         q_en=r"""Design a background job system in Node.js for sending invoice emails and generating PDF invoices: about 200k jobs per day with big spikes during sales campaigns. Jobs must not be lost, customers must not receive duplicate emails, and deploying workers must not drop work.""",
         q_bn=r"""Node.js-এ invoice email পাঠানো এবং PDF invoice তৈরির জন্য একটি background job system design করো: দিনে প্রায় 200k job, sales campaign-এর সময় বড় spike। কোনো job হারানো যাবে না, customer যেন duplicate email না পায়, আর worker deploy করার সময় কোনো কাজ হারানো যাবে না।""",
         a_en=r"""
@@ -435,6 +447,8 @@ QUESTIONS = [
             - **Graceful deploy:** `SIGTERM` পেলে নতুন job নেওয়া বন্ধ, চলমান job শেষ করা (`worker.close()`), তারপর exit; orchestrator-এর grace period সবচেয়ে লম্বা job-এর চেয়ে বেশি হতে হবে।
             - **Observability:** queue depth, oldest-job age, throughput, failure rate, job type অনুযায়ী processing time; job data-তে trace/request ID পাঠানো; DLQ বাড়লে alert।
         """,
+        quick_en=r"""Put a durable queue (BullMQ on Redis, or SQS) between the API and separate worker deployments, and design for at-least-once delivery with idempotent handlers, because exactly-once isn't realistic. Add deterministic job IDs, retries with backoff and a dead-letter queue, and graceful worker shutdown on `SIGTERM`.""",
+        quick_bn=r"""API আর আলাদা worker deployment-এর মাঝে একটা durable queue (Redis-এর উপর BullMQ, বা SQS) রাখো, আর at-least-once delivery ধরে নিয়ে handler-গুলো idempotent বানাও, কারণ exactly-once বাস্তবে সম্ভব নয়। সাথে deterministic job ID, backoff-সহ retry, dead-letter queue আর `SIGTERM`-এ worker-এর graceful shutdown রাখো।""",
         ex_en=r"""
             **Failure scenarios to discuss:**
 

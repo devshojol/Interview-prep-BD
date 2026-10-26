@@ -68,6 +68,8 @@ QUESTIONS = [
             - Drizzle 0.44+ যেহেতু original `pg` error `.cause`-এ রেখে `DrizzleQueryError` throw করে, helper আগে `cause` খুলে তারপর `code` পড়ে। সরাসরি `err.code` check করলে Drizzle upgrade-এর পর চুপচাপ match করা বন্ধ হয়ে যেত।
             - শুধু 5xx error stack trace সহ log হয়; 4xx হলো প্রত্যাশিত client error, log করলে শুধু noise বাড়ে।
         """,
+        quick_en=r"""Use a `@Catch()` filter registered via `APP_FILTER` that replies through `HttpAdapterHost`, so it works on Express and Fastify. `HttpException` keeps its status and body, a `23505` code found after unwrapping `DrizzleQueryError.cause` becomes 409, and anything else becomes a generic 500 logged with its stack.""",
+        quick_bn=r"""`APP_FILTER` দিয়ে register করা একটা `@Catch()` filter ব্যবহার করি, যেটা `HttpAdapterHost` দিয়ে reply দেয়, তাই Express আর Fastify দুটোতেই চলে। `HttpException` নিজের status আর body রাখে, `DrizzleQueryError.cause` unwrap করে `23505` পেলে 409, আর বাকি সব generic 500 যেটা stack-সহ log হয়।""",
         ex_en=r"""
             - **Why 409 instead of checking first:** "SELECT then INSERT" has a race between two requests; letting the unique constraint decide and mapping the error is both correct under concurrency and cheaper.
             - **Other useful SQLSTATEs:** `23503` (foreign key violation) and `23502` (not-null violation) usually mean bad input → 409/422; `40001` (serialization failure) and `40P01` (deadlock) are retryable.
@@ -195,6 +197,8 @@ QUESTIONS = [
 
             **সুপারিশ:** Nest 12-এ Express 5-ই default আর বেশিরভাগ team-এর জন্য যথেষ্ট; মাপা প্রমাণ থাকলে তবেই switch করো।
         """,
+        quick_en=r"""Profile first: Fastify cuts framework overhead, but most APIs spend their time in the database, so switch only with measured evidence. Express middleware, `@Res()` code and bootstrap (`listen(port, '0.0.0.0')`) must change, so make the code platform-agnostic, run e2e and load tests, then canary-release.""",
+        quick_bn=r"""আগে profile করি: Fastify framework-এর overhead কমায়, কিন্তু বেশিরভাগ API-র সময় যায় database-এ, তাই মাপা প্রমাণ ছাড়া switch করি না। Express middleware, `@Res()`-নির্ভর code আর bootstrap (`listen(port, '0.0.0.0')`) বদলাতে হয়, তাই আগে code platform-agnostic করি, e2e আর load test চালাই, তারপর canary release দিই।""",
         ex_en=r"""
             - **Hidden coupling:** Passport strategies usually work, but libraries that monkey-patch Express (`req.flash`, some session stores, older upload middleware) don't. Grep for `express` imports and `@Res()` first — that's your migration list.
             - **Schema-based serialisation** is a Fastify strength, but Nest's interceptors/`ClassSerializerInterceptor` still run on the Nest side, so don't expect Fastify's full benefits automatically.
@@ -268,6 +272,8 @@ QUESTIONS = [
 
             বেশিরভাগ backend role-এর জন্য এটা advanced বিষয়; interview-এ সাধারণত focus থাকে request-response বনাম event আর scaling-এর সমস্যায়।
         """,
+        quick_en=r"""`@nestjs/microservices` runs handlers over transports like TCP, Redis, NATS or Kafka: `@MessagePattern` is request-response via `send()`, `@EventPattern` is fire-and-forget via `emit()`, and a hybrid app serves HTTP plus a transport. To scale a Socket.IO gateway, add the Redis adapter and sticky sessions.""",
+        quick_bn=r"""`@nestjs/microservices` দিয়ে handler-গুলো TCP, Redis, NATS বা Kafka-র মতো transport-এ চলে: `@MessagePattern` হলো `send()` দিয়ে request-response, `@EventPattern` হলো `emit()` দিয়ে fire-and-forget, আর hybrid app HTTP-র পাশাপাশি transport-এও listen করে। Socket.IO gateway scale করতে Redis adapter আর sticky session লাগে।""",
         ex_en=r"""
             - **Delivery guarantees depend on the transport.** Redis pub/sub is at-most-once — if the consumer is down, the event is lost. For business-critical events (payments, orders) use a broker with acknowledgements and persistence (RabbitMQ, Kafka, NATS JetStream) and make consumers idempotent.
             - **v12 note:** the NATS transport moved to the `@nats-io/transport-node` (NATS v3) client package.
@@ -373,6 +379,8 @@ QUESTIONS = [
             - Event loop ফাঁকা রাখো: handler-এ sync crypto বা বিশাল JSON-এর কাজ না — CPU-heavy job queue (`@nestjs/bullmq`) বা worker thread-এ পাঠাও।
             - `app.enableShutdownHooks()` দিয়ে graceful shutdown; compression আর TLS সাধারণত reverse proxy-তে (NGINX/ALB)।
         """,
+        quick_en=r"""Security: strict global validation with `whitelist`, body size limits, `helmet()`, an explicit CORS allow-list, `@nestjs/throttler`, response DTOs instead of raw entities, and a generic error filter. Performance: no request-scoped providers on hot paths, sized DB pools, caching, queued CPU work and shutdown hooks.""",
+        quick_bn=r"""Security-র দিকে: `whitelist`-সহ কড়া global validation, body-র আকারের সীমা, `helmet()`, নির্দিষ্ট origin-এর তালিকা দিয়ে CORS, `@nestjs/throttler`, সরাসরি entity না পাঠিয়ে response DTO, আর সাধারণ error filter। Performance-এর দিকে: ব্যস্ত পথে request-scoped provider নয়, মাপমতো DB pool, caching, CPU-ভারী কাজ queue-তে পাঠানো, আর shutdown hook চালু রাখা।""",
         ex_en=r"""
             - **Verified trap:** with `ClassSerializerInterceptor` enabled, returning `new UserEntity(row)` hides `passwordHash`, but returning the raw `row` object includes it. Many teams switch ORMs (e.g. to Drizzle, which returns plain objects) and silently lose this protection.
             - **Throttler details (v6):** `ttl` is in milliseconds, configs are named (`default`), and `@SkipThrottle()` / `@Throttle({ default: { limit, ttl } })` override per route.
@@ -464,6 +472,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""The guard's `ForbiddenException`. Guards run **before** interceptors, so when a guard throws, `intercept()` is never called. Pipes, the handler and services all run inside `next.handle()`, so their errors flow through the interceptor's `catchError`.""",
         a_bn=r"""Guard-এর `ForbiddenException`। Guard interceptor-এর **আগে** চলে, তাই guard throw করলে `intercept()` কখনো call-ই হয় না। Pipe, handler আর service সবই `next.handle()`-এর ভেতরে চলে, তাই তাদের error interceptor-এর `catchError` দিয়ে যায়।""",
+        quick_en=r"""The `ForbiddenException` thrown by a guard. Guards run before interceptors, so `intercept()` is never called, while errors from pipes, the handler and services all flow through `next.handle()`.""",
+        quick_bn=r"""Guard-এর throw করা `ForbiddenException`। Guard interceptor-এর আগে চলে, তাই `intercept()` call-ই হয় না; অথচ pipe, handler আর service-এর error সব `next.handle()`-এর ভেতর দিয়ে interceptor-এ পৌঁছায়।""",
         ex_en=r"""
             The tempting wrong answer is the pipe error: pipes feel "earlier" than interceptors. But in Nest's execution order, the interceptor chain wraps a function that first applies pipes and then calls the handler — so a validation failure surfaces as an error on the `next.handle()` stream. (Verified on NestJS 12.1: a guard's 403 never reached the interceptor, while `ParseIntPipe` and `ValidationPipe` errors did.)
 
@@ -519,6 +529,8 @@ QUESTIONS = [
 
             **Trade-off:** microservices network failure, DB transaction-এর বদলে saga, distributed tracing আর on-call-এর চাপ যোগ করে। ৮ জন developer-এর জন্য সাধারণত একটা ভালোভাবে গোছানো monolith আর এক-দুটো আলাদা service-ই সবচেয়ে ভালো।
         """,
+        quick_en=r"""First make it a modular monolith: bounded contexts that export only small facades, own their tables and talk through domain events written to an outbox, with import rules enforced by lint. Extract a service only for a concrete reason such as a different scaling profile, team ownership or isolation needs.""",
+        quick_bn=r"""আগে modular monolith বানাই: bounded context-গুলো শুধু ছোট facade export করে, নিজের table নিজে রাখে, আর outbox-এ লেখা domain event দিয়ে কথা বলে; import rule lint দিয়ে enforce করি। আলাদা service তখনই বের করি যখন আলাদা scaling, team ownership বা isolation-এর মতো স্পষ্ট কারণ থাকে।""",
         ex_en=r"""
             **Components:** API layer (controllers per context) → facades → domain services → repositories (Drizzle/TypeORM) → PostgreSQL schemas per context; outbox relay → broker (RabbitMQ/Kafka/NATS JetStream or BullMQ for simpler cases) → consumers.
 
@@ -627,6 +639,8 @@ QUESTIONS = [
 
             **৫. Failure ঝুঁকি:** tenant-এর মধ্যে data leak (filter বাদ পড়া, cache-key collision, async callback-এ ভুল context), DB-per-tenant-এ connection শেষ হয়ে যাওয়া, এমন migration যা কিছু tenant schema-য় সফল কিন্তু বাকিগুলোতে না, আর একটা বড় tenant অন্যদের resource খেয়ে ফেলা।
         """,
+        quick_en=r"""Resolve the tenant from a verified JWT claim or subdomain, keep it in AsyncLocalStorage, and default to shared tables with `tenant_id` plus PostgreSQL Row-Level Security, with dedicated databases for big tenants. Make caches, rate limits and jobs tenant-aware; the main risk is cross-tenant data leaks.""",
+        quick_bn=r"""Tenant বের করি verified JWT claim বা subdomain থেকে, AsyncLocalStorage-এ রাখি, আর default হিসেবে `tenant_id`-সহ shared table আর PostgreSQL Row-Level Security; বড় tenant-এর জন্য আলাদা database। Cache, rate limit আর job-ও tenant-aware করি; সবচেয়ে বড় risk হলো এক tenant-এর data আরেক tenant-এর কাছে leak হওয়া।""",
         ex_en=r"""
             **RLS details that matter:**
             - `ALTER TABLE orders ENABLE ROW LEVEL SECURITY; ALTER TABLE orders FORCE ROW LEVEL SECURITY;` — without `FORCE`, the table owner bypasses policies.
@@ -744,6 +758,8 @@ QUESTIONS = [
 
             শুধু Redis lock যথেষ্ট না (TTL শেষ হওয়া, failover); correctness নিশ্চিত করে unique constraint।
         """,
+        quick_en=r"""The root cause is a non-atomic check-then-act handler running concurrently on several instances. Verify the signature, dedupe with a unique `(provider, event_id)` row via `ON CONFLICT DO NOTHING`, use a conditional `UPDATE`, send SMS through an outbox, and require an `Idempotency-Key` on `POST /orders`.""",
+        quick_bn=r"""মূল কারণ একটা non-atomic check-then-act handler, যেটা কয়েকটা instance-এ একসাথে চলে। Signature verify করি, `ON CONFLICT DO NOTHING` দিয়ে unique `(provider, event_id)` row রেখে dedupe করি, status বদলানো conditional `UPDATE` দিয়ে করি, SMS outbox দিয়ে পাঠাই, আর `POST /orders`-এ `Idempotency-Key` বাধ্যতামূলক করি।""",
         ex_en=r"""
             - **Why the unique constraint works under concurrency:** PostgreSQL's unique index makes the second inserter wait for the first transaction; on commit it gets a conflict (`DO NOTHING` → zero rows), on rollback it proceeds. No race window, no distributed lock.
             - **Keep the dedupe insert and the state change in the same transaction** — otherwise a crash between them marks the event processed without updating the order.

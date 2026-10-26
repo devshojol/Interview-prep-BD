@@ -14,7 +14,7 @@
    "import-meta",
    "modules"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -61,6 +61,10 @@
   "related": [
    "node-024"
   ],
+  "quickAnswer": {
+   "en": "CommonJS uses `require`/`module.exports` and loads synchronously; ES modules use `import`/`export`, are static and allow top-level `await`. Node decides by extension (`.mjs`/`.cjs`) or the `package.json` `\"type\"` field, and they mix: ESM imports CJS, and since Node 22.12 CJS can `require()` ESM without top-level `await`.",
+   "bn": "CommonJS-এ `require`/`module.exports`, load হয় synchronously; ES module-এ `import`/`export`, structure static, আর top-level `await` চলে। Node extension (`.mjs`/`.cjs`) বা `package.json`-এর `\"type\"` field দেখে ঠিক করে, আর দুটো মেশানো যায়: ESM থেকে CJS import করা যায়, আর Node 22.12 থেকে CJS-ও top-level `await` ছাড়া ESM `require()` করতে পারে।"
+  },
   "commonMistakes": {
    "en": "Saying CommonJS can never load ES modules (outdated since v22.12), or using `__dirname` inside an ES module (it's not defined there).",
    "bn": "CommonJS কখনোই ES module load করতে পারে না বলা (v22.12 থেকে এটা পুরনো তথ্য), অথবা ES module-এর ভেতরে `__dirname` ব্যবহার করা (সেখানে এটা defined নয়)।"
@@ -117,6 +121,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`5.3.0`: the caret range `^5.1.0` means `>=5.1.0 <6.0.0`, so npm picks the highest newer minor or patch release of major 5, but never `6.0.0`.",
+   "bn": "`5.3.0`: caret range `^5.1.0` মানে `>=5.1.0 <6.0.0`, তাই npm major 5-এর মধ্যে সবচেয়ে নতুন minor বা patch release নেয়, কিন্তু কখনো `6.0.0` নয়।"
+  },
   "options": [
    {
     "en": "`5.3.0`",
@@ -153,7 +161,7 @@
    "ci-cd",
    "reproducible-builds"
   ],
-  "technologyVersion": "npm 11 / Node.js 24 LTS",
+  "technologyVersion": "npm 11 / Node.js 24+",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -197,6 +205,10 @@
    "node-009",
    "node-025"
   ],
+  "quickAnswer": {
+   "en": "Each environment resolves version ranges at install time instead of installing one exact tree, usually because `package-lock.json` isn't committed or CI runs `npm install`. Commit the lockfile, use `npm ci` in CI and Docker, and pin the Node version (`engines`, `.nvmrc`, a fixed image tag).",
+   "bn": "প্রতিটা environment install-এর সময় version range নতুন করে resolve করছে, একই exact dependency tree install করছে না; সাধারণত `package-lock.json` commit করা নেই বা CI-তে `npm install` চলছে। Lockfile commit করো, CI আর Docker-এ `npm ci` ব্যবহার করো, আর Node version pin করো (`engines`, `.nvmrc`, নির্দিষ্ট image tag)।"
+  },
   "commonMistakes": {
    "en": "Deleting `package-lock.json` \"to fix conflicts\", or pinning every dependency to an exact version in `package.json` while still not committing the lockfile (transitive dependencies still float).",
    "bn": "\"Conflict ঠিক করতে\" `package-lock.json` মুছে ফেলা, অথবা `package.json`-এ সব dependency exact version-এ pin করা কিন্তু lockfile commit না করা (transitive dependency তখনও বদলাতে থাকে)।"
@@ -222,7 +234,7 @@
    "transform",
    "abortsignal"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26",
+  "technologyVersion": "Node.js 26 LTS / 24",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -266,6 +278,10 @@
    "node-005",
    "node-032"
   ],
+  "quickAnswer": {
+   "en": "Chain streams with `pipeline()` from `node:stream/promises`: read stream → a byte-counting `Transform` → `createGzip()` → write stream, passing the `signal` for cancellation. `pipeline` handles backpressure and errors, so memory stays constant (O(n) time, O(1) memory); in `catch`, delete the partial file and re-throw.",
+   "bn": "`node:stream/promises`-এর `pipeline()` দিয়ে stream-গুলো জোড়া দাও: read stream → byte গোনার একটা `Transform` → `createGzip()` → write stream, আর cancellation-এর জন্য `signal` পাঠাও। `pipeline` backpressure আর error সামলায়, তাই memory স্থির থাকে (time O(n), memory O(1)); `catch`-এ আধা-লেখা file মুছে error আবার throw করো।"
+  },
   "commonMistakes": {
    "en": "Accumulating chunks in an array \"to count them\", forgetting to delete the partial output, or attaching separate `'error'` handlers to each stream and still missing one.",
    "bn": "\"গোনার জন্য\" chunk-গুলো array-তে জমানো, অর্ধেক output file মুছতে ভুলে যাওয়া, অথবা প্রতিটি stream-এ আলাদা `'error'` handler লাগিয়েও কোনো একটা বাদ পড়ে যাওয়া।"
@@ -294,7 +310,7 @@
    "error-handling",
    "process"
   ],
-  "technologyVersion": "Node.js 15+ (current: 24 LTS / 26)",
+  "technologyVersion": "Node.js 15+ (current: 26 LTS / 24)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": true,
   "status": "stable",
@@ -326,6 +342,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "The process crashes: since Node 15 the default `--unhandled-rejections` mode is `throw`, so the unhandled rejection becomes an uncaught exception, the stack is printed and the process exits with code 1 before `still running` is logged.",
+   "bn": "Process crash করে: Node 15 থেকে default `--unhandled-rejections` mode হলো `throw`, তাই unhandled rejection-টা uncaught exception হয়ে যায়, stack print হয় আর `still running` log হওয়ার আগেই process exit code 1 দিয়ে বন্ধ হয়।"
+  },
   "code": {
    "language": "javascript",
    "source": "async function loadConfig() {\n  throw new Error('config service down');\n}\n\nloadConfig(); // called without await or .catch()\n\nsetTimeout(() => console.log('still running'), 1000);"
@@ -366,7 +386,7 @@
    "setimmediate",
    "output"
   ],
-  "technologyVersion": "Node.js 11+ semantics (current: 24 LTS / 26)",
+  "technologyVersion": "Node.js 11+ semantics (current: 26 LTS / 24)",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -410,6 +430,10 @@
    "node-002",
    "node-004"
   ],
+  "quickAnswer": {
+   "en": "Output: `sync n1 p1 p2 n2 i1 n3 p3 i2 t1`. After the script and after every single callback, Node drains all nextTicks and then all promise microtasks (between `setImmediate` callbacks too, since Node 11), and inside an I/O callback the check phase runs before the next timers phase.",
+   "bn": "Output: `sync n1 p1 p2 n2 i1 n3 p3 i2 t1`। Script শেষে এবং প্রতিটা আলাদা callback-এর পরে Node আগে সব nextTick, তারপর সব promise microtask খালি করে (Node 11 থেকে `setImmediate` callback-গুলোর মাঝেও), আর I/O callback-এর ভেতরে পরের timers phase-এর আগে check phase চলে।"
+  },
   "commonMistakes": {
    "en": "Assuming a nextTick scheduled from inside a promise callback runs before the remaining promise callbacks, or running both immediates before their microtasks (pre-Node 11 behaviour).",
    "bn": "Promise callback-এর ভেতর থেকে schedule করা nextTick বাকি promise callback-গুলোর আগে চলবে ধরে নেওয়া, অথবা microtask-এর আগে দুটো immediate-ই চালিয়ে দেওয়া (Node 11-এর আগের আচরণ)।"
@@ -436,7 +460,7 @@
    "gc",
    "production-debugging"
   ],
-  "technologyVersion": "Node.js 24 LTS / 26; Express 5.x",
+  "technologyVersion": "Node.js 26 LTS / 24; Express 5.x",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -484,6 +508,10 @@
    "node-023",
    "node-006"
   ],
+  "quickAnswer": {
+   "en": "The leak is the module-level `cache` Map keyed by `req.originalUrl`: every unique URL (query string included) adds an entry that is never evicted, so the heap grows until V8 hits its limit. Prove it by comparing heap snapshots in DevTools, then use a bounded LRU cache with a TTL and normalised keys (or Redis).",
+   "bn": "Leak-টা হলো module-level `cache` Map, যার key `req.originalUrl`: প্রতিটা নতুন URL (query string-সহ) একটা entry যোগ করে যেটা কখনো সরানো হয় না, তাই heap বাড়তে বাড়তে V8-এর limit ছুঁয়ে ফেলে। DevTools-এ heap snapshot compare করে প্রমাণ করো, তারপর TTL আর normalised key-সহ একটা সীমিত LRU cache (বা Redis) ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Calling `global.gc()` in a loop, restarting the process on a cron as the \"solution\", or assuming Node has no leaks because it has a garbage collector.",
    "bn": "Loop-এ `global.gc()` call করা, cron দিয়ে process restart করাকেই \"সমাধান\" ধরা, অথবা garbage collector আছে বলে Node-এ leak হয় না ধরে নেওয়া।"

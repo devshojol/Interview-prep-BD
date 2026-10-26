@@ -1,7 +1,9 @@
-# Verified Technology Facts — verified 2026-10-12
+# Verified Technology Facts — verified 2026-10-12, partially re-verified 2026-10-26
 
 All versions below were checked on 2026-10-12 against the npm registry (`npm view <pkg> dist-tags`),
 nodejs.org, official docs/blogs and release-note pages. Use `verifiedAt: "2026-10-12"` in question records.
+Rows marked *(re-verified 2026-10-26)* were checked again on that date (see the refresh log at the end). Use
+`verifiedAt: "2026-10-26"` for questions whose version claims you change against those rows.
 If you write a version-sensitive claim that is NOT covered here, verify it yourself against the official
 docs (WebFetch) before writing it, or phrase it in a version-independent way.
 
@@ -14,20 +16,21 @@ docs (WebFetch) before writing it, or phrase it in a version-independent way.
 | JavaScript | ECMAScript 2026 (17th edition, approved by Ecma GA on 2026-06-30) | ES2025 + ES2026 features listed below. |
 | React | **19.3.0** (blog post 2026-09-09) | React Compiler v1.0 (2025-10-07). React Foundation (Linux Foundation) since Feb 2026. |
 | Next.js | **16.4.0** (2026-10-06) | Uses React 19.3. Next 16.0 was 2025-10-21. Next 17 not released (Cache Components will be default in 17). Min Node 20.9. |
-| Node.js | **v24 "Krypton" = Active LTS (24.21.0)**, moves to Maintenance 2026-10-20. **v26 = Current (26.11.1)**, becomes LTS on 2026-10-28. v22 "Jod" = Maintenance LTS until 2027-04-30. v20 EOL 2026-04-30. v25 EOL. | New release model from Node 27: one major per year (April), every release becomes LTS (October), alpha channel; 27.0.0-alpha starts 2026-10-28, 27.0.0 in April 2027. Recommend v24 LTS for production now (v26 after 2026-10-28). |
+| Node.js *(re-verified 2026-10-26)* | **v26 = Active LTS from 2026-10-28** (Current until then; 26.12.1 on 2026-10-21; Maintenance from 2027-10-20, EOL 2029-04-30). **v24 "Krypton" = Maintenance LTS since 2026-10-20** (24.22.1; EOL 2028-04-30). v22 "Jod" = Maintenance LTS until 2027-04-30. v20 EOL 2026-04-30. v25 EOL. Source: nodejs/Release `schedule.json`, nodejs.org/dist/index.json. | New release model from Node 27: one major per year (April), every release becomes LTS (October), alpha channel; 27.0.0-alpha starts 2026-10-28, 27.0.0 in April 2027. **Recommend v26 (Active LTS) for new production deployments; v24 is still supported (security fixes) for existing ones.** In question text write "Node.js 26 LTS" (or "the current Active LTS"), and "Node.js 24 (Maintenance LTS)" when the older line matters. Do not call v24 "Active LTS". |
 | Express | **5.3.0** (2026-10-09); `latest-4` = 4.22.3 | Express 5 is the npm default since 5.1.0 (2025-03-31). Express 5 `engines.node >= 18`. |
-| NestJS | **12.1.3** (`@nestjs/core`, 2026-10-12); v11 = legacy line (11.2.7) | v12: core packages ship as ESM (CJS apps still work via `require(esm)`), Standard Schema validation (`StandardSchemaValidationPipe`, `schema` option on `@Body()`/`@Query()`/`@Param()`), `@nestjs/observe`, requires Node 20.19+ / 22.12+. `@nestjs/platform-express` 12 uses Express 5.2.x; `@nestjs/platform-fastify` uses Fastify 5.12.x. Rspack default for monorepos; oxlint in generated projects. |
+| NestJS *(re-verified 2026-10-26)* | **12.2.0** (`@nestjs/core` `latest`, 2026-10-19; content written against 12.1.x, no breaking changes expected in a minor); v11 = legacy line (11.2.8) | v12: core packages ship as ESM (CJS apps still work via `require(esm)`), Standard Schema validation (`StandardSchemaValidationPipe`, `schema` option on `@Body()`/`@Query()`/`@Param()`), `@nestjs/observe`, requires Node 20.19+ / 22.12+. `@nestjs/platform-express` 12 uses Express 5.2.x; `@nestjs/platform-fastify` uses Fastify 5.12.x. Rspack default for monorepos; oxlint in generated projects. |
 | MongoDB server | **9.0** (9.0.0 released 2026-09-28; current stable series). Previous: 8.3, 8.0, 7.0 | 9.0: `$accumulator`/`$function`/`$where` un-deprecated (WebAssembly engine); per-operation memory limit; `maxConcurrentMultiDocumentTransactions` default 10000; `constraint` validation level; Queryable Encryption prefix/suffix/substring GA; `$queryStats` on by default. Minor releases (X.Y) from 9.0 only on Atlas; annual "Feature Update" X.5 release for self-managed. Majors supported 5 years. |
 | MongoDB Node.js driver | **7.7.0** | |
 | Mongoose | **9.11.1** (8.x line = 8.24.5) | Node >= 20.19. See Mongoose 9 breaking changes below. |
 | PostgreSQL | **18** (latest minor 18.6, 2026-08-13). PostgreSQL 19 is in **beta (Beta 4, 2026-09-24)** — not GA. | PG 14 EOL 2026-11-12. |
 | SQL | ISO/IEC 9075 (SQL:2023 is latest edition) | Teach portable SQL; label PostgreSQL-specific syntax. |
-| Drizzle ORM | **0.45.4 stable** (`latest` tag, 2026-10-08); drizzle-kit **0.31.11**. **v1.0 is still a release candidate (npm `rc` tag 1.0.0-rc.4; rc.5 builds exist)** — NOT stable. | Teach 0.45 APIs as current stable; mention v1 RC changes (defineRelations, RQB v2) labelled as `preview`. |
+| Drizzle ORM | **0.45.4 stable** (`latest` tag, 2026-10-08); drizzle-kit **0.31.11**. **v1.0 is still a release candidate (npm `rc` tag 1.0.0-rc.5 as of 2026-10-26; `latest` still 0.45.4)** — NOT stable. | Teach 0.45 APIs as current stable; mention v1 RC changes (defineRelations, RQB v2) labelled as `preview`. |
 | Redis | **Redis Open Source 8.10** (8.10.2, 2026-09-17). 8.2 = Extended support (EOL 2030-09-01); 8.0 EOL 2026-12-01. | Redis 8 = Redis Open Source with Query Engine, JSON, time series, probabilistic types and Vector Sets built in; AGPLv3 added as a license option (Redis 8.0, May 2025) alongside RSALv2/SSPLv1. Node clients: `redis` (node-redis) **6.3.0**, `ioredis` **6.0.0**. Valkey is the Linux Foundation BSD fork (from Redis 7.2.4). |
 | pgvector | **0.8.7** (2026-10-01) | 0.8.0 added iterative index scans; halfvec/sparsevec since 0.7.0; HNSW and IVFFlat indexes. |
 | Docker Engine | **29.9.0** (2026-10-08) | Docker Compose **v5.6.0** (2026-10-02). The top-level `version:` key in compose files is obsolete (ignored, warns). Use `docker compose` (plugin), not legacy `docker-compose` v1 (Python, EOL 2023). BuildKit is the default builder. |
 | NGINX | Mainline **1.31.6**, Stable **1.30.5** (legacy 1.28.x) | Even minor = stable branch, odd = mainline. NGINX recommends mainline for most users. |
 | AWS | Service-based (no single version) | Lambda Node.js runtimes: `nodejs24.x` (GA, deprecation 2028-04-30), `nodejs22.x` (deprecation 2027-04-30), `nodejs26.x` (public preview, not for production). Amazon Linux 2 reached end of support 2026-06-30 → use Amazon Linux 2023. AWS SDK for JavaScript v3 (modular `@aws-sdk/client-*`, e.g. client-s3 3.1149.0); SDK v2 is end-of-support (Sept 2025). |
+| React Native *(added 2026-10-26)* | **0.88.0** (React 19.3); Expo **SDK 58** | See the React Native & Expo section below. |
 | TypeScript | **7.0.2** (native Go compiler "tsgo", ~10x faster) | TS 6.0 was the last JS-based compiler release. |
 | Other npm (for code examples) | zod 4.6.6, helmet 8.x, express-rate-limit 8.x, multer 2.x, jsonwebtoken 9.x, pg 8.23, Prisma 7.10, Vite 8.3, ESLint 10.x (flat config only) | |
 
@@ -94,6 +97,50 @@ docs (WebFetch) before writing it, or phrase it in a version-independent way.
 - PG 17 (2024): incremental backups (`pg_basebackup --incremental`), `JSON_TABLE`, SQL/JSON constructors, `MERGE ... RETURNING`, improved VACUUM memory.
 - PG 16: logical replication from standbys, `pg_stat_io`. PG 15: `MERGE`, `UNIQUE NULLS NOT DISTINCT`.
 
+## React Native & Expo facts (verified 2026-10-26)
+Sources: npm registry dist-tags/time, `expo/expo` `sdk-58/packages/expo/bundledNativeModules.json`, reactnative.dev/blog,
+expo.dev/changelog/sdk-58, docs.expo.dev/versions/latest/sdk/sqlite/.
+- **Versions:** React Native **0.88.0** (blog 2026-10-19; React **19.3.0**, Metro 0.87, no breaking changes). **Expo SDK 58**
+  (changelog 2026-10-15) bundles RN 0.88.0 + React 19.3.0; Expo packages are versioned with the SDK (`expo-router` ~58,
+  `expo-sqlite` ~58). Bundled: `react-native-reanimated` 4.7 (+ `react-native-worklets` 0.13), `react-native-gesture-handler`
+  ~3.3, `@shopify/flash-list` 2.3, `react-native-screens` ~4.30, `react-native-safe-area-context` ~5.10, `expo-audio`,
+  `expo-video`. React Navigation **7.x** (`@react-navigation/native` 7.5). `eas-cli` 25.x. RN engines: Node `^22.13 || ^24.3 || >=26`.
+- **Architecture:** RN **0.82 was the first release that runs entirely on the New Architecture** (Fabric renderer,
+  TurboModules, JSI, bridgeless); the legacy architecture can no longer be enabled, and its code is being removed (0.84 removed
+  legacy components). Teach the old "bridge" only as history/legacy. **Hermes V1 is the default engine since 0.84**;
+  JavaScriptCore is community-maintained (0.81). 0.87 made the **Strict TypeScript API** the default. 0.88 dispatches events via
+  the Web-based path by default. Android edge-to-edge is fully supported on Android 15+ (0.86); `SafeAreaView` from
+  `react-native` is deprecated (0.81) → use `react-native-safe-area-context`. `InteractionManager` was removed (noted in the
+  SDK 58 notes) → use `requestIdleCallback`/`setTimeout` or schedule after transitions. `StyleSheet.absoluteFillObject` was
+  removed in 0.85 (`StyleSheet.absoluteFill` remains).
+- **Expo workflow:** Expo is the framework recommended by the React Native docs for new apps. `create-expo-app`, file-based
+  routing with **Expo Router** (in SDK 58: data loaders, SSR, middleware, native tabs and toolbars are stable; `withLayoutContext`
+  deprecated → `integrateWithRouter`), **Continuous Native Generation** (`npx expo prebuild`, config plugins, app.json /
+  app.config.ts), **development builds** (`expo-dev-client`) vs **Expo Go** (sandbox app with a fixed set of native modules; it
+  supports one SDK at a time; login is required since 2026-09-03; the SDK 58 Expo Go is not in the stores yet, so until then
+  `create-expo-app` makes SDK 57 projects and SDK 58 needs a development build). **EAS Build** (cloud builds, `eas.json`
+  profiles), **EAS Submit**, **EAS Update** (OTA updates of JS/assets only, `runtimeVersion` must match the native build,
+  channels/branches; native changes need a new store build). `expo-av` is no longer part of the SDK → `expo-audio` /
+  `expo-video`. `expo-file-system`'s object API: `File.write()` is async in SDK 58 (`File.writeSync()` sync).
+- **expo-sqlite (SDK 58):** `openDatabaseAsync('app.db')` / `openDatabaseSync`; `execAsync` (batch SQL, **no parameter
+  escaping — never pass user input**); `runAsync(sql, ...params)` → `{ lastInsertRowId, changes }`; `getFirstAsync` (row or
+  `null`), `getAllAsync`, `getEachAsync` (async iterator); prepared statements `prepareAsync` → `executeAsync` → always
+  `finalizeAsync()` in `finally`; `withTransactionAsync` (non-exclusive: any query running meanwhile joins the transaction) vs
+  `withExclusiveTransactionAsync(txn => …)` (only queries on `txn`; not on web); React: `<SQLiteProvider databaseName onInit
+  useSuspense>` + `useSQLiteContext()`; migrations via `PRAGMA user_version` in `onInit`; docs recommend
+  `PRAGMA journal_mode = WAL`; `expo-sqlite/kv-store` (AsyncStorage-compatible, with sync variants) and
+  `expo-sqlite/localStorage/install`; SQLCipher via the `useSQLCipher` config plugin + `PRAGMA key` (not in Expo Go; verify with
+  `PRAGMA cipher_version`); `addDatabaseChangeListener` with `enableChangeListener: true`; web supported with wasm + COOP/COEP
+  headers (no FTS by default; `configureWeb({ wasmURL })` in SDK 58); **libSQL support removed in SDK 58**; Drizzle ORM has an
+  official `expo-sqlite` driver (`drizzle-orm/expo-sqlite`, migrations bundled with `useMigrations`).
+- **Other storage:** `expo-secure-store` (Keychain / Keystore-backed; for tokens and secrets, small values), AsyncStorage
+  (unencrypted key-value; `@react-native-async-storage/async-storage` 3.x on npm, SDK 58 bundles 2.2), `react-native-mmkv` 4.x
+  (fast synchronous key-value, needs a dev build).
+- **Lists/perf:** `FlatList` (virtualised; `keyExtractor`, `getItemLayout`, `initialNumToRender`, `windowSize`), `SectionList`,
+  FlashList v2 (New Architecture only, no `estimatedItemSize` needed in v2). `ScrollView` renders all children. Use
+  React DevTools/Profiler in React Native DevTools; Hermes sampling profiler; avoid inline heavy work on the JS thread;
+  animations on the UI thread with Reanimated worklets / native driver.
+
 ## Docker facts
 - Compose file: `compose.yaml` preferred; top-level `version` obsolete; `depends_on` with `condition: service_healthy`; `develop.watch` (Compose Watch); profiles; secrets.
 - BuildKit default; `# syntax=docker/dockerfile:1`; cache mounts `RUN --mount=type=cache`; secret mounts `RUN --mount=type=secret`; multi-stage builds; `.dockerignore`; `HEALTHCHECK`; `USER node`; distroless/alpine/slim trade-offs; `docker init`; `docker scout` for CVEs; `docker buildx` multi-platform.
@@ -124,3 +171,9 @@ docs (WebFetch) before writing it, or phrase it in a version-independent way.
 - Bangladesh: Public interview reviews (e.g., Glassdoor Brain Station 23, 2023–2024) describe aptitude/online MCQ tests (OOP, DBMS fundamentals, DSA, output tracing, SDLC), coding tests with easy/medium LeetCode-style problems, then a technical "viva". A dev.to article on "JavaScript interview questions for the Bangladesh job market" emphasises fundamentals: var/let/const, hoisting, closures, `this`, call/apply/bind, event loop, promises, Promise.all vs race, DOM events/bubbling, ES6 features and string/array coding problems. BD job posts (e.g., LinkedIn, 2026) for MERN/NestJS full-stack roles list Node/Express/NestJS, React/Next.js, MongoDB/PostgreSQL/MySQL, ORMs (Mongoose/Prisma/TypeORM), JWT/RBAC auth, Redis caching, Docker/AWS/CI-CD as nice-to-have.
 - International: Stack Overflow Developer Survey 2025 (professional developers): Docker 73.8%, JavaScript 68.8%, PostgreSQL 58.2%, Node.js 49.1%, React 46.9%, AWS 45.9%, MySQL 39.6%, Redis 30.7%, MongoDB 24.3%, Next.js 21.5%, Express 20.3%, NestJS 7.4%. International/remote interviews more often include system design, scalability, production debugging, cloud architecture and trade-off discussions.
 - Use `market: "both"` by default. Use `"bangladesh"` only for question styles specifically reported for BD hiring (written MCQ/output-tracing fundamentals, viva-style definitions, MERN/NestJS stack combos typical of BD job posts). Use `"international"` for deeper system-design / large-scale / cloud-architecture questions typical of international or remote senior roles. Never claim exact frequencies.
+
+## Refresh log
+- **2026-10-26** (after the content audit in `audit/AUDIT_REPORT.md`):
+  - Node.js: v24 entered Maintenance on 2026-10-20 and v26 becomes Active LTS on 2026-10-28 (nodejs/Release `schedule.json`). Content relabelled from "Node.js 24 LTS" to Node.js 26 LTS / 24 Maintenance.
+  - npm `latest` tags checked: `@nestjs/core` 12.2.0 (legacy 11.2.8), `drizzle-orm` 0.45.4 (`rc` 1.0.0-rc.5), `mongoose` 9.11.4 (8.x 8.24.7), `express` 5.3.0, `next` 16.4.3, `react` 19.3.1. Patch/minor bumps only; content labels such as "Next.js 16.4", "React 19.3", "Mongoose 9.11" stay valid.
+  - Still unresolved: CSS anchor positioning Baseline status (reports of Firefox 147 support; confirm on webstatus.dev before changing css-028).

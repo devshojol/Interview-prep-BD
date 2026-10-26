@@ -57,6 +57,10 @@
   "related": [
    "css-014"
   ],
+  "quickAnswer": {
+   "en": "`.a` is 250px wide because `content-box` adds padding and border to `width`; `.b` is 200px with a 150px content area because `border-box` includes them. The gap is 10px, since adjacent vertical margins collapse to the larger one.",
+   "bn": "`.a` 250px চওড়া, কারণ `content-box`-এ `width`-এর সাথে padding আর border যোগ হয়; `.b` 200px আর তার content area 150px, কারণ `border-box`-এ এগুলো `width`-এর ভেতরেই। মাঝের gap 10px, কারণ পাশাপাশি vertical margin collapse হয়ে বড়টা থাকে।"
+  },
   "commonMistakes": {
    "en": "Including margin in the width, assuming `border-box` is the default, or answering 20px for the gap.",
    "bn": "Width-এর মধ্যে margin ধরা, `border-box`-কে default ভাবা, অথবা ফাঁক 20px বলা।"
@@ -109,6 +113,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Red. `#main p` has specificity (1, 0, 1), and the ID column is compared first, so it beats `.content .text` (0, 2, 0) and `p.text` (0, 1, 1) regardless of source order.",
+   "bn": "লাল। `#main p`-এর specificity (1, 0, 1), আর ID-র ঘর সবার আগে তুলনা হয়, তাই source order যাই হোক এটা `.content .text` (0, 2, 0) আর `p.text` (0, 1, 1)-কে হারায়।"
+  },
   "code": {
    "language": "html",
    "source": "<div id=\"main\" class=\"content\">\n  <p class=\"text\">Hello</p>\n</div>\n\n<style>\n  #main p        { color: red; }\n  .content .text { color: green; }\n  p.text         { color: blue; }\n</style>"
@@ -192,6 +200,10 @@
    "css-002",
    "css-009"
   ],
+  "quickAnswer": {
+   "en": "The `<p>` is blue and bold, and so is the `<span>`. A rule that targets the `<p>` directly beats any inherited value however specific; `font-weight` is inherited from `#card`, and the span inherits both values from the `<p>`.",
+   "bn": "`<p>` নীল আর bold, `<span>`-ও নীল আর bold। `<p>`-কে সরাসরি target করা rule যেকোনো inherited value-কে হারায়, ancestor-এর selector যত specific-ই হোক; `font-weight` আসে `#card` থেকে inherit হয়ে, আর span দুটো value-ই `<p>` থেকে পায়।"
+  },
   "commonMistakes": {
    "en": "Answering red because `#card` \"has higher specificity\", or assuming `font-weight` stops at the `<p>`.",
    "bn": "`#card`-এর \"specificity বেশি\" বলে লাল বলা, অথবা `font-weight` `<p>`-এ গিয়ে থেমে যায় বলে ধরে নেওয়া।"
@@ -262,6 +274,10 @@
    "css-002",
    "css-030"
   ],
+  "quickAnswer": {
+   "en": "`#buy` is gray and `#cart` is green. Layer order is checked before specificity: unlayered styles beat every layer, and the later `components` layer beats `base` even against an ID selector.",
+   "bn": "`#buy` ধূসর আর `#cart` সবুজ। Specificity-র আগে layer order দেখা হয়: layer-এর বাইরের style সব layer-কে হারায়, আর পরের `components` layer ID selector থাকা সত্ত্বেও `base`-কে হারায়।"
+  },
   "commonMistakes": {
    "en": "Assuming the ID selector wins because of specificity, assuming unlayered styles have the *lowest* priority, or forgetting that `!important` flips layer order.",
    "bn": "Specificity-র কারণে ID selector জিতবে ধরে নেওয়া, unlayered style-এর priority *সবচেয়ে কম* ভাবা, অথবা ভুলে যাওয়া যে `!important` layer-এর ক্রম উল্টে দেয়।"
@@ -327,6 +343,10 @@
    "css-023",
    "css-031"
   ],
+  "quickAnswer": {
+   "en": "`:has()` is a relational \"parent\" selector: it matches an element by what it contains or what follows it, like `.card:has(img)`, which used to need JavaScript. It can't be nested inside another `:has()` or contain pseudo-elements, and it's Baseline widely available.",
+   "bn": "`:has()` একটা relational \"parent\" selector: ভেতরে কী আছে বা পরে কী আছে দেখে element match করে, যেমন `.card:has(img)`, যেটা আগে JavaScript ছাড়া হতো না। একটা `:has()`-এর ভেতরে আরেকটা বা pseudo-element রাখা যায় না, আর এটা Baseline widely available।"
+  },
   "commonMistakes": {
    "en": "Calling it \"only a parent selector\" (it also handles siblings), using `body:has(...)` for everything, or assuming `:has()` adds zero specificity like `:where()`.",
    "bn": "একে \"শুধু parent selector\" বলা (এটা sibling-ও সামলায়), সবকিছুর জন্য `body:has(...)` ব্যবহার করা, অথবা ধরে নেওয়া যে `:where()`-এর মতো `:has()`-ও কোনো specificity যোগ করে না।"
@@ -400,6 +420,10 @@
    "css-005",
    "css-027"
   ],
+  "quickAnswer": {
+   "en": "Flex items default to `min-width: auto`, so `.body` can't shrink below its long content and the row overflows. Add `min-width: 0` to `.body` so the ellipsis works, `overflow-wrap: anywhere` to the tracking code, and `flex-shrink: 0` to the avatar and button.",
+   "bn": "Flex item-এর default `min-width: auto`, তাই `.body` তার লম্বা content-এর চেয়ে ছোট হতে পারে না, ফলে row overflow করে। `.body`-তে `min-width: 0` দাও যাতে ellipsis কাজ করে, tracking code-এ `overflow-wrap: anywhere`, আর avatar ও button-এ `flex-shrink: 0`।"
+  },
   "commonMistakes": {
    "en": "Adding `overflow: hidden` to `body`, setting a fixed `width` on `.body`, or putting `text-overflow` on the flex item instead of the element whose text overflows.",
    "bn": "`body`-তে `overflow: hidden` দেওয়া, `.body`-তে নির্দিষ্ট `width` দেওয়া, অথবা যে element-এর text overflow করছে তাতে না দিয়ে flex item-এ `text-overflow` দেওয়া।"
@@ -471,6 +495,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Green. `.nav a:not(#x)` scores (1, 1, 1) because `:not()` takes its most specific argument, beating `:is(.nav, #site-nav) .link` at (1, 1, 0); `:where()` always counts as zero.",
+   "bn": "সবুজ। `.nav a:not(#x)`-এর specificity (1, 1, 1), কারণ `:not()` তার সবচেয়ে specific argument ধরে, তাই এটা (1, 1, 0)-এর `:is(.nav, #site-nav) .link`-কে হারায়; `:where()` সবসময় শূন্য।"
+  },
   "code": {
    "language": "html",
    "source": "<nav id=\"site-nav\" class=\"nav\">\n  <a class=\"link active\" href=\"/\">Home</a>\n</nav>\n\n<style>\n  :where(#site-nav) .link.active  { color: red; }\n  .nav a:not(#x)                  { color: green; }\n  :is(.nav, #site-nav) .link      { color: blue; }\n  nav > a.link.active             { color: orange; }\n</style>"
@@ -563,6 +591,10 @@
    "css-012",
    "css-028"
   ],
+  "quickAnswer": {
+   "en": "This is advanced: declare cascade layers and move Bootstrap into `vendor` and all old CSS into `legacy`, so new code wins without specificity fights. Add semantic token custom properties for dark mode, scoped components, a page-by-page migration and Stylelint guardrails against new `!important`.",
+   "bn": "এটা advanced বিষয়: cascade layer declare করে Bootstrap-কে `vendor` আর সব পুরোনো CSS-কে `legacy` layer-এ রাখি, যাতে নতুন code specificity-র লড়াই ছাড়াই জেতে। সাথে dark mode-এর জন্য semantic token custom property, scoped component, page ধরে ধরে migration, আর নতুন `!important` আটকাতে Stylelint।"
+  },
   "commonMistakes": {
    "en": "Proposing a big-bang rewrite, adding layers but leaving legacy CSS unlayered, ignoring legacy `!important`, or hard-coding dark-mode colours per component.",
    "bn": "একবারে সব rewrite করার প্রস্তাব দেওয়া, layer যোগ করে legacy CSS unlayered রেখে দেওয়া, legacy `!important` উপেক্ষা করা, অথবা প্রতিটা component-এ আলাদা করে dark-mode-এর রং hard-code করা।"

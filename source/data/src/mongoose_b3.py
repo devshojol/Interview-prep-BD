@@ -44,6 +44,8 @@ QUESTIONS = [
 
             তিনটাতেই arrow function না, সাধারণ `function` ব্যবহার করো, যাতে `this` ঠিকভাবে bind হয়।
         """,
+        quick_en=r"""Instance methods (`schema.methods`) run on a document, statics (`schema.statics`) run on the model, and query helpers (`schema.query`) chain on queries, with `this` being the document, model or query. Write them as regular functions, not arrow functions, so `this` is bound.""",
+        quick_bn=r"""Instance method (`schema.methods`) চলে document-এর ওপর, static (`schema.statics`) চলে model-এর ওপর, আর query helper (`schema.query`) query-তে chain করা যায়; `this` হয় যথাক্রমে document, model বা query। Arrow function না, সাধারণ function লেখো, যাতে `this` ঠিকমতো bind হয়।""",
         ex_en=r"""
             - **Where logic belongs:** methods keep data rules close to the data (e.g. normalising an email in one place), but don't move everything into models — HTTP concerns, emails and payment calls belong in services.
             - **Alternative syntax:** you can pass `methods`, `statics` and `query` in the schema options object, or use `schema.loadClass(SomeClass)` with ES6 classes. The options style gives better TypeScript inference.
@@ -115,6 +117,8 @@ QUESTIONS = [
 
             Fail করলে Mongoose একটা `ValidationError` throw করে, যার `errors` object-এ প্রতিটি invalid path-এর জন্য একটা করে entry থাকে।
         """,
+        quick_en=r"""Validators live on schema paths: built-ins like `required`, `min`/`max`, `enum` and `match`, plus custom (sync or async) `validate` functions. They run on `save()`/`create()` or `doc.validate()`, but not on `updateOne`/`findOneAndUpdate` unless you pass `runValidators: true`; failures throw a `ValidationError`.""",
+        quick_bn=r"""Validator থাকে schema path-এ: `required`, `min`/`max`, `enum`, `match`-এর মতো built-in, আর custom (sync বা async) `validate` function। এগুলো চলে `save()`/`create()` বা `doc.validate()`-এ, কিন্তু `runValidators: true` না দিলে `updateOne`/`findOneAndUpdate`-এ চলে না; fail করলে `ValidationError` throw হয়।""",
         ex_en=r"""
             - **Casting comes first:** if a value can't be cast (e.g. `"abc"` for a Number), you get a `CastError` inside `err.errors` and the other validators for that path don't run.
             - **Not validators:** `unique` (an index) and setters like `trim`/`lowercase` (transformations).
@@ -204,6 +208,8 @@ QUESTIONS = [
 
             আমি **read-only** পথে `.lean()` ব্যবহার করি — API list, report, server-side rendering — আর modify করে `save()` করব বা virtual/method লাগবে এমন জায়গায় সাধারণ document রাখি।
         """,
+        quick_en=r"""`.lean()` skips hydration and returns plain JavaScript objects, so it's faster and uses much less memory. You lose `save()`, change tracking, instance methods, virtuals, getters and defaults, so use it on read-only paths like API lists and reports.""",
+        quick_bn=r"""`.lean()` hydration বাদ দিয়ে plain JavaScript object return করে, তাই এটা দ্রুত আর অনেক কম memory নেয়। কিন্তু `save()`, change tracking, instance method, virtual, getter আর default হারাও, তাই API list বা report-এর মতো read-only জায়গায় ব্যবহার করো।""",
         ex_en=r"""
             - **What still works:** the query filter is still cast by the schema (lean only affects the *result*), and `populate()` still works.
             - **Types are BSON types:** `_id` is still an `ObjectId` instance and dates are `Date` objects. When passing lean results from a Next.js Server Component to a Client Component, convert `_id` to a string — class instances like `ObjectId` aren't allowed across that boundary.
@@ -335,6 +341,8 @@ Example: creating a user with an existing email returns `409 { "error": "email a
 
             এতে চারটা parameter আছে — Express এভাবেই error middleware চিনতে পারে — আর এটা route-গুলোর পরে register করা হয়।
         """,
+        quick_en=r"""One four-argument Express middleware, registered after the routes, checks errors from specific to generic: `ValidationError` → 400 with per-field messages, `CastError` → 400, driver error `code === 11000` → 409 using `keyValue`, `DocumentNotFoundError` → 404, and anything else → a logged, generic 500.""",
+        quick_bn=r"""Route-গুলোর পরে register করা চার parameter-এর একটা Express middleware error-গুলো specific থেকে generic ক্রমে check করে: `ValidationError` → field অনুযায়ী message সহ 400, `CastError` → 400, driver-এর `code === 11000` → `keyValue` দেখে 409, `DocumentNotFoundError` → 404, আর বাকি সব → log করে generic 500।""",
         ex_en=r"""
             - **Edge cases:** an error after headers were sent (streaming) must be delegated with `next(err)`; bulk inserts with duplicates throw a `MongoBulkWriteError` with per-document `writeErrors`; a `ValidationError` can contain several fields at once — return them all so the form can show every problem.
             - **Don't leak:** echoing `err.message` for unknown errors can reveal collection names, query shapes or stack traces.
@@ -381,6 +389,8 @@ Example: creating a user with an existing email returns `409 { "error": "email a
         correct=3,
         a_en=r"""Since Mongoose 7, `strictQuery` defaults to `false`, so filter properties that aren't in the schema are **kept** and passed to MongoDB. `{ emial: "spam@example.com" }` matches no documents, so `deletedCount` is 0.""",
         a_bn=r"""Mongoose 7 থেকে `strictQuery`-এর default `false`, তাই schema-তে না থাকা filter property **রেখে দেওয়া হয়** আর MongoDB-তে পাঠানো হয়। `{ emial: "spam@example.com" }` কোনো document match করে না, তাই `deletedCount` 0।""",
+        quick_en=r"""Nothing is deleted: with the default `strictQuery: false` (since Mongoose 7), the unknown `emial` filter is sent to MongoDB as-is, no document has that field, and `deletedCount` is 0.""",
+        quick_bn=r"""কিছুই delete হয় না: default `strictQuery: false` (Mongoose 7 থেকে) থাকায় অচেনা `emial` filter যেমন আছে তেমনই MongoDB-তে যায়, কোনো document-এ ওই field নেই, তাই `deletedCount` হয় 0।""",
         ex_en=r"""
             Option B is exactly what happens with `strictQuery: true` (the Mongoose 6 default): unknown paths are stripped, the filter becomes `{}`, and `deleteMany({})` wipes the collection. That danger is one reason the default changed. Option C happens if you set `strictQuery: "throw"` — a good choice in development and tests to catch typos early.
 
@@ -453,10 +463,11 @@ Example: creating a user with an existing email returns `409 { "error": "email a
                 const created = await User.create({ name, email: newEmail, passwordHash: await bcrypt.hash(pw, 12) });
 
                 // 3) Search: validated, length-limited, escaped, bounded result; a case-sensitive
-                //    prefix on a lowercase copy (nameLower) can use an index, unlike $options: "i"
+                //    prefix on a lowercase copy (nameLower) can use an index, unlike $options: "i".
+                //    sanitizeFilter would wrap our own $regex in $eq too, so mark it as trusted.
                 const { q } = SearchQuery.parse(req.query);                      // z.string().min(1).max(50)
                 const safe = q.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-                const products = await Product.find({ nameLower: { $regex: `^${safe}` } })
+                const products = await Product.find({ nameLower: mongoose.trusted({ $regex: `^${safe}` }) })
                   .limit(20).lean();
 
                 // 4) Profile: sensitive fields hidden by the schema
@@ -493,7 +504,10 @@ Example: creating a user with an existing email returns `409 { "error": "email a
             3. **Regex injection / ReDoS।** Raw user input regular expression হয়ে যায়: `.*` দিলে সব বেরিয়ে আসে, আর catastrophic backtracking-ওয়ালা pattern database-এর CPU পুড়িয়ে দেয়। Case-insensitive regex anchor করা থাকলেও দক্ষভাবে index ব্যবহার করতে পারে না। Fix: type আর length validate করো, special character escape করো, result সীমিত করো; index-backed prefix search চাইলে একটা normalised lowercase field-এর ওপর case-sensitive `^prefix` match করো — অথবা text index / Atlas Search ব্যবহার করো।
             4. **Sensitive data ফাঁস।** পুরো document return করলে `passwordHash`, reset token আর internal field বেরিয়ে যায়। Fix: sensitive path-এ `select: false` আর একটা `toJSON` transform (অথবা explicit response DTO)।
         """,
+        quick_en=r"""Login allows `$ne` operator injection with plain-text passwords, `create(req.body)` lets clients set `role`, raw regex input allows injection and ReDoS, and the profile leaks the password hash. Fix with string validation + bcrypt + `sanitizeFilter`, a field whitelist, escaped and length-limited search input, and `select: false`.""",
+        quick_bn=r"""Login-এ `$ne` দিয়ে operator injection সম্ভব আর password plain text-এ, `create(req.body)` দিয়ে client নিজেই `role` set করতে পারে, raw regex input-এ injection আর ReDoS হয়, আর profile response password hash ফাঁস করে। সমাধান: string validation + bcrypt + `sanitizeFilter`, field whitelist, escape করা ও length সীমিত search input, আর `select: false`।""",
         ex_en=r"""
+            - **`sanitizeFilter` also neutralises your own operators.** With it on, `{ nameLower: { $regex: "^abc" } }` becomes `{ nameLower: { $eq: { $regex: "^abc" } } }` and matches nothing. Wrap operators you add on purpose in `mongoose.trusted()`, as the fixed search does, or pass a `RegExp` object, which isn't a `$` key.
             - **`sanitizeFilter` is not a substitute for validation:** it protects filters, not updates, and it doesn't stop `$where`/`$function` code you build yourself. Validation at the edge remains the primary control.
             - **`strictQuery: false` (default since Mongoose 7)** means unknown filter keys pass through to MongoDB — another reason to validate the shape of any user-controlled filter (e.g. API "filter" query params).
             - **Express 5 helps a little:** its default `'simple'` query parser doesn't build nested objects from `?q[$ne]=x`, but JSON bodies can still contain objects.
@@ -501,6 +515,7 @@ Example: creating a user with an existing email returns `409 { "error": "email a
             - **Logging:** never log full request bodies on auth routes (passwords) and redact tokens.
         """,
         ex_bn=r"""
+            - **`sanitizeFilter` তোমার নিজের operator-ও নিষ্ক্রিয় করে দেয়।** এটা চালু থাকলে `{ nameLower: { $regex: "^abc" } }` হয়ে যায় `{ nameLower: { $eq: { $regex: "^abc" } } }`, যা কিছুই match করে না। ইচ্ছা করে যোগ করা operator `mongoose.trusted()`-এ মুড়ে দাও, যেমন fixed search-এ করা হয়েছে, অথবা একটা `RegExp` object দাও, কারণ সেটা `$` key না।
             - **`sanitizeFilter` validation-এর বিকল্প না:** এটা filter রক্ষা করে, update না, আর তুমি নিজে যে `$where`/`$function` code বানাও সেটাও আটকায় না। Edge-এ validation-ই মূল নিয়ন্ত্রণ।
             - **`strictQuery: false` (Mongoose 7 থেকে default)** মানে অজানা filter key MongoDB পর্যন্ত চলে যায় — user-controlled যেকোনো filter-এর (যেমন API-র "filter" query param) shape validate করার আরেকটা কারণ।
             - **Express 5 একটু সাহায্য করে:** এর default `'simple'` query parser `?q[$ne]=x` থেকে nested object বানায় না, কিন্তু JSON body-তে তবুও object থাকতে পারে।
@@ -552,6 +567,8 @@ Example: creating a user with an existing email returns `409 { "error": "email a
 
             **Pitfall:** hook `Model.collection.*`, native driver বা `bulkWrite` cover করে না; `$geoNear`/`$search` pipeline-এর প্রথম stage হতে হয়, তাই আগে `$match` বসালে এগুলো ভেঙে যায়; `populate()` referenced model-এ find middleware চালায়, তাই delete হওয়া reference `null` হয়ে যায়; TTL deletion পুরোপুরি Mongoose bypass করে (কোনো cascade বা hook নেই); প্রতিটি query-তে এখন একটা বাড়তি condition, তাই hot index এখনো মানানসই কি না দেখো (দরকার হলে compound index-এ `isDeleted` যোগ করো)।
         """,
+        quick_en=r"""Use a plugin: add `isDeleted`/`deletedAt`, add `{ isDeleted: false }` in `find*`, count, update and `aggregate` middleware, and purge with a TTL index on `deletedAt` after 30 days. Pitfalls: hooks skip the native driver and `bulkWrite`, `$geoNear`/`$search` must stay first, and unique fields need partial indexes.""",
+        quick_bn=r"""একটা plugin বানাও: `isDeleted`/`deletedAt` field যোগ করো, `find*`, count, update আর `aggregate` middleware-এ `{ isDeleted: false }` বসাও, আর 30 দিন পর মুছতে `deletedAt`-এ TTL index দাও। সাবধান: native driver আর `bulkWrite`-এ hook চলে না, `$geoNear`/`$search` প্রথম stage-এই থাকতে হবে, আর unique field-এ partial index লাগবে।""",
         ex_en=r"""
             - **Why a boolean plus a date?** Filtering on `isDeleted: false` is simple equality (index- and partial-index-friendly), while `deletedAt` drives the TTL purge. Backfill `isDeleted: false` before enabling the hook, or old documents (missing the field) vanish from queries.
             - **Escape hatch:** admins can query deleted items explicitly (`{ isDeleted: true }`) because the hook leaves filters that already mention `isDeleted` alone.
@@ -651,6 +668,8 @@ Example: creating a user with an existing email returns `409 { "error": "email a
             6. **নিরাপদ drop:** আগে index **hide** করো (`hidden: true` সহ `collMod`), কয়েক দিন latency দেখো, তারপর drop করো। Unhide সাথে সাথে হয়; rebuild হয় না।
             7. **Observability ও CI:** model-এর `'index'` error-এ alert দাও, drift ধরতে CI-তে staging-এর বিরুদ্ধে `diffIndexes()` compare করো, আর অব্যবহৃত index-এর জন্য `$indexStats` review করো।
         """,
+        quick_en=r"""The unique index failed to build because duplicate phones already existed (reported only as an `'index'` event), and Mongoose before 9.10.4 rebuilds unchanged indexes at each start on MongoDB 9.0. Upgrade, set `autoIndex: false`, and build indexes in one reviewed migration per deploy after removing duplicates.""",
+        quick_bn=r"""আগে থেকেই duplicate phone থাকায় unique index build fail করেছে (শুধু একটা `'index'` event হিসেবে জানানো হয়েছে), আর MongoDB 9.0-তে 9.10.4-এর আগের Mongoose প্রতিবার start-এ অপরিবর্তিত index আবার build করে। Upgrade করো, `autoIndex: false` দাও, আর duplicate সরিয়ে প্রতি deploy-এ একবার review করা migration দিয়ে index বানাও।""",
         ex_en=r"""
             - **`createIndexes()` vs `syncIndexes()`:** `createIndexes()` only builds what's missing; `syncIndexes()` also **drops** indexes that aren't in the schema — including ones a DBA added by hand for a hot query. Dropping should always be a reviewed, deliberate step.
             - **Why not per pod?** Index management is a cluster-level operation; doing it from every replica of the app multiplies load, creates races and hides failures in individual pod logs.

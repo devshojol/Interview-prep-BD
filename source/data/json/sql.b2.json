@@ -48,6 +48,10 @@
   "related": [
    "sql-017"
   ],
+  "quickAnswer": {
+   "en": "`DELETE` removes rows one by one, can use `WHERE`, and fires row-level triggers; `TRUNCATE` empties the whole table at once without scanning rows; `DROP TABLE` removes the table itself, with its data, indexes and constraints.",
+   "bn": "`DELETE` row ধরে ধরে মোছে, `WHERE` নিতে পারে আর row-level trigger চালায়; `TRUNCATE` row scan না করে পুরো table একবারে খালি করে; `DROP TABLE` table-টাই মুছে দেয়, তার data, index আর constraint-সহ।"
+  },
   "options": [
    {
     "en": "`TRUNCATE` removes the rows and the table definition, while `DROP` removes only the rows.",
@@ -127,6 +131,10 @@
   "related": [
    "sql-029"
   ],
+  "quickAnswer": {
+   "en": "Put the debit, the credit and the transfer record in one transaction. If the server crashes before `COMMIT`, recovery treats it as aborted, so account A keeps its money; once `COMMIT` returns, the change survives a crash. That is atomicity and durability, with consistency and isolation around it.",
+   "bn": "Debit, credit আর transfer record একটাই transaction-এ রাখো। `COMMIT`-এর আগে server crash করলে recovery সেটাকে aborted ধরে, তাই account A-র টাকা থেকে যায়; আর `COMMIT` return করার পরে change crash-এও টিকে থাকে। এটাই atomicity আর durability, সাথে consistency আর isolation।"
+  },
   "commonMistakes": {
    "en": "Saying \"Consistency\" means replicas are in sync (that's the CAP-theorem meaning, not ACID), or running the two `UPDATE`s as separate autocommitted statements.",
    "bn": "\"Consistency\" মানে replica-গুলো sync-এ আছে বলা (ওটা CAP theorem-এর অর্থ, ACID-এর নয়), অথবা দুটো `UPDATE` আলাদা autocommit statement হিসেবে চালানো।"
@@ -187,6 +195,10 @@
    "sql-007",
    "sql-032"
   ],
+  "quickAnswer": {
+   "en": "2NF. The key is `(order_id, product_id)`, and `product_name` depends on only part of it (`product_id`), which is a partial dependency. Move `product_name` into a `products` table.",
+   "bn": "2NF। Key হলো `(order_id, product_id)`, আর `product_name` তার শুধু একটা অংশের (`product_id`) ওপর নির্ভর করে, এটাই partial dependency। `product_name`-কে একটা `products` table-এ সরিয়ে নাও।"
+  },
   "code": {
    "language": "sql",
    "source": "CREATE TABLE order_items (\n  order_id     INT,\n  product_id   INT,\n  quantity     INT,\n  unit_price   NUMERIC(10,2),   -- price charged in this order\n  product_name VARCHAR(100),\n  PRIMARY KEY (order_id, product_id)\n);"
@@ -275,6 +287,10 @@
    "sql-013",
    "sql-025"
   ],
+  "quickAnswer": {
+   "en": "Use `DENSE_RANK() OVER (ORDER BY salary DESC)` in a CTE and filter `= 2`, which returns everyone at the second salary level. `ROW_NUMBER()` and `LIMIT 1 OFFSET 1` break with ties, and `RANK()` leaves a gap after ties.",
+   "bn": "একটা CTE-তে `DENSE_RANK() OVER (ORDER BY salary DESC)` হিসাব করে `= 2` দিয়ে filter করো, তাহলে দ্বিতীয় salary level-এর সবাই আসবে। Tie থাকলে `ROW_NUMBER()` আর `LIMIT 1 OFFSET 1` ভুল করে, আর `RANK()` tie-এর পরে একটা নম্বর বাদ দেয়।"
+  },
   "commonMistakes": {
    "en": "Using `ORDER BY salary DESC LIMIT 1 OFFSET 1` (fails with ties), or using `RANK()` and getting an empty result.",
    "bn": "`ORDER BY salary DESC LIMIT 1 OFFSET 1` ব্যবহার করা (tie থাকলে ভুল হয়), অথবা `RANK()` ব্যবহার করে খালি ফলাফল পাওয়া।"
@@ -370,6 +386,10 @@
    "sql-012",
    "sql-014"
   ],
+  "quickAnswer": {
+   "en": "Number rows with `ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, name)` in a subquery or CTE, then keep `rn <= 2` in the outer query. The name breaks ties, and the filter sits outside because window functions run after `WHERE`.",
+   "bn": "Subquery বা CTE-তে `ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, name)` দিয়ে নম্বর দাও, তারপর outer query-তে `rn <= 2` রাখো। Tie ভাঙে name দিয়ে, আর filter বাইরে রাখতে হয় কারণ window function `WHERE`-এর পরে চলে।"
+  },
   "commonMistakes": {
    "en": "Writing `WHERE ROW_NUMBER() OVER (...) <= 2` directly (not allowed), forgetting `PARTITION BY` (gives the top 2 overall), or omitting a tie-breaker.",
    "bn": "সরাসরি `WHERE ROW_NUMBER() OVER (...) <= 2` লেখা (অনুমোদিত নয়), `PARTITION BY` ভুলে যাওয়া (তখন পুরো company-র শীর্ষ ২ আসে), অথবা tie-breaker না দেওয়া।"
@@ -457,6 +477,10 @@
    "sql-025",
    "sql-024"
   ],
+  "quickAnswer": {
+   "en": "Use `SUM(amount) OVER (PARTITION BY region ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`. Unlike `GROUP BY`, a window function keeps every row and adds the cumulative sum, restarting for each region.",
+   "bn": "`SUM(amount) OVER (PARTITION BY region ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` ব্যবহার করো। `GROUP BY`-এর মতো নয়, window function প্রতিটা row রেখে cumulative যোগফল যোগ করে, আর প্রতিটা region-এর জন্য আবার শুরু করে।"
+  },
   "commonMistakes": {
    "en": "Using `GROUP BY` (which collapses rows) for a running total, or forgetting `PARTITION BY` so the total runs across all regions.",
    "bn": "Running total-এর জন্য `GROUP BY` ব্যবহার করা (যা row-গুলো এক করে ফেলে), অথবা `PARTITION BY` ভুলে যাওয়া যাতে সব region মিলিয়ে total চলতে থাকে।"
@@ -530,6 +554,10 @@
    "sql-016",
    "sql-013"
   ],
+  "quickAnswer": {
+   "en": "Use a correlated subquery: `WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept = e.dept)`, evaluated per outer row. `>` is strict, so someone earning exactly the average is excluded; `AVG(...) OVER (PARTITION BY dept)` is the window alternative.",
+   "bn": "Correlated subquery ব্যবহার করো: `WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept = e.dept)`, যেটা outer query-র প্রতিটা row-এর জন্য হিসাব হয়। `>` strict, তাই ঠিক average-এর সমান বেতনের কেউ বাদ যায়; window বিকল্প হলো `AVG(...) OVER (PARTITION BY dept)`।"
+  },
   "commonMistakes": {
    "en": "Comparing against the overall average (non-correlated), or trying `WHERE salary > AVG(salary)` directly (aggregates aren't allowed in `WHERE`).",
    "bn": "পুরো company-র গড়ের সাথে তুলনা করা (non-correlated), অথবা সরাসরি `WHERE salary > AVG(salary)` লেখার চেষ্টা করা (`WHERE`-এ aggregate অনুমোদিত নয়)।"
@@ -614,6 +642,10 @@
    "sql-006",
    "sql-015"
   ],
+  "quickAnswer": {
+   "en": "Use `NOT EXISTS` (or `LEFT JOIN ... IS NULL`), which returns Karim and Sumi. `NOT IN` returns nothing because the guest order's NULL makes `id <> NULL` UNKNOWN, so the whole condition is never TRUE.",
+   "bn": "`NOT EXISTS` (বা `LEFT JOIN ... IS NULL`) ব্যবহার করো, তাতে Karim আর Sumi আসে। `NOT IN` কিছুই দেয় না, কারণ guest order-এর NULL-এর জন্য `id <> NULL` UNKNOWN হয়, ফলে পুরো condition কখনো TRUE হয় না।"
+  },
   "commonMistakes": {
    "en": "Using `NOT IN` against a nullable column, or checking a nullable right-table column for `IS NULL` in the LEFT JOIN version.",
    "bn": "Nullable column-এর বিরুদ্ধে `NOT IN` ব্যবহার করা, অথবা LEFT JOIN version-এ ডান table-এর nullable column-এ `IS NULL` check করা।"

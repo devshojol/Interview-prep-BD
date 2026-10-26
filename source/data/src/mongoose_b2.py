@@ -42,6 +42,8 @@ QUESTIONS = [
 
             Referenced user delete হয়ে গেলে populated field `null` হয়ে যায়, তাই code-এ সেটা handle করতে হয়।
         """,
+        quick_en=r"""Store the author's ID with `type: Schema.Types.ObjectId, ref: "User"`. `populate("author")` is not a database join: Mongoose runs one more query (`User.find({ _id: { $in: ids } })`) and swaps the IDs for documents; limit fields with `.populate("author", "name avatarUrl")` and handle `null` for deleted users.""",
+        quick_bn=r"""Post-এ author-এর ID রাখো `type: Schema.Types.ObjectId, ref: "User"` দিয়ে। `populate("author")` database join না: Mongoose আরেকটা query চালায় (`User.find({ _id: { $in: ids } })`) আর ID-র জায়গায় document বসিয়ে দেয়; `.populate("author", "name avatarUrl")` দিয়ে field সীমিত করো, আর user delete হয়ে গেলে `null` handle করো।""",
         ex_en=r"""
             - **Reference vs embed:** reference when the related data is shared, large or updated independently (a user's profile is used across posts, comments, orders). Embed subdocuments when the data belongs only to the parent and stays bounded (an order's items).
             - **Cost:** each populated path is an extra round trip. Populating inside a loop (one post at a time) recreates the N+1 problem — populate the whole result set at once.
@@ -115,6 +117,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""`res.json()` calls `JSON.stringify`, which calls the document's `toJSON()`. Mongoose does **not** include virtuals in `toJSON()`/`toObject()` unless you set `{ toJSON: { virtuals: true } }` (and `toObject` if needed) in the schema options.""",
         a_bn=r"""`res.json()` `JSON.stringify` call করে, যেটা document-এর `toJSON()` call করে। Schema option-এ `{ toJSON: { virtuals: true } }` (দরকার হলে `toObject`-ও) না দিলে Mongoose `toJSON()`/`toObject()`-এ virtual **রাখে না**।""",
+        quick_en=r"""Virtuals are not included in `toJSON()`/`toObject()` output by default, and `res.json()` serialises the document through `toJSON()`. Set `toJSON: { virtuals: true }` in the schema options so `fullName` appears.""",
+        quick_bn=r"""Default-ভাবে virtual `toJSON()`/`toObject()`-এর output-এ থাকে না, আর `res.json()` document-কে `toJSON()` দিয়েই serialise করে। `fullName` দেখাতে schema option-এ `toJSON: { virtuals: true }` দাও।""",
         ex_en=r"""
             Virtuals are computed properties — they're **never stored in MongoDB** (so D is wrong) and you can't query by them. Option C is backwards: arrow functions don't get their own `this`, so a getter written as an arrow function can't see the document at all.
 
@@ -184,6 +188,8 @@ QUESTIONS = [
             3. **প্রতিবার save-এ আবার hash:** `if (!this.isModified("password")) return;` না থাকলে user-এর নাম edit করলেও *আগে থেকে hash করা* password আবার hash হয়, ফলে আসল password আর মেলে না — এটাই "profile edit করার পর login করা যায় না" bug।
             4. **`hashSync` event loop block করে:** bcrypt ইচ্ছাকৃতভাবে ধীর (প্রতিটি hash-এ কয়েক দশ millisecond বা তার বেশি); synchronously করলে বাকি সব request আটকে যায়। Async `bcrypt.hash` ব্যবহার করো।
         """,
+        quick_en=r"""Three bugs: the arrow function has no document `this`, Mongoose 9 pre hooks no longer receive `next`, and with no `isModified("password")` check every save re-hashes the hash. Use an `async function` that returns early if the password is unchanged and awaits `bcrypt.hash` instead of the blocking `hashSync`.""",
+        quick_bn=r"""তিনটা bug: arrow function-এ `this` document না, Mongoose 9-এর pre hook আর `next` পায় না, আর `isModified("password")` check না থাকায় প্রতিটি save-এ আগের hash-কেই আবার hash করা হয়। একটা `async function` লেখো, password না বদলালে আগেই return করো, আর blocking `hashSync`-এর বদলে `await bcrypt.hash` ব্যবহার করো।""",
         ex_en=r"""
             - **This hook only covers `save()`** (and `create()`, which calls `save()`). A password reset done with `findOneAndUpdate`/`updateOne` bypasses it and stores plain text — route password changes through `save()`, or hash in the service layer.
             - **Error handling:** in an async pre hook, a thrown error or rejected promise aborts the save and rejects `doc.save()` — no `next(err)` needed.
@@ -223,6 +229,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`findByIdAndUpdate()` sends an update command directly to MongoDB. It triggers **query middleware** (`findOneAndUpdate`), not document `save` middleware, so the hash hook never runs. `create()` calls `save()` internally, and the other two options call `save()` explicitly.""",
         a_bn=r"""`findByIdAndUpdate()` সরাসরি MongoDB-তে একটা update command পাঠায়। এটা **query middleware** (`findOneAndUpdate`) চালায়, document-এর `save` middleware না — তাই hash hook কখনো চলে না। `create()` ভেতরে `save()` call করে, আর বাকি দুইটা option explicitly `save()` call করে।""",
+        quick_en=r"""`User.findByIdAndUpdate(id, { password })` doesn't run the hook: it sends an update straight to MongoDB and triggers query middleware (`findOneAndUpdate`), not `save` middleware. `create()` and the other two options all call `save()`.""",
+        quick_bn=r"""`User.findByIdAndUpdate(id, { password })` hook চালায় না: এটা সরাসরি MongoDB-তে update পাঠায় আর query middleware (`findOneAndUpdate`) trigger করে, `save` middleware না। `create()` আর বাকি দুইটা option সবাই `save()` call করে।""",
         ex_en=r"""
             The tempting wrong answer is A — many developers don't realise `create()` is just a convenience wrapper around `new Model(doc).save()`, so it *does* run save hooks.
 
@@ -275,6 +283,8 @@ QUESTIONS = [
 
             **আমার নিয়ম:** সাধারণ CRUD page-এ ("author সহ post") populate; report আর related data দিয়ে filter বা sort করতে ("verified author-দের post, নতুনগুলো আগে") `$lookup`; আর কোনো field প্রতিটি read-এ লাগলে ছোট একটা snapshot denormalise করা।
         """,
+        quick_en=r"""N+1 is one query for the list plus one per item; `populate()` batches it into one extra `$in` query per path, but can't filter or sort parents by populated fields. `$lookup` joins on the server and can `$match`/`$sort` on joined data: populate for CRUD pages, `$lookup` for reports.""",
+        quick_bn=r"""N+1 মানে list-এর জন্য একটা query আর প্রতিটি item-এর জন্য আরেকটা; `populate()` প্রতি path-এ একটা অতিরিক্ত `$in` query দিয়ে এটা ঠিক করে, কিন্তু populated field দিয়ে parent filter বা sort করতে পারে না। `$lookup` server-এ join করে আর joined data-তে `$match`/`$sort` করা যায়: CRUD page-এ populate, report-এ `$lookup`।""",
         ex_en=r"""
             - **Aggregation casting gotcha:** `Post.aggregate([{ $match: { author: req.params.id } }])` matches nothing, because the string isn't cast to `ObjectId` in pipelines. Use `new mongoose.Types.ObjectId(id)`.
             - **Order of stages matters:** in the `$lookup` example, filtering on `author.verified` after the join means joining every post first. On a big collection, denormalise `authorVerified` onto posts or `$match` on post fields before the join.
@@ -420,6 +430,8 @@ QUESTIONS = [
 
             **Security-র সমস্যা:** `req.query.category` validation ছাড়াই ব্যবহার হচ্ছে — nested query parser চালু থাকলে এটা object হতে পারে (`category[$ne]=x` → operator injection), আর `page`/`limit`-এর কোনো সীমা নেই, তাই client বিশাল page চাইতে পারে। Schema দিয়ে validate করো (enum category, সীমিত limit)।
         """,
+        quick_en=r"""Add a `{ category: 1, createdAt: -1, _id: -1 }` index, replace deep `skip()` with keyset pagination, use `.lean()` with projections, populate only a few seller fields instead of all reviews, and cache or drop the exact count. Also validate `category` and bound `page`/`limit` to block operator injection and huge pages.""",
+        quick_bn=r"""`{ category: 1, createdAt: -1, _id: -1 }` index দাও, গভীর `skip()`-এর বদলে keyset pagination করো, projection সহ `.lean()` ব্যবহার করো, সব review না এনে seller-এর অল্প কয়েকটা field populate করো, আর exact count cache করো বা বাদ দাও। সাথে `category` validate করো আর `page`/`limit` সীমিত রাখো, যাতে operator injection আর বিশাল page আটকানো যায়।""",
         ex_en=r"""
             - **Why keyset works:** with the index, MongoDB seeks directly to the cursor position and reads exactly `limit + 1` keys, so page 500 costs the same as page 1. The trade-off: no "jump to page 37" — fine for feeds and infinite scroll, while admin tables with page numbers can keep `skip` for shallow pages.
             - **Mongoose casting:** the `_id: { $lt: id }` string is cast to `ObjectId` by Mongoose because `_id` is in the schema — this does *not* happen inside `aggregate()`.
@@ -466,6 +478,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""By default Mongoose's `__v` versioning only protects **array** operations that could shift element positions. A plain field change is saved as `$set: { price }` filtered by `_id` only, so the last `save()` wins and A's update is lost without any error.""",
         a_bn=r"""Default-ভাবে Mongoose-এর `__v` versioning শুধু সেই **array** operation রক্ষা করে, যেগুলো element-এর অবস্থান সরিয়ে দিতে পারে। সাধারণ field-এর পরিবর্তন শুধু `_id` filter দিয়ে `$set: { price }` হিসেবে save হয়, তাই শেষ `save()`-টাই জেতে আর কোনো error ছাড়াই A-এর update হারিয়ে যায়।""",
+        quick_en=r"""Both saves succeed and the final price is 1,250, so A's change is silently lost. Default `__v` versioning only guards certain array changes; a plain field update is sent as `$set` filtered by `_id` only, so the last save wins.""",
+        quick_bn=r"""দুইটা save-ই সফল হয় আর শেষ price হয় 1,250, তাই A-র পরিবর্তন চুপচাপ হারিয়ে যায়। Default `__v` versioning শুধু কিছু array পরিবর্তন রক্ষা করে; সাধারণ field update শুধু `_id` filter দিয়ে `$set` হিসেবে যায়, তাই শেষ save-ই জেতে।""",
         ex_en=r"""
             Option B is what many people assume because they see `__v` on every document. It becomes true only if you enable **`optimisticConcurrency: true`** on the schema: then every `save()` includes the current `__v` in its filter and increments it, so B's stale save matches nothing and throws a `VersionError` — your API can return 409 and ask B to reload.
 
@@ -528,6 +542,8 @@ QUESTIONS = [
 
             **পর্যবেক্ষণ:** sale চলাকালীন write-conflict সংখ্যা, p99 latency আর connection-pool saturation দেখো, আর campaign-এর আগে checkout load-test করো।
         """,
+        quick_en=r"""It's a read-modify-write race: hundreds of requests read `stock: 100`, all pass the check, and each `save()` overwrites the others. Let the database decide with an atomic `updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })`, add idempotency keys, and queue or throttle requests for the hot document.""",
+        quick_bn=r"""এটা read-modify-write race: শত শত request একসাথে `stock: 100` পড়ে, সবাই check পার হয়, আর প্রতিটি `save()` অন্যদের লেখা overwrite করে। সিদ্ধান্ত database-কে নিতে দাও atomic `updateOne({ _id, stock: { $gte: qty } }, { $inc: { stock: -qty } })` দিয়ে, idempotency key যোগ করো, আর hot document-এর জন্য request queue বা throttle করো।""",
         ex_en=r"""
             - **Why not `optimisticConcurrency` here?** It would turn lost updates into `VersionError`s, but under 5,000 concurrent buyers almost every save fails and retries — a retry storm. Version checks suit low-contention edit forms; hot counters need atomic operators.
             - **Transaction or compensation?** Transactions give clean atomicity and are fine at normal traffic. At flash-sale contention, a single-document conditional `$inc` plus compensation is cheaper; the price is a reconciliation job to repair rare crashes between the two steps.

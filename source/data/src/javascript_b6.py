@@ -74,12 +74,14 @@ QUESTIONS = [
             - `getOrInsert(key, defaultValue)` key থাকলে **আগের** value return করে; না থাকলে `defaultValue` insert করে সেটা return করে। তাই counter-টা `(map.get(k) ?? 0) + 1`-এর মতো কাজ করে, আর `'home'` পৌঁছায় `3`-এ।
             - `getOrInsertComputed(key, callback)` হলো **lazy** version: key না থাকলেই কেবল callback চলে, key-টা argument হিসেবে পায়, আর তার result insert হয়। `'r'` আর `'s'` নতুন key → ২ বার factory call; `'rafi'` আগের `'r'` array-টাই ব্যবহার করে → তাতে থাকে `['rina', 'rafi']`।
         """,
+        quick_en=r"""`3 2 2`. `getOrInsert` returns the existing value or inserts the default, so `'home'` counts up to `3`; `getOrInsertComputed` runs its callback only for missing keys (`'r'` and `'s'`, so 2 calls), and `'rafi'` reuses the `'r'` array, which ends up with 2 names.""",
+        quick_bn=r"""`3 2 2`। `getOrInsert` key থাকলে পুরনো value দেয়, না থাকলে default insert করে, তাই `'home'` গুনে `3` হয়; `getOrInsertComputed` callback চালায় শুধু key না থাকলে (`'r'` আর `'s'`, তাই 2 বার), আর `'rafi'` আগের `'r'` array-ই ব্যবহার করে, যেখানে শেষে 2টা নাম থাকে।""",
         ex_en=r"""
             - **Option B** assumes `getOrInsert` always returns the default (so `home` stays at 1) and that the factory runs every time.
             - **Option C** treats `getOrInsertComputed` like `getOrInsert(key, factory())`, where the argument is evaluated eagerly on every call. Avoiding that wasted work is exactly why the computed variant exists.
             - **Option D** assumes the existing array is replaced.
 
-            Support: Map/WeakMap upsert is ES2026 and Baseline newly available since February 2026 (Chrome 145, Firefox 144, Safari 26.2). It's in Node.js 26 but **not** Node.js 24 LTS — polyfill (core-js) or fall back to `has`/`get`/`set` there.
+            Support: Map/WeakMap upsert is ES2026 and Baseline newly available since February 2026 (Chrome 145, Firefox 144, Safari 26.2). It's in Node.js 26 but **not** Node.js 24 — polyfill (core-js) or fall back to `has`/`get`/`set` there.
 
             Other ES2026 additions worth knowing, with status:
             - `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (exact sum, rounded once), while `0.1 + 0.2 + 0.3` → `0.6000000000000001`. Baseline since April 2026; not yet in Node.js 26.
@@ -93,7 +95,7 @@ QUESTIONS = [
             - **Option C** `getOrInsertComputed`-কে `getOrInsert(key, factory())`-এর মতো ভাবে, যেখানে argument প্রতিটি call-এ আগেভাগে evaluate হয়। এই অপচয় এড়ানোর জন্যই computed version-টা আছে।
             - **Option D** ধরে নেয় আগের array replace হয়ে যায়।
 
-            Support: Map/WeakMap upsert ES2026-এর অংশ এবং February 2026 থেকে Baseline newly available (Chrome 145, Firefox 144, Safari 26.2)। Node.js 26-এ আছে, কিন্তু Node.js 24 LTS-এ **নেই** — সেখানে polyfill (core-js) বা `has`/`get`/`set` fallback ব্যবহার করো।
+            Support: Map/WeakMap upsert ES2026-এর অংশ এবং February 2026 থেকে Baseline newly available (Chrome 145, Firefox 144, Safari 26.2)। Node.js 26-এ আছে, কিন্তু Node.js 24-এ **নেই** — সেখানে polyfill (core-js) বা `has`/`get`/`set` fallback ব্যবহার করো।
 
             ES2026-এর আরও কিছু সংযোজন, অবস্থা সহ:
             - `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (নিখুঁত যোগফল, একবারই round হয়), যেখানে `0.1 + 0.2 + 0.3` → `0.6000000000000001`। April 2026 থেকে Baseline; Node.js 26-এ এখনো নেই।
@@ -160,6 +162,8 @@ QUESTIONS = [
 
             বাস্তবে আমি প্রথমে **`structuredClone`** ব্যবহার করি: এটা built-in (Baseline widely available, Node 17+), cycle, `Date`, `RegExp`, `Map`, `Set`, typed array সহ আরও অনেক কিছু handle করে। Custom clone লিখি কেবল তখনই, যখন এমন কিছু দরকার যা এটা করে না: class prototype রাখা, symbol key, বা function share করা।
         """,
+        quick_en=r"""Recurse with a `WeakMap` from original to copy, which handles cycles and shared references; special-case `Date`, `RegExp`, `Map` and `Set`, and keep prototypes and symbol keys with `Object.create` and `Reflect.ownKeys`. It's O(n); in practice I use `structuredClone` unless I need those extras.""",
+        quick_bn=r"""একটা `WeakMap`-এ original থেকে copy-র map রেখে recursion করি, এতে cycle আর shared reference দুটোই সামলানো যায়; `Date`, `RegExp`, `Map` আর `Set` আলাদাভাবে handle করি, আর `Object.create` ও `Reflect.ownKeys` দিয়ে prototype আর symbol key রেখে দিই। এটা O(n); বাস্তবে এগুলো না লাগলে আমি `structuredClone`-ই ব্যবহার করি।""",
         ex_en=r"""
             What each approach loses:
 
@@ -299,6 +303,8 @@ QUESTIONS = [
 
             **৫টা করে batch-এর সাথে পার্থক্য** (chunk-এ `Promise.all`): প্রতিটি batch তার সবচেয়ে ধীর request-এর জন্য অপেক্ষা করে, ফলে slot খালি পড়ে থাকে (head-of-line blocking)। Pool যেকোনো task শেষ হওয়ার সাথে সাথে slot ভরে ফেলে, ঠিক `limit`-সংখ্যক request সবসময় ব্যস্ত রাখে — সাধারণত মোট সময় অনেক কম লাগে।
         """,
+        quick_en=r"""Use a worker pool: start `min(limit, tasks.length)` async workers that pull from a shared `nextIndex`, store each result at its index, and stop taking work after a failure or abort. Unlike batches of 5, a slot refills as soon as any task finishes; tasks are functions so they don't start early.""",
+        quick_bn=r"""Worker pool ব্যবহার করি: `min(limit, tasks.length)`টা async worker চালাই, যারা একটা shared `nextIndex` থেকে কাজ নেয়, result রাখে নিজের index-এ, আর failure বা abort হলে নতুন কাজ নেয় না। ৫টার batch-এর মতো নয়, এখানে কোনো task শেষ হলেই slot আবার ভরে যায়; আর task-গুলো function বলে আগেভাগে শুরু হয়ে যায় না।""",
         ex_en=r"""
             Design variations an interviewer may push on:
 
@@ -417,6 +423,8 @@ QUESTIONS = [
 
             **React-এ যুক্ত করা:** `useSyncExternalStore(store.subscribe, () => selector(store.getState()))` concurrent rendering-এর সাথে নিরাপদে subscribe করে আর tearing এড়ায়। Zustand আর Redux Toolkit এই model-এরই production version; signals (Preact, Solid, Angular, Vue ref) হলো fine-grained বিকল্প।
         """,
+        quick_en=r"""Keep immutable state in a closure with `getState`, `setState` (skipped when `Object.is` sees no change) and `subscribe` returning an unsubscribe. Batch notifications with `queueMicrotask`, isolate listener errors, fire selector subscriptions only when their slice changes, and use `useSyncExternalStore` in React.""",
+        quick_bn=r"""Immutable state একটা closure-এ রাখি, সাথে `getState`, `setState` (`Object.is` অনুযায়ী কিছু না বদলালে কিছুই করে না) আর `subscribe`, যেটা unsubscribe function return করে। `queueMicrotask` দিয়ে notification batch করি, listener-এর error আলাদা করে রাখি, selector subscription শুধু নিজের slice বদলালে চলে, আর React-এর সাথে যুক্ত করি `useSyncExternalStore` দিয়ে।""",
         ex_en=r"""
             Trade-offs and failure scenarios to discuss:
 
@@ -547,6 +555,8 @@ QUESTIONS = [
 
             **6. System রক্ষা করো।** History array-র সীমা দাও (ring buffer), hidden tab handle করো (rAF থেমে যায়, তাই coalescing buffer ছোট রাখে), backoff সহ reconnect করো আর sequence number দিয়ে snapshot থেকে resync করো। Backend-কে বলো শুধু subscribed/দৃশ্যমান symbol পাঠাতে বা আগে থেকে aggregate করতে।
         """,
+        quick_en=r"""Profile first, then decouple the message rate from the render rate: coalesce ticks in a `Map` by symbol and flush once per `requestAnimationFrame`. Then parse in a Web Worker, virtualise the table to the visible rows, update only changed cells, and do all layout reads before writes.""",
+        quick_bn=r"""আগে profile করি, তারপর message rate আর render rate আলাদা করি: tick-গুলো symbol অনুযায়ী একটা `Map`-এ জমিয়ে প্রতি `requestAnimationFrame`-এ একবার flush করি। এরপর parsing Web Worker-এ পাঠাই, table virtualise করে শুধু দেখা যাওয়া row render করি, শুধু বদলানো cell update করি, আর সব layout read আগে করে তারপর write করি।""",
         ex_en=r"""
             - **Why rAF and not a timer?** `requestAnimationFrame` runs right before the browser paints, so all DOM writes for a frame land together. A `setInterval(16)` drifts relative to the display and can update twice in one frame or miss frames.
             - **Layout thrashing explained:** writing a style then reading a layout property forces the browser to recalculate layout synchronously. In a loop over 5,000 rows that's 5,000 forced layouts per frame.
@@ -652,6 +662,8 @@ QUESTIONS = [
             - Array dense আর একই ধরনের রাখো (hole নয়; integer, double আর object মেশানো নয়)।
             - সত্যিকারের dynamic key-এর জন্য `Map` ব্যবহার করো — এটা সেজন্যই।
         """,
+        quick_en=r"""Conditional fields, changing property order and `delete` create many hidden classes (shapes), so hot accesses go polymorphic or megamorphic, `delete` forces slow dictionary mode, and V8 deoptimises. Confirm with a CPU profile and `--trace-deopt`, then build every object in one factory with the same fields in the same order.""",
+        quick_bn=r"""Conditional field, বদলে যাওয়া property order আর `delete`-এর কারণে object-গুলোর অনেক hidden class (shape) তৈরি হয়, তাই hot property access polymorphic বা megamorphic হয়ে যায়, `delete` object-কে ধীর dictionary mode-এ পাঠায়, আর V8 deoptimise করে। CPU profile আর `--trace-deopt` দিয়ে নিশ্চিত হও, তারপর প্রতিটা object একটা factory-তে একই order-এ সব field দিয়ে তৈরি করো।""",
         ex_en=r"""
             - **Elements kinds:** V8 also tracks array element types (small integers → doubles → generic objects, packed vs holey). Transitions only go towards the more general kind — one `arr.push(1.5)` or a hole can permanently slow down a hot array.
             - **Type stability:** changing a field's type (number ↔ string) also creates new shapes/representations; keep fields monomorphic in type, not just in presence.

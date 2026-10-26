@@ -33,6 +33,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`FROM` (including joins) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` (then `LIMIT`/`FETCH`). We *write* `SELECT` first, but it's evaluated after the rows are filtered and grouped.""",
         a_bn=r"""`FROM` (join-সহ) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` (তারপর `LIMIT`/`FETCH`)। আমরা `SELECT` আগে *লিখি*, কিন্তু row filter আর group হওয়ার পরে এটা evaluate হয়।""",
+        quick_en=r"""`FROM` (with joins) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`, then `LIMIT`. We write `SELECT` first, but it is evaluated after rows are filtered and grouped, which is why a `SELECT` alias can't be used in `WHERE`.""",
+        quick_bn=r"""`FROM` (join-সহ) → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY`, তারপর `LIMIT`। আমরা `SELECT` আগে লিখি, কিন্তু row filter আর group হওয়ার পরে এটা evaluate হয়; এজন্যই `SELECT`-এর alias `WHERE`-এ ব্যবহার করা যায় না।""",
         ex_en=r"""
             This order explains several everyday errors:
             - `SELECT salary * 12 AS annual FROM employees WHERE annual > 600000;` fails — the alias `annual` doesn't exist yet when `WHERE` runs. Repeat the expression or use a subquery/CTE.
@@ -80,6 +82,8 @@ QUESTIONS = [
             - **CROSS JOIN:** সব combination (Cartesian product) — যেমন একটা grid বানাতে প্রতিটা product × প্রতিটা size।
             - **SELF JOIN:** alias দিয়ে একটা table-কে নিজের সাথেই join করা — যেমন একই table-এ employee আর তার manager।
         """,
+        quick_en=r"""INNER JOIN returns only matching rows; LEFT JOIN keeps every left row with NULLs where nothing matches (RIGHT is the mirror). FULL OUTER keeps unmatched rows from both sides, CROSS JOIN makes every combination, and a SELF JOIN joins a table to itself, like employees to their managers.""",
+        quick_bn=r"""INNER JOIN শুধু দুই দিকে মেলে এমন row দেয়; LEFT JOIN বাঁ দিকের সব row রাখে, না মিললে NULL বসায় (RIGHT এর উল্টো)। FULL OUTER দুই দিকের না-মেলা row-ও রাখে, CROSS JOIN সব combination বানায়, আর SELF JOIN একটা table-কে নিজের সাথেই join করে, যেমন employee আর তার manager।""",
         ex_en=r"""
             - **Row counts multiply:** a join returns one row per matching *pair*. A customer with 3 orders appears 3 times; with a LEFT JOIN, a customer with no orders still appears once (with NULLs). Aggregating after a join that fans out can double-count.
             - **Classic trap — `WHERE` on the right table after a LEFT JOIN:** `LEFT JOIN orders o ... WHERE o.status = 'paid'` removes the NULL rows and silently turns it into an inner join. Put that condition in the `ON` clause instead if you want to keep unmatched customers.
@@ -191,6 +195,8 @@ QUESTIONS = [
             - `GROUP BY c.id, c.name` প্রতিটা customer-এর জন্য একটা group বানায়; `COUNT(*)` আর `SUM(o.amount)` প্রতিটা group-এর জন্য হিসাব হয়। `id` দিয়েও group করায় একই নামের দুজন customer আলাদা থাকে।
             - `ORDER BY total_spent DESC`-এ alias ব্যবহার করা যায়, কারণ `ORDER BY` `SELECT`-এর পরে চলে।
         """,
+        quick_en=r"""Join `customers` to `orders`, filter `WHERE status = 'delivered'` before grouping, `GROUP BY c.id, c.name` with `COUNT(*)` and `SUM(amount)`, then `ORDER BY total_spent DESC`. The inner join and the `WHERE` filter already drop customers with no delivered orders.""",
+        quick_bn=r"""`customers`-কে `orders`-এর সাথে join করো, group করার আগে `WHERE status = 'delivered'` দিয়ে filter করো, `COUNT(*)` আর `SUM(amount)`-সহ `GROUP BY c.id, c.name`, তারপর `ORDER BY total_spent DESC`। Inner join আর `WHERE` filter মিলেই delivered order ছাড়া customer-দের বাদ দিয়ে দেয়।""",
         ex_en=r"""
             - Every non-aggregated column in `SELECT` must be in `GROUP BY` (or functionally dependent on it — PostgreSQL accepts `GROUP BY c.id` alone because `id` is the primary key). Older MySQL modes allowed ungrouped columns and returned arbitrary values — don't rely on that.
             - To include customers with zero delivered orders, switch to `LEFT JOIN` and move the status filter into the `ON` clause, then use `COUNT(o.id)` and `COALESCE(SUM(o.amount), 0)`.
@@ -273,6 +279,8 @@ QUESTIONS = [
 
             সহজ নিয়ম: আলাদা row-এর condition যায় `WHERE`-এ; aggregate-এর (`COUNT`, `SUM`, `AVG`...) condition যায় `HAVING`-এ।
         """,
+        quick_en=r"""`WHERE salary > 50000` filters individual rows first, `GROUP BY dept` groups them, and `HAVING COUNT(*) >= 2` filters the groups. Rule: row conditions go in `WHERE`, conditions on aggregates go in `HAVING`.""",
+        quick_bn=r"""আগে `WHERE salary > 50000` প্রতিটা row filter করে, তারপর `GROUP BY dept` group বানায়, আর `HAVING COUNT(*) >= 2` group filter করে। নিয়ম: row-এর condition `WHERE`-এ, aggregate-এর condition `HAVING`-এ।""",
         ex_en=r"""
             - `WHERE COUNT(*) >= 2` is an error: aggregates don't exist yet when `WHERE` runs.
             - Putting `salary > 50000` in `HAVING` instead is also wrong here: `salary` isn't grouped, so most databases reject it, and even `HAVING MAX(salary) > 50000` would answer a different question.
@@ -330,6 +338,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`5 | 3 | 2 | 433.33`. `COUNT(*)` counts rows (5); `COUNT(bonus)` skips NULLs (3); `COUNT(DISTINCT bonus)` counts distinct non-NULL values {500, 300} (2); `AVG` ignores NULLs, so it's 1300 / 3 = 433.33, not 1300 / 5.""",
         a_bn=r"""`5 | 3 | 2 | 433.33`। `COUNT(*)` row গোনে (5); `COUNT(bonus)` NULL বাদ দেয় (3); `COUNT(DISTINCT bonus)` আলাদা non-NULL value গোনে {500, 300} (2); `AVG` NULL উপেক্ষা করে, তাই 1300 / 3 = 433.33, 1300 / 5 নয়।""",
+        quick_en=r"""`5 | 3 | 2 | 433.33`. `COUNT(*)` counts all rows, `COUNT(bonus)` skips NULLs, `COUNT(DISTINCT bonus)` counts distinct non-NULL values, and `AVG` ignores NULLs, so it is 1300 / 3.""",
+        quick_bn=r"""`5 | 3 | 2 | 433.33`। `COUNT(*)` সব row গোনে, `COUNT(bonus)` NULL বাদ দেয়, `COUNT(DISTINCT bonus)` আলাদা non-NULL value গোনে, আর `AVG` NULL উপেক্ষা করে, তাই হিসাবটা 1300 / 3।""",
         ex_en=r"""
             All standard aggregates except `COUNT(*)` ignore NULLs. The tempting trap is `AVG = 260` (treating NULL as 0). If the business rule says "no bonus means 0", make it explicit: `AVG(COALESCE(bonus, 0))` → 260.00.
 
@@ -378,6 +388,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""**1** — only Karim (Sylhet). For Nadia and Tanvir, `NULL <> 'Dhaka'` is **UNKNOWN**, not TRUE, and `WHERE` keeps only rows where the condition is TRUE.""",
         a_bn=r"""**1** — শুধু Karim (Sylhet)। Nadia আর Tanvir-এর ক্ষেত্রে `NULL <> 'Dhaka'`-এর ফল **UNKNOWN**, TRUE নয়, আর `WHERE` শুধু সেসব row রাখে যেখানে condition TRUE।""",
+        quick_en=r"""1, only Karim. For the rows where city is NULL, `NULL <> 'Dhaka'` is UNKNOWN, not TRUE, and `WHERE` keeps only rows where the condition is TRUE.""",
+        quick_bn=r"""1, শুধু Karim। যেসব row-এ city NULL, সেখানে `NULL <> 'Dhaka'` হয় UNKNOWN, TRUE নয়, আর `WHERE` শুধু সেই row রাখে যেখানে condition TRUE।""",
         ex_en=r"""
             SQL uses three-valued logic: TRUE, FALSE, UNKNOWN. Any comparison with NULL (`=`, `<>`, `<`, even `NULL = NULL`) is UNKNOWN. The tempting answer is 3 — "NULL isn't Dhaka, so it should count".
 
@@ -433,6 +445,8 @@ QUESTIONS = [
             - **Composite key:** একাধিক column মিলে তৈরি, যেমন `order_items`-এ `(order_id, product_id)`।
             - **Natural key:** বাস্তব জগতের value (email, NID)। **Surrogate key:** অর্থহীন generated id (identity/UUID)। আমি সাধারণত surrogate primary key রাখি, আর natural key-গুলোতে `UNIQUE` constraint দিই।
         """,
+        quick_en=r"""A primary key uniquely identifies each row (unique and not null), a foreign key must match a key in another table, and `UNIQUE`, `NOT NULL`, `CHECK` and `DEFAULT` add more rules. A candidate key is any minimal unique column set; a natural key is a real-world value, a surrogate key a generated id.""",
+        quick_bn=r"""Primary key প্রতিটা row-কে আলাদাভাবে চেনায় (unique আর not null), foreign key-কে অন্য table-এর একটা key-এর সাথে মিলতে হয়, আর `UNIQUE`, `NOT NULL`, `CHECK`, `DEFAULT` আরও নিয়ম যোগ করে। Candidate key হলো যেকোনো ন্যূনতম unique column set; natural key বাস্তব জগতের value, surrogate key generate করা id।""",
         ex_en=r"""
             - **Why enforce in the database, not only in code?** Multiple apps, scripts, admin fixes, and race conditions bypass application checks. A `UNIQUE` constraint is the only reliable way to prevent duplicate emails under concurrency.
             - Natural keys can change (people change emails/phones) — changing a primary key ripples through every foreign key. That's the main argument for surrogate keys.
@@ -525,6 +539,8 @@ QUESTIONS = [
 
             Joy (১,২৫,০০০) Mitu-র (১,২০,০০০) চেয়ে বেশি পায়, আর Omar (৯৫,০০০) Rafi-র (৯০,০০০) চেয়ে বেশি। Shafiq-এর কোনো manager নেই (`manager_id` NULL), তাই inner join তাকে বাদ দেয় — এখানে সেটাই ঠিক, কারণ তুলনা করার কেউ নেই।
         """,
+        quick_en=r"""Join `employees` to itself with two aliases, `e` for the employee and `m` for the manager, on `m.id = e.manager_id`, then filter `WHERE e.salary > m.salary`. The inner join drops anyone without a manager, which is correct here.""",
+        quick_bn=r"""`employees` table-কে দুটো alias দিয়ে নিজের সাথে join করো, employee-র জন্য `e` আর manager-এর জন্য `m`, শর্ত `m.id = e.manager_id`, তারপর `WHERE e.salary > m.salary` দিয়ে filter। Inner join manager ছাড়া কাউকে বাদ দেয়, এখানে সেটাই ঠিক।""",
         ex_en=r"""
             - Use `LEFT JOIN` instead when you want to list *all* employees with their manager's name (the CEO then shows a NULL manager).
             - Self joins only go one level. For "everyone under Mitu at any depth" you need a **recursive CTE**.

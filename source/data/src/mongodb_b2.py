@@ -69,6 +69,8 @@ QUESTIONS = [
 
             Data মিলিয়ে দেখলে: Power Bank stock-এ নেই, Backpack 1,000-এর কম, আর Smart Watch অন্য category-র — তাই শুধু Laptop Bag (1800) আর Earbuds (3500) থাকে।
         """,
+        quick_en=r"""One filter whose fields are ANDed: `category: { $in: ["bags", "electronics"] }`, `stock: { $gt: 0 }` and `price: { $gte: 1000, $lte: 4000 }`, with projection `{ _id: 0, name: 1, price: 1 }` and `.sort({ price: 1 })`. Only Laptop Bag (1800) and Earbuds (3500) match.""",
+        quick_bn=r"""একটা filter-এই সব শর্ত দাও (field-গুলো AND হয়): `category: { $in: ["bags", "electronics"] }`, `stock: { $gt: 0 }` আর `price: { $gte: 1000, $lte: 4000 }`, সাথে projection `{ _id: 0, name: 1, price: 1 }` আর `.sort({ price: 1 })`। শুধু Laptop Bag (1800) আর Earbuds (3500) match করে।""",
         ex_en=r"""
             - **Projection rule:** you can't mix inclusion (`1`) and exclusion (`0`) in one projection — the only exception is `_id`. `{ name: 1, stock: 0 }` throws an error.
             - **`$in` vs `$or`:** for several values of the *same* field, `$in` is simpler and optimises better than `$or`.
@@ -115,6 +117,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`{ phone: null }` matches documents where `phone` is **null or does not exist**, so it returns Mitu and Tanvir (2 documents).""",
         a_bn=r"""`{ phone: null }` সেই document-গুলো match করে যেখানে `phone` **null অথবা field-টাই নেই** — তাই Mitu আর Tanvir, মোট 2টা document আসে।""",
+        quick_en=r"""2 (Mitu and Tanvir): `{ phone: null }` matches documents where `phone` is null **or** where the field doesn't exist at all, so no `$exists` is needed.""",
+        quick_bn=r"""2টা (Mitu আর Tanvir): `{ phone: null }` সেই document-গুলো match করে যেখানে `phone` null **অথবা** field-টাই নেই, তাই আলাদা `$exists` লাগে না।""",
         ex_en=r"""
             The tempting answer is "1 — only Mitu", which is what SQL's `IS NULL` intuition suggests. To be precise in MongoDB:
 
@@ -202,6 +206,8 @@ QUESTIONS = [
 
             আসল বিষয় হলো `preserveNullAndEmptyArrays: true`। সাধারণ `$unwind: "$customer"` খালি array-ওয়ালা document **বাদ দিয়ে দেয়**, ফলে order 104 চুপচাপ হারিয়ে যেত। এই option দিলে 104 থাকে (`customer` field ছাড়া), আর `$ifNull` সেখানে "Unknown" বসায়। Order 103 cancelled হওয়ায় শুরুর `$match`-এই বাদ পড়ে।
         """,
+        quick_en=r"""`$match` delivered orders, then `$lookup` (a left outer join that adds a `customer` array), `$unwind` with `preserveNullAndEmptyArrays: true`, and `$project` with `$ifNull` to fill "Unknown", sorted by `orderId`. Without that option a plain `$unwind` silently drops order 104.""",
+        quick_bn=r"""`$match` দিয়ে delivered order নাও, তারপর `$lookup` (left outer join, যেটা একটা `customer` array যোগ করে), `preserveNullAndEmptyArrays: true` সহ `$unwind`, আর `$ifNull` দিয়ে "Unknown" বসাতে `$project`, শেষে `orderId` অনুযায়ী sort। এই option ছাড়া সাধারণ `$unwind` order 104-কে চুপচাপ বাদ দিয়ে দেয়।""",
         ex_en=r"""
             - **Performance:** `$lookup` runs a query on `customers` for each input document, so filter first (`$match`) and make sure `foreignField` is indexed (`_id` always is). For large reports, join after `$sort` + `$limit` whenever possible.
             - **Pipeline form:** when you need extra join conditions or want to fetch only some fields, use `$lookup` with `pipeline` (since MongoDB 5.0 it can be combined with `localField`/`foreignField`), e.g. `pipeline: [{ $project: { name: 1, city: 1 } }]`.
@@ -256,6 +262,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""Query 1 returns `_id: 1` and `_id: 2`. Separate dotted conditions on an array can be satisfied by **different elements**: in order 1, item A satisfies the SKU condition and item B satisfies `qty ≥ 5`. `$elemMatch` requires one element to satisfy all conditions, so it returns only `_id: 2`.""",
         a_bn=r"""Query 1 `_id: 1` আর `_id: 2` return করে। Array-র ওপর আলাদা dotted condition **ভিন্ন ভিন্ন element** দিয়ে পূরণ হতে পারে: order 1-এ item A SKU condition পূরণ করে আর item B `qty ≥ 5` পূরণ করে। `$elemMatch` চায় একটাই element সব condition পূরণ করুক, তাই সেটা শুধু `_id: 2` return করে।""",
+        quick_en=r"""Query 1 returns `_id: 1` and `_id: 2`, because separate dotted conditions on an array can be satisfied by different elements. To require one element to match both, use `{ items: { $elemMatch: { sku: "A", qty: { $gte: 5 } } } }`, which returns only `_id: 2`.""",
+        quick_bn=r"""Query 1 `_id: 1` আর `_id: 2` return করে, কারণ array-তে আলাদা আলাদা dotted condition ভিন্ন element দিয়েও পূরণ হতে পারে। একই element-কে দুটো শর্তই মানতে বাধ্য করতে `{ items: { $elemMatch: { sku: "A", qty: { $gte: 5 } } } }` ব্যবহার করো, তখন শুধু `_id: 2` আসে।""",
         ex_en=r"""
             Option B is the subtle trap: `{ items: { sku: "A", qty: { $gte: 5 } } }` is an **exact embedded-document match**. MongoDB looks for an array element exactly equal to `{ sku: "A", qty: { $gte: 5 } }` (same fields, same order, and `$gte` treated as a literal field name), so it matches nothing.
 
@@ -304,6 +312,8 @@ QUESTIONS = [
 
             আমি `explain("executionStats")` দিয়ে নিশ্চিত হব: কোনো `SORT` stage নেই, আর `totalKeysExamined` 20-এর কাছাকাছি (সাম্প্রতিক অনেক order 1,000-এর কম হলে একটু বেশি — সেগুলোর key examine হয়ে skip হয়)।
         """,
+        quick_en=r"""Follow ESR (Equality, Sort, Range): `{ shopId: 1, status: 1, createdAt: -1, total: 1 }`. Equality fields first, then the sort field so keys are already newest-first and MongoDB can stop after 20 matches, then the range field; the teammate's E-R-S index forces a blocking in-memory sort.""",
+        quick_bn=r"""ESR (Equality, Sort, Range) মেনে index বানাও: `{ shopId: 1, status: 1, createdAt: -1, total: 1 }`। আগে equality field, তারপর sort field, যাতে key-গুলো আগে থেকেই newest-first থাকে আর MongoDB 20টা match পেয়েই থামতে পারে, শেষে range field; teammate-এর E-R-S index-এ blocking in-memory sort করতে হয়।""",
         ex_en=r"""
             - **Exception:** if the range is extremely selective (e.g. only a handful of orders above the threshold), E-R-S can examine fewer keys than E-S-R even with an in-memory sort of a tiny result. Measure with `explain` on realistic data.
             - **Prefixes:** the same index also serves queries on `{ shopId }` and `{ shopId, status }`, so you may be able to drop older single-field indexes. Every extra index costs RAM and slows writes.
@@ -423,6 +433,8 @@ QUESTIONS = [
             - Limit-এর **পরে** `$lookup` — 8 million-এর বদলে 20টা lookup — pipeline form দিয়ে শুধু দরকারি field আনো।
             - Count আলাদা `countDocuments(filter)` দিয়ে নাও, যেটা index ব্যবহার করে, আর সেটা cache করো (অথবা "50,000+" দেখাও)।
         """,
+        quick_en=r"""`$lookup` + `$unwind` run on all 8 million orders before any filter, so the sort and `$facet` work on a huge set (and hit 9.0's memory limit). Store the city on the order, add an ESR index, run `$match` → `$sort` → `$limit` first, then `$lookup` just 20 rows, and count separately with `countDocuments`.""",
+        quick_bn=r"""কোনো filter-এর আগেই 8 million order-এর ওপর `$lookup` + `$unwind` চলছে, তাই sort আর `$facet` বিশাল data নিয়ে কাজ করে (আর 9.0-এর memory limit-এ আটকায়)। City order-এই রাখো, একটা ESR index বানাও, আগে `$match` → `$sort` → `$limit`, তারপর শুধু 20টা row-তে `$lookup`, আর count আলাদা `countDocuments` দিয়ে নাও।""",
         ex_en=r"""
             - **Optimizer vs you:** the aggregation optimizer can reorder some stages (e.g. move parts of a `$match` earlier, coalesce `$sort` + `$limit`), but it can't move a filter on joined fields before the join. Write the efficient order explicitly and confirm with `explain()`.
             - **`$facet` pagination** is popular in MERN tutorials because it returns data + count in one call, but it's only fine for small filtered sets. Its single output document is also capped at 16 MB.
@@ -469,6 +481,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""A monotonically increasing key (timestamps, ObjectIds, auto-increment numbers) with ranged sharding sends every new document to the chunk with the **maximum key range**, which lives on one shard. That shard becomes a write hotspot while the others sit idle, and the balancer keeps migrating older chunks away.""",
         a_bn=r"""Monotonically বাড়তে থাকা key (timestamp, ObjectId, auto-increment number) ranged sharding-এ থাকলে প্রতিটি নতুন document **সর্বোচ্চ key range**-এর chunk-এ যায়, যেটা একটা shard-এই থাকে। সেই shard write hotspot হয়ে যায়, বাকিগুলো অলস বসে থাকে, আর balancer বারবার পুরনো chunk সরাতে থাকে।""",
+        quick_en=r"""With a ranged, always-increasing key like `createdAt`, every new insert goes to the chunk holding the highest values, so one shard takes almost all writes while the others sit idle. That shard becomes a write hotspot, and the balancer keeps moving older chunks away.""",
+        quick_bn=r"""`createdAt`-এর মতো সবসময় বাড়তে থাকা ranged key-তে প্রতিটি নতুন insert সবচেয়ে বড় value-র chunk-এ যায়, তাই একটা shard প্রায় সব write নেয় আর বাকিরা বসে থাকে। ওই shard-টা write hotspot হয়ে যায়, আর balancer বারবার পুরনো chunk সরাতে থাকে।""",
         ex_en=r"""
             Option B describes the opposite trade-off — that's what happens with a **hashed** key on `createdAt`: writes spread evenly, but range queries on time can no longer be targeted. Option D is wrong because timestamps have very high cardinality; low cardinality (e.g. `status`) is a different problem.
 
@@ -525,6 +539,8 @@ QUESTIONS = [
 
             **Recover:** `bsondump` দিয়ে rollback file থেকে data বের করো, payment gateway-র record-এর সাথে মিলিয়ে দেখো, verify করা order আবার insert করো। ক্ষতিগ্রস্ত customer-দের সাথে যোগাযোগ করো।
         """,
+        quick_en=r"""With `w: 1`, acknowledged writes that hadn't replicated yet were rolled back after the failover, and `secondaryPreferred` reads were stale. Use `w: "majority"` (the default since 5.0), idempotent order creation and primary or causally consistent reads for a user's own data; recover orders from the `rollback/` files.""",
+        quick_bn=r"""`w: 1`-এর কারণে crash করা primary যে write acknowledge করেছিল কিন্তু replicate করেনি, failover-এর পর সেগুলো rollback হয়েছে; আর `secondaryPreferred` read পুরনো data দেখিয়েছে। `w: "majority"` (5.0 থেকে default) দাও, order তৈরি idempotent করো, user-এর নিজের data primary থেকে বা causally consistent session-এ পড়ো; হারানো order `rollback/` file থেকে উদ্ধার করো।""",
         ex_en=r"""
             - **Cost of majority:** each write waits for one secondary in a 3-node set — typically a millisecond or two within a region, more across regions. For orders and payments that's the right trade; for click-tracking logs `w: 1` may be acceptable.
             - **Arbiters (PSA):** with one secondary down, a PSA set can't reach a data-bearing majority, so majority writes stall. That's why three data-bearing nodes are preferred.

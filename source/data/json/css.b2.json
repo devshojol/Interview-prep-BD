@@ -58,6 +58,10 @@
    "css-020",
    "css-019"
   ],
+  "quickAnswer": {
+   "en": "`static` is normal flow; `relative` stays in flow and can be nudged, often as the containing block; `absolute` leaves the flow and uses the nearest positioned ancestor; `fixed` uses the viewport; `sticky` acts like `relative` until a scroll threshold, then sticks.",
+   "bn": "`static` সাধারণ flow; `relative` flow-তেই থাকে, একটু সরানো যায়, আর প্রায়ই containing block হয়; `absolute` flow থেকে বেরিয়ে নিকটতম positioned ancestor ধরে বসে; `fixed` বসে viewport ধরে; `sticky` scroll-এর একটা সীমা পর্যন্ত `relative`-এর মতো, তারপর আটকে যায়।"
+  },
   "commonMistakes": {
    "en": "Saying `absolute` is relative to the parent (it's the nearest *positioned* ancestor), or thinking `fixed` is always relative to the viewport.",
    "bn": "`absolute` parent-এর সাপেক্ষে বলা (আসলে সবচেয়ে কাছের *positioned* ancestor-এর সাপেক্ষে), অথবা `fixed` সবসময় viewport-এর সাপেক্ষে ভাবা।"
@@ -114,6 +118,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`. Because every item starts from a zero basis, free space is shared equally, which is why `flex: 1` on all items gives equal-width columns.",
+   "bn": "`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`। প্রতিটা item শূন্য basis থেকে শুরু করে বলে খালি জায়গা সমানভাবে ভাগ হয়, এজন্যই সব item-এ `flex: 1` দিলে সমান চওড়া column হয়।"
+  },
   "options": [
    {
     "en": "`flex-grow: 1; flex-shrink: 1; flex-basis: 0%`",
@@ -193,6 +201,10 @@
    "css-015",
    "css-025"
   ],
+  "quickAnswer": {
+   "en": "Flexbox is one-dimensional and content-driven, good for navbars, button rows and centring; Grid is two-dimensional, good for page layouts and galleries, and the two combine well. `fr` is a fraction of the grid's free space after fixed tracks and gaps.",
+   "bn": "Flexbox এক-মাত্রিক আর content অনুযায়ী চলে, navbar, button-এর সারি বা centring-এর জন্য ভালো; Grid দুই-মাত্রিক, page layout আর gallery-র জন্য ভালো, আর দুটো একসাথে ভালো চলে। `fr` হলো fixed track আর gap বাদে grid-এর খালি জায়গার একটা ভাগ।"
+  },
   "commonMistakes": {
    "en": "Saying \"Grid replaces Flexbox\", or thinking `1fr` is a fraction of the *total* width (it's of the remaining free space).",
    "bn": "\"Grid Flexbox-কে প্রতিস্থাপন করে\" বলা, অথবা `1fr`-কে *মোট* width-এর ভগ্নাংশ ভাবা (আসলে এটা বাকি ফাঁকা জায়গার ভগ্নাংশ)।"
@@ -266,6 +278,10 @@
    "css-006",
    "css-016"
   ],
+  "quickAnswer": {
+   "en": "Both create as many 200px-plus columns as fit, but `auto-fill` keeps empty tracks and `auto-fit` collapses them. With two cards in 1000px, `auto-fill` gives four 238px columns (two empty) and `auto-fit` stretches the two cards to 492px each.",
+   "bn": "দুটোই যতগুলো কমপক্ষে 200px-এর column ধরে ততগুলো বানায়, কিন্তু `auto-fill` খালি track রেখে দেয় আর `auto-fit` সেগুলো collapse করে। 1000px-এ দুটো card থাকলে `auto-fill`-এ 238px-এর চারটা column হয় (দুটো খালি), আর `auto-fit`-এ দুটো card 492px করে ছড়িয়ে যায়।"
+  },
   "commonMistakes": {
    "en": "Saying the two are identical, forgetting that gaps around collapsed tracks also collapse, or using a fixed `minmax(300px, 1fr)` that overflows on 320px phones.",
    "bn": "দুটোকে একই বলা, collapse হওয়া track-এর আশেপাশের gap-ও যে collapse হয় তা ভুলে যাওয়া, অথবা নির্দিষ্ট `minmax(300px, 1fr)` ব্যবহার করা যা 320px phone-এ overflow করে।"
@@ -335,6 +351,10 @@
    "css-015",
    "css-032"
   ],
+  "quickAnswer": {
+   "en": "Media queries respond to the viewport; container queries respond to the component's own slot. Set `container-type: inline-size` on a parent, then `@container (min-width: 420px)` styles the card inside it. Size queries are widely available; style queries only became newly available in May 2026.",
+   "bn": "Media query viewport দেখে; container query দেখে component যে জায়গায় বসেছে সেটা। Parent-এ `container-type: inline-size` দাও, তারপর `@container (min-width: 420px)` ভেতরের card-কে style করে। Size query widely available; style query মাত্র May 2026-এ newly available হয়েছে।"
+  },
   "commonMistakes": {
    "en": "Putting `container-type` on the element you're trying to restyle, using `container-type: size` without a height, or replacing all media queries with container queries.",
    "bn": "যে element-এর style বদলাতে চাও তাতেই `container-type` দেওয়া, height ছাড়া `container-type: size` ব্যবহার করা, অথবা সব media query container query দিয়ে বদলে ফেলা।"
@@ -403,6 +423,10 @@
    "css-009",
    "css-026"
   ],
+  "quickAnswer": {
+   "en": "Sass variables are compile-time constants the browser never sees; custom properties are runtime values that inherit, can be overridden per context and changed with JavaScript, but can't be used in media query conditions. I use custom properties for themes and tokens, Sass for build-time constants.",
+   "bn": "Sass variable compile-time constant, browser এগুলো দেখেই না; custom property runtime value, inherit হয়, context অনুযায়ী override করা যায় আর JavaScript দিয়ে বদলানো যায়, তবে media query condition-এ চলে না। Theme আর token-এর জন্য আমি custom property, আর build-time constant-এর জন্য Sass ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Calling custom properties \"global variables\" (they're scoped to elements and inherit), trying `@media (min-width: var(--bp))`, or expecting the `var()` fallback to rescue a value of the wrong type.",
    "bn": "Custom property-কে \"global variable\" বলা (এগুলো element-ভিত্তিক scope-এ থাকে আর inherit হয়), `@media (min-width: var(--bp))` চেষ্টা করা, অথবা ভুল type-এর value-কে `var()`-এর fallback রক্ষা করবে বলে আশা করা।"
@@ -476,6 +500,10 @@
    "css-019",
    "css-031"
   ],
+  "quickAnswer": {
+   "en": "Style → Layout → Paint → Composite: geometry changes like `width` or `top` trigger layout, visual ones like `color` trigger paint, and `transform`/`opacity` can be composite-only. `will-change` is misused when applied widely, because every layer costs GPU memory and creates a stacking context.",
+   "bn": "Style → Layout → Paint → Composite: `width` বা `top`-এর মতো geometry বদলালে layout, `color`-এর মতো চেহারা বদলালে paint, আর `transform`/`opacity` শুধু composite-এই হতে পারে। `will-change` ঢালাওভাবে দিলে সমস্যা, কারণ প্রতিটা layer GPU memory খায় আর stacking context তৈরি করে।"
+  },
   "commonMistakes": {
    "en": "Adding `will-change: transform` (or `translateZ(0)`) to everything \"for GPU acceleration\", animating `top`/`left` or `height`, and assuming composited properties have no cost at all.",
    "bn": "\"GPU acceleration-এর জন্য\" সবকিছুতে `will-change: transform` (বা `translateZ(0)`) দেওয়া, `top`/`left` বা `height` animate করা, আর ধরে নেওয়া যে composited property-র কোনো খরচই নেই।"
@@ -544,6 +572,10 @@
    "css-006",
    "css-015"
   ],
+  "quickAnswer": {
+   "en": "Use subgrid: the parent grid defines the columns, and each card spans four rows with `display: grid; grid-template-rows: subgrid`, so cards in the same row share track sizes and titles, prices and buttons line up. Subgrid is Baseline widely available.",
+   "bn": "Subgrid ব্যবহার করো: parent grid column ঠিক করে, আর প্রতিটা card `display: grid; grid-template-rows: subgrid` দিয়ে চারটা row জুড়ে থাকে, তাই একই সারির card-গুলো একই track size পায় আর title, price, button এক লাইনে আসে। Subgrid Baseline widely available।"
+  },
   "commonMistakes": {
    "en": "Fixing it with fixed heights or JavaScript, forgetting `grid-row: span N` on the card (then `subgrid` has only one row to inherit), or a mismatch between the span and the number of children.",
    "bn": "Fixed height বা JavaScript দিয়ে ঠিক করা, card-এ `grid-row: span N` দিতে ভুলে যাওয়া (তখন `subgrid`-এর inherit করার মতো মাত্র একটা row থাকে), অথবা span আর children-এর সংখ্যায় অমিল।"

@@ -27,8 +27,8 @@
    "bn": "`3 2 2`।\n\n- `getOrInsert(key, defaultValue)` key থাকলে **আগের** value return করে; না থাকলে `defaultValue` insert করে সেটা return করে। তাই counter-টা `(map.get(k) ?? 0) + 1`-এর মতো কাজ করে, আর `'home'` পৌঁছায় `3`-এ।\n- `getOrInsertComputed(key, callback)` হলো **lazy** version: key না থাকলেই কেবল callback চলে, key-টা argument হিসেবে পায়, আর তার result insert হয়। `'r'` আর `'s'` নতুন key → ২ বার factory call; `'rafi'` আগের `'r'` array-টাই ব্যবহার করে → তাতে থাকে `['rina', 'rafi']`।"
   },
   "explanation": {
-   "en": "- **Option B** assumes `getOrInsert` always returns the default (so `home` stays at 1) and that the factory runs every time.\n- **Option C** treats `getOrInsertComputed` like `getOrInsert(key, factory())`, where the argument is evaluated eagerly on every call. Avoiding that wasted work is exactly why the computed variant exists.\n- **Option D** assumes the existing array is replaced.\n\nSupport: Map/WeakMap upsert is ES2026 and Baseline newly available since February 2026 (Chrome 145, Firefox 144, Safari 26.2). It's in Node.js 26 but **not** Node.js 24 LTS — polyfill (core-js) or fall back to `has`/`get`/`set` there.\n\nOther ES2026 additions worth knowing, with status:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (exact sum, rounded once), while `0.1 + 0.2 + 0.3` → `0.6000000000000001`. Baseline since April 2026; not yet in Node.js 26.\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — Baseline since September 2025, Node.js 26.\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access.\n- `Error.isError()` — standard, but **not Baseline** (Safari's implementation is still partial).\n- Still **not** Baseline: Temporal and `using` declarations — label them experimental if you mention them.",
-   "bn": "- **Option B** ধরে নেয় `getOrInsert` সবসময় default return করে (ফলে `home` 1-এই থাকে) আর factory প্রতিবার চলে।\n- **Option C** `getOrInsertComputed`-কে `getOrInsert(key, factory())`-এর মতো ভাবে, যেখানে argument প্রতিটি call-এ আগেভাগে evaluate হয়। এই অপচয় এড়ানোর জন্যই computed version-টা আছে।\n- **Option D** ধরে নেয় আগের array replace হয়ে যায়।\n\nSupport: Map/WeakMap upsert ES2026-এর অংশ এবং February 2026 থেকে Baseline newly available (Chrome 145, Firefox 144, Safari 26.2)। Node.js 26-এ আছে, কিন্তু Node.js 24 LTS-এ **নেই** — সেখানে polyfill (core-js) বা `has`/`get`/`set` fallback ব্যবহার করো।\n\nES2026-এর আরও কিছু সংযোজন, অবস্থা সহ:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (নিখুঁত যোগফল, একবারই round হয়), যেখানে `0.1 + 0.2 + 0.3` → `0.6000000000000001`। April 2026 থেকে Baseline; Node.js 26-এ এখনো নেই।\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — September 2025 থেকে Baseline, Node.js 26-এ আছে।\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access।\n- `Error.isError()` — standard, কিন্তু **Baseline নয়** (Safari-র implementation এখনো আংশিক)।\n- এখনো Baseline **নয়**: Temporal আর `using` declaration — উল্লেখ করলে experimental হিসেবে চিহ্নিত করো।"
+   "en": "- **Option B** assumes `getOrInsert` always returns the default (so `home` stays at 1) and that the factory runs every time.\n- **Option C** treats `getOrInsertComputed` like `getOrInsert(key, factory())`, where the argument is evaluated eagerly on every call. Avoiding that wasted work is exactly why the computed variant exists.\n- **Option D** assumes the existing array is replaced.\n\nSupport: Map/WeakMap upsert is ES2026 and Baseline newly available since February 2026 (Chrome 145, Firefox 144, Safari 26.2). It's in Node.js 26 but **not** Node.js 24 — polyfill (core-js) or fall back to `has`/`get`/`set` there.\n\nOther ES2026 additions worth knowing, with status:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (exact sum, rounded once), while `0.1 + 0.2 + 0.3` → `0.6000000000000001`. Baseline since April 2026; not yet in Node.js 26.\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — Baseline since September 2025, Node.js 26.\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access.\n- `Error.isError()` — standard, but **not Baseline** (Safari's implementation is still partial).\n- Still **not** Baseline: Temporal and `using` declarations — label them experimental if you mention them.",
+   "bn": "- **Option B** ধরে নেয় `getOrInsert` সবসময় default return করে (ফলে `home` 1-এই থাকে) আর factory প্রতিবার চলে।\n- **Option C** `getOrInsertComputed`-কে `getOrInsert(key, factory())`-এর মতো ভাবে, যেখানে argument প্রতিটি call-এ আগেভাগে evaluate হয়। এই অপচয় এড়ানোর জন্যই computed version-টা আছে।\n- **Option D** ধরে নেয় আগের array replace হয়ে যায়।\n\nSupport: Map/WeakMap upsert ES2026-এর অংশ এবং February 2026 থেকে Baseline newly available (Chrome 145, Firefox 144, Safari 26.2)। Node.js 26-এ আছে, কিন্তু Node.js 24-এ **নেই** — সেখানে polyfill (core-js) বা `has`/`get`/`set` fallback ব্যবহার করো।\n\nES2026-এর আরও কিছু সংযোজন, অবস্থা সহ:\n- `Math.sumPrecise([0.1, 0.2, 0.3])` → `0.6` (নিখুঁত যোগফল, একবারই round হয়), যেখানে `0.1 + 0.2 + 0.3` → `0.6000000000000001`। April 2026 থেকে Baseline; Node.js 26-এ এখনো নেই।\n- `Uint8Array.fromBase64()`, `.toBase64()`, `.toHex()`, `fromHex()` — September 2025 থেকে Baseline, Node.js 26-এ আছে।\n- `Iterator.concat()` (Baseline 2026-03), `Array.fromAsync()` (widely available), `JSON.rawJSON` / source text access।\n- `Error.isError()` — standard, কিন্তু **Baseline নয়** (Safari-র implementation এখনো আংশিক)।\n- এখনো Baseline **নয়**: Temporal আর `using` declaration — উল্লেখ করলে experimental হিসেবে চিহ্নিত করো।"
   },
   "interviewTip": {
    "en": "Explain the eager-vs-lazy difference between the two methods, then immediately give the support status (Baseline 2026, Node 26 yes, Node 24 no). Knowing *where* a new feature runs is what makes the answer production-grade.",
@@ -59,6 +59,10 @@
    "js-022",
    "js-012"
   ],
+  "quickAnswer": {
+   "en": "`3 2 2`. `getOrInsert` returns the existing value or inserts the default, so `'home'` counts up to `3`; `getOrInsertComputed` runs its callback only for missing keys (`'r'` and `'s'`, so 2 calls), and `'rafi'` reuses the `'r'` array, which ends up with 2 names.",
+   "bn": "`3 2 2`। `getOrInsert` key থাকলে পুরনো value দেয়, না থাকলে default insert করে, তাই `'home'` গুনে `3` হয়; `getOrInsertComputed` callback চালায় শুধু key না থাকলে (`'r'` আর `'s'`, তাই 2 বার), আর `'rafi'` আগের `'r'` array-ই ব্যবহার করে, যেখানে শেষে 2টা নাম থাকে।"
+  },
   "code": {
    "language": "javascript",
    "source": "const visits = new Map();\nfor (const page of ['home', 'cart', 'home', 'home']) {\n  visits.set(page, visits.getOrInsert(page, 0) + 1);\n}\n\nlet factoryCalls = 0;\nconst byInitial = new Map();\nfor (const name of ['rina', 'sakib', 'rafi']) {\n  byInitial\n    .getOrInsertComputed(name[0], () => {\n      factoryCalls++;\n      return [];\n    })\n    .push(name);\n}\n\nconsole.log(visits.get('home'), factoryCalls, byInitial.get('r').length);",
@@ -149,6 +153,10 @@
    "js-030",
    "js-014"
   ],
+  "quickAnswer": {
+   "en": "Recurse with a `WeakMap` from original to copy, which handles cycles and shared references; special-case `Date`, `RegExp`, `Map` and `Set`, and keep prototypes and symbol keys with `Object.create` and `Reflect.ownKeys`. It's O(n); in practice I use `structuredClone` unless I need those extras.",
+   "bn": "একটা `WeakMap`-এ original থেকে copy-র map রেখে recursion করি, এতে cycle আর shared reference দুটোই সামলানো যায়; `Date`, `RegExp`, `Map` আর `Set` আলাদাভাবে handle করি, আর `Object.create` ও `Reflect.ownKeys` দিয়ে prototype আর symbol key রেখে দিই। এটা O(n); বাস্তবে এগুলো না লাগলে আমি `structuredClone`-ই ব্যবহার করি।"
+  },
   "commonMistakes": {
    "en": "Forgetting cycles (infinite recursion), registering the copy in `seen` *after* recursing into children, using `{}` for class instances (losing methods), or treating `JSON.parse(JSON.stringify())` as a general deep clone.",
    "bn": "Cycle ভুলে যাওয়া (অসীম recursion), child-এ recurse করার *পরে* copy-টা `seen`-এ register করা, class instance-এর জন্য `{}` ব্যবহার করা (method হারিয়ে যায়), অথবা `JSON.parse(JSON.stringify())`-কে সাধারণ deep clone ভাবা।"
@@ -227,6 +235,10 @@
    "js-024",
    "js-033"
   ],
+  "quickAnswer": {
+   "en": "Use a worker pool: start `min(limit, tasks.length)` async workers that pull from a shared `nextIndex`, store each result at its index, and stop taking work after a failure or abort. Unlike batches of 5, a slot refills as soon as any task finishes; tasks are functions so they don't start early.",
+   "bn": "Worker pool ব্যবহার করি: `min(limit, tasks.length)`টা async worker চালাই, যারা একটা shared `nextIndex` থেকে কাজ নেয়, result রাখে নিজের index-এ, আর failure বা abort হলে নতুন কাজ নেয় না। ৫টার batch-এর মতো নয়, এখানে কোনো task শেষ হলেই slot আবার ভরে যায়; আর task-গুলো function বলে আগেভাগে শুরু হয়ে যায় না।"
+  },
   "commonMistakes": {
    "en": "Passing already-created promises (no limit is possible), pushing results in completion order, using `setInterval` polling to manage slots, or forgetting the empty-array and `limit < 1` cases.",
    "bn": "আগেই তৈরি promise pass করা (তখন কোনো limit সম্ভব নয়), শেষ হওয়ার ক্রমে result push করা, slot সামলাতে `setInterval` দিয়ে polling করা, অথবা খালি array আর `limit < 1`-এর case ভুলে যাওয়া।"
@@ -305,6 +317,10 @@
    "js-032",
    "js-016"
   ],
+  "quickAnswer": {
+   "en": "Keep immutable state in a closure with `getState`, `setState` (skipped when `Object.is` sees no change) and `subscribe` returning an unsubscribe. Batch notifications with `queueMicrotask`, isolate listener errors, fire selector subscriptions only when their slice changes, and use `useSyncExternalStore` in React.",
+   "bn": "Immutable state একটা closure-এ রাখি, সাথে `getState`, `setState` (`Object.is` অনুযায়ী কিছু না বদলালে কিছুই করে না) আর `subscribe`, যেটা unsubscribe function return করে। `queueMicrotask` দিয়ে notification batch করি, listener-এর error আলাদা করে রাখি, selector subscription শুধু নিজের slice বদলালে চলে, আর React-এর সাথে যুক্ত করি `useSyncExternalStore` দিয়ে।"
+  },
   "commonMistakes": {
    "en": "Mutating state in place (breaking change detection), notifying synchronously inside a loop of updates, forgetting to return an unsubscribe function, or letting one throwing listener stop the rest.",
    "bn": "State সরাসরি mutate করা (change detection ভেঙে যায়), update-এর loop-এর ভেতরে synchronously notify করা, unsubscribe function return করতে ভুলে যাওয়া, অথবা একটা throw করা listener-কে বাকিদের থামিয়ে দিতে দেওয়া।"
@@ -381,6 +397,10 @@
    "js-010",
    "js-032"
   ],
+  "quickAnswer": {
+   "en": "Profile first, then decouple the message rate from the render rate: coalesce ticks in a `Map` by symbol and flush once per `requestAnimationFrame`. Then parse in a Web Worker, virtualise the table to the visible rows, update only changed cells, and do all layout reads before writes.",
+   "bn": "আগে profile করি, তারপর message rate আর render rate আলাদা করি: tick-গুলো symbol অনুযায়ী একটা `Map`-এ জমিয়ে প্রতি `requestAnimationFrame`-এ একবার flush করি। এরপর parsing Web Worker-এ পাঠাই, table virtualise করে শুধু দেখা যাওয়া row render করি, শুধু বদলানো cell update করি, আর সব layout read আগে করে তারপর write করি।"
+  },
   "commonMistakes": {
    "en": "Re-rendering the whole table with `innerHTML` on every message, throttling with `setTimeout` but still doing per-message DOM work, or moving work to a worker without measuring that parsing was the bottleneck.",
    "bn": "প্রতিটি message-এ `innerHTML` দিয়ে পুরো table আবার render করা, `setTimeout` দিয়ে throttle করেও প্রতি message-এ DOM-এর কাজ করা, অথবা parsing-ই যে bottleneck তা না মেপে কাজ worker-এ সরিয়ে দেওয়া।"
@@ -455,6 +475,10 @@
    "js-039",
    "js-036"
   ],
+  "quickAnswer": {
+   "en": "Conditional fields, changing property order and `delete` create many hidden classes (shapes), so hot accesses go polymorphic or megamorphic, `delete` forces slow dictionary mode, and V8 deoptimises. Confirm with a CPU profile and `--trace-deopt`, then build every object in one factory with the same fields in the same order.",
+   "bn": "Conditional field, বদলে যাওয়া property order আর `delete`-এর কারণে object-গুলোর অনেক hidden class (shape) তৈরি হয়, তাই hot property access polymorphic বা megamorphic হয়ে যায়, `delete` object-কে ধীর dictionary mode-এ পাঠায়, আর V8 deoptimise করে। CPU profile আর `--trace-deopt` দিয়ে নিশ্চিত হও, তারপর প্রতিটা object একটা factory-তে একই order-এ সব field দিয়ে তৈরি করো।"
+  },
   "commonMistakes": {
    "en": "Micro-optimising without a profile, believing `delete` is \"free\", or assuming TypeScript types guarantee consistent runtime shapes.",
    "bn": "Profile ছাড়াই micro-optimise করা, ভাবা যে `delete` \"বিনামূল্যে\", অথবা ধরে নেওয়া যে TypeScript type runtime-এ একই shape নিশ্চিত করে।"

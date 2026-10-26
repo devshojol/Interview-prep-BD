@@ -47,6 +47,8 @@ QUESTIONS = [
 
             তাই app-এর উচিত **container-এর ভেতরে file-এ না লিখে stdout/stderr-এ log করা**। Writable layer-এর file-এ পৌঁছানো কঠিন, container-এর সাথে হারিয়ে যায়, আর disk ভরিয়ে ফেলতে পারে। আমি structured JSON log ব্যবহার করি (যেমন `pino` দিয়ে), প্রতি লাইনে একটা event, সাথে level, timestamp আর request ID। Log পাঠানো, সংরক্ষণ আর search-এর দায়িত্ব platform-এর: একটা logging driver বা agent, যেটা CloudWatch, Loki বা Elasticsearch-এ পাঠায়।
         """,
+        quick_en=r"""Docker captures the main process's stdout and stderr through a logging driver, and you read them with `docker logs -f` (or `docker compose logs -f api`). So the app should write structured JSON logs to stdout/stderr, not to files inside the container, and leave shipping and storage to the platform.""",
+        quick_bn=r"""Docker main process-এর stdout আর stderr একটা logging driver দিয়ে ধরে রাখে, আর `docker logs -f` (বা `docker compose logs -f api`) দিয়ে পড়া যায়। তাই app-এর উচিত container-এর ভেতরে file-এ না লিখে stdout/stderr-এ structured JSON log লেখা; log পাঠানো আর জমা রাখার কাজ platform-এর।""",
         ex_en=r"""
             - **Rotation:** the default `json-file` driver doesn't rotate logs unless you set `max-size`/`max-file`, so a chatty container can fill the disk. The `local` driver rotates by default (see docker-028).
             - **Lifetime:** logs stay until the container is removed. `docker rm` deletes them, which is another reason to ship logs off the host.
@@ -148,6 +150,8 @@ QUESTIONS = [
 
             কখনো `chmod 777` দিয়ে বা container root হিসেবে চালিয়ে এটা "ঠিক" কোরো না।
         """,
+        quick_en=r"""Docker's root daemon created the missing `./uploads` as `root:root`, and a bind mount keeps host ownership, so UID 1000 can't write to it. In production use a named volume with the directory owned by `node` in the image (or S3); locally match the UID or use Compose Watch, never `chmod 777`.""",
+        quick_bn=r"""`./uploads` না থাকায় root হিসেবে চলা Docker daemon সেটা `root:root` হিসেবে বানিয়েছে, আর bind mount host-এর ownership-ই দেখায়, তাই UID 1000 লিখতে পারে না। Production-এ named volume ব্যবহার করো, image-এ directory-টা `node`-এর owner করে রাখো (বা S3-তে রাখো); local-এ UID মিলাও বা Compose Watch ব্যবহার করো, কখনো `chmod 777` না।""",
         ex_en=r"""
             - **Why numeric IDs matter:** the kernel only compares numbers. "node" in the container and "ubuntu" on the host can both be UID 1000, and then permissions just work.
             - **The `node_modules` shadowing trap:** bind-mounting the whole project (`.:/app`) hides the image's `/app/node_modules`, sometimes replacing it with macOS-built binaries. Compose Watch or an extra anonymous volume for `/app/node_modules` avoids that.
@@ -204,6 +208,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""It's `undefined`. The `.env` file in the project directory feeds **variable interpolation** in `compose.yaml`: here `${API_PORT}` becomes `8080`. Its values aren't injected into containers by themselves. Add `environment: { JWT_SECRET: ${JWT_SECRET} }`, or `env_file: .env` (which loads the whole file into the container), to make it visible to the app.""",
         a_bn=r"""মান হবে `undefined`। Project directory-র `.env` file `compose.yaml`-এর **variable interpolation**-এ ব্যবহার হয়: এখানে `${API_PORT}` হয়ে যায় `8080`। এর value নিজে থেকে container-এ inject হয় না। App-কে দেখাতে চাইলে `environment: { JWT_SECRET: ${JWT_SECRET} }` যোগ করো, অথবা `env_file: .env` (এটা পুরো file container-এ load করে)।""",
+        quick_en=r"""It's `undefined`: the project `.env` only feeds `${…}` interpolation in `compose.yaml` and isn't injected into containers by itself. Pass the value with `environment: { JWT_SECRET: ${JWT_SECRET} }` or `env_file: .env`.""",
+        quick_bn=r"""এটা `undefined`: project-এর `.env` শুধু `compose.yaml`-এর `${…}` interpolation-এ কাজে লাগে, container-এ নিজে থেকে inject হয় না। Container-এ value দিতে `environment: { JWT_SECRET: ${JWT_SECRET} }` বা `env_file: .env` ব্যবহার করো।""",
         ex_en=r"""
             The tempting wrong answer is `dev-secret`, because both features use a file called `.env`, but they're different mechanisms:
             - **Interpolation** (`.env`, `--env-file`, shell variables): resolves `${VAR}` while Compose parses the file. Shell variables win over `.env`.
@@ -228,7 +234,7 @@ QUESTIONS = [
         id="docker-022", sub="Image Optimization", diff="medium", type="comparison",
         prio="high", market="both", mins=6,
         tags=["alpine", "slim", "distroless", "musl", "image-size"],
-        ver="Node.js 24 LTS images, distroless nodejs24-debian13", vs=True, status="stable",
+        ver="Node.js 24 (Maintenance LTS) images, distroless nodejs24-debian13", vs=True, status="stable",
         q_en=r"""Compare `node:24`, `node:24-slim`, `node:24-alpine` and a distroless Node.js image as the runtime base for a production API. How do you choose?""",
         q_bn=r"""Production API-র runtime base হিসেবে `node:24`, `node:24-slim`, `node:24-alpine` আর একটা distroless Node.js image-এর তুলনা করো। কোনটা বেছে নেবে, কীভাবে ঠিক করবে?""",
         a_en=r"""
@@ -247,6 +253,8 @@ QUESTIONS = [
 
             **আমি কীভাবে বেছে নিই:** নিরাপদ default হিসেবে slim; size গুরুত্বপূর্ণ আর dependency tree musl-এ যাচাই করা থাকলে Alpine; team-এর debugging-এর উপায় তৈরি থাকলে hardened production-এর জন্য distroless; পুরো image শুধু build stage-এ।
         """,
+        quick_en=r"""`node:24` is huge and best only as a build stage, while `-slim` (glibc) is the safe default with the best native-module compatibility. Alpine is smallest but uses musl, which some native modules handle badly, and distroless has no shell or package manager: more hardened, but harder to debug.""",
+        quick_bn=r"""`node:24` অনেক বড়, শুধু build stage-এর জন্যই ভালো; আর `-slim` (glibc) নিরাপদ default, native module-এর সাথে compatibility সবচেয়ে ভালো। Alpine সবচেয়ে ছোট কিন্তু musl ব্যবহার করে, কিছু native module-এ সমস্যা হয়; আর distroless-এ shell বা package manager নেই: বেশি hardened, কিন্তু debug করা কঠিন।""",
         ex_en=r"""
             - **Size isn't everything.** After the first pull, base layers are cached on each host. Fewer packages matters more for CVE noise and attack surface than for megabytes.
             - **Debugging minimal images:** `docker debug <container>` (Docker Desktop) attaches a toolbox shell without changing the image. Distroless also publishes `:debug` variants with a BusyBox shell, and Kubernetes has ephemeral debug containers.
@@ -366,6 +374,8 @@ QUESTIONS = [
             3. Cross-build দ্রুত করো: architecture-নিরপেক্ষ কাজ (TypeScript/Next build) `$BUILDPLATFORM`-এ চালাও, আর native addon-ওয়ালা production dependency install করো এমন stage-এ, যেটা **target** platform-এর জন্য চলে। QEMU emulation দিয়ে অন্য architecture build করা যায়, কিন্তু অনেক ধীর।
             4. Deploy manifest-এ digest দিয়ে pin করো আর platform যাচাই করো (`docker buildx imagetools inspect`)।
         """,
+        quick_en=r"""The image was built as `linux/arm64` on Apple silicon, so the amd64 server can't execute its binaries (`exec format error`). Build release images in CI as multi-platform images with `docker buildx build --platform linux/amd64,linux/arm64 --push`, never from laptops.""",
+        quick_bn=r"""Apple silicon-এ image `linux/arm64` হিসেবে build হয়েছে, তাই amd64 server তার binary চালাতে পারে না (`exec format error`)। Release image CI-তে `docker buildx build --platform linux/amd64,linux/arm64 --push` দিয়ে multi-platform হিসেবে build করো, laptop থেকে কখনো না।""",
         ex_en=r"""
             - **Other causes of `exec format error`:** an entrypoint shell script without a shebang line (`#!/bin/sh`), or a binary built for a different OS. CRLF line endings in scripts usually show up differently, as `no such file or directory`.
             - **Testing locally:** `docker run --platform linux/amd64 …` on a Mac runs the amd64 image under emulation, which is good for a smoke test but not for benchmarking.
@@ -421,6 +431,8 @@ QUESTIONS = [
             - **Data:** Redis persistence আর upload-এর জন্য named volume, সাথে **test করা backup**।
             - **Operations:** disk ঠিক রাখতে পুরনো image prune করা, CI-তে `docker scout` scan, মৌলিক monitoring আর alert (disk, memory, restart, 5xx), আর লিখিত deploy ও rollback পদ্ধতি।
         """,
+        quick_en=r"""Deploy immutable images by digest, add `restart: unless-stopped`, healthchecks and a graceful stop, and set memory, CPU and PID limits. Rotate logs (the default `json-file` driver doesn't), harden containers (non-root, read-only, `cap_drop`), publish only the reverse proxy, and back up named volumes.""",
+        quick_bn=r"""Digest দিয়ে immutable image deploy করো, `restart: unless-stopped`, healthcheck আর graceful stop দাও, আর memory, CPU, PID limit set করো। Log rotate করো (default `json-file` driver নিজে করে না), container harden করো (non-root, read-only, `cap_drop`), শুধু reverse proxy publish করো, আর named volume-এর backup রাখো।""",
         ex_en=r"""
             - **`daemon.json` log settings apply only to containers created afterwards.** Existing containers keep their old driver until they're recreated.
             - **`deploy.resources` in plain Compose:** Compose applies `limits` (memory, CPUs) to containers even outside Swarm. Verify with `docker stats` or `docker inspect`.
@@ -538,6 +550,8 @@ QUESTIONS = [
 
             **VM-এ Compose যথেষ্ট** ছোট team, অল্প কয়েকটা service, মাঝারি traffic আর single-host ঝুঁকি মেনে নেওয়া গেলে। এটা সস্তা, সহজ, debug করাও সহজ, আর blue/green script দিয়ে প্রায় zero-downtime deploy পাওয়া যায়। **Kubernetes (সম্ভব হলে managed: EKS/GKE/AKS) লাভজনক** হয় যখন অনেক service বা team থাকে, node/AZ জুড়ে high availability লাগে, autoscaling লাগে, ঘনঘন deploy হয়, আর এটা দেখার জন্য একটা platform team থাকে। Managed container service (ECS/Fargate, Cloud Run) একটা জনপ্রিয় মাঝামাঝি পথ।
         """,
+        quick_en=r"""Docker builds and runs containers on one host; Kubernetes is a cluster orchestrator that keeps declared state across many nodes (scheduling, self-healing, rolling updates, autoscaling). Compose on a VM suits a small team with a few services; Kubernetes pays off with many services, multi-node HA and a team to run it.""",
+        quick_bn=r"""Docker একটা host-এ image build আর container চালায়; Kubernetes হলো cluster orchestrator, যেটা অনেক node জুড়ে declare করা state বজায় রাখে (scheduling, self-healing, rolling update, autoscaling)। ছোট team আর অল্প কয়েকটা service হলে VM-এ Compose-ই যথেষ্ট; অনেক service, multi-node HA আর চালানোর মতো team থাকলে Kubernetes লাভজনক।""",
         ex_en=r"""
             - **Concept mapping:** Compose service ≈ Deployment + Service; `healthcheck` ≈ liveness/readiness/startup probes (Kubernetes ignores the image `HEALTHCHECK`); named volume ≈ PersistentVolumeClaim; `secrets:` ≈ Secret; `restart:` ≈ the kubelet's restart behaviour plus controllers.
             - **Hidden costs of Kubernetes:** cluster upgrades, networking (CNI, ingress), observability, RBAC, YAML sprawl and on-call expertise. For a three-person team that overhead can exceed the benefit.
@@ -627,6 +641,8 @@ QUESTIONS = [
             5. **Untrusted code**-এর জন্য (customer plugin, public fork-এর CI) container-এর চেয়ে শক্ত boundary লাগে: gVisor, Kata বা microVM।
             6. **Detect:** `docker` group audit করো, `docker events` দিয়ে privileged container তৈরি হলে alert দাও, আর খোলা port monitor করো।
         """,
+        quick_en=r"""Both hand out root on the host: anyone reaching `docker.sock` or the unauthenticated TCP 2375 API can start a privileged container that mounts `/`. Instead, build in CI without the host daemon, deploy by pull (or Docker over SSH, or mTLS on 2376), and front any tool that needs the API with a filtering socket proxy.""",
+        quick_bn=r"""দুটো প্রস্তাবই host-এর root দিয়ে দেয়: `docker.sock` বা authentication-ছাড়া TCP 2375 API-তে যে পৌঁছাতে পারে, সে `/` mount করা privileged container চালাতে পারে। তার বদলে CI-তে host daemon ছাড়া build করো, pull করে deploy করো (বা SSH বা 2376-এ mTLS দিয়ে Docker), আর যে tool-এর API লাগে তার সামনে filtering socket proxy রাখো।""",
         ex_en=r"""
             **Threat model in one line:** "Whoever controls the Docker API controls the host." Every design decision follows from minimising who can reach that API and what a compromised workload can do.
 

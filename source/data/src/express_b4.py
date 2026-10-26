@@ -42,6 +42,8 @@ QUESTIONS = [
         a_bn=r"""
             এটা security-সংক্রান্ত HTTP **response header** set করে। Helmet 8-এর default-এ আছে একটি baseline `Content-Security-Policy`, `Strict-Transport-Security` (এক বছর, `includeSubDomains`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: no-referrer`, cross-origin isolation header, `X-XSS-Protection: 0`, আর এটা `X-Powered-By` সরিয়ে দেয়।
         """,
+        quick_en=r"""It sets a group of security-related response headers, such as `Content-Security-Policy`, `Strict-Transport-Security` and `X-Content-Type-Options: nosniff`, and removes `X-Powered-By`. It doesn't validate input, rate-limit or turn on HTTPS.""",
+        quick_bn=r"""এটা security-সংক্রান্ত একগুচ্ছ response header set করে, যেমন `Content-Security-Policy`, `Strict-Transport-Security` আর `X-Content-Type-Options: nosniff`, আর `X-Powered-By` সরিয়ে দেয়। এটা input validate করে না, rate limit করে না, HTTPS-ও চালু করে না।""",
         ex_en=r"""
             Option A is the common misconception: helmet does **nothing** to your input. You still need schema validation, parameterised queries and output encoding. It also doesn't rate-limit (that's `express-rate-limit`) or enable HTTPS (TLS is terminated by NGINX/the load balancer; HSTS only tells browsers to keep using HTTPS).
 
@@ -88,6 +90,8 @@ QUESTIONS = [
             - **Route level:** role বা permission middleware, যেমন admin endpoint-এর জন্য `requireRole('admin')`।
             - **Object level:** handler বা service-এ — *এই* order কি *এই* user-এর (আর tenant-এর)? এই check বাদ দেওয়াই classic IDOR / BOLA bug: একজন logged-in user `/orders/123` বদলে `/orders/124` করে অন্যের data দেখে ফেলে।
         """,
+        quick_en=r"""Authentication answers "who are you?": middleware verifies a session, JWT or API key and sets `req.user`; failure is `401`. Authorization answers "what may you do?": role checks per route and ownership checks per object (to prevent IDOR); failure is `403`, or `404` to hide that the resource exists.""",
+        quick_bn=r"""Authentication-এর প্রশ্ন "তুমি কে?": middleware session, JWT বা API key যাচাই করে `req.user` set করে; fail করলে `401`। Authorization-এর প্রশ্ন "তুমি কী করতে পারো?": route-এ role check আর প্রতিটা object-এ ownership check (IDOR ঠেকাতে); fail করলে `403`, বা resource আছে কিনা লুকাতে `404`।""",
         ex_en=r"""
             - **Why object-level checks are easy to miss:** role middleware passes (the user *is* a customer), the route works in testing with your own IDs, and nothing fails visibly. It's #1 in the OWASP API Security Top 10 for a reason.
             - **Best practice:** scope the query itself — `orders.findOne({ id, userId: req.user.id })` — so you can't forget a separate `if`.
@@ -157,6 +161,8 @@ QUESTIONS = [
 
             `requireRole` একটি factory: এটা অনুমোদিত role-গুলো একটি `Set`-এ ধরে রাখে এবং এমন middleware return করে যা `req.user` না থাকলে (ভুলভাবে configure করা route) `401`, role অনুমোদিত না হলে `403`, আর অন্যথায় `next()` call করে।
         """,
+        quick_en=r"""`authenticate` parses `Bearer <token>`, verifies it with pinned `algorithms`, `issuer` and `audience`, returns `401` with `WWW-Authenticate` (`TOKEN_EXPIRED` or `INVALID_TOKEN`) on failure, and calls `next()` outside the `try`. `requireRole` is a factory: `401` without `req.user`, `403` for a wrong role, else `next()`.""",
+        quick_bn=r"""`authenticate` `Bearer <token>` parse করে, pinned `algorithms`, `issuer` আর `audience` দিয়ে `jwt.verify` চালায়, fail করলে `WWW-Authenticate`-সহ `401` দেয় (`TOKEN_EXPIRED` বা `INVALID_TOKEN`), আর `next()` call করে `try`-এর বাইরে। `requireRole` একটা factory: `req.user` না থাকলে `401`, role না মিললে `403`, নইলে `next()`।""",
         ex_en=r"""
             - **Pin the algorithm:** without `algorithms`, a library could accept tokens signed with an unexpected algorithm (the historic `alg: none` and RS/HS confusion attacks). Verified: an `alg: none` token is rejected with `401`.
             - **Check `iss`/`aud`:** a token minted for another service with the same secret shouldn't work here (verified: wrong audience → `401`).
@@ -252,6 +258,8 @@ QUESTIONS = [
 
             **একটি backend-ওয়ালা first-party web app-এর জন্য আমার default: session**, Redis-এ, secure cookie সহ — সহজ ও নিরাপদ। JWT বেছে নিই যখন একাধিক service বা native mobile app-কে নিজে নিজে identity verify করতে হয়, অথবা token আসে কোনো identity provider (OAuth 2.0 / OpenID Connect) থেকে।
         """,
+        quick_en=r"""Sessions keep an opaque ID in an `httpOnly` cookie and the data in a store like Redis: instant revocation, but a lookup per request and CSRF protection needed. JWTs need no lookup and suit many services or mobile clients, but are hard to revoke early; for a typical first-party web app I choose sessions.""",
+        quick_bn=r"""Session-এ `httpOnly` cookie-তে থাকে একটা opaque ID আর data থাকে Redis-এর মতো store-এ: সাথে সাথে revoke করা যায়, কিন্তু প্রতি request-এ lookup আর CSRF protection লাগে। JWT-তে lookup লাগে না, অনেক service বা mobile client-এর জন্য সুবিধাজনক, কিন্তু মেয়াদের আগে revoke করা কঠিন; সাধারণ first-party web app-এ আমি session বেছে নিই।""",
         ex_en=r"""
             - **"Stateless" is rarely fully stateless:** as soon as you need logout-everywhere, bans or refresh-token rotation, you store state again. Be honest about that trade-off in interviews.
             - **Performance:** a Redis session lookup is typically sub-millisecond; it's rarely the bottleneck people fear.
@@ -332,6 +340,8 @@ QUESTIONS = [
             4. **Fix:** `finally`-তে release (`catch`-এ `ROLLBACK` সহ), অথবা transaction helper / একক query-র জন্য `pool.query()` ব্যবহার।
             5. **পরেরবার যেন দ্রুত fail করে:** `connectionTimeoutMillis`, `statement_timeout` আর `idle_in_transaction_session_timeout`; outbound HTTP call-এ `AbortSignal.timeout()`; pool `waitingCount` আর ধীর request-এর অনুপাতের উপর alert।
         """,
+        quick_en=r"""Normal CPU, slow worsening and "a restart fixes it" point to a leaked resource, most likely pool connections never released when an error skips `client.release()`. Confirm with the pool's `waitingCount` and `pg_stat_activity`, release in `finally`, and set `connectionTimeoutMillis` and statement timeouts to fail fast.""",
+        quick_bn=r"""CPU স্বাভাবিক, ধীরে ধীরে খারাপ হওয়া আর "restart দিলে ঠিক হয়" মানে কোনো resource leak, সম্ভবত pool-এর connection, যেটা error হলে `client.release()` skip হওয়ায় ফেরত যায় না। Pool-এর `waitingCount` আর `pg_stat_activity` দিয়ে নিশ্চিত হও, `finally`-তে release করো, আর দ্রুত fail করতে `connectionTimeoutMillis` ও statement timeout দাও।""",
         ex_en=r"""
             **Other causes with the same "hang, no errors" signature:**
             - a middleware branch that neither responds nor calls `next()`;
@@ -418,7 +428,7 @@ QUESTIONS = [
         id="express-026", sub="Testing", diff="hard", type="coding",
         prio="high", market="both", mins=10,
         tags=["testing", "supertest", "node-test", "dependency-injection", "integration-tests"],
-        ver="Express 5.x; Node.js 24 LTS / 26 (node:test); supertest 7.x", vs=False, status="stable",
+        ver="Express 5.x; Node.js 26 LTS / 24 (node:test); supertest 7.x", vs=False, status="stable",
         q_en=r"""
             Write integration tests for `POST /api/orders` using `node:test` and supertest that check:
 
@@ -449,6 +459,8 @@ QUESTIONS = [
 
             supertest-এর `request(app)` সরাসরি app নেয় এবং ভেতরে ভেতরে একটি ephemeral port-এ bind করে, ফলে কোনো নির্দিষ্ট port খোলে না এবং test parallel-এ চলতে পারে। `node:test`-এ আমি `describe`/`it` ব্যবহার করি, `beforeEach`-এ প্রতিবার নতুন app বানাই (যাতে test-গুলো state share না করে), আর `node:assert/strict` দিয়ে assert করি: status code, response body, আর — গুরুত্বপূর্ণভাবে — fake repository-তে রেকর্ড হওয়া side effect (401/400-এ কিছু save হয়নি; `userId` token থেকে নেওয়া)।
         """,
+        quick_en=r"""Use an app factory, `createApp({ ordersRepo, verifyToken })`, that returns the app without `listen()` and takes its dependencies as parameters, so tests inject in-memory fakes. supertest's `request(app)` needs no fixed port; with `node:test`, build a fresh app per test and assert status, body and what the fake saved.""",
+        quick_bn=r"""একটা app factory ব্যবহার করো, `createApp({ ordersRepo, verifyToken })`, যেটা `listen()` ছাড়া app return করে আর dependency parameter হিসেবে নেয়, তাই test-এ in-memory fake দেওয়া যায়। supertest-এর `request(app)`-এ fixed port লাগে না; `node:test`-এ প্রতি test-এ নতুন app বানাও আর status, body ও fake-এ কী save হলো assert করো।""",
         ex_en=r"""
             - **Test behaviour, not implementation:** assert on HTTP status, body and observable side effects, not on which internal function was called.
             - **Security-relevant tests matter most:** "nothing is saved on 400" and "userId comes from the token, not the body" catch real vulnerabilities (mass assignment, IDOR) that happy-path tests miss.

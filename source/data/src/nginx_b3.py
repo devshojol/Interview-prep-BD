@@ -47,6 +47,8 @@ QUESTIONS = [
 
             সব জায়গায় HTTPS ঠিকঠাক চললে HSTS যোগ করো, যাতে browser আর সাধারণ HTTP চেষ্টাই না করে।
         """,
+        quick_en=r"""Point DNS at the server and run `certbot --nginx -d example.com`, which proves control with the HTTP-01 challenge and adds `listen 443 ssl` and the certificate paths. Redirect port 80 with `return 301 https://$host$request_uri;`, and let certbot's timer renew it (test with `certbot renew --dry-run`).""",
+        quick_bn=r"""Domain-এর DNS server-এ point করো, তারপর `certbot --nginx -d example.com` চালাও; এটা HTTP-01 challenge দিয়ে domain-এর মালিকানা প্রমাণ করে আর `listen 443 ssl` ও certificate path যোগ করে। Port 80-কে `return 301 https://$host$request_uri;` দিয়ে redirect করো, আর renewal certbot-এর timer-এর উপর ছেড়ে দাও (`certbot renew --dry-run` দিয়ে test করো)।""",
         ex_en=r"""
             - **Use `fullchain.pem`, not `cert.pem`.** Without the intermediate certificate, some clients (older Android, some HTTP libraries) fail with "unable to verify" even though desktop browsers work.
             - **Keep port 80 reachable:** HTTP-01 renewals need it. The redirect server is fine, because certbot handles the challenge path.
@@ -135,6 +137,8 @@ QUESTIONS = [
 
             **Compress কোরো না** আগে থেকেই compressed format (JPEG, PNG, WebP, MP4, ZIP, WOFF2)। এতে CPU খরচ হয়, কিন্তু কিছুই বাঁচে না। Text-ভিত্তিক JSON API response-এ লাভ সবচেয়ে বেশি: প্রায়ই ৭০–৯০% ছোট হয়।
         """,
+        quick_en=r"""Turn on `gzip on;` and add text types to `gzip_types`, because only `text/html` is compressed by default, with a moderate `gzip_comp_level` (around 4–6), a `gzip_min_length` and `gzip_vary on`. Don't compress formats that are already compressed, such as JPEG, PNG, WOFF2 or ZIP.""",
+        quick_bn=r"""`gzip on;` দাও আর `gzip_types`-এ text type-গুলো যোগ করো, কারণ default-এ শুধু `text/html` compress হয়; সাথে মাঝারি `gzip_comp_level` (৪–৬-এর মতো), `gzip_min_length` আর `gzip_vary on`। JPEG, PNG, WOFF2 বা ZIP-এর মতো আগে থেকেই compressed format আবার compress কোরো না।""",
         ex_en=r"""
             - **Brotli** usually compresses text better than gzip, but it isn't part of stock NGINX. It needs the third-party `ngx_brotli` module, or you can let the CDN do Brotli at the edge.
             - **Pre-compression:** with `gzip_static on;`, NGINX serves `app.js.gz` if it exists next to `app.js`, so you compress once at build time at maximum level with zero runtime CPU. The module is included in the official nginx.org packages.
@@ -208,6 +212,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`$upstream_response_time` is the time from when NGINX started connecting to the upstream until it received the whole response from it, so it measures the backend. `$request_time` covers the whole request from the client's first byte to the last byte sent to the client, so it also includes slow client networks.""",
         a_bn=r"""`$upstream_response_time` হলো upstream-এর সাথে NGINX connect শুরু করা থেকে পুরো response পাওয়া পর্যন্ত সময়, তাই এটা backend-কে মাপে। `$request_time` পুরো request ধরে মাপে, client-এর প্রথম byte থেকে client-কে পাঠানো শেষ byte পর্যন্ত, তাই এতে ধীর client network-এর সময়ও থাকে।""",
+        quick_en=r"""`$upstream_response_time`: it runs from connecting to the upstream until its whole response arrives, so it measures the backend. `$request_time` covers the entire request, including time spent on a slow client network.""",
+        quick_bn=r"""`$upstream_response_time`: upstream-এ connect শুরু থেকে তার পুরো response পাওয়া পর্যন্ত সময়, তাই এটা backend-এর সময় মাপে। `$request_time` পুরো request-এর সময়, slow client network-এ লাগা সময়সহ।""",
         ex_en=r"""
             The tempting wrong answer is `$request_time`, the total time. Comparing the two is the actual diagnostic:
             - `rt` high but `urt` low → the backend was fast; the client's network (e.g. a weak mobile connection) or a large download is slow.
@@ -259,6 +265,8 @@ QUESTIONS = [
 
             Login-এর জন্য আলাদা zone রাখো, যেমন `rate=5r/m` আর ছোট burst। এতে সাধারণ browsing-এ প্রভাব না ফেলে brute-force আর credential-stuffing-এর চেষ্টা ধীর হয়ে যায়। একসাথে কতগুলো connection থাকবে সেটাও সীমিত করতে চাইলে (যেমন download-এর জন্য) `limit_conn` যোগ করো।
         """,
+        quick_en=r"""`limit_req_zone` keeps a leaky bucket per client IP at a set `rate`, and `burst` lets extra requests through, delayed unless `nodelay` serves them at once. Rejections are 503 by default, so set `limit_req_status 429`, and use a separate, much stricter zone (like `5r/m`) for login.""",
+        quick_bn=r"""`limit_req_zone` প্রতিটা client IP-র জন্য একটা নির্দিষ্ট `rate`-এ leaky bucket রাখে, আর `burst` বাড়তি request ঢুকতে দেয়; `nodelay` না দিলে সেগুলো delay হয়, দিলে সাথে সাথে serve হয়। Default-এ reject হলে 503 যায়, তাই `limit_req_status 429` দাও, আর login-এর জন্য আলাদা, অনেক কড়া zone (যেমন `5r/m`) রাখো।""",
         ex_en=r"""
             - **Real client IP first:** behind a CDN or load balancer, `$binary_remote_addr` is the proxy's IP, and one limit then applies to everyone. Configure the `realip` module before rate limiting.
             - **Shared IPs:** mobile carriers and offices often put many users behind one IP (CGNAT). Keep per-IP limits generous and add per-user or per-API-key limits in the app (e.g. Redis-backed) for authenticated traffic.
@@ -350,6 +358,8 @@ QUESTIONS = [
 
             **Open source-এ failure ধরা হয় passive-ভাবে:** `fail_timeout`-এর (default 10s) মধ্যে কোনো server-এ `max_fails` (default 1) বার চেষ্টা fail করলে সেটা `fail_timeout` সময়ের জন্য unavailable চিহ্নিত হয়। কোনটা failure ধরা হবে তা ঠিক করে `proxy_next_upstream` (default: `error timeout`)। নিরাপদ হলে fail করা request পরের server-এ retry হয়। **Active** health check (`health_check` দিয়ে নিয়মিত probe) NGINX Plus-এর feature।
         """,
+        quick_en=r"""List the backends in an `upstream`: weighted round-robin is the default, with `least_conn`, `ip_hash` and `hash … consistent` as options, and `backup` servers used only when the primaries are down. Open-source failure detection is passive (`max_fails` within `fail_timeout`); active health checks are NGINX Plus.""",
+        quick_bn=r"""Backend-গুলো একটা `upstream`-এ লেখো: default হলো weighted round-robin, আর option হিসেবে আছে `least_conn`, `ip_hash` আর `hash … consistent`; `backup` server শুধু primary-রা down থাকলে ব্যবহার হয়। Open-source NGINX-এ failure ধরা হয় passive-ভাবে (`fail_timeout`-এর মধ্যে `max_fails`); active health check NGINX Plus-এর feature।""",
         ex_en=r"""
             - **Passive means users find the failures.** The first request to a dead server fails (and is retried if possible) before the server is marked down. Keep `proxy_connect_timeout` short (a few seconds) so a dead host is detected quickly instead of hanging for the 60 s default.
             - **Retries and idempotency:** since 1.9.13 NGINX doesn't retry non-idempotent requests (POST, PATCH) on the next server once they've been sent, unless you add `non_idempotent`. Don't, unless the endpoint is truly idempotent.
@@ -421,6 +431,8 @@ QUESTIONS = [
 
             **আমি প্রথমে কোথায় দেখি:** NGINX-এর **error log**, যেখানে সঠিক কারণ লেখা থাকে (`Connection refused`, `upstream timed out`, `upstream prematurely closed connection`, `upstream sent too big header`)। তারপর `$upstream_response_time` আর `$upstream_addr`-সহ access log, তারপর app-এর log আর health।
         """,
+        quick_en=r"""502 means NGINX got no valid response (app down, wrong port, crash), and 504 means the upstream didn't answer in time (`proxy_read_timeout`, 60 s by default). 503 is often NGINX's own rate limiting, 499 means the client gave up, and the NGINX error log names the exact reason first.""",
+        quick_bn=r"""502 মানে NGINX কোনো valid response পায়নি (app বন্ধ, ভুল port, crash), আর 504 মানে upstream সময়মতো উত্তর দেয়নি (`proxy_read_timeout`, default 60 s)। 503 প্রায়ই NGINX-এর নিজের rate limiting, 499 মানে client অপেক্ষা ছেড়ে চলে গেছে; সবার আগে NGINX-এর error log দেখো, সেখানে ঠিক কারণটা লেখা থাকে।""",
         ex_en=r"""
             **Typical fixes:**
             - **502 (refused):** start or fix the app, check the port, and make the app listen on the right interface. In containers that means `0.0.0.0`; on SELinux hosts, allow NGINX network connections.
@@ -506,6 +518,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""The "on by default since 1.29.7" answer is correct. NGINX **1.29.7** (mainline, March 2026, so included in the 1.30 stable branch) changed the defaults. `keepalive` in `upstream` blocks is enabled by default with 32 idle connections per worker (`local`: not shared across locations), `proxy_http_version` defaults to **1.1**, and the `Connection` header is no longer sent to upstreams by default. The three classic lines are still valid and are required on NGINX 1.28 and older, but on 1.30 they're redundant.""",
         a_bn=r""""1.29.7 থেকে default-এ চালু" উত্তরটাই সঠিক। NGINX **1.29.7** (mainline, মার্চ ২০২৬, তাই 1.30 stable branch-এও আছে) default বদলে দিয়েছে। `upstream` block-এ `keepalive` default-এ চালু, প্রতি worker-এ ৩২টা idle connection (`local`: location-গুলোর মধ্যে share হয় না), `proxy_http_version`-এর default **1.1**, আর `Connection` header default-এ আর upstream-এ পাঠানো হয় না। পুরনো তিনটা line এখনো বৈধ, আর NGINX 1.28 বা তার আগের version-এ দরকারি, কিন্তু 1.30-এ অপ্রয়োজনীয়।""",
+        quick_en=r"""Since 1.29.7 (so in 1.30 stable), upstream keepalive is on by default (`keepalive 32 local`), `proxy_http_version` defaults to 1.1 and `Connection` isn't sent upstream. The old three lines are redundant but harmless on 1.30, and still required on 1.28 and older.""",
+        quick_bn=r"""1.29.7 থেকে (তাই 1.30 stable-এ) upstream keepalive default-এ চালু (`keepalive 32 local`), `proxy_http_version`-এর default 1.1, আর upstream-এ `Connection` header পাঠানো হয় না। পুরনো তিনটা line 1.30-এ অপ্রয়োজনীয় কিন্তু ক্ষতিকর না, আর 1.28 বা তার আগের version-এ এখনো দরকার।""",
         ex_en=r"""
             "Nothing changed" is what most blog posts and older interview answers say, which is exactly why it's tempting. It's true for ≤ 1.28 and now outdated. The HTTP/2-only option mixes up a different feature: since 1.29.4, `proxy_http_version 2` **can** proxy to HTTP/2 backends, but HTTP/1.1 keepalive wasn't removed.
 
@@ -530,7 +544,7 @@ QUESTIONS = [
         id="nginx-026", sub="Timeouts", diff="hard", type="scenario",
         prio="high", market="both", mins=10,
         tags=["504", "proxy_read_timeout", "streaming", "background-jobs", "timeouts"],
-        ver="NGINX 1.30 stable / 1.31 mainline, Node.js 24 LTS", vs=False, status="stable",
+        ver="NGINX 1.30 stable / 1.31 mainline, Node.js 26 LTS", vs=False, status="stable",
         q_en=r"""Admins exporting a large sales report (a CSV for the last year) get `504 Gateway Timeout` after exactly 60 seconds. Other endpoints are fine. A teammate proposes adding `proxy_read_timeout 600s;` to the `http` block. How do you analyse and fix this properly?""",
         q_bn=r"""Admin-রা একটা বড় sales report (গত এক বছরের CSV) export করতে গেলে ঠিক ৬০ সেকেন্ড পরে `504 Gateway Timeout` পায়। অন্য endpoint-গুলো ঠিক আছে। একজন teammate প্রস্তাব দিয়েছে `http` block-এ `proxy_read_timeout 600s;` যোগ করার। কীভাবে বিশ্লেষণ করবে আর ঠিকভাবে সমাধান করবে?""",
         a_en=r"""
@@ -559,6 +573,8 @@ QUESTIONS = [
 
             **পুরো chain দেখো:** প্রতিটা hop-এর নিজস্ব timeout আছে। সামনে থাকা CDN বা load balancer (AWS ALB-এর idle timeout default ৬০ সেকেন্ড), Node-এর `server.requestTimeout` (বর্তমান version-এ default ৫ মিনিট) আর database-এর statement timeout, NGINX ঠিক করার পরেও এদের যেকোনোটা request কেটে দিতে পারে।
         """,
+        quick_en=r"""Exactly 60 seconds is the default `proxy_read_timeout`: Node sent nothing because it builds the whole CSV before responding. Don't raise it globally; scope a longer timeout to the export route as a stop-gap, and fix it properly by streaming the rows or making the export an async job.""",
+        quick_bn=r"""ঠিক ৬০ সেকেন্ড হলো default `proxy_read_timeout`: পুরো CSV বানানোর আগে Node কিছুই পাঠায়নি। Global-এ timeout বাড়িও না; সাময়িক সমাধান হিসেবে শুধু export route-এ বড় timeout দাও, আর আসল সমাধান হলো row-গুলো stream করা বা export-কে async job বানানো।""",
         ex_en=r"""
             - **NGINX timeout family:** `proxy_connect_timeout` (establishing the TCP connection; usually can't exceed 75 s), `proxy_send_timeout` (between two writes of the request to the upstream), `proxy_read_timeout` (between two reads of the response), `send_timeout` (between two writes to the **client**), and `client_body_timeout`/`client_header_timeout` (reading from the client).
             - **Buffering and big downloads:** by default NGINX buffers upstream responses and spills large ones to temp files (up to `proxy_max_temp_file_size`). For true streaming, the app can send `X-Accel-Buffering: no`, or you set `proxy_buffering off` on that location.

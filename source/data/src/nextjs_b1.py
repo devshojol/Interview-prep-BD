@@ -56,6 +56,8 @@ QUESTIONS = [
 
             বর্তমান version 16.4; App Router recommended, আর পুরনো Pages Router এখনো support করে।
         """,
+        quick_en=r"""Next.js is a full-stack React framework. React gives you components, and Next.js adds what surrounds them: file-system routing (App Router), server rendering with Server Components and streaming, Server Actions and Route Handlers, `proxy.ts`, and built-in image and font optimisation.""",
+        quick_bn=r"""Next.js হলো একটা full-stack React framework। React শুধু component দেয়, আর Next.js তার চারপাশের বাকি সব যোগ করে: folder দিয়ে routing (App Router), Server Component ও streaming-সহ server-এ render করা, Server Action ও Route Handler, `proxy.ts`, আর ছবি ও font নিজে থেকেই optimise করার ব্যবস্থা।""",
         ex_en=r"""
             **Request flow in the App Router (simplified):**
             1. `proxy.ts` can redirect, rewrite or set headers before routing.
@@ -120,6 +122,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`app/blog/[slug]/page.tsx`. In the App Router, **folders** define URL segments (`[slug]` is a dynamic segment) and a segment only becomes a public route when it contains a `page` file (for UI) or a `route` file (for an API endpoint).""",
         a_bn=r"""`app/blog/[slug]/page.tsx`। App Router-এ **folder** URL segment ঠিক করে (`[slug]` হলো dynamic segment), আর কোনো segment-এ `page` file (UI-এর জন্য) বা `route` file (API endpoint-এর জন্য) থাকলেই কেবল সেটা public route হয়।""",
+        quick_en=r"""`app/blog/[slug]/page.tsx`. In the App Router folders define URL segments (`[slug]` is dynamic), and a segment becomes a public route only when it has a `page` file (or a `route` file for an API).""",
+        quick_bn=r"""`app/blog/[slug]/page.tsx`। App Router-এ folder দিয়ে URL segment তৈরি হয় (`[slug]` dynamic), আর কোনো segment public route হয় শুধু তখনই যখন তাতে `page` file থাকে (API-র জন্য `route` file)।""",
         ex_en=r"""
             The tempting wrong answer is `app/blog/[slug].tsx` — that file-as-route style comes from the **Pages Router** (`pages/blog/[slug].tsx`). In `app/`, a file named `[slug].tsx` is just a module, not a route. `index.tsx` has no special meaning in the App Router either, and a `layout.tsx` alone only wraps pages — it doesn't create one.
 
@@ -156,6 +160,8 @@ QUESTIONS = [
 
             **Page** (`page.tsx`) হলো একটা route-এর নিজস্ব UI। **Template** (`template.tsx`) দেখতে layout-এর মতো, কিন্তু **প্রতিটা navigation-এ নতুন instance** পায়, ফলে state reset হয় আর effect আবার চলে — enter animation বা প্রতি page-এ logging-এর জন্য কাজে লাগে।
         """,
+        quick_en=r"""A `layout.tsx` wraps a segment and its children and stays mounted with its state when you navigate between pages under it. A `page.tsx` is one route's unique UI, and a `template.tsx` wraps like a layout but remounts on every navigation.""",
+        quick_bn=r"""`layout.tsx` একটা segment আর তার children-কে wrap করে, আর তার নিচের page-গুলোর মধ্যে navigate করলেও state-সহ mounted থাকে। `page.tsx` হলো একটা route-এর নিজস্ব UI, আর `template.tsx` layout-এর মতো wrap করে কিন্তু প্রতি navigation-এ নতুন করে mount হয়।""",
         ex_en=r"""
             - Layouts receive `children` and `params` (a Promise in v16), but **not** `searchParams` — because they don't re-render on navigation, they'd show stale query values. Read search params in the page or in a Client Component with `useSearchParams()`.
             - Layouts can't know the current pathname on the server; use `usePathname()` in a Client Component for "active link" styling.
@@ -226,6 +232,8 @@ QUESTIONS = [
 
             আমি শুধু যেখানে interactivity লাগে সেখানেই `'use client'` দিই — like button, dropdown, live validation-সহ form — আর page, layout ও data fetching Server Component হিসেবে রাখি। Server-এর data serialisable props হিসেবে Client Component-এ যায়।
         """,
+        quick_en=r"""Components are Server Components by default: they run only on the server, can be `async` and read data directly, and ship no JS. Add `'use client'` only where you need state, effects, event handlers or browser APIs; those are prerendered and then hydrated.""",
+        quick_bn=r"""Component default-এ Server Component: শুধু server-এ চলে, `async` হতে পারে, সরাসরি data পড়তে পারে, আর কোনো JS পাঠায় না। State, effect, event handler বা browser API লাগলে শুধু সেখানেই `'use client'` দাও; সেগুলো আগে prerender হয়, তারপর hydrate হয়।""",
         ex_en=r"""
             - **Misconception:** "Client Components render only in the browser." No — they're server-rendered to HTML too; `'use client'` means "also ship and hydrate this on the client".
             - **The directive marks a boundary in the module graph:** everything a Client Component file imports becomes client code. So put it on small leaf components, not on a whole page.
@@ -314,6 +322,8 @@ QUESTIONS = [
 
             App Router recommended, কারণ এটা কম JavaScript পাঠায়, UI stream করে, data fetching component-এর পাশেই রাখে আর নতুন feature (Cache Components, Partial Prerendering, Server Action) support করে। পুরনো app maintain করার সময় আমি এখনো Pages Router নিয়ে কাজ করব — এটা support করে, আর দুটো router একই project-এ পাশাপাশি থাকতে পারে, ফলে route ধরে ধরে ধাপে ধাপে migration করা যায়।
         """,
+        quick_en=r"""The App Router uses Server Components, nested persistent layouts, async data fetching, streaming and Server Actions, so it ships less JS and supports the new features. The Pages Router is legacy but supported; you meet it in existing apps, and both can coexist for route-by-route migration.""",
+        quick_bn=r"""App Router-এ আছে Server Component, nested persistent layout, async data fetching, streaming আর Server Action, তাই কম JS যায় আর নতুন feature-গুলো পাওয়া যায়। Pages Router legacy কিন্তু এখনো supported; পুরনো app-এ এটা পাবে, আর route ধরে migrate করার জন্য দুটো একসাথে চলতে পারে।""",
         ex_en=r"""
             **Coexistence details:** both `app/` and `pages/` can live in one project, but the same URL can't be defined in both. Navigating between a Pages route and an App route is a hard navigation (full page load), so migrate related routes together.
 
@@ -396,6 +406,8 @@ QUESTIONS = [
 
             Client-এ `useActionState` আমাকে return করা error আর button-এর জন্য `isPending` দেয়। JavaScript load হওয়ার আগেও form কাজ করে, কারণ `<form action>` native-ভাবে post করে।
         """,
+        quick_en=r"""Write a `'use server'` action `(prevState, formData)` that checks the session, validates with Zod `safeParse` and returns field errors, saves the post, calls `updateTag('posts')` and redirects. The form uses `useActionState` for errors and `isPending`.""",
+        quick_bn=r"""একটা `'use server'` action `(prevState, formData)` লেখো যেটা session check করে, Zod `safeParse` দিয়ে validate করে field error return করে, post save করে, `updateTag('posts')` call করে, তারপর redirect করে। Form-এ error আর `isPending`-এর জন্য `useActionState` ব্যবহার হয়।""",
         ex_en=r"""
             **Why these choices**
             - `safeParse` + `z.flattenError(...).fieldErrors` (Zod 4) gives a plain, serialisable object the client can render per field.
@@ -536,6 +548,8 @@ QUESTIONS = [
 
             Next.js বাড়তি স্তরের সুরক্ষা দেয় — শুধু POST, CSRF ঠেকাতে `Origin` বনাম host check (proxy থাকলে `serverActions.allowedOrigins`), অনুমান করা যায় না এমন action ID, ব্যবহার না হওয়া action বাদ দেওয়া, আর closure-এ ধরা variable encrypt করা — কিন্তু এগুলোর কোনোটাই তোমার নিজের check-এর বিকল্প না।
         """,
+        quick_en=r"""Every exported Server Action is a public POST endpoint, so the risks are missing auth (IDOR), unvalidated input, leaky return values and abuse. In each action authenticate, validate with a schema, authorize on the specific resource, rate-limit and return minimal data; never rely on `proxy.ts`.""",
+        quick_bn=r"""প্রতিটা export করা Server Action একটা public POST endpoint, তাই ঝুঁকি হলো auth না থাকা (IDOR), validate না করা input, বেশি data return করা আর অপব্যবহার। প্রতিটা action-এ authenticate করো, schema দিয়ে validate করো, নির্দিষ্ট resource-এর উপর authorize করো, rate-limit দাও আর অল্প data return করো; `proxy.ts`-এর উপর ভরসা করো না।""",
         ex_en=r"""
             - **Data Access Layer (DAL):** centralise session verification and authorization in `server-only` modules, wrapped in React `cache()` so multiple checks per request hit the session store once.
             - **Bound arguments and closures** are encrypted, but they still travel to the client and back — don't put secrets in them, and re-check authorization anyway.
@@ -649,6 +663,8 @@ QUESTIONS = [
             4. **CDN।** Hash-যুক্ত static asset immutable, চিরকাল cache থাকে; prerender করা shell public-ভাবে cache করা যায়; dynamic response `private`। Tag দিয়ে বদলাতে পারে এমন HTML-এর জন্য purge করো বা ছোট `s-maxage` দাও। নিশ্চিত করো CDN আর ingress streaming response buffer করে না।
             5. **Deploy।** Readiness probe-সহ rolling update, আগের version-এ থাকা client-দের জন্য পুরনো static asset রেখে দেওয়া, আর `SIGTERM`-এ graceful shutdown (১০–৩০ সেকেন্ড drain, যাতে `after()` callback শেষ হয়)।
         """,
+        quick_en=r"""All three symptoms come from per-pod state: in-memory caches, per-pod revalidation and per-build action keys. Build one image with a fixed `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` and `deploymentId`, use a Redis-backed shared cache handler with tag sync, and replicate only invalidation events across regions.""",
+        quick_bn=r"""তিনটা সমস্যাই আসে pod-ভিত্তিক state থেকে: in-memory cache, pod ধরে revalidation, আর প্রতি build-এ আলাদা action key। নির্দিষ্ট `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` আর `deploymentId`-সহ একটাই image বানাও, tag sync-সহ Redis-backed shared cache handler ব্যবহার করো, আর region-এর মধ্যে শুধু invalidation event replicate করো।""",
         ex_en=r"""
             **Failure scenarios**
             - **Redis unavailable:** handlers must catch errors and return a cache miss from `get()` (an unhandled error becomes a render error). Decide explicitly: serve from a short local cache (availability) or render fresh (correctness, more DB load).

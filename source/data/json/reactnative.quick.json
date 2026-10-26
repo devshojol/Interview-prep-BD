@@ -1,0 +1,548 @@
+[
+ {
+  "id": "rn-q01",
+  "subtopic": "Tooling",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "metro",
+   "bundler",
+   "fast-refresh"
+  ],
+  "technologyVersion": "React Native 0.88 (Metro 0.87)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is Metro in React Native?",
+   "bn": "React Native-এ Metro কী?"
+  },
+  "answer": {
+   "en": "Metro is React Native's JavaScript bundler. It resolves your imports (including platform files like `Button.ios.tsx`), transforms TS/JSX with Babel and serves the bundle to the app over HTTP during development with Fast Refresh; for a release build it produces the bundle that ships inside the app.",
+   "bn": "Metro হলো React Native-এর JavaScript bundler। এটা import resolve করে (`Button.ios.tsx`-এর মতো platform file-সহ), Babel দিয়ে TS/JSX transform করে, আর development-এ Fast Refresh-সহ HTTP দিয়ে app-কে bundle দেয়; release build-এ app-এর ভেতরে যাওয়া bundle-টা তৈরি করে।"
+  },
+  "explanation": {
+   "en": "It plays the role webpack or Vite plays on the web, but tuned for React Native. When something looks stale or a weird resolution error appears, restarting with a cleared cache (`npx expo start --clear`) is the classic first step.",
+   "bn": "Web-এ webpack বা Vite যে কাজ করে, Metro সেটাই করে, তবে React Native-এর জন্য বানানো। কিছু পুরোনো দেখালে বা অদ্ভুত resolution error এলে প্রথম কাজ হলো cache clear করে restart করা (`npx expo start --clear`)।"
+  },
+  "interviewTip": {
+   "en": "Say \"Metro is the bundler, like webpack for React Native\" and mention Fast Refresh and platform-specific file resolution.",
+   "bn": "বলো \"Metro হলো bundler, React Native-এর webpack-এর মতো\", আর Fast Refresh ও platform-specific file resolution-এর কথা বলো।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — Metro",
+    "url": "https://reactnative.dev/docs/metro"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why would you clear Metro's cache?",
+    "bn": "Metro-র cache কেন clear করবে?"
+   }
+  ],
+  "related": [
+   "rn-005",
+   "rn-006"
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q02",
+  "subtopic": "Architecture",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "hermes",
+   "js-engine",
+   "bytecode"
+  ],
+  "technologyVersion": "React Native 0.88 (Hermes V1 default since 0.84)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": true,
+  "status": "stable",
+  "question": {
+   "en": "What is Hermes?",
+   "bn": "Hermes কী?"
+  },
+  "answer": {
+   "en": "Hermes is the JavaScript engine built for React Native and used by default. It compiles your JS to bytecode at build time, so the app skips parsing on startup, starts faster and uses less memory; Hermes V1 has been the default since React Native 0.84.",
+   "bn": "Hermes হলো React Native-এর জন্য বানানো JavaScript engine, আর এটাই default। এটা build-এর সময় JS-কে bytecode-এ compile করে, ফলে app start-এর সময় parse করতে হয় না, দ্রুত চালু হয় আর memory কম লাগে; React Native 0.84 থেকে Hermes V1 default।"
+  },
+  "explanation": {
+   "en": "Hermes is the engine, not the architecture: JSI sits on top of it. Older apps sometimes used JavaScriptCore; that's now community-maintained.",
+   "bn": "Hermes হলো engine, architecture না: JSI এর ওপরে বসে। পুরোনো app-এ মাঝে মাঝে JavaScriptCore ব্যবহার হতো; সেটা এখন community-maintained।"
+  },
+  "interviewTip": {
+   "en": "Link it to a user benefit: \"bytecode at build time means faster startup on cheap phones\".",
+   "bn": "User-এর লাভের সাথে মেলাও: \"build-এর সময় bytecode মানে কম দামের phone-এ দ্রুত startup\"।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — Using Hermes",
+    "url": "https://reactnative.dev/docs/hermes"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is Hermes related to JSI and the New Architecture?",
+    "bn": "Hermes-এর সাথে JSI আর New Architecture-এর সম্পর্ক কী?"
+   }
+  ],
+  "related": [
+   "rn-033",
+   "rn-038"
+  ],
+  "code": {
+   "language": "javascript",
+   "source": "const isHermes = () => !!global.HermesInternal;\nconsole.log(isHermes()); // true in a Hermes-powered app"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q03",
+  "subtopic": "Styling",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "dp",
+   "pixelratio",
+   "density",
+   "units"
+  ],
+  "technologyVersion": "Version-independent concept (React Native 0.88)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Style sizes in React Native are unitless. Are they pixels? What is `PixelRatio`?",
+   "bn": "React Native-এ style-এর size-এ কোনো unit থাকে না। এগুলো কি pixel? `PixelRatio` কী?"
+  },
+  "answer": {
+   "en": "No, they are density-independent pixels (dp on Android, points on iOS), so `width: 100` looks about the same physical size on every screen. `PixelRatio.get()` returns how many physical pixels make one dp on the device (e.g. 2 or 3), which you use when you need real pixel sizes, such as requesting an image of the right resolution.",
+   "bn": "না, এগুলো density-independent pixel (Android-এ dp, iOS-এ point), তাই `width: 100` সব screen-এ মোটামুটি একই physical size-এ দেখায়। `PixelRatio.get()` বলে device-এ এক dp-তে কতগুলো physical pixel (যেমন 2 বা 3); আসল pixel size লাগলে এটা ব্যবহার করো, যেমন সঠিক resolution-এর image চাওয়ার সময়।"
+  },
+  "explanation": {
+   "en": "Sizing images for the screen this way avoids blurry images on dense screens and wasted memory on small ones. `PixelRatio.getFontScale()` is separate: it reflects the user's font-size setting.",
+   "bn": "এভাবে screen অনুযায়ী image-এর size ঠিক করলে dense screen-এ ঝাপসা image আর ছোট screen-এ memory অপচয় দুটোই এড়ানো যায়। `PixelRatio.getFontScale()` আলাদা জিনিস: এটা user-এর font-size setting দেখায়।"
+  },
+  "interviewTip": {
+   "en": "Say \"dp, not pixels\", then give the image-resolution use case for `PixelRatio`.",
+   "bn": "বলো \"pixel না, dp\", তারপর `PixelRatio`-এর image-resolution ব্যবহারের উদাহরণ দাও।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — PixelRatio",
+    "url": "https://reactnative.dev/docs/pixelratio"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you draw a hairline border that is exactly one physical pixel?",
+    "bn": "ঠিক এক physical pixel-এর একটা hairline border কীভাবে আঁকবে?"
+   }
+  ],
+  "related": [
+   "rn-003",
+   "rn-014"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "import { PixelRatio } from 'react-native';\nconst px = PixelRatio.getPixelSizeForLayoutSize(100);\n// → 300 on a device with PixelRatio 3, 263 with PixelRatio 2.625"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q04",
+  "subtopic": "Styling",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "stylesheet",
+   "styles",
+   "typescript"
+  ],
+  "technologyVersion": "React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `StyleSheet.create` do, and why use it instead of inline style objects?",
+   "bn": "`StyleSheet.create` কী করে, আর inline style object-এর বদলে কেন এটা ব্যবহার করবে?"
+  },
+  "answer": {
+   "en": "`StyleSheet.create` defines named style objects once, outside the component. It keeps styles out of the render function (no new object on every render), gives TypeScript checking and editor autocompletion for style props, and keeps JSX readable.",
+   "bn": "`StyleSheet.create` component-এর বাইরে একবারে নাম দেওয়া style object তৈরি করে। এতে style render function-এর বাইরে থাকে (প্রতি render-এ নতুন object তৈরি হয় না), style prop-এ TypeScript checking আর editor autocompletion পাওয়া যায়, আর JSX পরিষ্কার থাকে।"
+  },
+  "explanation": {
+   "en": "Inline styles are fine for values that truly depend on props or state; combine them with an array (`style={[styles.card, dynamic]}`). Later items in the array win.",
+   "bn": "যে value সত্যিই props বা state-এর ওপর নির্ভর করে, তার জন্য inline style ঠিক আছে; array দিয়ে মেলাও (`style={[styles.card, dynamic]}`)। Array-এর পরের item জেতে।"
+  },
+  "interviewTip": {
+   "en": "Mention the array syntax for combining static and dynamic styles; it's the follow-up interviewers usually ask.",
+   "bn": "Static আর dynamic style মেলানোর array syntax-এর কথা বলো; interviewer সাধারণত এটাই follow-up-এ জিজ্ঞেস করে।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — StyleSheet",
+    "url": "https://reactnative.dev/docs/stylesheet"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "In `style={[a, b]}`, which style wins when both set `color`?",
+    "bn": "`style={[a, b]}`-এ দুটোই `color` set করলে কোনটা জেতে?"
+   }
+  ],
+  "related": [
+   "rn-003"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "const styles = StyleSheet.create({\n  card: { padding: 16, borderRadius: 12, backgroundColor: '#fff' },\n  title: { fontSize: 18, fontWeight: '600' },\n});\n// <View style={[styles.card, isActive && { borderColor: 'green' }]} />"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q05",
+  "subtopic": "Navigation (Expo Router)",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "usefocuseffect",
+   "useeffect",
+   "navigation",
+   "screens"
+  ],
+  "technologyVersion": "Expo Router ~58 / React Navigation 7",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "On a screen, what is the difference between `useEffect` and `useFocusEffect`?",
+   "bn": "একটা screen-এ `useEffect` আর `useFocusEffect`-এর পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "In a stack, screens you navigate away from usually stay mounted, so `useEffect` runs only on mount and doesn't run again when you come back. `useFocusEffect` runs every time the screen gains focus and cleans up when it loses focus, so it's the right place to refresh data or start/stop a subscription per visit.",
+   "bn": "Stack-এ যে screen থেকে অন্য জায়গায় যাও, সেটা সাধারণত mounted থেকে যায়, তাই `useEffect` শুধু mount-এ চলে, ফিরে এলে আবার চলে না। `useFocusEffect` প্রতিবার screen focus পেলে চলে আর focus হারালে cleanup করে, তাই প্রতি visit-এ data refresh বা subscription চালু/বন্ধ করার সঠিক জায়গা এটা।"
+  },
+  "explanation": {
+   "en": "Wrap the callback in `useCallback`; otherwise it changes on every render and the effect re-runs while the screen is focused.",
+   "bn": "Callback-টা `useCallback`-এ মোড়াও; নইলে প্রতি render-এ এটা বদলায় আর screen focused থাকা অবস্থাতেই effect বারবার চলে।"
+  },
+  "interviewTip": {
+   "en": "Start with the fact that screens stay mounted in a stack; the rest of the answer follows from it.",
+   "bn": "শুরু করো এই কথা দিয়ে যে stack-এ screen mounted থেকে যায়; বাকি উত্তর এখান থেকেই আসে।"
+  },
+  "references": [
+   {
+    "title": "React Navigation — useFocusEffect",
+    "url": "https://reactnavigation.org/docs/use-focus-effect"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How else could you refetch data when a screen is revisited?",
+    "bn": "Screen-এ ফিরে এলে আর কীভাবে data refetch করা যায়?"
+   }
+  ],
+  "related": [
+   "rn-017",
+   "rn-018"
+  ],
+  "code": {
+   "language": "tsx",
+   "source": "import { useFocusEffect } from 'expo-router';\nimport { useCallback } from 'react';\n\nuseFocusEffect(useCallback(() => {\n  const sub = subscribeToCart(setCart);\n  return () => sub.unsubscribe(); // runs when the screen loses focus\n}, []));"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q06",
+  "subtopic": "App Store Release",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "apk",
+   "aab",
+   "ipa",
+   "release",
+   "eas-build"
+  ],
+  "technologyVersion": "Expo SDK 58, eas-cli 25.x",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between an APK, an AAB and an IPA?",
+   "bn": "APK, AAB আর IPA-এর মধ্যে পার্থক্য কী?"
+  },
+  "answer": {
+   "en": "An APK is an Android package you can install directly on a device. An AAB (Android App Bundle) is the publishing format Google Play requires for new apps; Play generates optimised APKs per device from it. An IPA is the iOS app archive you upload to App Store Connect or install through TestFlight.",
+   "bn": "APK হলো Android package, যেটা সরাসরি device-এ install করা যায়। AAB (Android App Bundle) হলো নতুন app-এর জন্য Google Play-এর বাধ্যতামূলক publishing format; Play এটা থেকে প্রতিটা device-এর জন্য optimise করা APK তৈরি করে। IPA হলো iOS app archive, যেটা App Store Connect-এ upload করো বা TestFlight দিয়ে install করো।"
+  },
+  "explanation": {
+   "en": "In `eas.json` above, `production` makes an AAB (the default) and `preview` makes an APK. For sharing a build with testers directly, an APK is easier because an AAB can't be installed by tapping it.",
+   "bn": "ওপরের `eas.json`-এ `production` AAB বানায় (default), আর `preview` বানায় APK। Tester-দের সরাসরি build দিতে APK সহজ, কারণ AAB tap করে install করা যায় না।"
+  },
+  "interviewTip": {
+   "en": "Answer \"install vs publish\" in one line, then mention how you'd get an APK from EAS for testers.",
+   "bn": "এক লাইনে \"install বনাম publish\" বলো, তারপর tester-দের জন্য EAS থেকে কীভাবে APK নেবে সেটা বলো।"
+  },
+  "references": [
+   {
+    "title": "Expo — Build APKs for Android emulators and devices",
+    "url": "https://docs.expo.dev/build-reference/apk/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why does the same app need both a `version` and a build number?",
+    "bn": "একই app-এর কেন `version` আর build number দুটোই লাগে?"
+   }
+  ],
+  "related": [
+   "rn-040",
+   "rn-006"
+  ],
+  "code": {
+   "language": "json",
+   "source": "{\n  \"build\": {\n    \"preview\": { \"distribution\": \"internal\", \"android\": { \"buildType\": \"apk\" } },\n    \"production\": {}\n  }\n}"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q07",
+  "subtopic": "Expo Basics",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "expo-cli",
+   "dev-server",
+   "expo-go",
+   "development-build"
+  ],
+  "technologyVersion": "Expo SDK 58",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What happens when you run `npx expo start`?",
+   "bn": "`npx expo start` চালালে কী হয়?"
+  },
+  "answer": {
+   "en": "It starts the Expo dev server (Metro) and prints a QR code. You scan it with a development build (or Expo Go for simple projects) or press `a`/`i` to open an Android emulator or iOS simulator; the app then loads the JS bundle from your computer, with Fast Refresh on every save.",
+   "bn": "এটা Expo dev server (Metro) চালু করে আর একটা QR code দেখায়। Development build (বা সাধারণ project-এ Expo Go) দিয়ে সেটা scan করো, অথবা `a`/`i` চেপে Android emulator বা iOS simulator খোলো; তারপর app তোমার computer থেকে JS bundle load করে, প্রতিবার save-এ Fast Refresh হয়।"
+  },
+  "explanation": {
+   "en": "It doesn't build native code; the native app must already be installed. If `expo-dev-client` is installed, the CLI targets your development build by default. Press `j` to open the debugger.",
+   "bn": "এটা native code build করে না; native app আগে থেকেই install থাকতে হয়। `expo-dev-client` install থাকলে CLI default-ভাবে তোমার development build-কে target করে। Debugger খুলতে `j` চাপো।"
+  },
+  "interviewTip": {
+   "en": "Separate \"JS dev server\" from \"native app\": the command serves JS; the native part comes from Expo Go or your development build.",
+   "bn": "\"JS dev server\" আর \"native app\" আলাদা করে বলো: command-টা JS serve করে; native অংশ আসে Expo Go বা তোমার development build থেকে।"
+  },
+  "references": [
+   {
+    "title": "Expo — Expo CLI",
+    "url": "https://docs.expo.dev/more/expo-cli/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Phone and laptop are on different networks; how do you still connect?",
+    "bn": "Phone আর laptop আলাদা network-এ থাকলে তবু কীভাবে connect করবে?"
+   }
+  ],
+  "related": [
+   "rn-006",
+   "rn-007"
+  ],
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q08",
+  "subtopic": "Core Components",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "alert",
+   "dialog",
+   "ui"
+  ],
+  "technologyVersion": "React Native 0.88",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you show a native confirmation dialog in React Native?",
+   "bn": "React Native-এ native confirmation dialog কীভাবে দেখাবে?"
+  },
+  "answer": {
+   "en": "Use `Alert.alert(title, message, buttons)`. Each button has a `text`, an optional `onPress` and a `style` (`'cancel'`, `'destructive'` or `'default'`); the call doesn't block, so put the follow-up action in `onPress`.",
+   "bn": "`Alert.alert(title, message, buttons)` ব্যবহার করো। প্রতিটা button-এ থাকে `text`, ঐচ্ছিক `onPress` আর `style` (`'cancel'`, `'destructive'` বা `'default'`); call-টা block করে না, তাই পরের কাজ `onPress`-এ রাখো।"
+  },
+  "explanation": {
+   "en": "Android shows at most three buttons; `style: 'destructive'` only changes the look on iOS. `Alert.prompt` (text input) is iOS-only, so for custom content build a modal instead.",
+   "bn": "Android সর্বোচ্চ তিনটা button দেখায়; `style: 'destructive'` শুধু iOS-এ চেহারা বদলায়। `Alert.prompt` (text input) শুধু iOS-এ আছে, তাই custom content লাগলে modal বানাও।"
+  },
+  "interviewTip": {
+   "en": "Point out that it isn't blocking like the browser's `confirm()`; the result comes through callbacks.",
+   "bn": "বলো যে এটা browser-এর `confirm()`-এর মতো block করে না; ফলাফল আসে callback দিয়ে।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — Alert",
+    "url": "https://reactnative.dev/docs/alert"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How would you wrap `Alert.alert` in a Promise that resolves to true/false?",
+    "bn": "`Alert.alert`-কে কীভাবে একটা Promise-এ মোড়াবে যেটা true/false দিয়ে resolve হয়?"
+   }
+  ],
+  "related": [
+   "rn-002",
+   "rn-005"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "Alert.alert('Delete address?', 'This cannot be undone.', [\n  { text: 'Cancel', style: 'cancel' },\n  { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(id) },\n]);"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q09",
+  "subtopic": "Deep Linking",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "linking",
+   "urls",
+   "phone",
+   "browser"
+  ],
+  "technologyVersion": "React Native 0.88, Expo SDK 58",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you open a phone dialer, an email draft or a website from a React Native app?",
+   "bn": "React Native app থেকে phone dialer, email draft বা website কীভাবে খুলবে?"
+  },
+  "answer": {
+   "en": "Call `Linking.openURL()` with the right URL scheme: `tel:` for the dialer, `mailto:` for email, `https:` for the browser. It returns a Promise, so catch the error in case no app can handle the URL. For web pages you want to keep inside the app, `expo-web-browser` opens an in-app browser.",
+   "bn": "সঠিক URL scheme দিয়ে `Linking.openURL()` call করো: dialer-এর জন্য `tel:`, email-এর জন্য `mailto:`, browser-এর জন্য `https:`। এটা Promise return করে, তাই কোনো app URL-টা handle করতে না পারলে error catch করো। Web page app-এর ভেতরেই রাখতে চাইলে `expo-web-browser` একটা in-app browser খোলে।"
+  },
+  "explanation": {
+   "en": "`Linking.canOpenURL()` needs extra setup to check other apps' schemes (`LSApplicationQueriesSchemes` on iOS, `<queries>` on Android 11+), so many apps simply try `openURL` and catch the failure.",
+   "bn": "অন্য app-এর scheme check করতে `Linking.canOpenURL()`-এর বাড়তি setup লাগে (iOS-এ `LSApplicationQueriesSchemes`, Android 11+-এ `<queries>`), তাই অনেক app সরাসরি `openURL` চেষ্টা করে failure catch করে।"
+  },
+  "interviewTip": {
+   "en": "Name the schemes (`tel:`, `mailto:`, `https:`) and mention error handling; that's what the question checks.",
+   "bn": "Scheme-গুলোর নাম বলো (`tel:`, `mailto:`, `https:`) আর error handling-এর কথা বলো; প্রশ্নটা এটাই যাচাই করে।"
+  },
+  "references": [
+   {
+    "title": "reactnative.dev — Linking",
+    "url": "https://reactnative.dev/docs/linking"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "How is opening a URL different from handling an incoming deep link?",
+    "bn": "URL খোলা আর ভেতরে আসা deep link handle করার মধ্যে পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "rn-020"
+  ],
+  "code": {
+   "language": "typescript",
+   "source": "import { Linking } from 'react-native';\nawait Linking.openURL('tel:+8801700000000');\nawait Linking.openURL('mailto:support@example.com?subject=Order%201042');"
+  },
+  "technology": "reactnative"
+ },
+ {
+  "id": "rn-q10",
+  "subtopic": "Permissions",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "permissions",
+   "camera",
+   "privacy"
+  ],
+  "technologyVersion": "Expo SDK 58 (expo-camera ~58)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the usual pattern for asking for a runtime permission such as the camera?",
+   "bn": "Camera-র মতো runtime permission চাওয়ার স্বাভাবিক pattern কী?"
+  },
+  "answer": {
+   "en": "Check the current status first, ask only when the user starts the feature that needs it, and handle all three outcomes: granted (continue), denied but can ask again (explain and offer a retry), and permanently denied (explain and open Settings with `Linking.openSettings()`). The usage text also has to be declared in the app config.",
+   "bn": "আগে বর্তমান status দেখো, user যখন feature-টা শুরু করে কেবল তখনই চাও, আর তিনটা ফলাফলই handle করো: granted (চালিয়ে যাও), denied কিন্তু আবার চাওয়া যায় (কারণ বুঝিয়ে retry দাও), আর স্থায়ীভাবে denied (বুঝিয়ে `Linking.openSettings()` দিয়ে Settings খোলো)। Usage text app config-এও declare করতে হয়।"
+  },
+  "explanation": {
+   "en": "On iOS the system prompt appears only once; after a denial only Settings can change it, which is why asking in context matters. Without the iOS usage description (e.g. via the `expo-camera` config plugin) the app crashes when it asks or is rejected in review.",
+   "bn": "iOS-এ system prompt একবারই আসে; deny করার পরে শুধু Settings থেকে বদলানো যায়, এজন্যই প্রসঙ্গ বুঝে চাওয়া জরুরি। iOS usage description (যেমন `expo-camera` config plugin দিয়ে) না থাকলে permission চাওয়ার সময় app crash করে বা review-তে reject হয়।"
+  },
+  "interviewTip": {
+   "en": "List the three states (granted, can ask again, blocked) and say you ask at the moment of need.",
+   "bn": "তিনটা অবস্থা বলো (granted, আবার চাওয়া যায়, blocked) আর বলো যে তুমি দরকারের মুহূর্তেই চাও।"
+  },
+  "references": [
+   {
+    "title": "Expo — Permissions",
+    "url": "https://docs.expo.dev/guides/permissions/"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why shouldn't you request every permission on the first launch?",
+    "bn": "প্রথম launch-এই সব permission কেন চাওয়া উচিত না?"
+   }
+  ],
+  "related": [
+   "rn-037",
+   "rn-036"
+  ],
+  "code": {
+   "language": "tsx",
+   "source": "const [permission, requestPermission] = useCameraPermissions(); // expo-camera\nif (!permission) return null;                  // still loading\nif (!permission.granted) {\n  return permission.canAskAgain\n    ? <Button title=\"Allow camera\" onPress={requestPermission} />\n    : <Button title=\"Open Settings\" onPress={() => Linking.openSettings()} />;\n}"
+  },
+  "technology": "reactnative"
+ }
+]

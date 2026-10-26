@@ -58,6 +58,10 @@
    "redis-014",
    "redis-023"
   ],
+  "quickAnswer": {
+   "en": "In cache-aside the app reads Redis first; on a miss it loads from the DB, stores the result with a TTL and returns it; on writes it updates the DB and deletes the key. Write-through updates cache and DB together on every write; write-behind writes the cache first and flushes later, risking data loss.",
+   "bn": "Cache-aside-এ app আগে Redis পড়ে; miss হলে DB থেকে এনে TTL-সহ cache-এ রাখে আর return করে; write-এর সময় DB update করে key delete করে। Write-through প্রতিটা write-এ cache আর DB একসাথে update করে; write-behind আগে cache-এ লেখে, পরে DB-তে flush করে, তাই data হারানোর ঝুঁকি থাকে।"
+  },
   "commonMistakes": {
    "en": "Forgetting the TTL, updating the cache before the database commit, or treating Redis as the source of truth in a cache-aside setup.",
    "bn": "TTL দিতে ভুলে যাওয়া, database commit-এর আগে cache update করা, অথবা cache-aside setup-এ Redis-কেই source of truth ভেবে নেওয়া।"
@@ -132,6 +136,10 @@
    "redis-027",
    "redis-029"
   ],
+  "quickAnswer": {
+   "en": "Redis keeps everything in RAM, is accessed by key, has configurable durability and no rollback; PostgreSQL and MongoDB keep data on disk with rich queries and stronger durability. Redis can be the primary store for key-based, loss-tolerant data like sessions or counters, but not for orders or payments.",
+   "bn": "Redis সব data RAM-এ রাখে, key দিয়ে access হয়, durability configurable আর rollback নেই; PostgreSQL আর MongoDB disk-এ data রাখে, rich query আর শক্ত durability দেয়। Session বা counter-এর মতো key-based, সামান্য loss সহ্য করা যায় এমন data-র primary store Redis হতে পারে, কিন্তু order বা payment-এর জন্য না।"
+  },
   "commonMistakes": {
    "en": "Claiming Redis \"has no persistence\", or claiming it's a drop-in replacement for a relational database because it's faster.",
    "bn": "দাবি করা যে Redis-এ \"কোনো persistence নেই\", অথবা দ্রুত বলে এটা relational database-এর সরাসরি বিকল্প।"
@@ -191,6 +199,10 @@
    "redis-026",
    "redis-032"
   ],
+  "quickAnswer": {
+   "en": "`KEYS` scans the whole keyspace in one blocking O(N) call, and because commands run on a single thread, every other client waits until it finishes. Use the cursor-based `SCAN` with `MATCH` instead.",
+   "bn": "`KEYS` একটাই blocking O(N) call-এ পুরো keyspace scan করে, আর command একটা thread-এ চলে বলে শেষ না হওয়া পর্যন্ত বাকি সব client অপেক্ষা করে। এর বদলে cursor-based `SCAN` আর `MATCH` ব্যবহার করো।"
+  },
   "extraCode": [
    {
     "language": "javascript",
@@ -282,6 +294,10 @@
    "redis-013",
    "redis-015"
   ],
+  "quickAnswer": {
+   "en": "Delete `product:{id}` right after the DB commit, use versioned keys for category and search pages (bump a version with `INCR` so old pages simply expire), publish a change event so other services invalidate their own caches, and keep a short TTL everywhere as a safety net.",
+   "bn": "DB commit-এর ঠিক পরে `product:{id}` delete করো, category আর search page-এর জন্য versioned key রাখো (`INCR` দিয়ে version বাড়াও, পুরনো page নিজেই expire হবে), অন্য service যেন নিজের cache invalidate করে সেজন্য change event publish করো, আর সব জায়গায় safety net হিসেবে ছোট TTL রাখো।"
+  },
   "commonMistakes": {
    "en": "Answering only \"reduce the TTL\" (more DB load, still stale), or deleting keys with `KEYS category:*` in the request path.",
    "bn": "শুধু \"TTL কমিয়ে দাও\" বলা (DB load বাড়ে, তবুও stale থাকে), অথবা request path-এ `KEYS category:*` দিয়ে key delete করা।"
@@ -355,6 +371,10 @@
    "redis-009",
    "redis-021"
   ],
+  "quickAnswer": {
+   "en": "Pub/Sub is a fire-and-forget broadcast to whoever is connected, a List is a simple one-consumer queue, and a Stream is a persistent log with consumer groups and acks. Use Pub/Sub for typing indicators, a Stream (or a `BLMOVE` list) for the email job queue, and a Stream for the order-events log.",
+   "bn": "Pub/Sub শুধু সেই মুহূর্তে যুক্ত থাকা subscriber-দের কাছে বার্তা ছড়িয়ে দেয়, কিছু জমা রাখে না; List হলো একজন consumer-এর জন্য সহজ queue; আর Stream হলো জমা থাকা log, যেখানে consumer group আর ack আছে। তাই typing indicator-এর জন্য Pub/Sub, email পাঠানোর job queue-তে Stream (বা `BLMOVE` list), আর order event-এর log-এর জন্যও Stream।"
+  },
   "commonMistakes": {
    "en": "Using Pub/Sub as a job queue (jobs vanish when no worker is connected), or assuming Streams deliver exactly once.",
    "bn": "Pub/Sub-কে job queue হিসেবে ব্যবহার করা (কোনো worker connected না থাকলে job উধাও হয়ে যায়), অথবা ধরে নেওয়া যে Stream exactly-once delivery দেয়।"
@@ -414,6 +434,10 @@
    "redis-003",
    "redis-024"
   ],
+  "quickAnswer": {
+   "en": "`ZRANGE lb:weekly 0 2 REV WITHSCORES`: a sorted set is ordered by ascending score, and `REV` (Redis 6.2+) reverses it so index 0 is the highest score.",
+   "bn": "`ZRANGE lb:weekly 0 2 REV WITHSCORES`: sorted set ascending score-এ সাজানো থাকে, আর `REV` (Redis 6.2+) সেটা উল্টে দেয়, ফলে index 0 হয় সর্বোচ্চ score।"
+  },
   "options": [
    {
     "en": "`ZRANGE lb:weekly 0 2 WITHSCORES`",
@@ -502,6 +526,10 @@
    "redis-012",
    "redis-016"
   ],
+  "quickAnswer": {
+   "en": "One sorted set per client, each request scored by its timestamp. In one Lua script: read server `TIME`, remove entries older than the window, count with `ZCARD`, and if under the limit `ZADD` plus `PEXPIRE`, else compute `retryAfterMs` from the oldest entry. The script makes it atomic; O(log N) per call.",
+   "bn": "প্রতি client-এর জন্য একটা sorted set, যেখানে প্রতিটা request তার timestamp দিয়ে score করা। একটা Lua script-এ: server `TIME` নাও, window-এর চেয়ে পুরনো entry মুছো, `ZCARD` দিয়ে গোনো, limit-এর নিচে থাকলে `ZADD` আর `PEXPIRE`, নইলে সবচেয়ে পুরনো entry থেকে `retryAfterMs` বের করো। Script-এর কারণে কাজটা atomic; প্রতি call-এ O(log N)।"
+  },
   "commonMistakes": {
    "en": "Doing `ZCARD` and `ZADD` as separate commands from Node (race condition), using the timestamp as the member, or forgetting the expiry so idle clients' sets live forever.",
    "bn": "Node থেকে `ZCARD` আর `ZADD` আলাদা command হিসেবে চালানো (race condition), timestamp-কেই member বানানো, অথবা expiry ভুলে যাওয়া — ফলে idle client-এর set চিরকাল থেকে যায়।"
@@ -580,6 +608,10 @@
    "redis-030",
    "redis-023"
   ],
+  "quickAnswer": {
+   "en": "`SETNX` then a separate `EXPIRE` isn't atomic, so a crash between them leaves a lock with no TTL; the constant value plus `DEL` in `finally` can delete another instance's lock; and the TTL is shorter than the job. Fix: a random token, `SET key token NX PX ttl`, and compare-and-delete (`DELEX ... IFEQ` on 8.4+, or Lua).",
+   "bn": "`SETNX`-এর পরে আলাদা `EXPIRE` atomic না, তাই মাঝখানে crash হলে lock TTL ছাড়াই থেকে যায়; constant value আর `finally`-র `DEL` অন্য instance-এর lock মুছে দিতে পারে; আর TTL job-এর চেয়ে ছোট। Fix: random token, `SET key token NX PX ttl`, আর compare-and-delete (8.4+-এ `DELEX ... IFEQ`, নইলে Lua)।"
+  },
   "commonMistakes": {
    "en": "Fixing only the atomic acquire and still releasing with plain `DEL`, or doing the ownership check with a separate `GET` before `DEL`.",
    "bn": "শুধু atomic acquire ঠিক করে release-এ এখনো সাধারণ `DEL` রাখা, অথবা `DEL`-এর আগে আলাদা `GET` দিয়ে মালিকানা check করা।"

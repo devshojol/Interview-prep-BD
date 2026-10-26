@@ -58,6 +58,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Next.js is a full-stack React framework. React gives you components, and Next.js adds what surrounds them: file-system routing (App Router), server rendering with Server Components and streaming, Server Actions and Route Handlers, `proxy.ts`, and built-in image and font optimisation.",
+   "bn": "Next.js হলো একটা full-stack React framework। React শুধু component দেয়, আর Next.js তার চারপাশের বাকি সব যোগ করে: folder দিয়ে routing (App Router), Server Component ও streaming-সহ server-এ render করা, Server Action ও Route Handler, `proxy.ts`, আর ছবি ও font নিজে থেকেই optimise করার ব্যবস্থা।"
+  },
   "commonMistakes": {
    "en": "Describing Next.js only as \"React with SSR\", or presenting `getServerSideProps` and `middleware.ts` as the current way to build new apps.",
    "bn": "Next.js-কে শুধু \"SSR-সহ React\" বলা, অথবা নতুন app বানানোর বর্তমান উপায় হিসেবে `getServerSideProps` আর `middleware.ts` উপস্থাপন করা।"
@@ -118,6 +122,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "`app/blog/[slug]/page.tsx`. In the App Router folders define URL segments (`[slug]` is dynamic), and a segment becomes a public route only when it has a `page` file (or a `route` file for an API).",
+   "bn": "`app/blog/[slug]/page.tsx`। App Router-এ folder দিয়ে URL segment তৈরি হয় (`[slug]` dynamic), আর কোনো segment public route হয় শুধু তখনই যখন তাতে `page` file থাকে (API-র জন্য `route` file)।"
+  },
   "options": [
    {
     "en": "`app/blog/[slug].tsx`",
@@ -196,6 +204,10 @@
   "related": [
    "next-002"
   ],
+  "quickAnswer": {
+   "en": "A `layout.tsx` wraps a segment and its children and stays mounted with its state when you navigate between pages under it. A `page.tsx` is one route's unique UI, and a `template.tsx` wraps like a layout but remounts on every navigation.",
+   "bn": "`layout.tsx` একটা segment আর তার children-কে wrap করে, আর তার নিচের page-গুলোর মধ্যে navigate করলেও state-সহ mounted থাকে। `page.tsx` হলো একটা route-এর নিজস্ব UI, আর `template.tsx` layout-এর মতো wrap করে কিন্তু প্রতি navigation-এ নতুন করে mount হয়।"
+  },
   "commonMistakes": {
    "en": "Putting an auth check only in a layout, or expecting `searchParams` in a layout's props.",
    "bn": "শুধু layout-এ auth check রাখা, অথবা layout-এর props-এ `searchParams` আশা করা।"
@@ -263,6 +275,10 @@
   "related": [
    "next-001"
   ],
+  "quickAnswer": {
+   "en": "Components are Server Components by default: they run only on the server, can be `async` and read data directly, and ship no JS. Add `'use client'` only where you need state, effects, event handlers or browser APIs; those are prerendered and then hydrated.",
+   "bn": "Component default-এ Server Component: শুধু server-এ চলে, `async` হতে পারে, সরাসরি data পড়তে পারে, আর কোনো JS পাঠায় না। State, effect, event handler বা browser API লাগলে শুধু সেখানেই `'use client'` দাও; সেগুলো আগে prerender হয়, তারপর hydrate হয়।"
+  },
   "commonMistakes": {
    "en": "Adding `'use client'` to every page \"to make hooks work\", which ships far more JavaScript, or trying to use `useState` in a Server Component.",
    "bn": "\"Hook চালানোর জন্য\" প্রতিটা page-এ `'use client'` দেওয়া, যাতে অনেক বেশি JavaScript পাঠানো হয়, অথবা Server Component-এ `useState` ব্যবহারের চেষ্টা করা।"
@@ -335,6 +351,10 @@
    "next-002",
    "next-004"
   ],
+  "quickAnswer": {
+   "en": "The App Router uses Server Components, nested persistent layouts, async data fetching, streaming and Server Actions, so it ships less JS and supports the new features. The Pages Router is legacy but supported; you meet it in existing apps, and both can coexist for route-by-route migration.",
+   "bn": "App Router-এ আছে Server Component, nested persistent layout, async data fetching, streaming আর Server Action, তাই কম JS যায় আর নতুন feature-গুলো পাওয়া যায়। Pages Router legacy কিন্তু এখনো supported; পুরনো app-এ এটা পাবে, আর route ধরে migrate করার জন্য দুটো একসাথে চলতে পারে।"
+  },
   "commonMistakes": {
    "en": "Claiming the Pages Router is deprecated or removed, or using `getServerSideProps` inside the `app/` directory (it doesn't work there).",
    "bn": "দাবি করা যে Pages Router deprecated বা সরিয়ে ফেলা হয়েছে, অথবা `app/` directory-র ভেতরে `getServerSideProps` ব্যবহার করা (সেখানে এটা কাজ করে না)।"
@@ -407,6 +427,10 @@
   "related": [
    "next-004"
   ],
+  "quickAnswer": {
+   "en": "Write a `'use server'` action `(prevState, formData)` that checks the session, validates with Zod `safeParse` and returns field errors, saves the post, calls `updateTag('posts')` and redirects. The form uses `useActionState` for errors and `isPending`.",
+   "bn": "একটা `'use server'` action `(prevState, formData)` লেখো যেটা session check করে, Zod `safeParse` দিয়ে validate করে field error return করে, post save করে, `updateTag('posts')` call করে, তারপর redirect করে। Form-এ error আর `isPending`-এর জন্য `useActionState` ব্যবহার হয়।"
+  },
   "commonMistakes": {
    "en": "Validating only on the client, calling `redirect()` inside `try/catch`, or forgetting to invalidate the cache so the list doesn't show the new post.",
    "bn": "শুধু client-এ validate করা, `try/catch`-এর ভেতরে `redirect()` call করা, অথবা cache invalidate করতে ভুলে যাওয়া — ফলে list-এ নতুন post দেখা যায় না।"
@@ -483,6 +507,10 @@
   "related": [
    "next-013"
   ],
+  "quickAnswer": {
+   "en": "Every exported Server Action is a public POST endpoint, so the risks are missing auth (IDOR), unvalidated input, leaky return values and abuse. In each action authenticate, validate with a schema, authorize on the specific resource, rate-limit and return minimal data; never rely on `proxy.ts`.",
+   "bn": "প্রতিটা export করা Server Action একটা public POST endpoint, তাই ঝুঁকি হলো auth না থাকা (IDOR), validate না করা input, বেশি data return করা আর অপব্যবহার। প্রতিটা action-এ authenticate করো, schema দিয়ে validate করো, নির্দিষ্ট resource-এর উপর authorize করো, rate-limit দাও আর অল্প data return করো; `proxy.ts`-এর উপর ভরসা করো না।"
+  },
   "commonMistakes": {
    "en": "Assuming an action is safe because only logged-in users see the button, trusting TypeScript parameter types, or checking only that a user is logged in without checking they own the resource.",
    "bn": "ভাবা যে শুধু logged-in user button দেখে বলে action নিরাপদ, TypeScript parameter type-এর উপর ভরসা করা, অথবা user logged in কি না শুধু সেটা check করা — resource-টা তার কি না সেটা check না করা।"
@@ -559,6 +587,10 @@
   "related": [
    "next-023"
   ],
+  "quickAnswer": {
+   "en": "All three symptoms come from per-pod state: in-memory caches, per-pod revalidation and per-build action keys. Build one image with a fixed `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` and `deploymentId`, use a Redis-backed shared cache handler with tag sync, and replicate only invalidation events across regions.",
+   "bn": "তিনটা সমস্যাই আসে pod-ভিত্তিক state থেকে: in-memory cache, pod ধরে revalidation, আর প্রতি build-এ আলাদা action key। নির্দিষ্ট `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` আর `deploymentId`-সহ একটাই image বানাও, tag sync-সহ Redis-backed shared cache handler ব্যবহার করো, আর region-এর মধ্যে শুধু invalidation event replicate করো।"
+  },
   "commonMistakes": {
    "en": "Fixing it with sticky sessions (hides the problem, breaks on pod restarts), rebuilding the image per environment with different keys, or caching dynamic personalised HTML at the CDN.",
    "bn": "Sticky session দিয়ে \"ঠিক\" করা (সমস্যা লুকায়, pod restart হলে ভেঙে যায়), প্রতি environment-এ আলাদা key দিয়ে image আবার build করা, অথবা dynamic personalised HTML CDN-এ cache করা।"

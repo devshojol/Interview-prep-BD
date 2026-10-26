@@ -52,6 +52,8 @@ QUESTIONS = [
 
             Migration সামলায় সঙ্গী CLI, Drizzle Kit। Stable line হলো 0.45.x; v1.0 এখনো release candidate।
         """,
+        quick_en=r"""Drizzle is a TypeScript ORM for SQL databases: you define tables in TypeScript and the query API reads like SQL. Unlike TypeORM or Sequelize it infers types without code generation and has no entity manager, change tracking or lazy loading; 0.45.x is the stable line and v1.0 is still a release candidate.""",
+        quick_bn=r"""Drizzle হলো SQL database-এর জন্য একটা TypeScript ORM: table define করা হয় TypeScript-এ, আর query API দেখতে প্রায় SQL-এর মতো। TypeORM বা Sequelize-এর মতো entity manager, change tracking বা lazy loading নেই, আর code generation ছাড়াই type infer হয়; stable line হলো 0.45.x, v1.0 এখনো release candidate।""",
         ex_en=r"""
             - **"If you know SQL, you know Drizzle"** is the design goal. The flip side: you need to understand joins, indexes and transactions yourself — Drizzle won't hide the database.
             - **No magic loading:** traditional ORMs can trigger hidden N+1 queries through lazy relations. With Drizzle you choose: a join, a relational query (compiled into one SQL statement), or separate queries.
@@ -140,6 +142,8 @@ QUESTIONS = [
 
             Expected output-এ দেখানো আছে এই schema থেকে `drizzle-kit generate` কোন SQL তৈরি করে।
         """,
+        quick_en=r"""Use `pgTable('users', {...})` with `integer().primaryKey().generatedAlwaysAsIdentity()`, `varchar({ length: 255 }).notNull().unique()`, a `pgEnum` column with `.default('user')` and `timestamp('created_at', { withTimezone: true }).notNull().defaultNow()`. Types come from `$inferSelect` and `$inferInsert`.""",
+        quick_bn=r"""`pgTable('users', {...})`-এ `integer().primaryKey().generatedAlwaysAsIdentity()`, `varchar({ length: 255 }).notNull().unique()`, `.default('user')`-সহ একটা `pgEnum` column আর `timestamp('created_at', { withTimezone: true }).notNull().defaultNow()` লিখি। Type আসে `$inferSelect` আর `$inferInsert` থেকে।""",
         ex_en=r"""
             - **Identity vs serial:** identity columns are the SQL standard and PostgreSQL's recommendation. `generatedAlwaysAsIdentity()` rejects manual ids (and Drizzle removes `id` from the insert type); `generatedByDefaultAsIdentity()` allows overriding, which is handy for data imports.
             - **Always use `timestamptz`** (`withTimezone: true`) for points in time — it stores an absolute instant, so servers in Dhaka and Frankfurt agree. Plain `timestamp` silently drops the offset.
@@ -225,6 +229,8 @@ QUESTIONS = [
 
             আমি `db` একটা module-এ (বা NestJS provider-এ) **প্রতি process-এ একবার** তৈরি করি আর সব জায়গায় reuse করি — কখনো per request না। Relational API `db.query.*` চাইলে `schema` (table + relation) pass করা বাধ্যতামূলক। Shutdown-এর সময় pool বন্ধ করি (`pool.end()`)।
         """,
+        quick_en=r"""Drizzle wraps a driver: node-postgres (`drizzle-orm/node-postgres`, optionally with your own `Pool`), postgres.js, or a serverless driver such as Neon HTTP. Create `db` once per process and reuse it, pass `schema` if you want `db.query`, and close the pool on shutdown.""",
+        quick_bn=r"""Drizzle নিজে connection খোলে না, একটা driver-কে wrap করে: node-postgres (`drizzle-orm/node-postgres`, চাইলে নিজের `Pool` দিয়ে), postgres.js, বা Neon HTTP-র মতো serverless driver। `db` প্রতি process-এ একবার তৈরি করে সব জায়গায় reuse করি, `db.query` চাইলে `schema` pass করি, আর shutdown-এ pool বন্ধ করি।""",
         ex_en=r"""
             - **Why a single instance:** each `Pool` holds up to `max` connections. Creating one per request (or per hot-reload in dev) quickly hits PostgreSQL's `max_connections`.
             - **Choosing a driver:** `pg` is the most widely used and battle-tested; postgres.js is fast and has tagged-template ergonomics; both work well. Pick one and stay consistent.
@@ -316,6 +322,8 @@ QUESTIONS = [
 
             প্রতিটা builder await করতে হবে — তার আগে কিছুই চলে না।
         """,
+        quick_en=r"""`db.select().from(users).where(eq(users.id, 1))` returns an array; combine `and()` and `ilike()` with a partial `select({ id, email })`; use `insert().values().returning()`, `update().set().where()`, `delete().where().returning()` and `db.$count(users)`. Every builder runs only when awaited.""",
+        quick_bn=r"""`db.select().from(users).where(eq(users.id, 1))` একটা array দেয়; partial `select({ id, email })`-এর সাথে `and()` আর `ilike()` ব্যবহার করি; তারপর `insert().values().returning()`, `update().set().where()`, `delete().where().returning()` আর `db.$count(users)`। প্রতিটা builder শুধু `await` করলেই চলে।""",
         ex_en=r"""
             - **`returning()` is PostgreSQL-friendly:** it avoids a second round trip to read generated values. (MySQL doesn't support it; Drizzle offers `$returningId()` there.)
             - **Update/delete without `where`** affect every row. The official `eslint-plugin-drizzle` has `enforce-update-with-where` and `enforce-delete-with-where` rules to catch this in CI.
@@ -404,6 +412,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""`ilike(users.email, '%@gmail.com')`. It compiles to `"users"."email" ilike $1` — PostgreSQL's case-insensitive `LIKE` — with the pattern sent as a bound parameter.""",
         a_bn=r"""`ilike(users.email, '%@gmail.com')`। এটা compile হয় `"users"."email" ilike $1`-এ — PostgreSQL-এর case-insensitive `LIKE` — আর pattern-টা bound parameter হিসেবে যায়।""",
+        quick_en=r"""`ilike(users.email, '%@gmail.com')`: it compiles to PostgreSQL's case-insensitive `ILIKE` with the pattern sent as a bound parameter, while `like` is case-sensitive and `eq` does no pattern matching.""",
+        quick_bn=r"""`ilike(users.email, '%@gmail.com')`: এটা PostgreSQL-এর case-insensitive `ILIKE`-এ compile হয় আর pattern যায় bound parameter হিসেবে; `like` case-sensitive, আর `eq` কোনো pattern matching-ই করে না।""",
         ex_en=r"""
             - `like` is the tempting option, but in PostgreSQL `LIKE` is **case-sensitive**, so `@Gmail.com` wouldn't match.
             - `eq` compares literally — `%` is not a wildcard there.
@@ -451,6 +461,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Only `name`. The insert type is `{ name: string; bio?: string | null; createdAt?: Date | null }`: nullable columns and columns with defaults become optional, and an *always*-generated identity `id` is left out entirely.""",
         a_bn=r"""শুধু `name`। Insert type হলো `{ name: string; bio?: string | null; createdAt?: Date | null }`: nullable column আর default থাকা column optional হয়ে যায়, আর *always*-generated identity `id` পুরোপুরি বাদ পড়ে।""",
+        quick_en=r"""Only `name`. In `$inferInsert`, nullable columns and columns with defaults become optional, and an always-generated identity `id` is left out entirely.""",
+        quick_bn=r"""শুধু `name`। `$inferInsert`-এ nullable column আর default থাকা column optional হয়ে যায়, আর always-generated identity `id` পুরোপুরি বাদ পড়ে।""",
         ex_en=r"""
             - `$inferInsert` reflects what the **database** requires on insert: `NOT NULL` without a default → required.
             - `createdAt` has a default (`now()`), so it's optional — the tempting answer C forgets that defaults make fields optional. It's also nullable here because there's no `.notNull()`, so `$inferSelect` gives `Date | null` — a hint that you probably want `.notNull().defaultNow()`.
@@ -485,6 +497,8 @@ QUESTIONS = [
         correct=3,
         a_en=r"""`drizzle-kit generate`. It compares your TypeScript schema with the last snapshot in the migrations folder and writes a new SQL file (e.g. `drizzle/0001_add_phone.sql`) — no database connection needed.""",
         a_bn=r"""`drizzle-kit generate`। এটা তোমার TypeScript schema-কে migrations folder-এর শেষ snapshot-এর সাথে তুলনা করে একটা নতুন SQL file লেখে (যেমন `drizzle/0001_add_phone.sql`) — database connection লাগে না।""",
+        quick_en=r"""`drizzle-kit generate`: it diffs your TypeScript schema against the last snapshot and writes a new SQL migration file to review and commit, without connecting to the database.""",
+        quick_bn=r"""`drizzle-kit generate`: এটা তোমার TypeScript schema-কে আগের snapshot-এর সাথে তুলনা করে একটা নতুন SQL migration file লেখে, যেটা review করে commit করা যায় — database-এ connect করারও দরকার হয় না।""",
         ex_en=r"""
             - `migrate` **applies** already-generated files to a database and records them in the `drizzle.__drizzle_migrations` table. It's the second half of the workflow.
             - `push` (the tempting answer) applies schema changes **directly** without creating a file — great for prototyping and local dev, risky for production because there's nothing to review or replay.
@@ -534,6 +548,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""Only D. In A, B and C the value becomes a bound parameter (`$1`). `sql.raw()` inserts its argument verbatim into the SQL text, and here that argument is a JavaScript template string built from user input — classic injection.""",
         a_bn=r"""শুধু D। A, B আর C-তে value একটা bound parameter (`$1`) হয়ে যায়। `sql.raw()` তার argument হুবহু SQL text-এ বসিয়ে দেয়, আর এখানে সেই argument user input দিয়ে বানানো একটা JavaScript template string — classic injection।""",
+        quick_en=r"""Only D: `sql.raw()` inserts its string into the SQL text verbatim, so a template string built from user input is injectable. Values interpolated into the `sql` tag or passed to the builders become bound parameters.""",
+        quick_bn=r"""শুধু D: `sql.raw()` তার string হুবহু SQL text-এ বসিয়ে দেয়, তাই user input দিয়ে বানানো template string থাকলে SQL injection হয়। `sql` tag-এ interpolate করা বা builder-এ দেওয়া value bound parameter হিসেবে যায়।""",
         ex_en=r"""
             The tempting wrong answer is B/C: they *look* like string interpolation, but `sql` is a **tagged template**. Drizzle receives the static parts and the values separately, and sends values as parameters — verified output for B: `where "users"."name" = $1` with `params: ["x' OR 1=1 --"]`.
 

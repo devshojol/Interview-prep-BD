@@ -59,6 +59,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Point DNS at the server and run `certbot --nginx -d example.com`, which proves control with the HTTP-01 challenge and adds `listen 443 ssl` and the certificate paths. Redirect port 80 with `return 301 https://$host$request_uri;`, and let certbot's timer renew it (test with `certbot renew --dry-run`).",
+   "bn": "Domain-এর DNS server-এ point করো, তারপর `certbot --nginx -d example.com` চালাও; এটা HTTP-01 challenge দিয়ে domain-এর মালিকানা প্রমাণ করে আর `listen 443 ssl` ও certificate path যোগ করে। Port 80-কে `return 301 https://$host$request_uri;` দিয়ে redirect করো, আর renewal certbot-এর timer-এর উপর ছেড়ে দাও (`certbot renew --dry-run` দিয়ে test করো)।"
+  },
   "commonMistakes": {
    "en": "Using `cert.pem` instead of `fullchain.pem`, blocking port 80 after setup (renewals fail silently), forgetting to reload NGINX after renewal, and enabling HSTS `preload` before every subdomain supports HTTPS.",
    "bn": "`fullchain.pem`-এর বদলে `cert.pem` ব্যবহার করা, setup-এর পর port 80 বন্ধ করে দেওয়া (renewal চুপচাপ fail করে), renewal-এর পর NGINX reload করতে ভুলে যাওয়া, আর সব subdomain HTTPS support করার আগেই HSTS `preload` চালু করা।"
@@ -135,6 +139,10 @@
    }
   ],
   "related": [],
+  "quickAnswer": {
+   "en": "Turn on `gzip on;` and add text types to `gzip_types`, because only `text/html` is compressed by default, with a moderate `gzip_comp_level` (around 4–6), a `gzip_min_length` and `gzip_vary on`. Don't compress formats that are already compressed, such as JPEG, PNG, WOFF2 or ZIP.",
+   "bn": "`gzip on;` দাও আর `gzip_types`-এ text type-গুলো যোগ করো, কারণ default-এ শুধু `text/html` compress হয়; সাথে মাঝারি `gzip_comp_level` (৪–৬-এর মতো), `gzip_min_length` আর `gzip_vary on`। JPEG, PNG, WOFF2 বা ZIP-এর মতো আগে থেকেই compressed format আবার compress কোরো না।"
+  },
   "commonMistakes": {
    "en": "Adding `image/jpeg` or `image/png` to `gzip_types`, setting `gzip_comp_level 9` on busy servers, and forgetting `gzip_vary`.",
    "bn": "`gzip_types`-এ `image/jpeg` বা `image/png` যোগ করা, ব্যস্ত server-এ `gzip_comp_level 9` দেওয়া, আর `gzip_vary` ভুলে যাওয়া।"
@@ -203,6 +211,10 @@
   "related": [
    "nginx-003"
   ],
+  "quickAnswer": {
+   "en": "`$upstream_response_time`: it runs from connecting to the upstream until its whole response arrives, so it measures the backend. `$request_time` covers the entire request, including time spent on a slow client network.",
+   "bn": "`$upstream_response_time`: upstream-এ connect শুরু থেকে তার পুরো response পাওয়া পর্যন্ত সময়, তাই এটা backend-এর সময় মাপে। `$request_time` পুরো request-এর সময়, slow client network-এ লাগা সময়সহ।"
+  },
   "code": {
    "language": "nginx",
    "source": "log_format timing '$remote_addr \"$request\" $status $body_bytes_sent '\n                  'rt=$request_time uct=$upstream_connect_time '\n                  'uht=$upstream_header_time urt=$upstream_response_time';\n\naccess_log /var/log/nginx/access.log timing;"
@@ -286,6 +298,10 @@
   "related": [
    "nginx-004"
   ],
+  "quickAnswer": {
+   "en": "`limit_req_zone` keeps a leaky bucket per client IP at a set `rate`, and `burst` lets extra requests through, delayed unless `nodelay` serves them at once. Rejections are 503 by default, so set `limit_req_status 429`, and use a separate, much stricter zone (like `5r/m`) for login.",
+   "bn": "`limit_req_zone` প্রতিটা client IP-র জন্য একটা নির্দিষ্ট `rate`-এ leaky bucket রাখে, আর `burst` বাড়তি request ঢুকতে দেয়; `nodelay` না দিলে সেগুলো delay হয়, দিলে সাথে সাথে serve হয়। Default-এ reject হলে 503 যায়, তাই `limit_req_status 429` দাও, আর login-এর জন্য আলাদা, অনেক কড়া zone (যেমন `5r/m`) রাখো।"
+  },
   "commonMistakes": {
    "en": "Leaving the default 503 (which looks like an outage in monitoring), rate-limiting on the CDN's IP, and using `burst` without `nodelay` on APIs and then wondering why latency jumped.",
    "bn": "Default 503 রেখে দেওয়া (monitoring-এ এটাকে outage মনে হয়), CDN-এর IP ধরে rate-limit করা, আর API-তে `nodelay` ছাড়া `burst` দিয়ে তারপর অবাক হওয়া যে latency কেন বেড়ে গেল।"
@@ -358,6 +374,10 @@
   "related": [
    "nginx-005"
   ],
+  "quickAnswer": {
+   "en": "List the backends in an `upstream`: weighted round-robin is the default, with `least_conn`, `ip_hash` and `hash … consistent` as options, and `backup` servers used only when the primaries are down. Open-source failure detection is passive (`max_fails` within `fail_timeout`); active health checks are NGINX Plus.",
+   "bn": "Backend-গুলো একটা `upstream`-এ লেখো: default হলো weighted round-robin, আর option হিসেবে আছে `least_conn`, `ip_hash` আর `hash … consistent`; `backup` server শুধু primary-রা down থাকলে ব্যবহার হয়। Open-source NGINX-এ failure ধরা হয় passive-ভাবে (`fail_timeout`-এর মধ্যে `max_fails`); active health check NGINX Plus-এর feature।"
+  },
   "commonMistakes": {
    "en": "Claiming open-source NGINX actively probes backends, using `ip_hash` behind a CDN (every client looks like the CDN's IP), and enabling retries for POST requests.",
    "bn": "বলা যে open-source NGINX backend-গুলোকে active-ভাবে probe করে, CDN-এর পেছনে `ip_hash` ব্যবহার করা (সব client-কেই CDN-এর IP মনে হয়), আর POST request-এ retry চালু করা।"
@@ -431,6 +451,10 @@
    "nginx-010",
    "nginx-017"
   ],
+  "quickAnswer": {
+   "en": "502 means NGINX got no valid response (app down, wrong port, crash), and 504 means the upstream didn't answer in time (`proxy_read_timeout`, 60 s by default). 503 is often NGINX's own rate limiting, 499 means the client gave up, and the NGINX error log names the exact reason first.",
+   "bn": "502 মানে NGINX কোনো valid response পায়নি (app বন্ধ, ভুল port, crash), আর 504 মানে upstream সময়মতো উত্তর দেয়নি (`proxy_read_timeout`, default 60 s)। 503 প্রায়ই NGINX-এর নিজের rate limiting, 499 মানে client অপেক্ষা ছেড়ে চলে গেছে; সবার আগে NGINX-এর error log দেখো, সেখানে ঠিক কারণটা লেখা থাকে।"
+  },
   "commonMistakes": {
    "en": "Treating every 502 as \"increase timeouts\", confusing 499 with an NGINX bug, and debugging from the access log alone (it has the status, not the reason).",
    "bn": "প্রতিটা 502-কে \"timeout বাড়াও\" ধরে নেওয়া, 499-কে NGINX-এর bug ভাবা, আর শুধু access log দেখে debug করা (সেখানে status থাকে, কারণ থাকে না)।"
@@ -495,6 +519,10 @@
    "nginx-018",
    "nginx-005"
   ],
+  "quickAnswer": {
+   "en": "Since 1.29.7 (so in 1.30 stable), upstream keepalive is on by default (`keepalive 32 local`), `proxy_http_version` defaults to 1.1 and `Connection` isn't sent upstream. The old three lines are redundant but harmless on 1.30, and still required on 1.28 and older.",
+   "bn": "1.29.7 থেকে (তাই 1.30 stable-এ) upstream keepalive default-এ চালু (`keepalive 32 local`), `proxy_http_version`-এর default 1.1, আর upstream-এ `Connection` header পাঠানো হয় না। পুরনো তিনটা line 1.30-এ অপ্রয়োজনীয় কিন্তু ক্ষতিকর না, আর 1.28 বা তার আগের version-এ এখনো দরকার।"
+  },
   "code": {
    "language": "nginx",
    "source": "upstream api {\n    server 10.0.1.11:3000;\n    server 10.0.1.12:3000;\n    keepalive 32;\n}\n\nserver {\n    location / {\n        proxy_pass http://api;\n        proxy_http_version 1.1;\n        proxy_set_header Connection \"\";\n    }\n}"
@@ -535,7 +563,7 @@
    "background-jobs",
    "timeouts"
   ],
-  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline, Node.js 24 LTS",
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline, Node.js 26 LTS",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -583,6 +611,10 @@
    "nginx-019",
    "nginx-010"
   ],
+  "quickAnswer": {
+   "en": "Exactly 60 seconds is the default `proxy_read_timeout`: Node sent nothing because it builds the whole CSV before responding. Don't raise it globally; scope a longer timeout to the export route as a stop-gap, and fix it properly by streaming the rows or making the export an async job.",
+   "bn": "ঠিক ৬০ সেকেন্ড হলো default `proxy_read_timeout`: পুরো CSV বানানোর আগে Node কিছুই পাঠায়নি। Global-এ timeout বাড়িও না; সাময়িক সমাধান হিসেবে শুধু export route-এ বড় timeout দাও, আর আসল সমাধান হলো row-গুলো stream করা বা export-কে async job বানানো।"
+  },
   "commonMistakes": {
    "en": "Raising every timeout globally, building huge CSVs in memory, and fixing NGINX but forgetting the load balancer or CDN timeout in front of it.",
    "bn": "সব timeout globally বাড়িয়ে দেওয়া, বিশাল CSV memory-তে বানানো, আর NGINX ঠিক করে সামনে থাকা load balancer বা CDN-এর timeout ভুলে যাওয়া।"

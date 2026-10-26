@@ -100,6 +100,8 @@ QUESTIONS = [
 
             `CHECK (stock >= 0)` constraint হলো শেষ safety net।
         """,
+        quick_en=r"""Three bugs: the update uses `db` instead of `tx`, so it commits outside the transaction (and hangs a one-connection pool); the read-check-write in JavaScript loses updates, so use one `UPDATE ... WHERE stock >= qty RETURNING`; and the payment call inside the transaction should move after commit via an outbox.""",
+        quick_bn=r"""তিনটা bug: update-এ `tx`-এর বদলে `db`, তাই সেটা transaction-এর বাইরে commit হয় (আর one-connection pool-এ আটকে যায়); JavaScript-এ read-check-write করায় update হারায়, তাই একটাই `UPDATE ... WHERE stock >= qty RETURNING` লাগে; আর transaction-এর ভেতরের payment call outbox দিয়ে commit-এর পরে সরাতে হবে।""",
         ex_en=r"""
             - **Why the atomic UPDATE works:** PostgreSQL row-locks the product while updating. A concurrent UPDATE waits, then re-evaluates its `WHERE` against the *new* row version — so the second buyer sees `stock >= qty` is false and gets zero rows back. Verified: three concurrent reservations of 1 unit with stock 2 returned `[1, 0, null]`.
             - **`for('update')`** is the alternative when business logic needs to read several columns first; it serialises buyers on that row for the transaction's duration, so keep the transaction short.
@@ -167,6 +169,8 @@ QUESTIONS = [
 
             **Drizzle-specific সতর্কতা:** migrator সব pending migration **একটা transaction-এ** apply করে, তাই শুরুতে নেওয়া lock শেষ পর্যন্ত থাকে। Lock-sensitive ধাপগুলো আলাদা release-এ (আলাদা `migrate` run) পাঠাও, `SET LOCAL lock_timeout = '5s'` দাও যাতে লম্বা transaction-এর পেছনে queue না করে migration দ্রুত fail করে, আর PR-এ generated SQL সবসময় review করো।
         """,
+        quick_en=r"""Don't do it in one migration; use expand → migrate → contract: add `full_name`, write both columns, backfill in batches, switch reads, and drop `name` in a later release. For NOT NULL, add a `CHECK (phone IS NOT NULL) NOT VALID`, validate it in a separate run, then `SET NOT NULL` without a long locking scan.""",
+        quick_bn=r"""এক migration-এ করি না; expand → migrate → contract: `full_name` যোগ করি, দুই column-এই লিখি, batch-এ backfill করি, read switch করি, আর পরের release-এ `name` drop করি। NOT NULL-এর জন্য আগে `CHECK (phone IS NOT NULL) NOT VALID`, আলাদা run-এ validate, তারপর `SET NOT NULL` — লম্বা lock-ধরা scan ছাড়াই।""",
         ex_en=r"""
             - **The lock queue problem:** `ALTER TABLE` needs a strong lock. If a long-running query holds a weaker lock, the `ALTER` waits — and every new query queues behind the `ALTER`. A 2-second migration can cause a multi-minute outage; `lock_timeout` plus retries prevents this.
             - **When "rename" in the prompt is fine:** single-instance apps or a maintenance window. `RENAME COLUMN` itself is metadata-only and instant.
@@ -240,6 +244,8 @@ QUESTIONS = [
 
             **Upgrade plan:** GA-র জন্য অপেক্ষা করো (বা একটা কম গুরুত্বপূর্ণ service-এ pilot), `drizzle-orm` আর `drizzle-kit` একসাথে upgrade করো, একটা branch-এ `drizzle-kit up` চালাও, relation definition আর RQB query module ধরে ধরে migrate করো (official v1→v2 guide মেনে), আর আসল PostgreSQL-এর বিরুদ্ধে পুরো integration test suite চালাও। SQL-এর মতো builder (`select/insert/update`) relational API-র চেয়ে অনেক কম বদলায়।
         """,
+        quick_en=r"""v1.0 is still a release candidate, so 0.45.x stays in production. It brings `defineRelations()`, Relational Queries v2 with object-style `where`/`orderBy`, validators under `drizzle-orm/zod` and a new migration folder layout; upgrade after GA or on a pilot service, with `drizzle-kit up` and full integration tests.""",
+        quick_bn=r"""v1.0 এখনো release candidate, তাই production-এ 0.45.x-ই থাকে। এতে আসছে `defineRelations()`, object-style `where`/`orderBy`-সহ Relational Queries v2, `drizzle-orm/zod`-এ validator আর নতুন migration folder layout; upgrade করি GA-র পরে বা একটা pilot service-এ, `drizzle-kit up` আর পুরো integration test চালিয়ে।""",
         ex_en=r"""
             - **Why RQB v2:** object filters are easier to serialise and compose (e.g. building filters from API query params), relation-level `where` lets you define "published posts" once, and `through` removes the boilerplate of exposing junction tables in results.
             - **Mixed codebases:** during migration, keep relation definitions in one module so the switch is contained; isolate RQB usage behind repositories so callers don't change.
@@ -396,6 +402,8 @@ QUESTIONS = [
             - **Mass assignment:** `values(req.body)` দিয়ে client `status: 'paid'`, `total: 0` বা অন্য `customerId` set করতে পারে। Strict schema দিয়ে validate করো, `customerId` session থেকে নাও, আর price ও total server-এ হিসাব করো।
             - **Input validation:** `Number(req.query.page)` `NaN` বা বিশাল হতে পারে; সব query param validate আর সীমিত করো।
         """,
+        quick_en=r"""Performance: N+1 item queries (batch with `inArray`), deep OFFSET paging (use keyset), selecting every column and missing FK indexes. Security: `sql.raw(req.query.sort)` is SQL injection (whitelist sorts), `values(req.body)` allows mass assignment, and query params aren't validated.""",
+        quick_bn=r"""Performance: N+1 item query (`inArray` দিয়ে একবারে আনো), গভীর OFFSET paging (keyset ব্যবহার করো), সব column select, আর FK-তে index নেই। Security: `sql.raw(req.query.sort)` সরাসরি SQL injection (sort whitelist করো), `values(req.body)` mass assignment-এর সুযোগ দেয়, আর query param validate হয় না।""",
         ex_en=r"""
             - **How to find these in production:** enable query logging in staging (`drizzle({ client, logger: true })`), use `pg_stat_statements` to find the most expensive statements, and look for the same query repeated many times per request (the N+1 signature) in traces.
             - **Why the composite index `(customer_id, id)`:** it serves both the `WHERE customer_id = ?` filter and the `ORDER BY id` with a `LIMIT`, so PostgreSQL reads only 20 index entries instead of sorting all of a customer's orders.
@@ -449,6 +457,8 @@ QUESTIONS = [
 
             Drizzle যা model করে না — trigger, function, custom type বা extension — সেগুলো **custom migration**-এ (`generate --custom`) থাকে, যাতে versioned থাকে।
         """,
+        quick_en=r"""Work on a restored copy, run `drizzle-kit pull` to generate the schema, review it until `generate` reports no changes, then record the initial migration as applied without running any DDL. After that every change goes through `generate` → review → `migrate`, while old raw SQL keeps working through `db.execute(sql...)`.""",
+        quick_bn=r"""Restore করা copy-তে কাজ করি, `drizzle-kit pull` দিয়ে schema বানাই, `generate` "no changes" না বলা পর্যন্ত review করি, তারপর কোনো DDL না চালিয়ে initial migration-কে applied হিসেবে record করি। এরপর প্রতিটা change যায় `generate` → review → `migrate` পথে, আর পুরোনো raw SQL `db.execute(sql...)` দিয়ে চলতে থাকে।""",
         ex_en=r"""
             - **Why "no changes" after pull matters:** it proves the TypeScript schema is a faithful model. If you skip this, the first real `generate` may include surprise `ALTER`s that "fix" differences you didn't intend to change.
             - **Drift between environments:** staging and production may have diverged over 4 years (hotfixes applied by hand). Introspect each, diff them, and reconcile before baselining.
@@ -543,6 +553,8 @@ QUESTIONS = [
 
             **৬. Operational guardrail:** connection fan-in-এর জন্য PgBouncer, `statement_timeout`/`lock_timeout`, "reserve"-এ idempotency key, user প্রতি rate limiting, আর event-এর আগে sale traffic replay করে load test।
         """,
+        quick_en=r"""Keep stock in PostgreSQL with `CHECK (stock >= 0)` and reserve with one short guarded `UPDATE ... WHERE stock >= qty` plus a reservation row, so it can't oversell. Add admission control or bucketed stock for the hot rows, expire reservations with `FOR UPDATE SKIP LOCKED` workers, and serve product pages from cache.""",
+        quick_bn=r"""Stock থাকে PostgreSQL-এ `CHECK (stock >= 0)`-সহ, আর reserve করি একটাই ছোট guarded `UPDATE ... WHERE stock >= qty` আর একটা reservation row দিয়ে — তাই oversell হয় না। Hot row-এর জন্য admission control বা bucketed stock, `FOR UPDATE SKIP LOCKED` worker দিয়ে reservation expire, আর product page cache থেকে।""",
         ex_en=r"""
             **Failure scenarios to discuss:**
             - *Payment succeeds after the reservation expired:* the payment handler must check the reservation status in a transaction; if expired, either re-reserve if stock remains or refund automatically.
@@ -661,6 +673,8 @@ QUESTIONS = [
 
             **Testing:** fake repository দিয়ে service-এর unit test; আসল PostgreSQL-এর বিরুদ্ধে repository আর migration-এর integration test (CI-তে disposable container, শুরু থেকে migrate করা); invariant-এর (stock, balance) জন্য concurrency test।
         """,
+        quick_en=r"""Split the schema per bounded context, use thin repositories that accept `db` or `tx`, and let services own transaction boundaries by passing `tx` explicitly. Use Drizzle for CRUD and joins but plain SQL (`sql` tag, views) for heavy analytics, `withReplicas()` for reads, and integration tests on real PostgreSQL.""",
+        quick_bn=r"""Schema bounded context ধরে ভাগ করি, পাতলা repository বানাই যেগুলো `db` বা `tx` নেয়, আর `tx` explicitly pass করে transaction-এর সীমা service-এর হাতে রাখি। CRUD আর join-এ Drizzle, ভারী analytics-এ সাধারণ SQL (`sql` tag, view), read-এ `withReplicas()`, আর আসল PostgreSQL-এ integration test।""",
         ex_en=r"""
             **Trade-offs to discuss:**
             - *Explicit `tx` vs ambient context:* explicit is verbose but impossible to misuse silently; ambient (ALS) is convenient but makes "is this inside a transaction?" invisible — a common source of the `db`-instead-of-`tx` bug.
@@ -780,6 +794,8 @@ QUESTIONS = [
             - Migration চালাও একটা নির্দিষ্ট, observable release step হিসেবে, `lock_timeout`/`statement_timeout` সহ — CI-এর ভেতরে চুপচাপ না, আর ঝুঁকিপূর্ণ পরিবর্তন peak hour-এ না।
             - Production-আকারের কপিতে migration test করে lock-এর সময় মাপো।
         """,
+        quick_en=r"""A plain `CREATE INDEX` blocked writes on the 40M-row table until it finished, and `CONCURRENTLY` can't run inside the migrator's single transaction. Unblock by turning that migration into a no-op, build the index concurrently outside a transaction, drop any invalid leftover, and run online DDL as a separate step.""",
+        quick_bn=r"""সাধারণ `CREATE INDEX` শেষ না হওয়া পর্যন্ত 40M row-এর table-এ write আটকে রেখেছিল, আর `CONCURRENTLY` migrator-এর single transaction-এর ভেতরে চলতে পারে না। ওই migration-কে no-op বানিয়ে pipeline খুলি, transaction-এর বাইরে concurrently index বানাই, invalid index থাকলে drop করি, আর online DDL আলাদা step হিসেবে চালাই।""",
         ex_en=r"""
             - **Verified behaviour:** with drizzle-kit 0.31 / Drizzle 0.45, `index(...).concurrently()` generates `CREATE INDEX CONCURRENTLY "orders_customer_id_idx" ON "orders" USING btree ("customer_id")`, and running it through `migrate()` fails with `25001`, rolling back the other pending migrations of that run.
             - **Lock details:** a plain `CREATE INDEX` takes a SHARE lock (reads continue, writes block). `CONCURRENTLY` takes a weaker lock and scans twice, so it's slower overall and can fail leaving an INVALID index — that's the price of not blocking writes.

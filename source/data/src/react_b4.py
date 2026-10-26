@@ -57,6 +57,8 @@ QUESTIONS = [
 
             সাথে `autoComplete` hint যোগ করব আর error `role="alert"` দিয়ে announce করব।
         """,
+        quick_en=r"""The clickable `<div>` isn't focusable or announced as a button, the inputs have no labels, the image has no `alt`, and there's no `<form>`. Fix it with a real `<button type="submit">`, `<label htmlFor>` for each input, proper `alt` and a wrapping `<form>`.""",
+        quick_bn=r"""Click করার `<div>`-টা focus হয় না, button হিসেবেও announce হয় না; input-এ label নেই, image-এ `alt` নেই, আর কোনো `<form>` নেই। সমাধান: আসল `<button type="submit">`, প্রতিটা input-এ `<label htmlFor>`, ঠিকঠাক `alt`, আর সবকিছু একটা `<form>`-এ রাখা।""",
         ex_en=r"""
             **Rule of thumb:** use the native HTML element first. A `<button>` gives you focus, keyboard activation, the `button` role and form submission for free; recreating that on a `<div>` needs `role`, `tabIndex`, key handlers and still misses details.
 
@@ -147,6 +149,8 @@ QUESTIONS = [
 
             **Interaction:** `@testing-library/user-event` (`const user = userEvent.setup(); await user.click(...)`) focus আর keyboard event-সহ আসল টাইপ ও click simulate করে, যেটা `fireEvent`-এর চেয়ে বাস্তবসম্মত। Network call-এর জন্য নিজের module mock না করে HTTP level-এ mock করি (যেমন MSW)।
         """,
+        quick_en=r"""RTL tests behaviour the way a user sees it: render, find elements with `getByRole` first (`getByTestId` last), interact with `user-event`, and assert on the screen. Use `findBy...` to wait for async UI and `queryBy...` to check something is absent.""",
+        quick_bn=r"""RTL user যেভাবে দেখে সেভাবে behaviour test করে: render করো, element খোঁজো আগে `getByRole` দিয়ে (`getByTestId` সবশেষে), `user-event` দিয়ে interact করো, আর screen-এ যা আছে তা assert করো। Async UI-র জন্য অপেক্ষা করতে `findBy...`, আর কিছু নেই সেটা দেখতে `queryBy...`।""",
         ex_en=r"""
             - **Avoid `act` warnings properly:** awaiting `user-event` calls and `findBy…` queries keeps updates inside `act` automatically. If you see an `act` warning, something updated after the test stopped waiting — usually a missing `await`.
             - **`waitFor`** is for assertions that become true later; don't put side effects (clicks) inside it.
@@ -219,6 +223,8 @@ QUESTIONS = [
 
             সমাধান: data থেকে আসা স্থায়ী id-কে key হিসেবে ব্যবহার করো (`key={todo.id}`) আর index না, id দিয়ে delete করো। তখন React ঠিক Buy milk-এর `<li>`-টাই তার input-সহ সরিয়ে দেয়।
         """,
+        quick_en=r"""The list uses the array index as `key`, so after deleting the first item, key 0 now means Call Karim and React keeps the first row's input with "urgent". Use `key={todo.id}` and delete by id.""",
+        quick_bn=r"""List-এ array index-কে `key` বানানো হয়েছে, তাই প্রথম item delete করার পর key 0 মানে Call Karim, আর React প্রথম row-এর "urgent" লেখা input রেখে দেয়। `key={todo.id}` ব্যবহার করো আর id দিয়ে delete করো।""",
         ex_en=r"""
             The note lives in **uncontrolled DOM state** (and the same happens with component state inside each row). React attaches that state to the key, not to the data, so when keys shift, state "moves" to another item.
 
@@ -316,6 +322,8 @@ QUESTIONS = [
         correct=2,
         a_en=r"""A regular function can't cross the server→client boundary, because props are **serialised** and sent over the network. The only functions allowed are Server Functions (marked `'use server'`), which are sent as references the client can call.""",
         a_bn=r"""সাধারণ function server→client boundary পার হতে পারে না, কারণ props **serialise** করে network দিয়ে পাঠানো হয়। শুধু Server Function (`'use server'` দেওয়া) পাঠানো যায়, যেগুলো এমন reference হিসেবে যায় যেটা client call করতে পারে।""",
+        quick_en=r"""An inline handler like `onSelect={(id) => ...}` can't be passed, because props are serialised across the server-to-client boundary. Plain objects, promises and JSX children are fine; the only functions allowed are Server Functions marked `'use server'`.""",
+        quick_bn=r"""`onSelect={(id) => ...}`-এর মতো inline handler পাঠানো যায় না, কারণ server থেকে client-এ যাওয়ার সময় props serialise হয়। সাধারণ object, promise আর JSX children চলে; function-এর মধ্যে শুধু `'use server'` দেওয়া Server Function পাঠানো যায়।""",
         ex_en=r"""
             The tempting wrong answer is the **Promise**. React can serialise promises: the server starts the fetch, passes the promise, and the Client Component reads it with `use()` inside a `<Suspense>` boundary — a useful streaming pattern. Plain objects, arrays, `Date`, `Map`, `Set`, typed arrays and JSX (including Server Component output as `children`) are all supported.
 
@@ -356,6 +364,8 @@ QUESTIONS = [
 
             Gotcha: Effect Event শুধু effect-এর ভেতর থেকে call করতে হবে (render-এর সময় না, child-এ পাঠিয়ে না), আর dependency-তে রাখা যাবে না — আপডেট হওয়া `eslint-plugin-react-hooks` এটা জানে। Activity-র ক্ষেত্রে effect-এর সঠিক cleanup থাকতে হবে, কারণ hide করলে cleanup চলে — যেমন video-কে effect cleanup-এ pause করতে হবে, নইলে লুকানো অবস্থাতেও চলতে থাকবে।
         """,
+        quick_en=r"""`<Activity mode="hidden">` hides UI without unmounting it: state is kept, but effects are cleaned up and updates deferred. `useEffectEvent` reads the latest props/state inside an effect without being a dependency; call it only from effects and give hidden Activity content proper cleanups.""",
+        quick_bn=r"""`<Activity mode="hidden">` unmount না করেই UI লুকায়: state থাকে, কিন্তু effect cleanup হয় আর update পিছিয়ে যায়। `useEffectEvent` dependency না হয়েই effect-এর ভেতরে সর্বশেষ props/state পড়ে; এটাকে শুধু effect থেকে call করো, আর লুকানো Activity-র effect-এ ঠিকঠাক cleanup রাখো।""",
         ex_en=r"""
             **Why Activity cleans up effects:** hidden UI shouldn't keep subscriptions, timers or network polling alive. Treating hide/show like unmount/remount for effects (but not for state) is exactly what StrictMode's double-effect check prepares you for — symmetrical effects "just work".
 
@@ -458,6 +468,8 @@ QUESTIONS = [
         correct=0,
         a_en=r"""`<ViewTransition>` (stable in React 19.3) is activated only by **non-urgent** updates: `startTransition`, `useDeferredValue` or a Suspense boundary revealing content. Urgent updates apply immediately. Fix: `onClick={() => startTransition(() => setIndex(...))}`.""",
         a_bn=r"""`<ViewTransition>` (React 19.3-এ stable) শুধু **non-urgent** update-এ চালু হয়: `startTransition`, `useDeferredValue` বা কোনো Suspense boundary content দেখানো। Urgent update সাথে সাথে apply হয়। সমাধান: `onClick={() => startTransition(() => setIndex(...))}`।""",
+        quick_en=r"""`<ViewTransition>` only animates non-urgent updates (a Transition, a `useDeferredValue` update or a Suspense reveal), and a plain `setState` is urgent. Wrap the update: `startTransition(() => setIndex(...))`.""",
+        quick_bn=r"""`<ViewTransition>` শুধু non-urgent update animate করে (Transition, `useDeferredValue` update বা Suspense reveal), আর সাধারণ `setState` urgent। Update-টা wrap করো: `startTransition(() => setIndex(...))`।""",
         ex_en=r"""
             The tempting wrong answer is the `key`: changing the key is actually what makes this work — the old `<ViewTransition>` "exits" and the new one "enters" in the same Transition, and React runs a cross-fade by default using the browser's View Transition API. You can then customise it with View Transition classes in CSS, and with `addTransitionType('next')` inside `startTransition` you can animate "next" and "previous" differently (e.g. `enter={{ next: 'from-right', previous: 'from-left' }}`). Respect `prefers-reduced-motion`.
 
@@ -507,6 +519,8 @@ QUESTIONS = [
             4. **সম্ভব হলে কাজ client থেকে সরাও।** খুব বড় বা বাড়তে থাকা dataset-এর জন্য server-এ sort/filter/paginate করো (cursor-based pagination বা infinite loading); client-এ ভারী হিসাবের জন্য Web Worker।
             5. **আগে-পরে মাপো** React Profiler আর Performance panel দিয়ে।
         """,
+        quick_en=r"""The bottleneck is DOM size, so virtualise the table and render only the visible rows. Then keep rows cheap (stable keys, memoized rows, sort/filter once), keep search responsive with `useDeferredValue`, and move huge datasets to server-side pagination.""",
+        quick_bn=r"""আসল সমস্যা DOM-এর size, তাই table virtualise করে শুধু দেখা যাওয়া row-গুলো render করো। তারপর row হালকা রাখো (stable key, memoized row, sort/filter একবারই), `useDeferredValue` দিয়ে search responsive রাখো, আর খুব বড় data হলে server-side pagination করো।""",
         ex_en=r"""
             **Trade-offs of virtualisation**
             - Browser find (Ctrl+F) and screen readers only "see" mounted rows. Mitigate with your own search, `aria-rowcount` on the table plus `aria-rowindex` on each row, and keyboard navigation that scrolls the virtualizer.
@@ -624,6 +638,8 @@ QUESTIONS = [
 
             Trade-off: coalescing সামান্য freshness ছেড়ে অনেক CPU বাঁচায়; প্রতি item-এ immutable object change detection সস্তা করে, কিন্তু বেশি allocate করে।
         """,
+        quick_en=r"""Keep the WebSocket and data outside React: a manager that reconnects and drops out-of-order messages, and an external store that coalesces updates and flushes once per frame. Components subscribe per row with `useSyncExternalStore`, the table is virtualised and history buffers are bounded.""",
+        quick_bn=r"""WebSocket আর data React-এর বাইরে রাখো: একটা manager যেটা reconnect করে আর out-of-order message বাদ দেয়, আর একটা external store যেটা update জমিয়ে প্রতি frame-এ একবার flush করে। Component `useSyncExternalStore` দিয়ে row ধরে subscribe করে, table virtualise করা থাকে, আর history buffer-এর size সীমিত থাকে।""",
         ex_en=r"""
             **Why the first version froze:** 50 `setState` calls per second, each copying a growing array, re-rendering a 2,000-row table and every chart. Garbage collection pauses plus long render tasks → frozen tab; the unbounded message array → memory growth.
 

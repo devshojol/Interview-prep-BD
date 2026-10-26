@@ -51,6 +51,10 @@
   "related": [
    "pg-024"
   ],
+  "quickAnswer": {
+   "en": "The `DELETE` really runs and the rows are gone: `EXPLAIN ANALYZE` executes the statement to measure real timings. To inspect a write safely, wrap it in `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`.",
+   "bn": "`DELETE` সত্যিই চলে আর row-গুলো মুছে যায়: আসল timing মাপতে `EXPLAIN ANALYZE` statement-টা execute করে। কোনো write নিরাপদে দেখতে চাইলে `BEGIN; EXPLAIN ANALYZE ...; ROLLBACK;`-এর ভেতরে চালাও।"
+  },
   "extraCode": [
    {
     "language": "sql",
@@ -139,6 +143,10 @@
   "related": [
    "pg-016"
   ],
+  "quickAnswer": {
+   "en": "`json` keeps the exact input text (whitespace, key order, duplicate keys) and re-parses it on every read; `jsonb` stores a parsed binary form that is faster to query and supports GIN indexes and operators like `@>`. Use `jsonb` unless you must keep the original text.",
+   "bn": "`json` হুবহু input text রাখে (whitespace, key order, duplicate key) আর প্রতিবার পড়ার সময় আবার parse করে; `jsonb` parse করা binary রূপে রাখে, তাই query দ্রুত হয় আর GIN index ও `@>`-এর মতো operator চলে। মূল text রাখার দরকার না থাকলে `jsonb` নাও।"
+  },
   "commonMistakes": {
    "en": "Treating `jsonb` as a replacement for schema design, or expecting `jsonb` to preserve key order and duplicate keys.",
    "bn": "`jsonb`-কে schema design-এর বিকল্প ভাবা, অথবা আশা করা যে `jsonb` key-এর ক্রম আর duplicate key রেখে দেবে।"
@@ -211,6 +219,10 @@
   "related": [
    "pg-026"
   ],
+  "quickAnswer": {
+   "en": "`pg_dump` makes a logical backup of one database from a consistent snapshot without blocking normal reads and writes; use `-Fc` so `pg_restore` can restore selectively and in parallel. `pg_basebackup` copies the whole cluster physically, for replicas and point-in-time recovery with WAL. Always test the restore.",
+   "bn": "`pg_dump` একটা database-এর logical backup নেয় consistent snapshot থেকে, সাধারণ read/write block না করে; `-Fc` দিলে `pg_restore` বেছে বেছে আর parallel-এ restore করতে পারে। `pg_basebackup` পুরো cluster-এর physical copy নেয়, replica আর WAL দিয়ে point-in-time recovery-র জন্য। Restore সবসময় test করো।"
+  },
   "commonMistakes": {
    "en": "Forgetting roles (`--globals-only`), never testing restores, or relying only on nightly dumps for a system that can't lose a day of data.",
    "bn": "Role-এর কথা ভুলে যাওয়া (`--globals-only`), কখনো restore test না করা, অথবা এক দিনের data হারানো যায় না এমন system-এ শুধু রাতের dump-এর উপর ভরসা করা।"
@@ -284,6 +296,10 @@
    "pg-003",
    "pg-013"
   ],
+  "quickAnswer": {
+   "en": "Prefer `GENERATED ALWAYS AS IDENTITY` over legacy `serial`. Use UUIDs only when you need them, and then PG18's time-ordered `uuidv7()` over random `gen_random_uuid()` for index locality. Generated columns are virtual by default in PG18; use `STORED` when you need to index the value.",
+   "bn": "Legacy `serial`-এর বদলে `GENERATED ALWAYS AS IDENTITY` নাও। UUID শুধু দরকার হলে নাও, আর তখন index locality-র জন্য random `gen_random_uuid()`-এর বদলে PG18-এর time-ordered `uuidv7()`। PG18-এ generated column default-ভাবে virtual; value-টার index লাগলে `STORED` দাও।"
+  },
   "commonMistakes": {
    "en": "Using UUIDv4 primary keys \"for scale\" without knowing the index-locality cost, or expecting to index a virtual generated column in PG18.",
    "bn": "Index locality-র খরচ না জেনে \"scale-এর জন্য\" UUIDv4 primary key ব্যবহার করা, অথবা PG18-এ virtual generated column-এ index দেওয়া যাবে বলে আশা করা।"
@@ -359,6 +375,10 @@
    "pg-028",
    "pg-016"
   ],
+  "quickAnswer": {
+   "en": "B-tree is the default for equality, ranges, sorting and uniqueness; Hash is equality only. GIN handles \"contains\" searches (`jsonb`, arrays, full-text, trigrams), GiST/SP-GiST handle geometric and range data like overlaps, and BRIN is a tiny index for huge append-only tables ordered by a column like `created_at`.",
+   "bn": "B-tree হলো default: equality, range, sorting আর uniqueness-এর জন্য; Hash শুধু equality। GIN \"contains\" ধরনের search সামলায় (`jsonb`, array, full-text, trigram), GiST/SP-GiST geometric আর range data (যেমন overlap), আর BRIN হলো `created_at`-এর মতো column-এ সাজানো বিশাল append-only table-এর জন্য খুব ছোট index।"
+  },
   "commonMistakes": {
    "en": "Using BRIN on a randomly-ordered column, or expecting a B-tree to speed up `LIKE '%term%'` (use `pg_trgm` + GIN, or full-text search).",
    "bn": "এলোমেলো ক্রমের column-এ BRIN ব্যবহার করা, অথবা আশা করা যে B-tree `LIKE '%term%'` দ্রুত করবে (এর জন্য `pg_trgm` + GIN, বা full-text search লাগে)।"
@@ -433,6 +453,10 @@
    "pg-013",
    "pg-025"
   ],
+  "quickAnswer": {
+   "en": "The query filters on `lower(email)` but the index stores plain `email`, so PostgreSQL computes the function for every row and scans the table. Fix: an expression index on `(lower(email))`, created `CONCURRENTLY` and made `UNIQUE` if emails must be unique case-insensitively, then `ANALYZE`.",
+   "bn": "Query filter করছে `lower(email)` দিয়ে, কিন্তু index-এ আছে সাধারণ `email`, তাই PostgreSQL প্রতিটা row-এর জন্য function হিসাব করে পুরো table scan করে। Fix: `(lower(email))`-এর ওপর expression index, `CONCURRENTLY` দিয়ে বানাও, case-insensitive unique দরকার হলে `UNIQUE` করো, তারপর `ANALYZE`।"
+  },
   "commonMistakes": {
    "en": "Creating the expression index without `CONCURRENTLY` on a busy production table (blocking writes), or writing the query with a slightly different expression than the index.",
    "bn": "Busy production table-এ `CONCURRENTLY` ছাড়া expression index বানানো (write block হয়ে যায়), অথবা index-এর চেয়ে সামান্য আলাদা expression দিয়ে query লেখা।"
@@ -497,6 +521,10 @@
   "related": [
    "pg-024"
   ],
+  "quickAnswer": {
+   "en": "It is inlined into the outer query: since PostgreSQL 12 a non-recursive, side-effect-free CTE referenced once is treated like a subquery. So the planner sees both conditions together and can use the `(customer_id, created_at)` index.",
+   "bn": "এটা outer query-র ভেতরে inline হয়ে যায়: PostgreSQL 12 থেকে non-recursive, side-effect ছাড়া আর একবার reference করা CTE subquery-র মতো ধরা হয়। তাই planner দুটো condition একসাথে দেখে আর `(customer_id, created_at)` index ব্যবহার করতে পারে।"
+  },
   "code": {
    "language": "sql",
    "source": "WITH recent AS (\n  SELECT * FROM orders\n  WHERE created_at > now() - interval '7 days'\n)\nSELECT * FROM recent\nWHERE customer_id = 42;"
@@ -585,6 +613,10 @@
    "pg-010",
    "pg-013"
   ],
+  "quickAnswer": {
+   "en": "Filter with containment `attrs @> '{\"brand\": \"Walton\"}'` so the GIN index can be used, read fields with `->>`, cast `(attrs->>'ram_gb')::int` so sorting is numeric, and test the tag with `attrs->'tags' ? '5g'`. Sort `DESC NULLS LAST`, because NULLs sort first under plain `DESC`.",
+   "bn": "`attrs @> '{\"brand\": \"Walton\"}'` containment দিয়ে filter করো যাতে GIN index কাজে লাগে, field পড়ো `->>` দিয়ে, `(attrs->>'ram_gb')::int` cast করো যাতে sorting সংখ্যা হিসেবে হয়, আর tag দেখো `attrs->'tags' ? '5g'` দিয়ে। `DESC NULLS LAST` দাও, কারণ শুধু `DESC`-এ NULL সবার আগে আসে।"
+  },
   "commonMistakes": {
    "en": "Comparing `attrs->>'ram_gb'` as text, or using `?` with a `jsonb_path_ops` index and wondering why it isn't used. Some drivers (JDBC, PDO) treat `?` as a parameter placeholder — use `jsonb_exists()` or the driver's escape there.",
    "bn": "`attrs->>'ram_gb'`-কে text হিসেবে তুলনা করা, অথবা `jsonb_path_ops` index থাকা অবস্থায় `?` ব্যবহার করে অবাক হওয়া যে index কেন কাজে লাগছে না। কিছু driver (JDBC, PDO) `?`-কে parameter placeholder ধরে — সেখানে `jsonb_exists()` বা driver-এর escape ব্যবহার করো।"

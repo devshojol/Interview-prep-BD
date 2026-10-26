@@ -60,6 +60,10 @@
   "related": [
    "pg-016"
   ],
+  "quickAnswer": {
+   "en": "`LEFT JOIN` customers to orders so customers without orders stay, compute `count(o.id)` and `sum(o.amount)` as window functions over each customer, then `DISTINCT ON (c.id)` with `ORDER BY c.id, o.ordered_at DESC, o.id DESC` keeps the latest order per customer.",
+   "bn": "Customer-কে order-এর সাথে `LEFT JOIN` করো যাতে order ছাড়া customer-ও থাকে, প্রতিটা customer-এর ওপর window function দিয়ে `count(o.id)` আর `sum(o.amount)` হিসাব করো, তারপর `ORDER BY c.id, o.ordered_at DESC, o.id DESC`-সহ `DISTINCT ON (c.id)` প্রতিটা customer-এর সর্বশেষ order রাখে।"
+  },
   "commonMistakes": {
    "en": "Using `count(*)` (gives 1 for customers without orders), using an inner join (drops Sumi), or omitting the tie-breaker in `ORDER BY`.",
    "bn": "`count(*)` ব্যবহার করা (order না থাকা customer-এর জন্যও 1 দেয়), inner join ব্যবহার করা (Sumi বাদ পড়ে যায়), অথবা `ORDER BY`-তে tie-breaker না দেওয়া।"
@@ -138,6 +142,10 @@
    "pg-032",
    "pg-006"
   ],
+  "quickAnswer": {
+   "en": "A superuser bypasses every permission check and RLS, so one SQL injection becomes a full server compromise, and MD5 password auth is deprecated in PostgreSQL 18. Use a `NOLOGIN` owner role, a least-privilege app role, a read-only role, and SCRAM-SHA-256 over `hostssl`.",
+   "bn": "Superuser সব permission check আর RLS এড়িয়ে যায়, তাই একটা SQL injection-ই পুরো server দখলে নিয়ে যায়, আর PostgreSQL 18-এ MD5 password auth deprecated। একটা `NOLOGIN` owner role, কম privilege-এর app role, একটা read-only role আর `hostssl`-এর ওপর SCRAM-SHA-256 ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Granting `ALL PRIVILEGES` to the app role \"to avoid permission errors\", or switching `password_encryption` to SCRAM without resetting existing passwords (they stay MD5 until changed).",
    "bn": "\"Permission error এড়াতে\" app role-কে `ALL PRIVILEGES` দিয়ে দেওয়া, অথবা `password_encryption` SCRAM-এ বদলে পুরনো password reset না করা (বদলানো না পর্যন্ত সেগুলো MD5-ই থাকে)।"
@@ -222,6 +230,10 @@
    "pg-023",
    "pg-020"
   ],
+  "quickAnswer": {
+   "en": "It's a lost update: two requests read the same balance, both pass the check, and one write overwrites the other. Fix it with one atomic statement, `UPDATE ... SET balance = balance - $1 WHERE user_id = $2 AND balance >= $1`, inside a transaction on a single client.",
+   "bn": "এটা lost update: দুটো request একই balance পড়ে, দুটোই check পাস করে, আর একটার write অন্যটাকে overwrite করে দেয়। একটা atomic statement দিয়ে ঠিক করো, `UPDATE ... SET balance = balance - $1 WHERE user_id = $2 AND balance >= $1`, একই client-এ একটা transaction-এর ভেতরে।"
+  },
   "commonMistakes": {
    "en": "\"Fixing\" it by raising the isolation level without adding retry logic, or by adding an application-level mutex that doesn't work across multiple server instances.",
    "bn": "Retry logic ছাড়া শুধু isolation level বাড়িয়ে \"ঠিক\" করা, অথবা app-level mutex বসানো যেটা একাধিক server instance-এ কাজই করে না।"
@@ -299,6 +311,10 @@
    "pg-019",
    "pg-023"
   ],
+  "quickAnswer": {
+   "en": "`FOR UPDATE SKIP LOCKED`: each worker locks the job it picks, and other workers skip rows that are already locked and take the next one, so nobody waits and no job is processed twice.",
+   "bn": "`FOR UPDATE SKIP LOCKED`: প্রতিটা worker যে job নেয় সেটা lock করে, আর অন্য worker-রা আগে থেকে lock করা row বাদ দিয়ে পরেরটা নেয়, তাই কেউ অপেক্ষা করে না আর একই job দুবার চলে না।"
+  },
   "code": {
    "language": "sql",
    "source": "UPDATE jobs\n   SET status = 'running', locked_at = now()\n WHERE id = (\n       SELECT id FROM jobs\n       WHERE status = 'queued'\n       ORDER BY run_at, id\n       LIMIT 1\n       ________________\n )\nRETURNING id, payload;"
@@ -383,6 +399,10 @@
    "pg-006",
    "pg-031"
   ],
+  "quickAnswer": {
+   "en": "30 pods × 20 connections = 600, but `max_connections` defaults to 100, and raising it hurts because each connection is a process. Shrink the app pools, release clients, set `idle_in_transaction_session_timeout`, and put PgBouncer in transaction mode in front.",
+   "bn": "30 pod × 20 connection = 600, কিন্তু `max_connections`-এর default 100, আর এটা বাড়ানো ক্ষতিকর কারণ প্রতিটা connection একটা আলাদা process। App pool ছোট করো, client release নিশ্চিত করো, `idle_in_transaction_session_timeout` দাও, আর সামনে transaction mode-এ PgBouncer বসাও।"
+  },
   "commonMistakes": {
    "en": "Raising `max_connections` to thousands, or enabling PgBouncer transaction mode while the app still relies on session `SET` statements or `LISTEN/NOTIFY`.",
    "bn": "`max_connections` হাজারে তুলে দেওয়া, অথবা app এখনো session `SET` বা `LISTEN/NOTIFY`-এর উপর নির্ভর করছে অথচ PgBouncer transaction mode চালু করে দেওয়া।"
@@ -473,6 +493,10 @@
   "related": [
    "pg-019"
   ],
+  "quickAnswer": {
+   "en": "Use one `INSERT ... VALUES ... ON CONFLICT (sku) DO UPDATE SET qty = inventory.qty + EXCLUDED.qty RETURNING sku, qty`. `EXCLUDED` is the proposed row, and the statement is atomic and race-safe, unlike \"SELECT, then INSERT or UPDATE\" in app code.",
+   "bn": "একটাই statement: `INSERT ... VALUES ... ON CONFLICT (sku) DO UPDATE SET qty = inventory.qty + EXCLUDED.qty RETURNING sku, qty`। `EXCLUDED` হলো insert করতে চাওয়া row, আর app code-এ \"আগে SELECT, তারপর INSERT বা UPDATE\"-এর মতো নয়, এটা atomic আর race-safe।"
+  },
   "commonMistakes": {
    "en": "Writing `SET qty = EXCLUDED.qty` (overwrites instead of adding), or doing upserts as SELECT-then-INSERT in application code.",
    "bn": "`SET qty = EXCLUDED.qty` লেখা (যোগ না করে overwrite করে ফেলে), অথবা application code-এ SELECT-তারপর-INSERT করে upsert করা।"
@@ -552,6 +576,10 @@
    "pg-019",
    "pg-020"
   ],
+  "quickAnswer": {
+   "en": "Use a double-entry ledger with Read Committed plus `SELECT ... FOR UPDATE` on both accounts, locked in a consistent order (lowest id first) to avoid deadlocks, and Serializable only for multi-row invariants. For a hot merchant row, append credits and roll them up, or split the balance into bucket rows.",
+   "bn": "Double-entry ledger রাখো, Read Committed-এর সাথে দুটো account-এ `SELECT ... FOR UPDATE`, deadlock এড়াতে সবসময় একই ক্রমে lock করো (ছোট id আগে), আর Serializable শুধু multi-row invariant-এর জন্য। Hot merchant row-এর জন্য credit append করে পরে roll up করো, অথবা balance-কে কয়েকটা bucket row-এ ভাগ করো।"
+  },
   "commonMistakes": {
    "en": "Choosing `SERIALIZABLE` without retry logic, locking accounts in request order (deadlocks), or storing only a mutable balance with no ledger to reconcile against.",
    "bn": "Retry logic ছাড়া `SERIALIZABLE` বেছে নেওয়া, request-এর ক্রমে account lock করা (deadlock হয়), অথবা মেলানোর মতো কোনো ledger না রেখে শুধু পরিবর্তনশীল balance রাখা।"
@@ -626,6 +654,10 @@
    "pg-031",
    "pg-015"
   ],
+  "quickAnswer": {
+   "en": "Stale statistics: the planner estimated 1 row for `under_review` but got 200,000, so it chose a nested loop that ran the inner index scan 200,000 times. Run `ANALYZE payments;`, and make backfill jobs run `ANALYZE` when they finish.",
+   "bn": "Statistics পুরোনো হয়ে গেছে: planner `under_review`-এর জন্য 1টা row ধরেছিল কিন্তু পেয়েছে 200,000, তাই এমন nested loop বেছেছে যেটা ভেতরের index scan 200,000 বার চালিয়েছে। `ANALYZE payments;` চালাও, আর backfill job শেষে যেন `ANALYZE` চালায় সেটা নিশ্চিত করো।"
+  },
   "commonMistakes": {
    "en": "Adding more indexes or disabling nested loops instead of fixing the estimates, or reading only the top-level execution time without comparing estimated and actual rows per node.",
    "bn": "Estimate ঠিক না করে আরও index যোগ করা বা nested loop বন্ধ করে দেওয়া, অথবা প্রতিটা node-এ estimated আর actual row তুলনা না করে শুধু উপরের execution time পড়া।"

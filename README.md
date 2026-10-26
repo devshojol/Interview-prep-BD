@@ -7,7 +7,7 @@
 
 <p align="center">
   <strong>Bilingual (English + বাংলা) technical interview practice for developers in Bangladesh and beyond.</strong><br>
-  584 questions · 18 technologies · works offline · no account · no backend
+  834 questions · 19 technologies + behavioural · works offline · no account · no backend
 </p>
 
 <p align="center">
@@ -54,8 +54,11 @@ Fonts (Inter, Hind Siliguri, JetBrains Mono) load from Google Fonts when you're 
 ### Learn
 
 - **Dashboard:** real stats calculated from your answers (accuracy, weighted score, completion, streak, items due for review), today's goal, recent sessions, per-technology progress, difficulty distribution, weak topics and the daily challenge.
-- **Technologies:** 18 categories with question counts per difficulty, completion, search, sort and an area filter.
+- **Technologies:** 19 technologies plus a behavioural category, with question counts per difficulty, completion, search, sort and an area filter.
 - **All Questions:** search in English or বাংলা, including tags and subtopics. Filter by technology, difficulty, type and market (Bangladesh, international or both). You can also show only bookmarked, incorrect, unanswered, learned or needs-review questions.
+- **Quick answer + full answer:** every question opens with a 1–3 sentence quick answer (what you'd say first in an interview), followed by the full answer below it.
+- **Quick recall:** 10 short fundamental questions per technology, plain viva-style answers with a tiny example, for fast revision before a written test or first round.
+- **Behavioural & projects:** introducing yourself, walking through your project, the hardest bug, teamwork, deadlines and the questions to ask back, with sample answers you adapt.
 - **Question detail:** Learning mode (answer shown) or Interview mode (hidden until you reveal it). Each question has code blocks with copy, expected output, explanation, common mistakes, an interview tip, follow-ups, official docs, version information, and related questions.
 
 ### Practise
@@ -64,7 +67,7 @@ Fonts (Inter, Hind Siliguri, JetBrains Mono) load from Google Fonts when you're 
 - **Interview simulation:** timed, answers hidden, questions ordered from easy to hard, auto-submits when time runs out.
 - **MCQs:** graded automatically with an explanation, and locked once scored.
 - **Daily challenge:** three questions chosen from your local date: one MCQ, one medium and one hard.
-- **Flashcards:** bilingual flip cards with decks (all, not learned, bookmarked, due, mistakes), shuffle and keyboard control.
+- **Flashcards:** bilingual flip cards that show the quick answer, with decks (all, quick recall, not learned, bookmarked, due, mistakes), shuffle and keyboard control.
 
 ### Track
 
@@ -101,34 +104,38 @@ Fonts (Inter, Hind Siliguri, JetBrains Mono) load from Google Fonts when you're 
 
 Counted from the actual records:
 
-| Technology | Easy | Medium | Hard | Extreme | Total | MCQs |
-|---|---:|---:|---:|---:|---:|---:|
-| HTML | 11 | 11 | 7 | 3 | 32 | 8 |
-| CSS | 11 | 11 | 7 | 3 | 32 | 7 |
-| JavaScript | 14 | 14 | 8 | 4 | 40 | 10 |
-| React | 11 | 11 | 7 | 3 | 32 | 8 |
-| Next.js | 11 | 11 | 7 | 3 | 32 | 8 |
-| Node.js | 11 | 11 | 7 | 3 | 32 | 7 |
-| Express.js | 11 | 11 | 7 | 3 | 32 | 7 |
-| NestJS | 11 | 11 | 7 | 3 | 32 | 8 |
-| MongoDB | 11 | 11 | 7 | 3 | 32 | 8 |
-| Mongoose | 11 | 11 | 7 | 3 | 32 | 8 |
-| PostgreSQL | 11 | 11 | 7 | 3 | 32 | 7 |
-| SQL | 11 | 11 | 7 | 3 | 32 | 7 |
-| Drizzle ORM | 11 | 11 | 7 | 3 | 32 | 7 |
-| Redis | 11 | 11 | 7 | 3 | 32 | 8 |
-| Vector Databases | 11 | 11 | 7 | 3 | 32 | 8 |
-| Docker | 11 | 11 | 7 | 3 | 32 | 8 |
-| NGINX | 11 | 11 | 7 | 3 | 32 | 9 |
-| AWS | 11 | 11 | 7 | 3 | 32 | 7 |
-| **Total** | **201** | **201** | **127** | **55** | **584** | **140** |
+| Technology | Easy | Medium | Hard | Extreme | Main bank | MCQs | Quick recall |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| HTML | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| CSS | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| JavaScript | 14 | 14 | 8 | 4 | 40 | 10 | 10 |
+| React | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| Next.js | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| React Native (with Expo) | 14 | 14 | 8 | 4 | 40 | 10 | 10 |
+| Node.js | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| Express.js | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| NestJS | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| MongoDB | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| Mongoose | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| PostgreSQL | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| SQL | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| Drizzle ORM | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| Redis | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| Vector Databases | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| Docker | 11 | 11 | 7 | 3 | 32 | 8 | 10 |
+| NGINX | 11 | 11 | 7 | 3 | 32 | 9 | 10 |
+| AWS | 11 | 11 | 7 | 3 | 32 | 7 | 10 |
+| **Total** | **215** | **215** | **135** | **59** | **624** | **150** | **190** |
 
-- **Split:** 34% easy, 34% medium, 22% hard and 9% extreme. Extreme questions are senior-level material, not a requirement for junior roles.
-- **By type:** MCQ 140, conceptual 115, scenario 67, debugging 57, coding 46, comparison 44, security/performance 27, database query 25, architecture 23, output prediction 23, system design 17.
-- **By market:** both 457, Bangladesh 72, international 55.
-- **Code and references:** 490 questions include code, and there are 1,387 official-documentation references (853 unique URLs).
+Plus **20 behavioural & project questions** (introducing yourself, walking through a project, hardest bug, teamwork, the salary conversation, questions to ask back), for **834** in total.
 
-Every record has English and Bangla text for the question, answer, explanation, interview tip, follow-ups and MCQ options. It also carries `technologyVersion`, `verifiedAt`, `versionSensitive` (201 questions), `status` and `documentationUrl`.
+- **Quick layer:** every main-bank question has a 1–3 sentence quick answer (`quickAnswer`), and each technology has 10 quick-recall questions (`type: "quick"`, ids like `js-q01`) with plain viva-style answers.
+- **Split (main bank):** 34% easy, 34% medium, 22% hard and 9% extreme. Extreme questions are senior-level material, not a requirement for junior roles.
+- **By type (main bank):** MCQ 150, conceptual 122, scenario 73, debugging 61, coding 49, comparison 48, security/performance 31, database query 25, architecture 24, output prediction 23, system design 18. Plus 190 quick-recall and 20 behavioural questions.
+- **By market:** both 705, Bangladesh 72, international 57.
+- **Code and references:** 685 questions include code, and there are 1,692 documentation references (1,007 unique URLs).
+
+Every record has English and Bangla text for the question, answer, quick answer (main bank), explanation, interview tip, follow-ups and MCQ options. It also carries `technologyVersion`, `verifiedAt`, `versionSensitive` (201 questions), `status` and `documentationUrl`.
 
 <details>
 <summary><strong>Verified versions (checked 2026-10-12)</strong></summary>

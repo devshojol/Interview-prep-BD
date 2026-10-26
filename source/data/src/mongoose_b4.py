@@ -50,6 +50,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Mongoose removed callback support from model and query APIs in **Mongoose 7**, and Mongoose 9 removed the last remaining callback-style APIs. Passing a callback throws an error such as "Model.find() no longer accepts a callback". The modern form is `const users = await User.find({ role: "admin" });`.""",
         a_bn=r"""**Mongoose 7**-এ model আর query API থেকে callback support সরিয়ে দেওয়া হয়েছে, আর Mongoose 9 বাকি থাকা শেষ callback-style API-গুলোও সরিয়েছে। Callback দিলে "Model.find() no longer accepts a callback"-এর মতো error throw হয়। আধুনিক রূপ হলো `const users = await User.find({ role: "admin" });`।""",
+        quick_en=r"""It throws a `MongooseError` saying `Model.find()` no longer accepts a callback: callbacks were removed in Mongoose 7, and Mongoose 9 removed the last ones. Use `const users = await User.find({ role: "admin" });` instead.""",
+        quick_bn=r"""এটা একটা `MongooseError` throw করে, যেখানে বলা থাকে `Model.find()` আর callback নেয় না: Mongoose 7-এ callback বাদ দেওয়া হয়েছে, আর Mongoose 9 বাকি শেষগুলোও সরিয়ে দিয়েছে। এর বদলে লেখো `const users = await User.find({ role: "admin" });`।""",
         ex_en=r"""
             Option D is the tempting one — many libraries deprecate before removing — but in Mongoose 7+ it's a hard error, not a warning. Option C would be worse (a silent failure); Mongoose fails loudly on purpose.
 
@@ -118,6 +120,8 @@ QUESTIONS = [
 
             Fix: আগে `mongoose.isObjectIdOrHexString(id)` দিয়ে ID validate করো (শুধু `ObjectId` instance আর 24-character hex string-এর জন্য true), আর `null` check করো। বিকল্পভাবে, central error middleware-এ `CastError`-কে 400-এ map করো আর 404-এর জন্য `.orFail()` ব্যবহার করো।
         """,
+        quick_en=r"""`"abc"` can't be cast to an `ObjectId`, so `findById` throws a `CastError` that becomes a 500, and a missing product returns `null`, which is sent as 200. Validate with `mongoose.isObjectIdOrHexString()` (or map `CastError` to 400) and return 404 on `null` (or use `.orFail()`).""",
+        quick_bn=r"""`"abc"`-কে `ObjectId`-তে cast করা যায় না, তাই `findById` একটা `CastError` throw করে যেটা 500 হয়ে যায়; আর product না থাকলে `null` আসে, যেটা 200 হিসেবে যায়। `mongoose.isObjectIdOrHexString()` দিয়ে validate করো (বা `CastError`-কে 400-এ map করো), আর `null` হলে 404 দাও (বা `.orFail()` ব্যবহার করো)।""",
         ex_en=r"""
             - **Why not `isValidObjectId()`?** It answers a broader question — "can Mongoose cast this to an ObjectId?" — so it also returns `true` for things like a Mongoose document, and its rules have changed between versions (older releases accepted any 12-character string such as `"hello-world!"`; until Mongoose 8 it returned `true` for numbers, while Mongoose 9 returns `false` and `new mongoose.Types.ObjectId(6)` throws). For a URL param, `isObjectIdOrHexString()` states the intent exactly: an `ObjectId` instance or a 24-character hex string.
             - **Express 5:** a thrown `CastError` in an async route reaches your error middleware automatically; in Express 4 an unhandled rejection could leave the request hanging.
@@ -161,6 +165,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`schema.index()` only **declares** an index. With `autoIndex: true` (the default), Mongoose calls `createIndexes()` when the model initialises; with `autoIndex: false` nothing happens until you build it yourself — `Model.createIndexes()`, `syncIndexes()`, or a migration script/pipeline step.""",
         a_bn=r"""`schema.index()` শুধু একটা index **declare** করে। `autoIndex: true` (default) থাকলে model initialise হওয়ার সময় Mongoose `createIndexes()` call করে; `autoIndex: false` হলে তুমি নিজে build না করা পর্যন্ত কিছুই হয় না — `Model.createIndexes()`, `syncIndexes()`, বা একটা migration script/pipeline ধাপ দিয়ে।""",
+        quick_en=r"""Nothing is built automatically: `schema.index()` only declares the index, and with `autoIndex: false` it exists only after you run `Order.createIndexes()`, `syncIndexes()` or a migration. Until then the "My orders" query keeps scanning.""",
+        quick_bn=r"""নিজে থেকে কিছুই build হয় না: `schema.index()` শুধু index declare করে, আর `autoIndex: false` থাকলে `Order.createIndexes()`, `syncIndexes()` বা migration চালানোর পরেই index তৈরি হয়। ততক্ষণ "My orders" query scan করতেই থাকে।""",
         ex_en=r"""
             Turning `autoIndex` off in production is what the Mongoose docs suggest when you want to manage indexes carefully: an index build on a large collection consumes CPU, I/O and cache on every replica-set member, and you don't want every app restart to trigger one. The cost is that you need a deployment step — otherwise you ship code that depends on an index that doesn't exist (option B's "keeps scanning").
 
@@ -209,6 +215,8 @@ QUESTIONS = [
 
             **আমি যেভাবে বেছে নিই:** অনেক related model আর মিশ্র অভিজ্ঞতার team সহ সাধারণ business app → Mongoose। High-throughput ingestion/analytics service, shared library, বা যে database-এ কয়েকটা service/language লেখে → native driver আর database-level validation। দুটো মিলিয়েও চলে: Mongoose app-এর ভেতরেই bulk বা streaming job-এর জন্য `Model.collection` দিয়ে driver-এ নেমে যাওয়া যায়।
         """,
+        quick_en=r"""Mongoose is an ODM on top of the official driver: schemas, casting, validation, hooks, `populate()` and TypeScript types, at the cost of an abstraction layer and hydration overhead. I pick Mongoose for CRUD-heavy business apps and the native driver plus database validation for high-throughput or shared data.""",
+        quick_bn=r"""Mongoose হলো official driver-এর ওপর বানানো একটা ODM: schema, casting, validation, hook, `populate()` আর TypeScript type দেয়, বিনিময়ে একটা abstraction layer আর hydration-এর খরচ। CRUD-ভারী business app-এ আমি Mongoose নিই, আর high-throughput বা কয়েকটা service-এর shared data-র জন্য native driver সাথে database-level validation।""",
         ex_en=r"""
             - **Validation location matters:** Mongoose validation lives in one Node.js codebase. If a Python job or another service writes to the same collection, only MongoDB `$jsonSchema` validation protects you — so for shared data, put rules in the database too.
             - **Performance reality:** for reads, `.lean()` brings Mongoose close to the driver; the bigger wins usually come from indexes, projections and query shape, not from dropping the ODM.
@@ -283,6 +291,8 @@ QUESTIONS = [
 
             **Rollout:** একটা branch-এ upgrade করো, উপরের pattern-গুলো grep করো, type checker আর পুরো test suite চালাও (hook আর transaction সহ), production-এর মতো data নিয়ে staging-এ কিছুদিন চালিয়ে log-এ deprecation warning দেখো, তারপর ধীরে ধীরে deploy করো, rollback option হিসেবে 8.x line রেখে।
         """,
+        quick_en=r"""Check Node.js ≥ 20.19 and driver 7.x, then fix the breaking changes: no `next()` in pre hooks, update pipelines need `updatePipeline: true`, `returnDocument: "after"` replaces `new: true`, ObjectId/UUID changes, and `FilterQuery` → `QueryFilter`. Roll out with tests, type checks and a staging soak, keeping 8.x as rollback.""",
+        quick_bn=r"""আগে Node.js ≥ 20.19 আর driver 7.x নিশ্চিত করো, তারপর breaking change ঠিক করো: pre hook-এ আর `next()` নেই, update pipeline-এ `updatePipeline: true` লাগে, `new: true`-এর জায়গায় `returnDocument: "after"`, ObjectId/UUID-এর পরিবর্তন, আর `FilterQuery` → `QueryFilter`। Test, type check আর staging-এ কিছুদিন চালিয়ে rollout করো, 8.x-কে rollback হিসেবে রাখো।""",
         ex_en=r"""
             - **Why update pipelines became opt-in:** a pipeline update (`[ { $set: ... } ]`) is evaluated by the server with aggregation semantics; accidentally passing an array where an update object was expected — e.g. from user input — could do unexpected things. Opt-in makes the intent explicit.
             - **Hidden hook breakage:** a pre hook that still declares `next` and calls it will throw a `TypeError` at runtime, so only tests that exercise `save()` paths will catch it — make sure they exist before upgrading.
@@ -352,6 +362,8 @@ QUESTIONS = [
 
             ভালো ব্যবহারের জায়গা: notification (SMS / email / push), payment method (bKash / card / COD), activity-feed event, polymorphic content — "একই ধরনের জিনিস, কয়েকটা field আলাদা, সাধারণত একসাথে list হয়"।
         """,
+        quick_en=r"""Discriminators give schema inheritance in one collection: a base model holds the shared fields, child models add their own, and a discriminator key (`__t` by default) stores each document's type. Querying a child model filters by that key automatically; use them for things like SMS/email/push notifications listed together.""",
+        quick_bn=r"""Discriminator দিয়ে একটা collection-এর ভেতরেই schema inheritance করা যায়: base model-এ common field থাকে, child model নিজের field যোগ করে, আর একটা discriminator key (default `__t`) প্রতিটি document-এর type রাখে। Child model দিয়ে query করলে ওই key দিয়ে নিজে থেকেই filter হয়; SMS/email/push notification-এর মতো একসাথে দেখানো জিনিসে এটা কাজে লাগে।""",
         ex_en=r"""
             **Pitfalls:**
             - **One collection, shared indexes:** an index declared for a child-only field is still built on the whole collection. Use partial indexes (e.g. on the discriminator key) for child-specific uniqueness.
@@ -440,6 +452,8 @@ QUESTIONS = [
 
             মনে রেখো, `toJSON: { virtuals: true }` ছাড়া virtual JSON-এ আসে না, আর একজন author-এর হাজার হাজার post paginate করতে সরাসরি `Post` query করো keyset pagination দিয়ে — populate pagination-এর tool না।
         """,
+        quick_en=r"""An ever-growing `posts` array is unbounded (toward 16 MB, bigger rewrites) and a dual write that can drift out of sync. Store only `author` on each post, define a virtual `posts` (`ref`, `localField: "_id"`, `foreignField: "author"`), and populate it with `select`, `match`, a sort and `perDocumentLimit` rather than `limit`.""",
+        quick_bn=r"""সবসময় বাড়তে থাকা `posts` array unbounded (16 MB-এর দিকে যায়, প্রতিবার বড় document আবার লিখতে হয়), আর এটা একটা dual write, যেটা sync হারাতে পারে। প্রতিটি post-এ শুধু `author` রাখো, একটা virtual `posts` বানাও (`ref`, `localField: "_id"`, `foreignField: "author"`), আর `select`, `match`, sort ও `limit`-এর বদলে `perDocumentLimit` দিয়ে populate করো।""",
         ex_en=r"""
             - **Cost of `perDocumentLimit`:** to guarantee N per parent, Mongoose runs **one query per parent document**. For a page of 20 authors that's 20 small indexed queries — acceptable, but don't do it for 1,000 authors.
             - **Counts at scale:** `count: true` runs a count per populate; for list pages showing "1,240 posts" for many authors, a stored `postCount` (computed pattern, updated with `$inc`) is cheaper.
@@ -552,6 +566,8 @@ QUESTIONS = [
 
             **একই লক্ষণ, অন্য যে কারণগুলো check করা উচিত:** `mongoose.connect()` চুপচাপ fail করা (ভুল URI, auth failure, Atlas IP access list-এ server-এর IP নেই, DNS/SRV সমস্যা), কারণ কেউ `'error'` শোনেনি; অথবা `node_modules`-এ `mongoose` package-এর দুইটা copy (monorepo-তে common), ফলে model আর connection আলাদা Mongoose instance-এর।
         """,
+        quick_en=r"""`User` was registered on the default connection with `mongoose.model()`, but the app only opened a separate `createConnection()`, so the default connection never connects and operations buffer until the 10-second timeout. Register the model on that connection (`conn.model("User", userSchema)`), or use `mongoose.connect()` consistently.""",
+        quick_bn=r"""`mongoose.model()` দিয়ে `User` register হয়েছে default connection-এ, কিন্তু app শুধু আলাদা একটা `createConnection()` খুলেছে; তাই default connection কখনো connect হয় না, আর operation-গুলো 10 second-এর timeout পর্যন্ত buffer হয়ে থাকে। Model-টা ওই connection-এই register করো (`conn.model("User", userSchema)`), অথবা সব জায়গায় `mongoose.connect()` ব্যবহার করো।""",
         ex_en=r"""
             - **Why buffering exists:** it lets you define models and even start queries before the connection finishes, which is convenient at startup — but it turns configuration mistakes into mysterious timeouts.
             - **Fail fast:** `mongoose.set("bufferCommands", false)` (or per schema) makes operations error immediately when not connected; a shorter `serverSelectionTimeoutMS` (default 30 s) surfaces unreachable clusters sooner.

@@ -47,6 +47,8 @@ QUESTIONS = [
         a_bn=r"""
             প্রথম option-টা। Decorative image-এ **খালি** `alt=""` দিতে হয়, যাতে screen reader সেটা এড়িয়ে যায়। আর যে image একটা link-এর একমাত্র content, সেটা একটা *functional* image — তার `alt`-এ ছবির বর্ণনা নয়, link-এর উদ্দেশ্য লিখতে হয় ("Dokan — home")।
         """,
+        quick_en=r"""The decorative divider gets `alt=""` so screen readers skip it, and the logo inside the home link gets an `alt` that describes the link's purpose ("Dokan — home"), not the picture.""",
+        quick_bn=r"""Decorative divider-এ `alt=""` দিই যাতে screen reader সেটা skip করে, আর home link-এর ভেতরের logo-র `alt` হবে link-এর উদ্দেশ্য ("Dokan — home"), ছবির বর্ণনা নয়।""",
         ex_en=r"""
             The most tempting wrong option is the third one: it *has* alt text everywhere, but "decorative wave image" makes a screen reader announce noise for something that carries no information, and "logo image" is redundant — screen readers already say "image" or "graphic". The logo `alt` should tell users where the link goes.
 
@@ -87,6 +89,8 @@ QUESTIONS = [
 
             একগুচ্ছ radio button বা checkbox-এর জন্য আমি সেগুলোকে `<legend>`-সহ `<fieldset>`-এ wrap করি, যাতে প্রতিটা option-এর সাথে প্রশ্নটাও ("Payment method") শোনা যায়।
         """,
+        quick_en=r"""Use a `<label>` whose `for` matches the input's `id` (or wrap the input in it): that gives an accessible name and a bigger click target. A `placeholder` disappears when you type, is low-contrast and isn't a reliable name, so use it only for an example format.""",
+        quick_bn=r"""Input-এর `id`-এর সাথে মিলিয়ে `for`-সহ `<label>` দাও (বা input-কে label-এর ভেতরে রাখো); এতে accessible name আর বড় click target দুটোই পাওয়া যায়। `placeholder` type করলেই হারিয়ে যায়, রং হালকা, আর নির্ভরযোগ্য name নয়, তাই এটা শুধু example format দেখানোর জন্য।""",
         ex_en=r"""
             - **Explicit vs implicit:** `for`/`id` works even when the label and input are far apart in the DOM; wrapping is handy for checkboxes. Both are valid; explicit association is the most robust across assistive tech.
             - **`for` points to an `id`, not a `name`.** And IDs must be unique — two inputs with `id="email"` (common when a component renders twice) break the association.
@@ -147,6 +151,8 @@ QUESTIONS = [
             - `typeof price` হলো `"string"`।
             - `dataset.discountRate`-এ value assign করলে নতুন একটা `data-discount-rate` attribute তৈরি হয়, যেটা আগের attribute-গুলোর পরে যোগ হয়।
         """,
+        quick_en=r"""It logs `421`, `available`, `string`, then the button's HTML with a new `data-discount-rate="10"` at the end. Every `dataset` value is a string, so `"42" + 1` concatenates and `"false"` is truthy.""",
+        quick_bn=r"""Output: `421`, `available`, `string`, তারপর শেষে নতুন `data-discount-rate="10"`-সহ button-এর HTML। `dataset`-এর সব value string, তাই `"42" + 1` জোড়া লাগে, আর `"false"` truthy।""",
         ex_en=r"""
             Step by step:
             1. Destructuring reads three string values: `"42"`, `"false"`, `"1250.50"`.
@@ -225,6 +231,8 @@ QUESTIONS = [
         a_bn=r"""
             দ্বিতীয় কথাটা। `auto` popover **top layer**-এ render হয়, **light dismiss** support করে (বাইরে click বা Esc), আর একসাথে একটাই অসম্পর্কিত `auto` popover খোলা থাকতে পারে — একটা খুললে বাকিগুলো বন্ধ হয় (এর ভেতর থেকে খোলা nested popover খোলা থাকে)। এটা **non-modal**।
         """,
+        quick_en=r"""An `auto` popover is shown in the top layer, light-dismisses on an outside click or Esc, and opening it closes other unrelated `auto` popovers. It is non-modal and needs no `z-index` or JavaScript.""",
+        quick_bn=r"""`auto` popover top layer-এ দেখায়, বাইরে click বা Esc চাপলে light dismiss হয়, আর খুললে অন্য unrelated `auto` popover বন্ধ হয়ে যায়। এটা non-modal, আর `z-index` বা JavaScript লাগে না।""",
         ex_en=r"""
             The tempting wrong answer is the first one, because popovers and modal dialogs both appear "on top". But a popover never makes the page inert or traps focus — the user can keep interacting with the page. For a blocking confirmation, use `<dialog>` with `showModal()`.
 
@@ -269,6 +277,8 @@ QUESTIONS = [
 
             সীমাবদ্ধতা: invoker command December 2025 থেকে মাত্র Baseline (newly available), তাই পুরোনো browser-এর জন্য JavaScript fallback লাগবে; built-in command শুধু dialog আর popover কভার করে। যখন user-কে একসাথে কয়েকটা section মিলিয়ে দেখতে হয়, তখন exclusive accordion ভুল পছন্দ, আর `<summary>`-কে বেশি custom style করতে গিয়ে অনেক সময় এর semantics বা focus style হারিয়ে যায়।
         """,
+        quick_en=r"""Invoker commands let a `<button>` with `commandfor` and `command` open or close a dialog or popover, or send a custom `--` command event, without click handlers. `<details>` sharing a `name` form an exclusive accordion. Invoker commands are Baseline only since December 2025, so keep a fallback.""",
+        quick_bn=r"""Invoker command দিয়ে `commandfor` আর `command`-সহ একটা `<button>` click handler ছাড়াই dialog বা popover খুলতে-বন্ধ করতে, বা `--` দিয়ে শুরু custom command event পাঠাতে পারে। একই `name`-এর `<details>`-গুলো মিলে exclusive accordion হয়। Invoker command মাত্র December 2025 থেকে Baseline, তাই fallback রাখো।""",
         ex_en=r"""
             - **Why declarative matters:** fewer event listeners, works before your JavaScript bundle has loaded (useful on slow networks), and the browser wires up accessibility relationships for you.
             - **`request-close` vs `close`:** `request-close` fires the dialog's `cancel` event first, so your code can `preventDefault()` (for example, "You have unsaved changes"); `close` closes immediately.
@@ -347,6 +357,8 @@ QUESTIONS = [
             - JSON-LD আকারে **structured data** (`<script type="application/ld+json">`), schema.org-এর `Product` আর `Offer` দিয়ে — দাম, currency (`BDT`), stock-এর অবস্থা — এতে page rich result-এর যোগ্য হয়।
             - চাইলে Bangla আর English version-এর জন্য `hreflang` alternate, আর যেসব page index হওয়া উচিত নয় (cart, internal search) শুধু সেখানে `<meta name="robots" content="noindex">`।
         """,
+        quick_en=r"""A unique `<title>` and meta description for the search result, `rel="canonical"` so duplicate URLs don't split ranking, Open Graph tags for Facebook and WhatsApp share previews, and JSON-LD with schema.org `Product`/`Offer` for rich results.""",
+        quick_bn=r"""Search result-এর জন্য unique `<title>` আর meta description, duplicate URL-এ ranking ভাগ না হতে `rel="canonical"`, Facebook আর WhatsApp share preview-এর জন্য Open Graph tag, আর rich result-এর জন্য JSON-LD-তে schema.org `Product`/`Offer`।""",
         ex_en=r"""
             - **Open Graph uses `property`, not `name`:** `<meta property="og:image" content="…">`. Use an absolute image URL; around 1200×630 works well across platforms.
             - **Social crawlers generally don't run JavaScript.** If these tags are injected client-side by an SPA, previews will show your default tags — they must be in the server HTML.
@@ -433,6 +445,8 @@ QUESTIONS = [
             5. **সময় নির্ধারণ:** submit-এ validate করি, আর কোনো field একবার invalid হলে `blur`/`input`-এ আবার validate করি, যাতে ঠিক করামাত্র error মুছে যায় — user type করার মাঝেই চিৎকার করে error দেখাই না।
             6. **কাজের message লেখো:** "Invalid input" নয়, বরং "01 দিয়ে শুরু হওয়া 11 সংখ্যার mobile number দিন, যেমন 01712345678"।
         """,
+        quick_en=r"""Add `novalidate` but keep using the Constraint Validation API; mark bad fields with `aria-invalid` and a visible message linked by `aria-describedby`; on submit, show an error summary with links and move focus to it. Server errors use the same slots, and the user's input is kept.""",
+        quick_bn=r"""`novalidate` দিলেও Constraint Validation API ব্যবহার করি; ভুল field-এ `aria-invalid` আর `aria-describedby` দিয়ে যুক্ত দৃশ্যমান message দিই; submit-এ link-সহ error summary দেখিয়ে focus সেখানে নিই। Server error-ও একই জায়গায় দেখাই, আর user যা লিখেছে তা রেখে দিই।""",
         ex_en=r"""
             - **Why focus the summary instead of using a live region?** Moving focus is reliable across screen readers and also scrolls sighted users to the problem. If you can't move focus (e.g. inline async check while typing), use a live region that already exists in the DOM before you inject text — live regions added together with their content are often not announced.
             - **`aria-describedby` can list several IDs** (hint + error), read in order. An empty error element simply adds nothing.
@@ -550,6 +564,8 @@ QUESTIONS = [
 
             **মৌলিক বিষয়গুলোও ঠিক করো:** navigation-এর জন্য আসল `<a href>` link (কোনো `div`-এ `onClick` + `navigate()` নয়), `#/` hash route-এর বদলে History API URL, প্রতিটা route-এর আলাদা title/description, না-থাকা product-এর জন্য আসল **404 status** (soft 404 এড়াও), একটা XML sitemap, আর `robots.txt`-এ JS/CSS block কোরো না।
         """,
+        quick_en=r"""The server sends the same empty shell with default tags for every URL: social crawlers don't run JavaScript, and Google renders it late and unreliably. Server-render or pre-render the routes, or at least inject per-route title, OG and canonical tags at the server or edge.""",
+        quick_bn=r"""Server প্রতিটা URL-এ default tag-সহ একই খালি shell পাঠায়: social crawler JavaScript চালায় না, আর Google দেরিতে ও অনির্ভরযোগ্যভাবে render করে। Route-গুলো server-render বা pre-render করো, নইলে অন্তত server বা edge-এ প্রতি route-এর title, OG আর canonical tag inject করো।""",
         ex_en=r"""
             **How to verify:** `curl` the product URL (or "View source", not DevTools Elements) — if you can't see the product name and tags in the raw HTML, crawlers that don't run JavaScript can't either. Use the platforms' own debugging tools (e.g. Google's URL Inspection, Facebook's Sharing Debugger) to see what they fetched; they also let you refresh cached previews.
 

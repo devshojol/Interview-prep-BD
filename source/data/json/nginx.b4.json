@@ -46,6 +46,10 @@
   "related": [
    "nginx-018"
   ],
+  "quickAnswer": {
+   "en": "Weighted round-robin: each server in turn, in proportion to its `weight` (all 1 here), so each gets about a third of the traffic. Servers that failed recently (per `max_fails`/`fail_timeout`) are skipped for a while.",
+   "bn": "Weighted round-robin: প্রতিটা server পালা করে, তার `weight` অনুযায়ী (এখানে সবগুলো 1), তাই প্রত্যেকে মোটামুটি এক-তৃতীয়াংশ traffic পায়। সম্প্রতি fail করা server (`max_fails`/`fail_timeout` অনুযায়ী) কিছুক্ষণের জন্য বাদ পড়ে।"
+  },
   "code": {
    "language": "nginx",
    "source": "upstream app {\n    server 10.0.1.11:3000;\n    server 10.0.1.12:3000;\n    server 10.0.1.13:3000;\n}"
@@ -130,6 +134,10 @@
    "nginx-006",
    "nginx-014"
   ],
+  "quickAnswer": {
+   "en": "Browsers cached `index.html` for 7 days, and it points to hashed chunks that the deploy deleted, so they 404. Serve hashed assets with `max-age=31536000, immutable` and `index.html` with `no-cache`, and keep the previous release's assets around for a while.",
+   "bn": "Browser `index.html` ৭ দিনের জন্য cache করে রেখেছে, আর সেটা এমন hashed chunk-এর দিকে point করে যেগুলো deploy-এ মুছে গেছে, তাই 404 আসে। Hashed asset-এ `max-age=31536000, immutable` দাও, `index.html`-এ `no-cache`, আর আগের release-এর asset কিছুদিন রেখে দাও।"
+  },
   "commonMistakes": {
    "en": "Caching `index.html` for days, using `no-store` everywhere \"to be safe\" (slow site), deleting old assets the instant a deploy finishes, and adding `?v=123` query strings instead of content hashes.",
    "bn": "`index.html` কয়েক দিনের জন্য cache করা, \"নিরাপদ থাকতে\" সব জায়গায় `no-store` দেওয়া (site ধীর হয়), deploy শেষ হওয়া মাত্র পুরনো asset মুছে ফেলা, আর content hash-এর বদলে `?v=123` query string যোগ করা।"
@@ -189,6 +197,10 @@
   "related": [
    "nginx-008"
   ],
+  "quickAnswer": {
+   "en": "`listen 443 ssl;` plus `http2 on;`, available since NGINX 1.25.1. The old `http2` parameter on the `listen` line is deprecated: it still works but logs a warning.",
+   "bn": "`listen 443 ssl;`-এর সাথে `http2 on;`, যেটা NGINX 1.25.1 থেকে আছে। `listen` line-এ পুরনো `http2` parameter deprecated: এখনো কাজ করে, কিন্তু warning log করে।"
+  },
   "options": [
    {
     "en": "`listen 443 ssl http2;`",
@@ -225,7 +237,7 @@
    "deployment",
    "ufw"
   ],
-  "technologyVersion": "NGINX 1.30 stable, Node.js 24 LTS, PM2 / systemd",
+  "technologyVersion": "NGINX 1.30 stable, Node.js 26 LTS, PM2 / systemd",
   "verifiedAt": "2026-10-12",
   "versionSensitive": false,
   "status": "stable",
@@ -273,6 +285,10 @@
    "nginx-005",
    "nginx-008"
   ],
+  "quickAnswer": {
+   "en": "NGINX on 80/443 terminates TLS, serves the React build and proxies `/api/` to Node on `127.0.0.1:3000`, which runs under systemd or PM2 cluster mode (`pm2 reload` for zero downtime). Lock it down with `ufw`, key-only SSH, a non-root app user, security updates, protected secrets and backups.",
+   "bn": "80/443-এ NGINX TLS terminate করে, React build serve করে আর `/api/` proxy করে `127.0.0.1:3000`-এর Node-এ; Node চলে systemd বা PM2 cluster mode-এ (zero downtime-এর জন্য `pm2 reload`)। নিরাপত্তার জন্য `ufw`, শুধু key দিয়ে SSH, non-root app user, security update, সুরক্ষিত secret আর backup রাখো।"
+  },
   "commonMistakes": {
    "en": "Running `node server.js` inside `screen`/`tmux`, running the app as root on port 80, exposing port 3000 publicly, and keeping in-memory sessions with PM2 cluster mode.",
    "bn": "`screen`/`tmux`-এর ভেতরে `node server.js` চালানো, root হিসেবে port 80-এ app চালানো, port 3000 public করে রাখা, আর PM2 cluster mode-এর সাথে in-memory session রাখা।"
@@ -365,6 +381,10 @@
    "nginx-003",
    "nginx-020"
   ],
+  "quickAnswer": {
+   "en": "Set `ssl_protocols TLSv1.2 TLSv1.3`, add security headers with `always` (and `add_header_inherit merge` on 1.30, because an inner `add_header` drops inherited ones), and `server_tokens off`. Add a catch-all `default_server` with `return 444` on port 80 and `ssl_reject_handshake on` on 443.",
+   "bn": "`ssl_protocols TLSv1.2 TLSv1.3` দাও, security header `always` দিয়ে যোগ করো (1.30-এ `add_header_inherit merge`-ও দাও, কারণ ভেতরের `add_header` inherit হওয়া header বাদ দেয়), আর `server_tokens off`। অচেনা host-এর জন্য একটা catch-all `default_server` রাখো: port 80-এ `return 444`, আর 443-এ `ssl_reject_handshake on`।"
+  },
   "commonMistakes": {
    "en": "Adding headers without `always` (missing on error pages), assuming server-level `add_header` applies everywhere, relying on `server_tokens off` as \"security\", and enabling HSTS preload before auditing all subdomains.",
    "bn": "`always` ছাড়া header যোগ করা (error page-এ থাকে না), ধরে নেওয়া যে server-level `add_header` সব জায়গায় প্রযোজ্য, `server_tokens off`-কেই \"security\" ভাবা, আর সব subdomain যাচাই না করেই HSTS preload চালু করা।"
@@ -430,6 +450,10 @@
    "nginx-001",
    "nginx-025"
   ],
+  "quickAnswer": {
+   "en": "About 2,048: `worker_connections` is per worker and also counts upstream connections, so each proxied client uses two. That gives 4 × 1,024 / 2.",
+   "bn": "প্রায় 2,048: `worker_connections` প্রতি worker-এর হিসাব, আর এতে upstream connection-ও গোনা হয়, তাই প্রতিটা proxied client দুটো connection নেয়। হিসাবটা 4 × 1,024 / 2।"
+  },
   "code": {
    "language": "nginx",
    "source": "worker_processes 4;\n\nevents {\n    worker_connections 1024;\n}"
@@ -518,6 +542,10 @@
    "nginx-016",
    "nginx-018"
   ],
+  "quickAnswer": {
+   "en": "Socket.IO's polling requests must reach the same process, so round-robin causes \"Session ID unknown\"; add stickiness (`hash $remote_addr consistent`, or `sticky cookie` on 1.30). Broadcasts don't cross instances either, so add the Redis adapter: you need both fixes.",
+   "bn": "Socket.IO-র polling request-গুলো একই process-এ যেতে হয়, তাই round-robin-এ \"Session ID unknown\" আসে; stickiness দাও (`hash $remote_addr consistent`, বা 1.30-এ `sticky cookie`)। আবার broadcast এক instance থেকে আরেক instance-এ যায় না, তাই Redis adapter যোগ করো: দুটো সমাধানই লাগবে।"
+  },
   "commonMistakes": {
    "en": "Adding only stickiness (broadcasts still break), using `ip_hash` behind a CDN, and storing room membership in a plain in-memory `Map` across instances.",
    "bn": "শুধু stickiness যোগ করা (broadcast তখনো ভাঙা থাকে), CDN-এর পেছনে `ip_hash` ব্যবহার করা, আর একাধিক instance থাকা অবস্থায় room membership সাধারণ in-memory `Map`-এ রাখা।"
@@ -611,6 +639,10 @@
    "nginx-019",
    "nginx-030"
   ],
+  "quickAnswer": {
+   "en": "Stabilise first (capacity, stale cache, tighter rate limits), then read each error: exhausted `worker_connections`, the FD limit, ephemeral port exhaustion from no upstream keepalive, and a slow `/api/cart`. Fix with keepalive, coherent FD and connection limits, a faster cart path and bounded retries.",
+   "bn": "আগে system স্থির করো (capacity বাড়াও, stale cache serve করো, rate limit কড়া করো), তারপর প্রতিটা error পড়ো: `worker_connections` শেষ, file descriptor limit, upstream keepalive না থাকায় ephemeral port শেষ হয়ে যাওয়া, আর ধীর `/api/cart`। সমাধান: keepalive, মিল রেখে FD ও connection limit বাড়ানো, cart path দ্রুত করা আর retry সীমিত রাখা।"
+  },
   "commonMistakes": {
    "en": "Restarting NGINX repeatedly as the \"fix\", raising `worker_connections` without raising file-descriptor limits, ignoring the slow upstream that started the cascade, and letting unbounded retries amplify the load.",
    "bn": "বারবার NGINX restart করাকেই \"সমাধান\" ভাবা, file-descriptor limit না বাড়িয়ে শুধু `worker_connections` বাড়ানো, যে ধীর upstream থেকে পুরো ধস শুরু হয়েছে সেটা উপেক্ষা করা, আর সীমাহীন retry-কে load বাড়িয়ে তুলতে দেওয়া।"

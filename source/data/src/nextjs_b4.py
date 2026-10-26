@@ -43,6 +43,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Next.js 16 renamed Middleware to **Proxy**: create `proxy.ts` (or `.js`) at the project root — or inside `src/` — at the same level as `app/`, and export a `proxy` function (or a default export). An optional `config.matcher` limits which paths it runs on.""",
         a_bn=r"""Next.js 16 Middleware-এর নাম বদলে **Proxy** রেখেছে: project root-এ — অথবা `src/`-এর ভেতরে — `app/`-এর একই স্তরে `proxy.ts` (বা `.js`) তৈরি করো, আর একটা `proxy` function (বা default export) export করো। ঐচ্ছিক `config.matcher` ঠিক করে এটা কোন path-এ চলবে।""",
+        quick_en=r"""Create `proxy.ts` at the project root (or in `src/`, next to `app/`) exporting a `proxy` function. Next.js 16 renamed Middleware to Proxy, so `middleware.ts` is the deprecated legacy name; use `config.matcher` to limit which paths it runs on.""",
+        quick_bn=r"""Project root-এ (বা `src/`-এ, `app/`-এর পাশে) `proxy.ts` বানাও যেটা একটা `proxy` function export করে। Next.js 16 Middleware-এর নাম বদলে Proxy রেখেছে, তাই `middleware.ts` এখন deprecated legacy নাম; কোন path-এ চলবে তা `config.matcher` দিয়ে সীমিত করো।""",
         ex_en=r"""
             The tempting answer is `middleware.ts` — it's in countless tutorials and still exists, but it's **deprecated** in v16 (kept only for Edge-runtime use cases). The rename makes the purpose clearer: it's a network-boundary layer in front of the app, not Express-style middleware. `proxy.ts` runs on the **Node.js runtime** by default, and `npx @next/codemod@canary middleware-to-proxy .` renames both the file and the function.
 
@@ -82,6 +84,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""Inside the Server Action (ideally via a server-only data-access layer). A Server Action is a public POST endpoint: anyone can call it directly with any post id, so it must verify the session **and** ownership/role itself every time.""",
         a_bn=r"""Server Action-এর ভেতরে (আদর্শভাবে একটা server-only data-access layer-এর মাধ্যমে)। Server Action হলো একটা public POST endpoint: যে কেউ যেকোনো post id দিয়ে সরাসরি এটা call করতে পারে, তাই প্রতিবার এটাকে নিজেই session **আর** ownership/role যাচাই করতে হবে।""",
+        quick_en=r"""Inside the `deletePost` Server Action (or the data-access function it calls), on every call. A Server Action is a public POST endpoint anyone can call with any id, so `proxy.ts` and hidden buttons are not enough.""",
+        quick_bn=r"""`deletePost` Server Action-এর ভেতরে (বা যে data-access function-কে এটা call করে সেখানে), প্রতিবার call-এ। Server Action হলো একটা public POST endpoint, যেকেউ যেকোনো id দিয়ে call করতে পারে, তাই `proxy.ts` বা button লুকানো যথেষ্ট না।""",
         ex_en=r"""
             The tempting answer is `proxy.ts`. Proxy is great for **optimistic** checks (is there a session cookie? redirect early), but it isn't the security boundary: Server Actions are handled as POST requests to the route where they're used, so a matcher change or moving the action to another route can silently remove proxy coverage — and proxy doesn't know who owns post 123 anyway.
 
@@ -127,6 +131,8 @@ QUESTIONS = [
 
             Layout Server Component-ই থাকে (তাই এখনো `metadata` export করতে পারে), আর `children` হিসেবে পাঠানো page-গুলোও **Server Component-ই থাকে** — Client Component তার children হিসেবে পাওয়া Server Component render করতে পারে। শুধু provider-এর নিজের code browser-এ যায়।
         """,
+        quick_en=r"""`layout.tsx` is a Server Component, which can't use `useState` or create context. Move the provider into a `'use client'` file like `app/providers.tsx` and wrap `{children}` with it; the layout and the pages stay Server Components.""",
+        quick_bn=r"""`layout.tsx` একটা Server Component, যেখানে `useState` বা context তৈরি চলে না। Provider-টা `app/providers.tsx`-এর মতো একটা `'use client'` file-এ সরাও আর সেটা দিয়ে `{children}` wrap করো; layout আর page-গুলো Server Component-ই থাকে।""",
         ex_en=r"""
             - **Don't put `'use client'` on the root layout itself.** It would turn the layout and everything it imports into client code and you'd lose the `metadata` export.
             - **Render providers as deep as possible**, e.g. a cart provider only around the shop section, so more of the tree can be optimised.
@@ -224,6 +230,8 @@ QUESTIONS = [
 
             সব model-এই time-based (আর `'max'`-সহ tag-based) regeneration হলো stale-while-revalidate: revalidation সময় পার হওয়ার পর প্রথম visitor তখনো পুরনো page পায় আর নতুন build শুরু করিয়ে দেয়। ব্যতিক্রম: `updateTag` / `revalidateTag(tag, { expire: 0 })`, আর Cache Components-এ `cacheLife`-এর `expire` সময় পার হওয়া entry — এসব ক্ষেত্রে পরের request fresh content-এর জন্য অপেক্ষা করে।
         """,
+        quick_en=r"""ISR serves a static page and regenerates it later. Today you use `'use cache'` with `cacheLife` and `cacheTag`, prebuild known slugs with `generateStaticParams`, and revalidate the tag from a CMS webhook; legacy equivalents are `export const revalidate` and Pages Router `getStaticProps` with `revalidate`.""",
+        quick_bn=r"""ISR static page দেয় আর পরে সেটা regenerate করে। এখন `cacheLife` ও `cacheTag`-সহ `'use cache'` ব্যবহার করো, `generateStaticParams` দিয়ে জানা slug আগে build করো, আর CMS webhook থেকে tag revalidate করো; legacy উপায় হলো `export const revalidate` আর Pages Router-এর `revalidate`-সহ `getStaticProps`।""",
         ex_en=r"""
             - **Why tags beat time-based revalidation for a blog:** with a long `cacheLife` plus a tag, posts update within seconds of publishing but aren't regenerated needlessly every hour.
             - **Don't mix models:** in a Cache Components app, `export const revalidate` and `fetch(..., { next: { revalidate } })` are the old way; caching belongs in `'use cache'` scopes.
@@ -326,6 +334,8 @@ QUESTIONS = [
 
             Modal বন্ধ করতে একটা Client Component `router.back()` call করে; user পায় শেয়ারযোগ্য URL, কাজ করা back button, আর modal-এর পেছনে আগের context অক্ষত।
         """,
+        quick_en=r"""An `@modal` slot (parallel route) renders next to `children`, and `@modal/(.)photos/[id]` intercepts soft navigations to show the photo in the modal. A hard load renders the normal `app/photos/[id]` page, and `@modal/default.tsx` returns `null` when the slot has nothing to show.""",
+        quick_bn=r"""একটা `@modal` slot (parallel route) `children`-এর পাশে render হয়, আর `@modal/(.)photos/[id]` soft navigation intercept করে photo-টা modal-এ দেখায়। Hard load-এ সাধারণ `app/photos/[id]` page দেখায়, আর slot-এ দেখানোর কিছু না থাকলে `@modal/default.tsx` `null` return করে।""",
         ex_en=r"""
             - **Why `default.tsx` matters:** on soft navigation Next.js remembers each slot's active state; on a hard load it can't, so it needs a fallback. Before v16 a missing default led to a 404 on hard navigation; now the build fails instead — a common upgrade failure.
             - **Closing on other navigations:** add a catch-all `@modal/[...catchAll]/page.tsx` returning `null`, so navigating to another page via `<Link>` clears the modal.
@@ -437,6 +447,8 @@ QUESTIONS = [
 
             তারপর যাচাই: analyzer snapshot তুলনা করো আর real-user monitoring-এ INP আর LCP দেখো। কম JavaScript মানে main thread-এ কম parsing আর hydration-এর কাজ, যেটা সরাসরি INP-তে সাহায্য করে।
         """,
+        quick_en=r"""Measure first with `next analyze` (the Turbopack bundle analyzer). Then push `'use client'` down to small leaves, do heavy work in Server Components, lazy-load late widgets with `next/dynamic`, optimise package imports and load third-party scripts with `next/script`.""",
+        quick_bn=r"""আগে `next analyze` (Turbopack bundle analyzer) দিয়ে মাপো। তারপর `'use client'`-কে ছোট leaf component-এ নামাও, ভারী কাজ Server Component-এ করো, পরে লাগবে এমন widget `next/dynamic` দিয়ে lazy-load করো, package import optimise করো, আর third-party script `next/script` দিয়ে load করো।""",
         ex_en=r"""
             **Why `'use client'` placement is the biggest lever:** the directive marks a module-graph boundary. One directive on `app/page.tsx` can drag a CMS SDK, a markdown parser and every child component into the client bundle, even though the output is static HTML.
 
@@ -539,6 +551,8 @@ QUESTIONS = [
         correct=1,
         a_en=r"""`app/error.tsx`. Inside a segment the nesting is `layout` → `template` → `error` → `loading` → `not-found` → `page`, so the error boundary from `dashboard/error.tsx` sits **inside** `dashboard/layout.tsx` and can't catch what the layout throws. The error bubbles to the nearest boundary above — the parent segment's `error.tsx`, rendered inside the root layout.""",
         a_bn=r"""`app/error.tsx`। একটা segment-এর ভেতরে nesting হলো `layout` → `template` → `error` → `loading` → `not-found` → `page`, তাই `dashboard/error.tsx`-এর error boundary `dashboard/layout.tsx`-এর **ভেতরে** বসে, আর layout যা throw করে তা ধরতে পারে না। Error উপরের সবচেয়ে কাছের boundary-তে যায় — parent segment-এর `error.tsx`, যেটা root layout-এর ভেতরে render হয়।""",
+        quick_en=r"""`app/error.tsx`. A segment's `error.tsx` sits inside that segment's own `layout.tsx`, so it can't catch errors the layout throws; the error bubbles to the parent segment's boundary.""",
+        quick_bn=r"""`app/error.tsx`। কোনো segment-এর `error.tsx` সেই segment-এর নিজের `layout.tsx`-এর ভেতরে থাকে, তাই layout-এর throw করা error ধরতে পারে না; error উপরের segment-এর boundary-তে চলে যায়।""",
         ex_en=r"""
             The tempting answer is the same-folder `dashboard/error.tsx`. It *does* catch errors from `dashboard/page.tsx` and nested segments — just not from its sibling layout, because a boundary can't catch errors in the component that renders it.
 
@@ -592,6 +606,8 @@ QUESTIONS = [
 
             **Infrastructure:** static shell আর hash-যুক্ত asset-এর জন্য CDN, instance-গুলোর মধ্যে tag coordination-সহ shared cache handler (Redis), image CDN, আর streaming সমর্থন করে এমন proxy।
         """,
+        quick_en=r"""Classify data by audience and freshness: product details cached for days with tags, prices and stock in a short-lived separately tagged cache, region in the URL, and per-user data streamed inside `<Suspense>`. Checkout is always dynamic and re-reads price and stock from the database.""",
+        quick_bn=r"""Data-কে কার জন্য আর কতটা fresh দরকার সেই অনুযায়ী ভাগ করো: product details tag-সহ কয়েক দিনের জন্য cache, price আর stock আলাদা tag-সহ অল্প সময়ের cache-এ, region URL-এ, আর user-ভিত্তিক data `<Suspense>`-এর ভেতরে stream। Checkout সবসময় dynamic, আর database থেকে price ও stock আবার পড়ে।""",
         ex_en=r"""
             **Tag taxonomy:** `product-<id>`, `price-<id>`, `category-<slug>`, `sale-<id>`. Fine-grained tags avoid invalidating millions of entries at once; a single `products` tag for everything would cause a regeneration stampede.
 

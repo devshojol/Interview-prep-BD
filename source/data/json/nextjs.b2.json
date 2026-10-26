@@ -49,6 +49,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Make the page `async` and write `const { slug } = await params`. In Next.js 16 `params` is a Promise, like `searchParams`, `cookies()` and `headers()`; `useRouter().query` and `getServerSideProps` are legacy Pages Router APIs.",
+   "bn": "Page-কে `async` করো আর লেখো `const { slug } = await params`। Next.js 16-এ `params` একটা Promise, `searchParams`, `cookies()` আর `headers()`-এর মতোই; `useRouter().query` আর `getServerSideProps` হলো legacy Pages Router API।"
+  },
   "options": [
    {
     "en": "`export default function Page({ params }) { const slug = params.slug; }`",
@@ -132,6 +136,10 @@
   "related": [
    "next-003"
   ],
+  "quickAnswer": {
+   "en": "`loading.tsx` is a Suspense fallback for the segment, `error.tsx` is a client error boundary with a `retry` function, `not-found.tsx` renders for `notFound()` and unmatched URLs, and `global-error.tsx` catches root-layout errors and renders its own `<html>` and `<body>`.",
+   "bn": "`loading.tsx` segment-এর Suspense fallback, `error.tsx` হলো `retry` function-সহ একটা client error boundary, `not-found.tsx` দেখায় `notFound()` call বা মেলে না এমন URL-এ, আর `global-error.tsx` root layout-এর error ধরে এবং নিজের `<html>` ও `<body>` render করে।"
+  },
   "commonMistakes": {
    "en": "Writing `error.tsx` as a Server Component (it must be `'use client'`), or forgetting `<html>`/`<body>` in `global-error.tsx`.",
    "bn": "`error.tsx`-কে Server Component হিসেবে লেখা (এটা অবশ্যই `'use client'` হতে হবে), অথবা `global-error.tsx`-এ `<html>`/`<body>` ভুলে যাওয়া।"
@@ -188,6 +196,10 @@
   ],
   "followUps": [],
   "related": [],
+  "quickAnswer": {
+   "en": "Only variables prefixed with `NEXT_PUBLIC_` reach the browser; everything else is server-only. At `next build` each `process.env.NEXT_PUBLIC_*` is replaced with its literal value, so rename it to `NEXT_PUBLIC_API_URL` and rebuild.",
+   "bn": "শুধু `NEXT_PUBLIC_` prefix দেওয়া variable browser-এ যায়; বাকি সব server-only। `next build`-এর সময় প্রতিটা `process.env.NEXT_PUBLIC_*` আসল value দিয়ে বদলে যায়, তাই নাম `NEXT_PUBLIC_API_URL` করে আবার build করো।"
+  },
   "options": [
    {
     "en": "Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser, and they are inlined into the JavaScript bundle at build time",
@@ -271,6 +283,10 @@
   "related": [
    "next-004"
   ],
+  "quickAnswer": {
+   "en": "With Cache Components (`cacheComponents: true`) everything is dynamic and caching is opt-in: `'use cache'` caches a function or component, `cacheLife` sets how long and `cacheTag` labels it for invalidation. The previous model used route/fetch options like `revalidate` and `dynamic`.",
+   "bn": "Cache Components (`cacheComponents: true`)-এ সবকিছু dynamic, আর caching নিজে চালু করতে হয়: `'use cache'` function বা component cache করে, `cacheLife` ঠিক করে কতক্ষণ, আর `cacheTag` invalidate করার জন্য label দেয়। আগের model-এ route/fetch-এর `revalidate` আর `dynamic`-এর মতো option ব্যবহার হতো।"
+  },
   "commonMistakes": {
    "en": "Assuming `fetch` is cached by default (that was Next.js 14), reading `cookies()` inside a `'use cache'` function, or adding `export const revalidate` to a Cache Components app.",
    "bn": "ধরে নেওয়া যে `fetch` default-ভাবে cache হয় (সেটা ছিল Next.js 14-এ), `'use cache'` function-এর ভেতরে `cookies()` পড়া, অথবা Cache Components app-এ `export const revalidate` যোগ করা।"
@@ -333,6 +349,10 @@
   "related": [
    "next-014"
   ],
+  "quickAnswer": {
+   "en": "`updateTag('user-42')`. It works only in Server Actions and expires the tag immediately, so the next request waits for fresh data (read-your-own-writes), while `revalidateTag(tag, 'max')` would still serve the stale entry once.",
+   "bn": "`updateTag('user-42')`। এটা শুধু Server Action-এ চলে আর tag সাথে সাথে expire করে, তাই পরের request fresh data-র জন্য অপেক্ষা করে (read-your-own-writes); `revalidateTag(tag, 'max')` হলে একবার পুরনো entry দেখাত।"
+  },
   "options": [
    {
     "en": "`revalidateTag('user-42', 'max')`",
@@ -417,6 +437,10 @@
    "next-014",
    "next-006"
   ],
+  "quickAnswer": {
+   "en": "Fix the waterfall and the all-or-nothing render: split the page into independent async components so fetches run in parallel, wrap slow ones in `<Suspense>` to stream them, and cache shareable data with `'use cache'`. The product shows almost at once and reviews arrive later.",
+   "bn": "Waterfall আর all-or-nothing render দুটোই ঠিক করো: page-কে আলাদা async component-এ ভাগ করো যাতে fetch parallel-এ চলে, ধীরগুলো `<Suspense>`-এ রেখে stream করো, আর share করা যায় এমন data `'use cache'` দিয়ে cache করো। Product প্রায় সাথে সাথে দেখা যায়, review পরে আসে।"
+  },
   "commonMistakes": {
    "en": "Only adding `loading.tsx` (the whole page still waits for the slowest call), or using `Promise.all` but keeping everything under a single boundary so reviews still block the product.",
    "bn": "শুধু `loading.tsx` যোগ করা (পুরো page তখনো সবচেয়ে ধীর call-এর জন্য অপেক্ষা করে), অথবা `Promise.all` ব্যবহার করে সবকিছু একটাই boundary-র নিচে রাখা — ফলে review তখনো product আটকে রাখে।"
@@ -491,6 +515,10 @@
    "next-014",
    "next-030"
   ],
+  "quickAnswer": {
+   "en": "Walk the cache layers with evidence: browser, CDN headers, whether the data has a tag the webhook invalidates, then `'max'` stale-while-revalidate semantics. The likely culprit is three instances with separate caches, so add a shared cache handler and use `{ expire: 0 }` for prices.",
+   "bn": "Evidence দেখে cache layer-গুলো একে একে দেখো: browser, CDN header, data-তে এমন tag আছে কিনা যা webhook invalidate করে, তারপর `'max'`-এর stale-while-revalidate আচরণ। সম্ভাব্য কারণ তিনটা instance-এর আলাদা cache, তাই shared cache handler যোগ করো আর price-এর জন্য `{ expire: 0 }` ব্যবহার করো।"
+  },
   "commonMistakes": {
    "en": "Disabling caching entirely, restarting servers as a \"fix\", or assuming `revalidateTag` on one instance updates all of them.",
    "bn": "Caching পুরোপুরি বন্ধ করে দেওয়া, \"সমাধান\" হিসেবে server restart করা, অথবা ধরে নেওয়া যে এক instance-এ `revalidateTag` দিলে সবগুলো update হয়।"
@@ -564,6 +592,10 @@
    "next-012",
    "next-014"
   ],
+  "quickAnswer": {
+   "en": "Migrate incrementally, since `pages/` and `app/` can coexist: upgrade to Next.js 16 in place (`middleware.ts` to `proxy.ts`), build the `app/` foundation, then move routes from lowest to highest risk. Replace `getServerSideProps` with async Server Components and `getStaticProps` with `'use cache'`.",
+   "bn": "ধীরে ধীরে migrate করো, কারণ `pages/` আর `app/` একসাথে চলতে পারে: আগে জায়গায় থেকেই Next.js 16-এ upgrade (`middleware.ts` থেকে `proxy.ts`), তারপর `app/`-এর ভিত্তি তৈরি, তারপর কম ঝুঁকি থেকে বেশি ঝুঁকির route সরাও। `getServerSideProps`-এর বদলে async Server Component, আর `getStaticProps`-এর বদলে `'use cache'`।"
+  },
   "commonMistakes": {
    "en": "Starting with checkout, keeping a module-level Redux store (shared between users on the server), or assuming `middleware.ts` keeps working unchanged as the long-term solution.",
    "bn": "Checkout দিয়ে শুরু করা, module-level Redux store রাখা (server-এ বিভিন্ন user-এর মধ্যে share হয়ে যায়), অথবা ধরে নেওয়া যে `middleware.ts` কোনো পরিবর্তন ছাড়াই দীর্ঘমেয়াদি সমাধান হিসেবে চলবে।"

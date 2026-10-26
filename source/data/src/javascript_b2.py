@@ -60,6 +60,8 @@ QUESTIONS = [
 
             Index loop-এর বদলে `for...of` ব্যবহার করি, কারণ `for...of` Unicode code point ধরে চলে — ফলে 😀-এর মতো emoji দুটো UTF-16 অংশ না হয়ে একটা character হিসেবে গণ্য হয়।
         """,
+        quick_en=r"""Count every character in a `Map` in one pass, then walk the string again and return the first character whose count is `1` (or `null`). That's O(n) time and O(k) space for k distinct characters, and `for...of` treats an emoji as one character.""",
+        quick_bn=r"""প্রথম pass-এ একটা `Map`-এ প্রতিটা character গুনি, তারপর string-টা আবার ঘুরে প্রথম যে character-এর count `1` সেটা return করি (না থাকলে `null`)। Time O(n), space O(k) যেখানে k হলো আলাদা character-এর সংখ্যা; `for...of` emoji-কে একটা character হিসেবেই ধরে।""",
         ex_en=r"""
             - **Why not `indexOf === lastIndexOf`?** Calling `str.indexOf(ch) === str.lastIndexOf(ch)` inside a loop is O(n²) — fine for 10 characters, slow for 100k. Interviewers usually want you to spot this.
             - **Map vs object:** a `Map` keeps insertion order and has no inherited keys. An optimisation: because the `Map` keeps the order in which characters first appeared, the second pass can loop over the map entries (O(k)) instead of the whole string.
@@ -153,6 +155,8 @@ QUESTIONS = [
 
             ভুলটা হলো: spread (`Object.assign`-এর মতোই) **shallow copy** করে। `{ ...user }` নতুন object ঠিকই, কিন্তু `copy.address` এখনো একই nested object-কে point করে, তাই `copy.address.city` বদলালে original-ও বদলে যায়। Deep copy-র জন্য আমি `structuredClone` ব্যবহার করি, অথবা যে level বদলাচ্ছি সেটা আলাদা করে copy করি (`{ ...user, address: { ...user.address, city: 'Sylhet' } }`)।
         """,
+        quick_en=r"""Destructuring unpacks array items or object properties into variables; rest (`...rest`) on the left collects what's left, and spread (`...x`) on the right expands values. The pitfall: spread makes a shallow copy, so nested objects are still shared; use `structuredClone` or copy each level you change.""",
+        quick_bn=r"""Destructuring array-র item বা object-এর property বের করে variable-এ রাখে; বাম দিকে rest (`...rest`) বাকিগুলো জড়ো করে, আর ডান দিকে spread (`...x`) value-গুলো ছড়িয়ে দেয়। ফাঁদ হলো spread shallow copy করে, তাই nested object share-ই থাকে; deep copy লাগলে `structuredClone` বা যে level বদলাচ্ছ সেটা আলাদা করে copy করো।""",
         ex_en=r"""
             - **Defaults apply only to `undefined`**, not `null`: `const { role = 'viewer' } = { role: null }` gives `null`.
             - **Destructuring `null`/`undefined` throws** a `TypeError`. For function parameters, add a default: `function createUser({ name, role = 'viewer' } = {})`, otherwise `createUser()` crashes.
@@ -221,6 +225,8 @@ QUESTIONS = [
 
             **Event delegation** bubbling-কে কাজে লাগায়: প্রতিটি child-এ listener না বসিয়ে আমি একটা common parent-এ একটা listener বসাই, তারপর `event.target` (সাধারণত `closest()` দিয়ে) check করে বুঝি কোন child-এ click হয়েছে। এতে listener কম লাগে, memory কম খরচ হয়, আর পরে যোগ হওয়া element-এর জন্যও এটা আপনা-আপনি কাজ করে — list, table বা dynamic content-এর জন্য একদম উপযুক্ত।
         """,
+        quick_en=r"""An event travels down from `window` to the target (capturing), then back up (bubbling); `addEventListener` listens while it bubbles by default. Event delegation puts one listener on a parent and uses `event.target.closest()` to find the clicked child, so you need fewer listeners and new elements work automatically.""",
+        quick_bn=r"""Event প্রথমে `window` থেকে target পর্যন্ত নিচে নামে (capturing), তারপর আবার উপরে ওঠে (bubbling); default-ভাবে `addEventListener` bubbling phase-এ শোনে। Event delegation-এ parent-এ একটাই listener রেখে `event.target.closest()` দিয়ে বের করি কোন child-এ click হয়েছে, ফলে listener কম লাগে আর পরে যোগ হওয়া element-ও কাজ করে।""",
         ex_en=r"""
             - **`event.target` vs `event.currentTarget`:** `target` is the deepest element that was actually clicked (maybe a `<span>` inside your button); `currentTarget` is the element the listener is attached to. That's why `closest('button[data-action]')` is used — it walks up from the target.
             - **Check the match is inside the container:** `closest()` can match an ancestor *outside* the delegating parent, so guard with `list.contains(button)` in nested layouts.
@@ -284,6 +290,8 @@ QUESTIONS = [
         a_bn=r"""
             `Promise.any`। এটা **প্রথম fulfilled** promise-এর value দিয়ে fulfil হয় এবং rejection-গুলো উপেক্ষা করে। **সব** input reject করলেই শুধু এটা reject করে — তখন একটা `AggregateError` দেয়, যার `errors` array-তে প্রতিটি কারণ থাকে।
         """,
+        quick_en=r"""`Promise.any`: it fulfils with the first promise that fulfils and ignores rejections. It rejects only if every mirror fails, with an `AggregateError` that lists all the reasons.""",
+        quick_bn=r"""`Promise.any`: যে promise প্রথমে fulfil হয় তার value দেয় আর rejection-গুলো উপেক্ষা করে। সব mirror fail করলেই কেবল reject করে, তখন একটা `AggregateError` দেয় যার মধ্যে সব কারণ থাকে।""",
         ex_en=r"""
             The four combinators:
 
@@ -364,6 +372,8 @@ QUESTIONS = [
 
             Modern code-এ আমি built-in ব্যবহার করব (ES2024, Baseline widely available, Node 21+): `Object.groupBy(items, fn)` একটা null-prototype object দেয়, আর `Map.groupBy(items, fn)` দেয় একটা `Map` — key যখন string নয় (object, বা এমন number যা string-এ বদলাতে চাও না) অথবা `.get()`, `.size`-এর মতো map method দরকার, তখন এটা ভালো।
         """,
+        quick_en=r"""Loop once with `reduce`, compute each item's key and push it into that key's array with `(groups[key] ??= []).push(item)`, starting from `Object.create(null)`; that's O(n) time and space. In modern code I use the ES2024 built-ins `Object.groupBy`, or `Map.groupBy` when keys aren't strings.""",
+        quick_bn=r"""`reduce` দিয়ে একবার loop করি, প্রতিটা item-এর key বের করে `(groups[key] ??= []).push(item)` দিয়ে সেই key-এর array-তে রাখি, শুরু করি `Object.create(null)` থেকে; time আর space দুটোই O(n)। আধুনিক code-এ ES2024-এর built-in `Object.groupBy` ব্যবহার করি, আর key string না হলে `Map.groupBy`।""",
         ex_en=r"""
             - **Why not `{}` as the accumulator?** With a plain object, `groups['constructor']` already exists (inherited), so `(groups[key] ??= [])` would try to push into a function. A null-prototype object avoids this.
             - **Keys are strings** in `Object.groupBy`: `getKey` returning `1` and `'1'` end up in the same group. `Map.groupBy` keeps them separate.
@@ -455,6 +465,8 @@ QUESTIONS = [
 
             Fix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)` → `3800`।
         """,
+        quick_en=r"""Two bugs: the arrow function has a block body with no `return`, so it returns `undefined`, and `reduce` has no initial value, so it starts from the first item object. Fix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)` gives `3800`.""",
+        quick_bn=r"""দুটো bug: arrow function-এর block body-তে `return` নেই, তাই সে `undefined` return করে; আর `reduce`-এ initial value নেই, তাই সে প্রথম item object থেকে শুরু করে। Fix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)`, এতে `3800` আসে।""",
         ex_en=r"""
             Tracing the buggy version: no initial value → `sum = cart[0]` (the Keyboard object), loop starts at the Mouse. The callback runs once and returns `undefined`, so `total` is `undefined`.
 
@@ -531,6 +543,8 @@ QUESTIONS = [
         a_bn=r"""
             `true 5`। `Object.freeze` **shallow**: বাইরের object freeze হয় (তাই `isFrozen` হলো `true`), কিন্তু ভেতরের `api` একটা আলাদা, freeze না করা object — তাই `settings.api.retries` বদলানো যায়।
         """,
+        quick_en=r"""`true 5`. `Object.freeze` is shallow: the outer object is frozen, but the nested `api` object is not, so `settings.api.retries = 5` still works.""",
+        quick_bn=r"""`true 5`। `Object.freeze` shallow: বাইরের object freeze হয়, কিন্তু ভেতরের `api` object হয় না, তাই `settings.api.retries = 5` ঠিকই কাজ করে।""",
         ex_en=r"""
             - Option A assumes freeze is deep — the most common misconception.
             - Option D is tempting if you know frozen writes throw in strict mode. That's true, but only for the frozen object's **own** properties: `settings.theme = 'light'` throws a `TypeError` in strict mode (ES modules, classes) and is silently ignored in sloppy scripts. Here we write to the unfrozen nested object, so nothing throws in either mode.

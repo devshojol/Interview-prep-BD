@@ -48,6 +48,10 @@
   "related": [
    "sql-014"
   ],
+  "quickAnswer": {
+   "en": "`100, 180, 180, 200`. With `ORDER BY` and no frame, the default is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, which includes all peer rows with the same `paid_on`, so both 2026-10-02 rows get 180.",
+   "bn": "`100, 180, 180, 200`। `ORDER BY` আছে কিন্তু frame নেই, তাই default হলো `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, যেটা একই `paid_on`-এর সব peer row ধরে, তাই 2026-10-02-এর দুটো row-ই 180 পায়।"
+  },
   "code": {
    "language": "sql",
    "source": "CREATE TABLE payments (id INT PRIMARY KEY, paid_on DATE NOT NULL, amount INT NOT NULL);\nINSERT INTO payments (id, paid_on, amount) VALUES\n  (1, '2026-10-01', 100),\n  (2, '2026-10-02',  50),\n  (3, '2026-10-02',  30),\n  (4, '2026-10-03',  20);\n\nSELECT id, paid_on, amount,\n       SUM(amount) OVER (ORDER BY paid_on) AS running\nFROM payments\nORDER BY id;",
@@ -137,6 +141,10 @@
    "sql-020",
    "sql-031"
   ],
+  "quickAnswer": {
+   "en": "`WHERE (created_at, id) < ('2026-10-10 09:00:00', 5) ORDER BY created_at DESC, id DESC LIMIT 3`. It seeks straight into the `(created_at, id)` index and reads 3 rows at any depth, while `OFFSET` reads and discards every skipped row and shifts when new rows arrive.",
+   "bn": "`WHERE (created_at, id) < ('2026-10-10 09:00:00', 5) ORDER BY created_at DESC, id DESC LIMIT 3`। এটা সরাসরি `(created_at, id)` index-এ গিয়ে যেকোনো page-এ মাত্র 3টা row পড়ে, আর `OFFSET` বাদ দেওয়া প্রতিটা row পড়ে ফেলে দেয়, নতুন row এলে page-ও সরে যায়।"
+  },
   "commonMistakes": {
    "en": "Using only `WHERE created_at < :last_created_at` (skips post 4, which shares the timestamp), or ordering by a non-unique column so pages overlap.",
    "bn": "শুধু `WHERE created_at < :last_created_at` ব্যবহার করা (একই timestamp-এর post 4 বাদ পড়ে যায়), অথবা non-unique column দিয়ে order করা, যাতে page-গুলো একে অপরের সাথে মিশে যায়।"
@@ -225,6 +233,10 @@
    "sql-031",
    "sql-028"
   ],
+  "quickAnswer": {
+   "en": "A view is a saved query that stores no data, so it is always current; a materialized view stores the result, so reads are fast and indexable but stale until refreshed. In PostgreSQL, `REFRESH MATERIALIZED VIEW CONCURRENTLY` keeps reads working but needs a unique index.",
+   "bn": "View হলো একটা saved query, কোনো data রাখে না, তাই সবসময় হালনাগাদ; materialized view result জমা রাখে, তাই read দ্রুত আর index দেওয়া যায়, কিন্তু refresh না করা পর্যন্ত পুরোনো থাকে। PostgreSQL-এ `REFRESH MATERIALIZED VIEW CONCURRENTLY` চলাকালীন read চালু রাখে, তবে একটা unique index লাগে।"
+  },
   "commonMistakes": {
    "en": "Expecting a normal view to make a slow query fast, or forgetting that a materialized view is stale until refreshed (and that plain refresh blocks readers in PostgreSQL).",
    "bn": "ভাবা যে সাধারণ view একটা ধীর query-কে দ্রুত করে দেবে, অথবা ভুলে যাওয়া যে materialized view refresh না করা পর্যন্ত পুরনো থাকে (আর PostgreSQL-এ সাধারণ refresh reader-দের আটকে দেয়)।"
@@ -295,6 +307,10 @@
    "sql-022",
    "sql-021"
   ],
+  "quickAnswer": {
+   "en": "Keep declarative constraints in the database always, use triggers only for small data rules every writer must obey (audit rows, `updated_at`), and procedures for heavy set-based batch work. Business workflows like pricing, payments and emails stay in the app, where they are testable and observable.",
+   "bn": "Declarative constraint সবসময় database-এ রাখো, trigger শুধু ছোট data rule-এর জন্য যেটা সব writer-কে মানতে হবে (audit row, `updated_at`), আর procedure ভারী set-based batch কাজের জন্য। Pricing, payment, email-এর মতো business workflow app-এ থাকে, যেখানে test আর observe করা সহজ।"
+  },
   "commonMistakes": {
    "en": "Putting external API calls or emails inside triggers, or rejecting database-side logic entirely and losing guarantees that only constraints/triggers can give for all writers.",
    "bn": "Trigger-এর ভেতরে external API call বা email পাঠানো, অথবা database-এর ভেতরের logic পুরোপুরি বাতিল করে সেই guarantee হারানো যা সব writer-এর জন্য শুধু constraint/trigger-ই দিতে পারে।"
@@ -363,6 +379,10 @@
   "related": [
    "sql-010"
   ],
+  "quickAnswer": {
+   "en": "Read Uncommitted allows dirty reads, Read Committed blocks them, Repeatable Read also blocks non-repeatable reads (the standard still allows phantoms), and Serializable behaves like some serial order. PostgreSQL, Oracle and SQL Server default to Read Committed; MySQL InnoDB to Repeatable Read.",
+   "bn": "Read Uncommitted dirty read হতে দেয়, Read Committed সেটা আটকায়, Repeatable Read non-repeatable read-ও আটকায় (standard তবুও phantom হতে দেয়), আর Serializable কোনো একটা serial ক্রমের মতো আচরণ করে। PostgreSQL, Oracle আর SQL Server-এর default Read Committed; MySQL InnoDB-র Repeatable Read।"
+  },
   "commonMistakes": {
    "en": "Assuming every database implements a level the same way, or believing Repeatable Read prevents lost updates and write skew in all engines.",
    "bn": "ধরে নেওয়া যে প্রতিটা database একটা level একইভাবে implement করে, অথবা বিশ্বাস করা যে Repeatable Read সব engine-এ lost update আর write skew আটকায়।"
@@ -442,6 +462,10 @@
    "sql-024",
    "sql-013"
   ],
+  "quickAnswer": {
+   "en": "Gaps and islands: remove duplicate days, then within each user `login_date − ROW_NUMBER()` stays constant across consecutive days, so group by it to get each streak's start, end and length. Finally pick the longest streak per user with `ROW_NUMBER()`, earliest first on ties.",
+   "bn": "Gaps and islands: আগে একই দিনের duplicate বাদ দাও, তারপর প্রতিটা user-এর ভেতরে টানা দিনগুলোতে `login_date − ROW_NUMBER()` একই থাকে, তাই সেটা দিয়ে group করে প্রতিটা streak-এর শুরু, শেষ আর দৈর্ঘ্য বের করো। শেষে `ROW_NUMBER()` দিয়ে প্রতিটা user-এর দীর্ঘতম streak নাও, tie হলে আগেরটা।"
+  },
   "commonMistakes": {
    "en": "Forgetting `DISTINCT` (duplicate logins split streaks), using `RANK()` instead of `ROW_NUMBER()` for the per-user pick (returns several rows on ties), or ignoring time zones when converting timestamps to dates.",
    "bn": "`DISTINCT` ভুলে যাওয়া (duplicate login streak ভেঙে দেয়), প্রতি user-এর জন্য বাছাইয়ে `ROW_NUMBER()`-এর বদলে `RANK()` ব্যবহার করা (tie হলে একাধিক row আসে), অথবা timestamp থেকে date বানানোর সময় time zone উপেক্ষা করা।"
@@ -531,6 +555,10 @@
    "sql-020",
    "sql-026"
   ],
+  "quickAnswer": {
+   "en": "Isolate the dashboard from checkout first: send it to a read replica with a `statement_timeout` and cache the response. Then measure with `EXPLAIN (ANALYZE, BUFFERS)`, make the date filter sargable, and serve the dashboard from a pre-aggregated daily summary table instead of recomputing history.",
+   "bn": "আগে dashboard-কে checkout থেকে আলাদা করো: read replica-তে পাঠাও, `statement_timeout` দাও, আর response cache করো। তারপর `EXPLAIN (ANALYZE, BUFFERS)` দিয়ে মাপো, date filter sargable করো, আর প্রতিবার history আবার হিসাব না করে আগে থেকে aggregate করা daily summary table থেকে dashboard দেখাও।"
+  },
   "commonMistakes": {
    "en": "Only adding indexes to the 300M-row table, raising `work_mem` globally, or running heavy analytics on the primary that serves checkout.",
    "bn": "শুধু ৩০ কোটি row-এর table-এ index যোগ করা, globally `work_mem` বাড়ানো, অথবা checkout চালানো primary-তেই ভারী analytics চালানো।"
@@ -605,6 +633,10 @@
    "sql-007",
    "sql-010"
   ],
+  "quickAnswer": {
+   "en": "Start in 3NF with surrogate keys, `UNIQUE` on natural keys, FKs and `CHECK`s, copying `unit_price` and address into orders as historical facts. Prevent overselling with one atomic `UPDATE ... SET stock = stock - :qty WHERE id = :id AND stock >= :qty`, backed by `CHECK (stock >= 0)`.",
+   "bn": "Surrogate key, natural key-এ `UNIQUE`, FK আর `CHECK`-সহ 3NF দিয়ে শুরু করো, আর `unit_price` ও ঠিকানা ঐতিহাসিক তথ্য হিসেবে order-এ copy করো। Overselling ঠেকাও একটা atomic `UPDATE ... SET stock = stock - :qty WHERE id = :id AND stock >= :qty` দিয়ে, পেছনে safety net হিসেবে `CHECK (stock >= 0)`।"
+  },
   "commonMistakes": {
    "en": "Reading the price from `products` when displaying old orders, storing stock on `products` instead of variants, or checking stock with a `SELECT` and decrementing it in a separate statement (race condition → overselling).",
    "bn": "পুরনো order দেখানোর সময় `products` থেকে দাম পড়া, variant-এর বদলে `products`-এ stock রাখা, অথবা `SELECT` দিয়ে stock check করে আলাদা statement-এ কমানো (race condition → overselling)।"

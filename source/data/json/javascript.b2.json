@@ -56,6 +56,10 @@
   "related": [
    "js-012"
   ],
+  "quickAnswer": {
+   "en": "Count every character in a `Map` in one pass, then walk the string again and return the first character whose count is `1` (or `null`). That's O(n) time and O(k) space for k distinct characters, and `for...of` treats an emoji as one character.",
+   "bn": "প্রথম pass-এ একটা `Map`-এ প্রতিটা character গুনি, তারপর string-টা আবার ঘুরে প্রথম যে character-এর count `1` সেটা return করি (না থাকলে `null`)। Time O(n), space O(k) যেখানে k হলো আলাদা character-এর সংখ্যা; `for...of` emoji-কে একটা character হিসেবেই ধরে।"
+  },
   "commonMistakes": {
    "en": "Returning the first character with count 1 by iterating over a plain object (key order differs for integer-like keys such as `'1'`), or using `str[i]` and breaking emoji into two halves.",
    "bn": "Plain object-এর key ঘুরে count 1 পাওয়া প্রথম character return করা (`'1'`-এর মতো integer-like key-এর order আলাদা হয়), অথবা `str[i]` ব্যবহার করে emoji-কে দুই টুকরো করে ফেলা।"
@@ -139,6 +143,10 @@
    "js-036",
    "js-014"
   ],
+  "quickAnswer": {
+   "en": "Destructuring unpacks array items or object properties into variables; rest (`...rest`) on the left collects what's left, and spread (`...x`) on the right expands values. The pitfall: spread makes a shallow copy, so nested objects are still shared; use `structuredClone` or copy each level you change.",
+   "bn": "Destructuring array-র item বা object-এর property বের করে variable-এ রাখে; বাম দিকে rest (`...rest`) বাকিগুলো জড়ো করে, আর ডান দিকে spread (`...x`) value-গুলো ছড়িয়ে দেয়। ফাঁদ হলো spread shallow copy করে, তাই nested object share-ই থাকে; deep copy লাগলে `structuredClone` বা যে level বদলাচ্ছ সেটা আলাদা করে copy করো।"
+  },
   "commonMistakes": {
    "en": "Believing `{ ...obj }` is a deep copy, or expecting a default value to replace `null`.",
    "bn": "ভাবা যে `{ ...obj }` deep copy করে, অথবা আশা করা যে default value `null`-কেও replace করবে।"
@@ -211,6 +219,10 @@
   "related": [
    "js-039"
   ],
+  "quickAnswer": {
+   "en": "An event travels down from `window` to the target (capturing), then back up (bubbling); `addEventListener` listens while it bubbles by default. Event delegation puts one listener on a parent and uses `event.target.closest()` to find the clicked child, so you need fewer listeners and new elements work automatically.",
+   "bn": "Event প্রথমে `window` থেকে target পর্যন্ত নিচে নামে (capturing), তারপর আবার উপরে ওঠে (bubbling); default-ভাবে `addEventListener` bubbling phase-এ শোনে। Event delegation-এ parent-এ একটাই listener রেখে `event.target.closest()` দিয়ে বের করি কোন child-এ click হয়েছে, ফলে listener কম লাগে আর পরে যোগ হওয়া element-ও কাজ করে।"
+  },
   "commonMistakes": {
    "en": "Comparing `event.target` directly to the button (fails when the click lands on an icon inside it), or confusing `stopPropagation()` with `preventDefault()`.",
    "bn": "`event.target`-কে সরাসরি button-এর সাথে compare করা (button-এর ভেতরের icon-এ click পড়লে fail করে), অথবা `stopPropagation()` আর `preventDefault()` গুলিয়ে ফেলা।"
@@ -279,6 +291,10 @@
    "js-021",
    "js-019"
   ],
+  "quickAnswer": {
+   "en": "`Promise.any`: it fulfils with the first promise that fulfils and ignores rejections. It rejects only if every mirror fails, with an `AggregateError` that lists all the reasons.",
+   "bn": "`Promise.any`: যে promise প্রথমে fulfil হয় তার value দেয় আর rejection-গুলো উপেক্ষা করে। সব mirror fail করলেই কেবল reject করে, তখন একটা `AggregateError` দেয় যার মধ্যে সব কারণ থাকে।"
+  },
   "commonMistakes": {
    "en": "Using `Promise.race` for \"first success\", or assuming the slower promises are cancelled automatically.",
    "bn": "\"প্রথম সফল\" পাওয়ার জন্য `Promise.race` ব্যবহার করা, অথবা ধরে নেওয়া যে ধীর promise-গুলো আপনা-আপনি cancel হয়ে যায়।"
@@ -377,6 +393,10 @@
    "js-008",
    "js-013"
   ],
+  "quickAnswer": {
+   "en": "Loop once with `reduce`, compute each item's key and push it into that key's array with `(groups[key] ??= []).push(item)`, starting from `Object.create(null)`; that's O(n) time and space. In modern code I use the ES2024 built-ins `Object.groupBy`, or `Map.groupBy` when keys aren't strings.",
+   "bn": "`reduce` দিয়ে একবার loop করি, প্রতিটা item-এর key বের করে `(groups[key] ??= []).push(item)` দিয়ে সেই key-এর array-তে রাখি, শুরু করি `Object.create(null)` থেকে; time আর space দুটোই O(n)। আধুনিক code-এ ES2024-এর built-in `Object.groupBy` ব্যবহার করি, আর key string না হলে `Map.groupBy`।"
+  },
   "commonMistakes": {
    "en": "Forgetting to `return groups` from the reducer (the accumulator becomes `undefined` after the first item), or calling `items.groupBy(...)` — it's a static method, not an array method.",
    "bn": "Reducer থেকে `return groups` করতে ভুলে যাওয়া (প্রথম item-এর পর accumulator `undefined` হয়ে যায়), অথবা `items.groupBy(...)` call করা — এটা static method, array method নয়।"
@@ -450,6 +470,10 @@
    "js-012",
    "js-006"
   ],
+  "quickAnswer": {
+   "en": "Two bugs: the arrow function has a block body with no `return`, so it returns `undefined`, and `reduce` has no initial value, so it starts from the first item object. Fix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)` gives `3800`.",
+   "bn": "দুটো bug: arrow function-এর block body-তে `return` নেই, তাই সে `undefined` return করে; আর `reduce`-এ initial value নেই, তাই সে প্রথম item object থেকে শুরু করে। Fix: `cart.reduce((sum, item) => sum + item.price * item.qty, 0)`, এতে `3800` আসে।"
+  },
   "commonMistakes": {
    "en": "Adding `return` but still omitting the initial value, or \"fixing\" it with `map` + `forEach` and an outer mutable variable.",
    "bn": "`return` যোগ করেও initial value না দেওয়া, অথবা `map` + `forEach` আর বাইরের একটা mutable variable দিয়ে \"fix\" করা।"
@@ -529,6 +553,10 @@
    "js-009",
    "js-007"
   ],
+  "quickAnswer": {
+   "en": "`true 5`. `Object.freeze` is shallow: the outer object is frozen, but the nested `api` object is not, so `settings.api.retries = 5` still works.",
+   "bn": "`true 5`। `Object.freeze` shallow: বাইরের object freeze হয়, কিন্তু ভেতরের `api` object হয় না, তাই `settings.api.retries = 5` ঠিকই কাজ করে।"
+  },
   "code": {
    "language": "javascript",
    "source": "const settings = Object.freeze({\n  theme: 'dark',\n  api: { retries: 3 },\n});\n\nsettings.api.retries = 5;\nconsole.log(Object.isFrozen(settings), settings.api.retries);",

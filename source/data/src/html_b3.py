@@ -44,6 +44,8 @@ QUESTIONS = [
             - এরপর `value` *attribute* বদলালে শুধু **default value** (`defaultValue`) বদলায়। Value যেহেতু আগেই বদলানো হয়েছে (field-টা "dirty"), বর্তমান `value` `Karim`-ই থাকে।
             - `getAttribute('href')` যা লেখা আছে ঠিক তাই দেয় (`/orders`), আর `href` property resolve করা absolute URL দেয়।
         """,
+        quick_en=r"""`Rahim`, `Karim`, `Karim`, `Jamal`, `/orders`, `https://dokan.example/orders`. Attributes hold the initial markup values and properties the live state: setting the `value` attribute on an already-changed field only updates `defaultValue`, and `link.href` is the resolved URL.""",
+        quick_bn=r"""Output: `Rahim`, `Karim`, `Karim`, `Jamal`, `/orders`, `https://dokan.example/orders`। Attribute হলো markup-এর শুরুর value, আর property হলো live state: আগেই বদলানো field-এ `value` attribute set করলে শুধু `defaultValue` বদলায়, আর `link.href` পুরো resolved URL দেয়।""",
         ex_en=r"""
             Line by line:
             1. `getAttribute('value')` → `Rahim` (markup untouched).
@@ -143,6 +145,8 @@ QUESTIONS = [
         a_bn=r"""
             কোনো form-এর সাথে যুক্ত `<button>`-এ `type` না দিলে তার default হয় `type="submit"`। Click handler চলে, তারপর default action হিসেবে form submit হয়। সমাধান: যে button submit করার জন্য নয়, তাতে `<button type="button">` দাও।
         """,
+        quick_en=r"""A `<button>` in a form defaults to `type="submit"`, so after the click handler runs, the whole form is submitted. Give buttons that shouldn't submit `type="button"`.""",
+        quick_bn=r"""Form-এর ভেতরের `<button>`-এর default `type="submit"`, তাই click handler চলার পরে পুরো form submit হয়ে যায়। যে button submit করবে না, তাতে `type="button"` দাও।""",
         ex_en=r"""
             Option B is the tempting one because inline handlers *are* discouraged (and blocked by a strict CSP) — but switching to `addEventListener` alone changes nothing; the button is still a submit button. Calling `event.preventDefault()` would work, but `type="button"` states the intent in the markup.
 
@@ -178,6 +182,8 @@ QUESTIONS = [
         a_bn=r"""
             এটা **disabled**। `disabled` একটা boolean attribute: থাকলেই true — `disabled`, `disabled=""`, `disabled="disabled"`, এমনকি `disabled="false"` — সবগুলোই button disable করে। Enable করতে হলে attribute-টা **সরিয়ে ফেলতে** হবে (`btn.removeAttribute('disabled')` বা `btn.disabled = false`)।
         """,
+        quick_en=r"""It's disabled: `disabled` is a boolean attribute, so its presence means true whatever the value, even `"false"`. To enable it, remove the attribute or set `btn.disabled = false`.""",
+        quick_bn=r"""Button-টা disabled: `disabled` একটা boolean attribute, তাই value যাই হোক, এমনকি `"false"` হলেও, attribute থাকলেই true। Enable করতে attribute-টা সরাও বা `btn.disabled = false` দাও।""",
         ex_en=r"""
             The tempting answer is A, because the string reads like a value. But the HTML Standard defines boolean attributes by presence; the only valid values are the empty string or the attribute's own name, and any value still means "on". Browsers are consistent about this (so D is wrong), and they don't drop the attribute (C is wrong).
 
@@ -218,6 +224,8 @@ QUESTIONS = [
 
             দুই ক্ষেত্রেই আসল element হলো `<img>`: `alt`, `width`/`height`, `loading` আর `fetchpriority` এতেই থাকে।
         """,
+        quick_en=r"""`srcset` + `sizes` serves the same image at different sizes and lets the browser pick; `<picture>` is for art direction or format fallback, where the first matching `<source>` must be used. Without `sizes`, it defaults to `100vw`, so grid thumbnails download far too large.""",
+        quick_bn=r"""`srcset` + `sizes` একই ছবির ভিন্ন size দেয়, file বেছে নেয় browser; `<picture>` art direction বা format fallback-এর জন্য, যেখানে প্রথম মিলে যাওয়া `<source>`-ই ব্যবহার করতে হয়। `sizes` না দিলে default `100vw` ধরা হয়, তাই grid-এর thumbnail অনেক বড় download হয়।""",
         ex_en=r"""
             - **`sizes` syntax:** a list of media conditions with slot widths, first match wins, last entry has no condition: `sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"`. Keep it in sync with your CSS breakpoints — a wrong `sizes` is just as bad as none.
             - **Why the browser chooses with `srcset`:** it knows the DPR, zoom level and sometimes the user's data-saving preference; your job is to give honest candidates and slot widths.
@@ -293,6 +301,8 @@ QUESTIONS = [
 
             প্রতিটা order-এর জন্য template-এর content `cloneNode(true)` করি, cell-গুলো **`textContent`** দিয়ে পূরণ করি (user data-র জন্য কখনোই `innerHTML` নয়, ফলে নামের ভেতরে `<img onerror=…>` থাকলেও তা সাধারণ text হিসেবে দেখায়), আর clone-টা একটা `DocumentFragment`-এ append করি। শেষে `tbody.replaceChildren(fragment)` এক DOM operation-এ পুরোনো row সরিয়ে সব নতুন row বসিয়ে দেয় — অর্থাৎ প্রতি row-এ একবার নয়, পুরোটার জন্য একবার style/layout হয়। Currency format করি `Intl.NumberFormat` দিয়ে।
         """,
+        quick_en=r"""Clone a `<template>` row per order, fill the cells with `textContent` (never `innerHTML`) so names are XSS-safe, format the total with `Intl.NumberFormat`, collect rows in a `DocumentFragment` and call `tbody.replaceChildren(fragment)` once. O(n) time and space.""",
+        quick_bn=r"""প্রতিটা order-এর জন্য `<template>`-এর row clone করি, cell-এ `textContent` দিয়ে লিখি (`innerHTML` কখনো নয়), তাই নাম XSS-safe থাকে; total format করি `Intl.NumberFormat` দিয়ে; সব row একটা `DocumentFragment`-এ জমিয়ে একবার `tbody.replaceChildren(fragment)` call করি। Time আর space O(n)।""",
         ex_en=r"""
             - **Query before appending:** once a cloned fragment is appended, it becomes empty (its children move). That's why each row is filled *before* `fragment.append(row)`.
             - **Template parsing perks:** `<template>` can contain `<tr>` directly; a `<div>` with `innerHTML = '<tr>…'` would drop the table parts because of HTML parsing rules.
@@ -399,6 +409,8 @@ QUESTIONS = [
         a_bn=r"""
             "Find a product"। Accessible name হিসাবের নিয়মে সবার আগে `aria-labelledby`, তারপর `aria-label`, তারপর native label (`<label>`, `alt`, `<caption>`, বা button ও link-এর text content), আর একদম শেষে `title` বা `placeholder`-এর মতো fallback।
         """,
+        quick_en=r""""Find a product". In the accessible name computation `aria-labelledby` wins, then `aria-label`, then the native `<label>`, and only after that fallbacks like `title` or `placeholder`.""",
+        quick_bn=r""""Find a product"। Accessible name হিসাবের সময় `aria-labelledby` সবার আগে, তারপর `aria-label`, তারপর native `<label>`, আর সবশেষে `title` বা `placeholder`-এর মতো fallback।""",
         ex_en=r"""
             The tempting answer is B, because many people think of `aria-label` as the "strongest" label. It does override the native `<label>`, but `aria-labelledby` beats it.
 
@@ -453,6 +465,8 @@ QUESTIONS = [
 
             Trusted Types February 2026 থেকে Baseline newly available, তাই পুরোনো browser-এর user-রা এই সুরক্ষা পাবে না — এটা সঠিক code-এর উপরে বাড়তি একটা স্তর (defence in depth), সঠিক code-এর বিকল্প নয়।
         """,
+        quick_en=r"""Fix the sink with `textContent` or a sanitizer, add a strict nonce-based CSP, and enforce Trusted Types so `innerHTML` throws on plain strings except through a few reviewed policies. Roll out in Report-Only mode first; it's defence in depth, as older browsers lack Trusted Types.""",
+        quick_bn=r"""`textContent` বা sanitizer দিয়ে sink ঠিক করি, nonce-based strict CSP দিই, আর Trusted Types enforce করি যাতে অল্প কয়েকটা review করা policy ছাড়া plain string দিলে `innerHTML` error throw করে। আগে Report-Only mode-এ চালাই; পুরোনো browser-এ Trusted Types নেই, তাই এটা defence in depth।""",
         ex_en=r"""
             - **Why both?** CSP limits what injected markup can *do* (no script execution); Trusted Types limits where markup can *enter*. HTML injection without script can still deface pages or phish (fake login forms), so you want both layers.
             - **Framework notes:** React escapes text by default, but `dangerouslySetInnerHTML`, `javascript:` URLs in `href`, and third-party widgets remain sinks. React 19.3 added Trusted Types support, so TrustedHTML values can flow through.
@@ -557,6 +571,8 @@ QUESTIONS = [
 
             **বিকল্পগুলো কেন নয়?** `<datalist>`-এ filtering, styling বা screen reader-এর আচরণের উপর কোনো নিয়ন্ত্রণ নেই, আর এগুলো browser ভেদে অনেক আলাদা। Customizable `<select>` (`appearance: base-select`) **এখনো Baseline নয়**। আর সত্যি বলতে, 64টা item-এর নির্দিষ্ট list-এর জন্য সাধারণ native `<select>`-ই প্রায়ই সবচেয়ে accessible বিকল্প — আমি combobox তখনই বানাব যখন filtering, async search বা rich option সত্যিই দরকার।
         """,
+        quick_en=r"""Follow the ARIA combobox pattern: an input with `role="combobox"`, `aria-expanded` and `aria-controls`, a `role="listbox"` of options, focus kept on the input with `aria-activedescendant` marking the highlight, and a `role="status"` result count. For 64 fixed items, a plain `<select>` may be enough.""",
+        quick_bn=r"""ARIA combobox pattern মেনে চলি: `role="combobox"`, `aria-expanded` আর `aria-controls`-সহ input, option-গুলোর জন্য `role="listbox"`, focus input-এই থাকে আর `aria-activedescendant` দিয়ে highlight বোঝাই, সাথে result সংখ্যার জন্য `role="status"`। মাত্র 64-টা নির্দিষ্ট item-এর জন্য সাধারণ `<select>`-ই যথেষ্ট হতে পারে।""",
         ex_en=r"""
             - **Why `aria-activedescendant` instead of moving focus into the list?** Moving real focus to options would take the caret away from the input, so typing would stop working. Active-descendant keeps one focus point while still announcing the option.
             - **Announcement noise:** updating the results count on every keystroke can be chatty; debounce it (~300 ms) or only announce when the count changes.

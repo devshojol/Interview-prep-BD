@@ -58,6 +58,8 @@ QUESTIONS = [
 
             দুটোর মাঝের ফাঁক **10px**, 20px নয়: normal flow-তে পাশাপাশি থাকা block box-এর vertical margin **collapse** করে দুটোর মধ্যে বড়টার সমান হয়।
         """,
+        quick_en=r"""`.a` is 250px wide because `content-box` adds padding and border to `width`; `.b` is 200px with a 150px content area because `border-box` includes them. The gap is 10px, since adjacent vertical margins collapse to the larger one.""",
+        quick_bn=r"""`.a` 250px চওড়া, কারণ `content-box`-এ `width`-এর সাথে padding আর border যোগ হয়; `.b` 200px আর তার content area 150px, কারণ `border-box`-এ এগুলো `width`-এর ভেতরেই। মাঝের gap 10px, কারণ পাশাপাশি vertical margin collapse হয়ে বড়টা থাকে।""",
         ex_en=r"""
             - **Why teams reset to `border-box`:** it makes `width: 50%` plus padding behave intuitively. The common reset is `*, *::before, *::after { box-sizing: border-box; }`.
             - **Edge case:** with `border-box`, if padding + border exceed the width, the content area becomes 0 and the box grows anyway.
@@ -124,6 +126,8 @@ QUESTIONS = [
 
             ID column আগে তুলনা হয়, তাই (1, 0, 1) জেতে।
         """,
+        quick_en=r"""Red. `#main p` has specificity (1, 0, 1), and the ID column is compared first, so it beats `.content .text` (0, 2, 0) and `p.text` (0, 1, 1) regardless of source order.""",
+        quick_bn=r"""লাল। `#main p`-এর specificity (1, 0, 1), আর ID-র ঘর সবার আগে তুলনা হয়, তাই source order যাই হোক এটা `.content .text` (0, 2, 0) আর `p.text` (0, 1, 1)-কে হারায়।""",
         ex_en=r"""
             The tempting answer is green: "two classes beat one ID plus one element" sounds reasonable if you add up points. But specificity isn't a single number — columns are compared left to right, and no number of classes ever beats one ID ((0, 11, 0) still loses to (1, 0, 0)).
 
@@ -175,6 +179,8 @@ QUESTIONS = [
             - `<p>` **bold**: কোনো rule `<p>`-এ `font-weight` set করেনি, আর `font-weight` একটা inherited property, তাই এটা `#card` থেকে inherit করে।
             - `<span>` **নীল আর bold**: কোনো rule span-কে target করেনি, তাই দুটো value-ই parent `<p>` থেকে inherit করে।
         """,
+        quick_en=r"""The `<p>` is blue and bold, and so is the `<span>`. A rule that targets the `<p>` directly beats any inherited value however specific; `font-weight` is inherited from `#card`, and the span inherits both values from the `<p>`.""",
+        quick_bn=r"""`<p>` নীল আর bold, `<span>`-ও নীল আর bold। `<p>`-কে সরাসরি target করা rule যেকোনো inherited value-কে হারায়, ancestor-এর selector যত specific-ই হোক; `font-weight` আসে `#card` থেকে inherit হয়ে, আর span দুটো value-ই `<p>` থেকে পায়।""",
         ex_en=r"""
             - **Inherited vs non-inherited properties:** text-related properties (`color`, `font-*`, `line-height`, `letter-spacing`, `visibility`, `cursor`) inherit by default; box-related ones (`margin`, `padding`, `border`, `background`, `width`) don't.
             - **Keywords to control it:** `inherit` (take the parent's value), `initial` (the property's spec default — e.g. `display: initial` is `inline`, which surprises people), `unset` (inherit if inheritable, else initial) and `revert` (go back to the browser's default style), plus `revert-layer`.
@@ -241,6 +247,8 @@ QUESTIONS = [
 
             তাই `#buy` **ধূসর (gray)**: unlayered `button` selector, যার specificity মাত্র (0, 0, 1), দুটো layered rule-কেই হারায়। `#cart` **সবুজ (green)**: `components`-এর `.btn` `base`-এর ID selector-কে হারায়, কারণ layer-এর তুলনা আগে হয়।
         """,
+        quick_en=r"""`#buy` is gray and `#cart` is green. Layer order is checked before specificity: unlayered styles beat every layer, and the later `components` layer beats `base` even against an ID selector.""",
+        quick_bn=r"""`#buy` ধূসর আর `#cart` সবুজ। Specificity-র আগে layer order দেখা হয়: layer-এর বাইরের style সব layer-কে হারায়, আর পরের `components` layer ID selector থাকা সত্ত্বেও `base`-কে হারায়।""",
         ex_en=r"""
             Step by step for `#cart`: candidates are `base` → red (specificity 1,0,0) and `components` → green (0,1,0). Different layers, so specificity is never compared — the later layer wins.
 
@@ -302,6 +310,8 @@ QUESTIONS = [
 
             সীমাবদ্ধতা: `:has()`-এর ভেতরে আরেকটা `:has()` nest করা যায় না, এর ভেতরে pseudo-element চলে না, আর এর specificity হয় এর সবচেয়ে specific argument-এর সমান (`:is()`-এর মতো)। এটা Baseline widely available, তাই নিরাপদে ব্যবহার করা যায়; খুব পুরোনো browser-এর জন্য এটাকে enhancement হিসেবে design করো।
         """,
+        quick_en=r"""`:has()` is a relational "parent" selector: it matches an element by what it contains or what follows it, like `.card:has(img)`, which used to need JavaScript. It can't be nested inside another `:has()` or contain pseudo-elements, and it's Baseline widely available.""",
+        quick_bn=r"""`:has()` একটা relational "parent" selector: ভেতরে কী আছে বা পরে কী আছে দেখে element match করে, যেমন `.card:has(img)`, যেটা আগে JavaScript ছাড়া হতো না। একটা `:has()`-এর ভেতরে আরেকটা বা pseudo-element রাখা যায় না, আর এটা Baseline widely available।""",
         ex_en=r"""
             **Performance:** `:has()` makes the browser re-check the subject element when its descendants change. Keep it cheap:
             - Anchor it to a specific, small container (`.filters:has(...)`), not `body`, `:root` or `*` — on a big page every DOM change below the anchor can trigger re-evaluation.
@@ -397,6 +407,8 @@ QUESTIONS = [
             - Tracking code-এ `overflow-wrap: anywhere` দিলে লম্বা string wrap হতে পারে (আর `break-word`-এর মতো নয়, এটা min-content size-ও কমায়)।
             - Avatar আর button-এ `flex-shrink: 0` দিলে স্পষ্ট হয় যে এগুলো নিজেদের মাপ বজায় রাখবে।
         """,
+        quick_en=r"""Flex items default to `min-width: auto`, so `.body` can't shrink below its long content and the row overflows. Add `min-width: 0` to `.body` so the ellipsis works, `overflow-wrap: anywhere` to the tracking code, and `flex-shrink: 0` to the avatar and button.""",
+        quick_bn=r"""Flex item-এর default `min-width: auto`, তাই `.body` তার লম্বা content-এর চেয়ে ছোট হতে পারে না, ফলে row overflow করে। `.body`-তে `min-width: 0` দাও যাতে ellipsis কাজ করে, tracking code-এ `overflow-wrap: anywhere`, আর avatar ও button-এ `flex-shrink: 0`।""",
         ex_en=r"""
             - **Why `min-width: auto` exists:** it protects content from being crushed by default. The downside shows up with long words, URLs, `<pre>`/`<code>`, tables or nested flex containers.
             - **Same bug in Grid:** `1fr` means `minmax(auto, 1fr)`, so a grid column with a long `<pre>` refuses to shrink. Use `minmax(0, 1fr)`.
@@ -480,6 +492,8 @@ QUESTIONS = [
 
             (1, 1, 1) সবচেয়ে বেশি।
         """,
+        quick_en=r"""Green. `.nav a:not(#x)` scores (1, 1, 1) because `:not()` takes its most specific argument, beating `:is(.nav, #site-nav) .link` at (1, 1, 0); `:where()` always counts as zero.""",
+        quick_bn=r"""সবুজ। `.nav a:not(#x)`-এর specificity (1, 1, 1), কারণ `:not()` তার সবচেয়ে specific argument ধরে, তাই এটা (1, 1, 0)-এর `:is(.nav, #site-nav) .link`-কে হারায়; `:where()` সবসময় শূন্য।""",
         ex_en=r"""
             The tempting answer is **blue**, for one of two reasons: people either think `:is()` only counts the argument that actually matched (it doesn't — it always uses the most specific argument in the list), or they forget that `:not(#x)` contributes a full ID even though the element doesn't have that ID. Both rules give green the edge: (1, 1, 1) beats (1, 1, 0) in the last column.
 
@@ -540,6 +554,8 @@ QUESTIONS = [
 
             **5. পাহারাদার নিয়ম।** Stylelint rule (ID নয়, নতুন `!important` নয়, সর্বোচ্চ specificity সীমা, শুধু token দিয়ে রং), team অনুযায়ী code ownership, আর CI-তে CSS size budget।
         """,
+        quick_en=r"""This is advanced: declare cascade layers and move Bootstrap into `vendor` and all old CSS into `legacy`, so new code wins without specificity fights. Add semantic token custom properties for dark mode, scoped components, a page-by-page migration and Stylelint guardrails against new `!important`.""",
+        quick_bn=r"""এটা advanced বিষয়: cascade layer declare করে Bootstrap-কে `vendor` আর সব পুরোনো CSS-কে `legacy` layer-এ রাখি, যাতে নতুন code specificity-র লড়াই ছাড়াই জেতে। সাথে dark mode-এর জন্য semantic token custom property, scoped component, page ধরে ধরে migration, আর নতুন `!important` আটকাতে Stylelint।""",
         ex_en=r"""
             **Trade-offs:**
             - Layers vs CSS Modules/`@scope` solve different problems: layers control *priority*, scoping controls *reach*. Large codebases usually want both.

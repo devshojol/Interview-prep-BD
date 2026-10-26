@@ -1,0 +1,549 @@
+[
+ {
+  "id": "nginx-q01",
+  "subtopic": "Web Server Fundamentals",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "nginx",
+   "web-server",
+   "reverse-proxy",
+   "basics"
+  ],
+  "technologyVersion": "Version-independent concept (NGINX 1.30 stable / 1.31 mainline)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is NGINX, and what is it used for?",
+   "bn": "NGINX কী, আর এটা কী কাজে ব্যবহার হয়?"
+  },
+  "answer": {
+   "en": "NGINX is an event-driven web server that is mostly used as a **reverse proxy** in front of apps. It serves static files, terminates HTTPS, load-balances across backends, compresses and caches responses, and applies limits like rate limiting and maximum body size.",
+   "bn": "NGINX হলো একটা event-driven web server, যেটা বেশিরভাগ সময় app-এর সামনে **reverse proxy** হিসেবে ব্যবহার হয়। এটা static file serve করে, HTTPS terminate করে, একাধিক backend-এ load balance করে, response compress ও cache করে, আর rate limit বা maximum body size-এর মতো সীমা বসায়।"
+  },
+  "explanation": {
+   "en": "A few worker processes, each running an event loop, handle thousands of connections without a thread per connection, which is why it copes well with many slow clients.",
+   "bn": "কয়েকটা worker process, প্রত্যেকটা একটা event loop চালিয়ে, connection-প্রতি thread ছাড়াই হাজার হাজার connection সামলায়; এজন্যই অনেক slow client থাকলেও এটা ভালো চলে।"
+  },
+  "interviewTip": {
+   "en": "Answer \"web server and reverse proxy\", then list three concrete jobs it does in front of your app.",
+   "bn": "বলো \"web server আর reverse proxy\", তারপর তোমার app-এর সামনে এটা কী কী করে তার তিনটা নির্দিষ্ট কাজ বলো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Beginner's Guide",
+    "url": "https://nginx.org/en/docs/beginners_guide.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why put NGINX in front of Node.js instead of exposing Node directly?",
+    "bn": "Node সরাসরি expose না করে সামনে NGINX কেন রাখা হয়?"
+   }
+  ],
+  "related": [
+   "nginx-001",
+   "nginx-002"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "server {\n    listen 80;\n    server_name example.com;\n    location / {\n        proxy_pass http://127.0.0.1:3000;   # forward to the Node.js app\n    }\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q02",
+  "subtopic": "Reverse Proxy",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "reverse-proxy",
+   "forward-proxy"
+  ],
+  "technologyVersion": "Version-independent concept",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "Forward proxy vs reverse proxy: whom does each one represent?",
+   "bn": "Forward proxy বনাম reverse proxy: কোনটা কার প্রতিনিধিত্ব করে?"
+  },
+  "answer": {
+   "en": "A **forward proxy** represents clients: the client is configured to use it, and websites see the proxy instead of the user. A **reverse proxy** represents servers: clients talk to it as if it were the site, and it forwards requests to hidden backends. NGINX in front of an app is a reverse proxy.",
+   "bn": "**Forward proxy** client-দের প্রতিনিধিত্ব করে: client নিজে এটা ব্যবহারের জন্য configure করা থাকে, আর website user-এর বদলে proxy-কে দেখে। **Reverse proxy** server-দের প্রতিনিধিত্ব করে: client এটাকেই আসল site ভেবে কথা বলে, আর এটা লুকানো backend-এ request পাঠায়। App-এর সামনে থাকা NGINX হলো reverse proxy।"
+  },
+  "explanation": {
+   "en": "An office or school web proxy is a forward proxy; NGINX, a load balancer or a CDN in front of your servers is a reverse proxy.",
+   "bn": "অফিস বা স্কুলের web proxy হলো forward proxy; তোমার server-এর সামনে NGINX, load balancer বা CDN হলো reverse proxy।"
+  },
+  "interviewTip": {
+   "en": "Use \"forward hides the client, reverse hides the server\" and give one example of each.",
+   "bn": "বলো \"forward client-কে লুকায়, reverse server-কে লুকায়\", তারপর দুটোরই একটা করে উদাহরণ দাও।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_proxy_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What does a reverse proxy give a Node.js app?",
+    "bn": "Reverse proxy একটা Node.js app-কে কী সুবিধা দেয়?"
+   }
+  ],
+  "related": [
+   "nginx-002"
+  ],
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q03",
+  "subtopic": "Load Balancing",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "load-balancing",
+   "upstream",
+   "round-robin"
+  ],
+  "technologyVersion": "NGINX 1.30 stable / 1.31 mainline",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you load-balance several Node.js instances with NGINX?",
+   "bn": "NGINX দিয়ে কয়েকটা Node.js instance-এ কীভাবে load balance করবে?"
+  },
+  "answer": {
+   "en": "List the instances in an `upstream` block and `proxy_pass` to its name. The default is round-robin (weighted by `weight`); add `least_conn` to prefer the least busy server, or `ip_hash` to keep a client on the same server.",
+   "bn": "Instance-গুলো একটা `upstream` block-এ লেখো, আর তার নামে `proxy_pass` করো। Default হলো round-robin (`weight` অনুযায়ী); সবচেয়ে কম ব্যস্ত server-কে বেছে নিতে `least_conn`, আর একই client-কে একই server-এ রাখতে `ip_hash` দাও।"
+  },
+  "explanation": {
+   "en": "Open-source NGINX detects failed servers passively (`max_fails`/`fail_timeout`) and skips them for a while; active health checks are an NGINX Plus feature.",
+   "bn": "Open-source NGINX fail করা server passive-ভাবে ধরে (`max_fails`/`fail_timeout`) আর কিছুক্ষণ বাদ দেয়; active health check NGINX Plus-এর feature।"
+  },
+  "interviewTip": {
+   "en": "Write the five-line `upstream` block from memory and name the default algorithm.",
+   "bn": "পাঁচ লাইনের `upstream` block-টা মুখস্থ লিখে দেখাও, আর default algorithm-এর নাম বলো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Using nginx as HTTP load balancer",
+    "url": "https://nginx.org/en/docs/http/load_balancing.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When would you use `ip_hash` or sticky sessions?",
+    "bn": "কখন `ip_hash` বা sticky session ব্যবহার করবে?"
+   }
+  ],
+  "related": [
+   "nginx-011",
+   "nginx-018"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "upstream api {\n    least_conn;              # optional; default is round-robin\n    server 127.0.0.1:3001;\n    server 127.0.0.1:3002;\n}\nserver {\n    listen 80;\n    location / { proxy_pass http://api; }\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q04",
+  "subtopic": "Static File Serving",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "static-files",
+   "root",
+   "try_files"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How does NGINX serve static files?",
+   "bn": "NGINX কীভাবে static file serve করে?"
+  },
+  "answer": {
+   "en": "You set `root` to a folder, and NGINX maps each request to `root` + the request URI, then sends the file straight from disk. `try_files $uri =404;` serves the file if it exists and returns 404 otherwise, and `index` picks the default file for a directory.",
+   "bn": "`root`-এ একটা folder দাও, আর NGINX প্রতিটা request-কে `root` + request URI-তে map করে সরাসরি disk থেকে file পাঠায়। `try_files $uri =404;` file থাকলে serve করে, না থাকলে 404 দেয়, আর `index` directory-র জন্য default file ঠিক করে।"
+  },
+  "explanation": {
+   "en": "`root` appends the whole URI, while `alias` replaces the matched location prefix; mixing them up is the classic \"file exists but 404\" bug.",
+   "bn": "`root` পুরো URI যোগ করে, আর `alias` match হওয়া location prefix-টা replace করে; এই দুটো গুলিয়ে ফেলাই \"file আছে কিন্তু 404\" bug-এর চিরচেনা কারণ।"
+  },
+  "interviewTip": {
+   "en": "Explain the `root + URI` rule with one concrete path; that shows you can debug a 404.",
+   "bn": "একটা নির্দিষ্ট path দিয়ে `root + URI` নিয়মটা বোঝাও; এতে বোঝা যায় তুমি 404 debug করতে পারো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What is the difference between `root` and `alias`?",
+    "bn": "`root` আর `alias`-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "nginx-014",
+   "nginx-020"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "server {\n    listen 80;\n    root /var/www/site;          # GET /css/app.css -> /var/www/site/css/app.css\n    index index.html;\n    location / {\n        try_files $uri =404;\n    }\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q05",
+  "subtopic": "SPA Fallback",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "spa",
+   "try_files",
+   "react",
+   "routing"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What does `try_files $uri $uri/ /index.html;` do, and why do React/Vue SPAs need it?",
+   "bn": "`try_files $uri $uri/ /index.html;` কী করে, আর React/Vue SPA-তে এটা কেন লাগে?"
+  },
+  "answer": {
+   "en": "NGINX tries the exact file, then a directory, and otherwise internally serves `/index.html`. SPA routes like `/dashboard` exist only in client-side JavaScript, so without it a page refresh or a shared link returns 404 instead of booting the app.",
+   "bn": "NGINX আগে ঠিক ওই file খোঁজে, তারপর directory, আর কিছু না পেলে ভেতরে ভেতরে `/index.html` serve করে। `/dashboard`-এর মতো SPA route শুধু client-side JavaScript-এ থাকে, তাই এটা না দিলে page refresh বা shared link-এ app চালু না হয়ে 404 আসে।"
+  },
+  "explanation": {
+   "en": "Keep a plain 404 for asset folders and proxy `/api/` separately; otherwise a missing chunk gets HTML back and fails with a confusing \"Unexpected token '<'\".",
+   "bn": "Asset folder-এর জন্য সাধারণ 404 রাখো আর `/api/` আলাদা করে proxy করো; না হলে হারানো chunk-এর বদলে HTML আসে, আর বিভ্রান্তিকর \"Unexpected token '<'\" error হয়।"
+  },
+  "interviewTip": {
+   "en": "Explain it through the refresh scenario: clicking works, refreshing 404s, and this line fixes it.",
+   "bn": "Refresh-এর ঘটনা দিয়ে বোঝাও: click করলে চলে, refresh করলে 404, আর এই line সেটা ঠিক করে।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why shouldn't missing `.js` files fall back to `index.html`?",
+    "bn": "হারানো `.js` file কেন `index.html`-এ fallback করা উচিত না?"
+   }
+  ],
+  "related": [
+   "nginx-006"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "location / {\n    try_files $uri $uri/ /index.html;\n}\nlocation /assets/ {\n    try_files $uri =404;    # missing JS/CSS should still be a real 404\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q06",
+  "subtopic": "HTTP and HTTPS",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 2,
+  "tags": [
+   "redirect",
+   "return",
+   "301",
+   "https",
+   "rewrite"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How do you redirect HTTP to HTTPS (or `www` to the bare domain) in NGINX?",
+   "bn": "NGINX-এ HTTP থেকে HTTPS-এ (বা `www` থেকে মূল domain-এ) কীভাবে redirect করবে?"
+  },
+  "answer": {
+   "en": "Use a small `server` block with `return 301 https://example.com$request_uri;`, which keeps the path and query string. `return` is simpler and faster than `rewrite`; use 301 for permanent moves and 302 (or 307/308) for temporary ones.",
+   "bn": "একটা ছোট `server` block-এ `return 301 https://example.com$request_uri;` দাও; এতে path আর query string ঠিক থাকে। `rewrite`-এর চেয়ে `return` সহজ আর দ্রুত; স্থায়ী পরিবর্তনে 301, আর অস্থায়ী হলে 302 (বা 307/308) ব্যবহার করো।"
+  },
+  "explanation": {
+   "en": "Browsers cache 301s aggressively, so test with 302 first. Use `$request_uri`, not `$uri`: `$uri` is decoded and drops the query string.",
+   "bn": "Browser 301 অনেকদিন cache করে রাখে, তাই আগে 302 দিয়ে test করো। `$uri` না, `$request_uri` ব্যবহার করো: `$uri` decode করা থাকে আর query string বাদ দেয়।"
+  },
+  "interviewTip": {
+   "en": "Mention `return` over `rewrite` and why `$request_uri` matters; both show hands-on config experience.",
+   "bn": "`rewrite`-এর বদলে `return` কেন, আর `$request_uri` কেন জরুরি, দুটোই বলো; এতে হাতে-কলমে config করার অভিজ্ঞতা বোঝা যায়।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_rewrite_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_rewrite_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "When do you still need `rewrite` instead of `return`?",
+    "bn": "কখন `return`-এর বদলে এখনো `rewrite` লাগে?"
+   }
+  ],
+  "related": [
+   "nginx-008"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "server {                          # all HTTP -> HTTPS\n    listen 80;\n    server_name example.com www.example.com;\n    return 301 https://example.com$request_uri;\n}\nserver {                          # https://www -> https://bare domain\n    listen 443 ssl;\n    server_name www.example.com;\n    # ssl_certificate / ssl_certificate_key for www.example.com here\n    return 301 https://example.com$request_uri;\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q07",
+  "subtopic": "Configuration Blocks",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "server_name",
+   "default_server",
+   "virtual-hosts"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "How does NGINX choose which `server` block handles a request?",
+   "bn": "কোন `server` block একটা request সামলাবে, NGINX সেটা কীভাবে ঠিক করে?"
+  },
+  "answer": {
+   "en": "First it filters by the `listen` address and port, then it matches the `Host` header against `server_name`: exact name, then the longest wildcard starting with `*`, then the longest ending with `*`, then the first matching regex. If nothing matches, the `default_server` for that port is used (or the first server block if none is marked).",
+   "bn": "প্রথমে `listen` address আর port দিয়ে বাছাই করে, তারপর `Host` header-কে `server_name`-এর সাথে মেলায়: আগে exact নাম, তারপর `*` দিয়ে শুরু হওয়া সবচেয়ে লম্বা wildcard, তারপর `*` দিয়ে শেষ হওয়া সবচেয়ে লম্বা wildcard, তারপর প্রথম match করা regex। কিছুই না মিললে ওই port-এর `default_server` ব্যবহার হয় (কোনোটা mark করা না থাকলে প্রথম server block)।"
+  },
+  "explanation": {
+   "en": "The catch-all comes from `default_server` on `listen`, not from the name `_`. Without an explicit default, a request to your bare IP lands on whichever server block comes first.",
+   "bn": "Catch-all আসে `listen`-এর `default_server` থেকে, `_` নাম থেকে না। Explicit default না দিলে তোমার bare IP-তে আসা request যে server block প্রথমে আছে সেখানে চলে যায়।"
+  },
+  "interviewTip": {
+   "en": "Recite the match order and add the `default_server` catch-all; that covers the usual follow-up about unknown hosts.",
+   "bn": "Match-এর ক্রমটা বলো আর `default_server` catch-all-এর কথা যোগ করো; অচেনা host নিয়ে সাধারণ follow-up-টা এতেই কভার হয়।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Server names",
+    "url": "https://nginx.org/en/docs/http/server_names.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Why add a catch-all `default_server` that returns 444?",
+    "bn": "444 return করা একটা catch-all `default_server` কেন যোগ করবে?"
+   }
+  ],
+  "related": [
+   "nginx-027",
+   "nginx-003"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "server {\n    listen 80 default_server;   # catch-all for unknown Host headers\n    server_name _;              # \"_\" is just an invalid name, not magic\n    return 444;                 # close the connection without a response\n}\nserver {\n    listen 80;\n    server_name example.com *.example.com;\n    # ...\n}"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q08",
+  "subtopic": "Configuration Blocks",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "high",
+  "estimatedMinutes": 1,
+  "tags": [
+   "nginx-t",
+   "reload",
+   "operations"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "You changed the NGINX config. How do you apply it safely without dropping traffic?",
+   "bn": "NGINX config বদলেছ। Traffic না হারিয়ে কীভাবে নিরাপদে apply করবে?"
+  },
+  "answer": {
+   "en": "Run `nginx -t` to check the syntax and config, then reload with `nginx -s reload` (or `systemctl reload nginx`). A reload starts new workers with the new config while the old ones finish their requests, whereas a restart stops everything and drops connections.",
+   "bn": "আগে `nginx -t` চালিয়ে syntax আর config যাচাই করো, তারপর `nginx -s reload` (বা `systemctl reload nginx`) দিয়ে reload করো। Reload নতুন config দিয়ে নতুন worker চালু করে আর পুরনোরা নিজেদের request শেষ করে; কিন্তু restart সব বন্ধ করে দেয়, connection কেটে যায়।"
+  },
+  "explanation": {
+   "en": "If the new config is invalid, a reload is rejected and the old config keeps running. `nginx -T` prints the full effective config, which helps when includes are involved.",
+   "bn": "নতুন config ভুল হলে reload বাতিল হয়, আর পুরনো config চলতেই থাকে। `nginx -T` পুরো কার্যকর config print করে, include থাকলে এটা খুব কাজে লাগে।"
+  },
+  "interviewTip": {
+   "en": "Say the exact one-liner `nginx -t && systemctl reload nginx` and explain why reload beats restart.",
+   "bn": "হুবহু `nginx -t && systemctl reload nginx` line-টা বলো, আর restart-এর চেয়ে reload কেন ভালো সেটা ব্যাখ্যা করো।"
+  },
+  "references": [
+   {
+    "title": "NGINX — Controlling nginx",
+    "url": "https://nginx.org/en/docs/control.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What happens to in-flight requests during a reload?",
+    "bn": "Reload-এর সময় চলমান request-গুলোর কী হয়?"
+   }
+  ],
+  "related": [
+   "nginx-007",
+   "nginx-003"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "sudo nginx -t && sudo systemctl reload nginx\n# nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\n# nginx: configuration file /etc/nginx/nginx.conf test is successful"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q09",
+  "subtopic": "Logging",
+  "difficulty": "easy",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 1,
+  "tags": [
+   "logs",
+   "access-log",
+   "error-log",
+   "debugging"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31, Debian/Ubuntu paths)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What is the difference between NGINX's access log and error log, and which do you check first for a 502?",
+   "bn": "NGINX-এর access log আর error log-এর পার্থক্য কী, আর 502 হলে আগে কোনটা দেখবে?"
+  },
+  "answer": {
+   "en": "The **access log** has one line per request (client IP, request, status, size, timing), and the **error log** records problems and their reasons. For a 502, check the error log first, because it says exactly why, such as `connect() failed (111: Connection refused)` when the app is down.",
+   "bn": "**Access log**-এ প্রতিটা request-এর জন্য এক line থাকে (client IP, request, status, size, সময়), আর **error log**-এ সমস্যা আর তার কারণ লেখা থাকে। 502 হলে আগে error log দেখো, কারণ সেখানে ঠিক কারণটা থাকে, যেমন app বন্ধ থাকলে `connect() failed (111: Connection refused)`।"
+  },
+  "explanation": {
+   "en": "In the official Docker image, both logs go to stdout/stderr, so you read them with `docker logs`. Add `$upstream_response_time` to the log format to see how long the backend took.",
+   "bn": "Official Docker image-এ দুটো log-ই stdout/stderr-এ যায়, তাই `docker logs` দিয়ে পড়তে হয়। Backend কত সময় নিল দেখতে log format-এ `$upstream_response_time` যোগ করো।"
+  },
+  "interviewTip": {
+   "en": "Say \"status in the access log, reason in the error log\", then quote one real error message.",
+   "bn": "বলো \"access log-এ status, error log-এ কারণ\", তারপর একটা আসল error message উদাহরণ দাও।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_log_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_log_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "What's the difference between a 502 and a 504?",
+    "bn": "502 আর 504-এর পার্থক্য কী?"
+   }
+  ],
+  "related": [
+   "nginx-010",
+   "nginx-019"
+  ],
+  "code": {
+   "language": "bash",
+   "source": "sudo tail -f /var/log/nginx/error.log\nsudo tail -f /var/log/nginx/access.log\n# per site: access_log /var/log/nginx/api.access.log;  error_log /var/log/nginx/api.error.log;"
+  },
+  "technology": "nginx"
+ },
+ {
+  "id": "nginx-q10",
+  "subtopic": "Location Matching",
+  "difficulty": "medium",
+  "type": "quick",
+  "market": "both",
+  "priority": "medium",
+  "estimatedMinutes": 2,
+  "tags": [
+   "location",
+   "regex",
+   "prefix",
+   "matching"
+  ],
+  "technologyVersion": "Version-independent (NGINX 1.30 / 1.31)",
+  "verifiedAt": "2026-10-12",
+  "versionSensitive": false,
+  "status": "stable",
+  "question": {
+   "en": "What do the `location` modifiers `=`, `^~`, `~` and `~*` mean?",
+   "bn": "`location`-এর modifier `=`, `^~`, `~` আর `~*` মানে কী?"
+  },
+  "answer": {
+   "en": "`=` is an exact match and wins immediately; no modifier is a prefix match; `^~` is a prefix match that, if it's the longest, stops the regex search. `~` and `~*` are case-sensitive and case-insensitive regexes, checked in order after the longest prefix is found, and the first matching regex beats a plain prefix.",
+   "bn": "`=` হলো exact match, মিললে সাথে সাথে জেতে; modifier ছাড়া হলো prefix match; `^~` এমন prefix match, যেটা সবচেয়ে লম্বা হলে regex খোঁজা বন্ধ করে দেয়। `~` আর `~*` হলো case-sensitive ও case-insensitive regex, সবচেয়ে লম্বা prefix পাওয়ার পর ক্রম অনুযায়ী পরীক্ষা হয়, আর প্রথম match করা regex সাধারণ prefix-কে হারিয়ে দেয়।"
+  },
+  "explanation": {
+   "en": "The usual trap: a plain prefix like `/images/` loses to a later regex for `.png` files unless you mark it `^~`.",
+   "bn": "সাধারণ ফাঁদ: `/images/`-এর মতো সাধারণ prefix `.png` file-এর জন্য পরের একটা regex-এর কাছে হেরে যায়, যদি না সেটাকে `^~` দিয়ে mark করো।"
+  },
+  "interviewTip": {
+   "en": "Give the order: exact, longest prefix (stop if `^~`), regexes in order, else the remembered prefix.",
+   "bn": "ক্রমটা বলো: exact, সবচেয়ে লম্বা prefix (`^~` হলে থামো), ক্রম অনুযায়ী regex, না মিললে মনে রাখা prefix।"
+  },
+  "references": [
+   {
+    "title": "NGINX — ngx_http_core_module",
+    "url": "https://nginx.org/en/docs/http/ngx_http_core_module.html"
+   }
+  ],
+  "followUps": [
+   {
+    "en": "Which location handles `/images/logo.png` if both a prefix and a regex match?",
+    "bn": "Prefix আর regex দুটোই match করলে `/images/logo.png` কোন location সামলাবে?"
+   }
+  ],
+  "related": [
+   "nginx-012"
+  ],
+  "code": {
+   "language": "nginx",
+   "source": "location = /health    { return 200 \"ok\"; }       # only /health\nlocation ^~ /static/  { root /var/www; }         # prefix, skip regex\nlocation ~* \\.(png|jpg)$ { expires 30d; }        # case-insensitive regex\nlocation /            { proxy_pass http://127.0.0.1:3000; }"
+  },
+  "technology": "nginx"
+ }
+]

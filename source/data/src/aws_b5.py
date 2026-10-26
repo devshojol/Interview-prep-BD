@@ -51,6 +51,8 @@ QUESTIONS = [
             5. **Instance:** IMDSv2 required, SSM Patch Manager দিয়ে patching, আর EC2, ECR image ও Lambda-র vulnerability scan-এর জন্য Amazon Inspector।
             6. **Secret আর recovery:** credential-এর জন্য Secrets Manager, আর Vault Lock-সহ AWS Backup, যাতে ransomware backup delete করতে না পারে।
         """,
+        quick_en=r"""Identity first: MFA on root, no root or long-lived keys, IAM Identity Center for people and roles for workloads. Then CloudTrail and GuardDuty for visibility, AWS WAF on CloudFront or the ALB, private databases, KMS encryption at rest plus TLS in transit, and IMDSv2 with patching on instances.""",
+        quick_bn=r"""আগে identity: root-এ MFA, root বা long-lived key নয়, মানুষের জন্য IAM Identity Center আর workload-এর জন্য role। তারপর visibility-র জন্য CloudTrail আর GuardDuty, CloudFront বা ALB-তে AWS WAF, private database, at rest KMS encryption আর in transit TLS, আর instance-এ IMDSv2 ও patching।""",
         ex_en=r"""
             **Performance and cost side effects** (the "-performance" half of this question):
             - **WAF** adds very little latency, especially on CloudFront at the edge. Rule capacity and request volume drive the cost, so start with managed rule groups and add custom rules based on real traffic.
@@ -133,6 +135,8 @@ QUESTIONS = [
 
             আমার default: বেশিরভাগ service-এ circuit breaker আর alarm-সহ rolling, আর গুরুত্বপূর্ণ customer-facing API-তে canary বা blue/green।
         """,
+        quick_en=r"""Rolling replaces tasks in batches (cheap and the ECS default, but versions mix), blue/green runs a full new copy and switches traffic for instant rollback (double capacity), and canary shifts a small share first with alarm-based rollback. Immutable images plus IaC make every release reproducible and reviewable.""",
+        quick_bn=r"""Rolling ধাপে ধাপে task বদলায় (সস্তা আর ECS-এর default, কিন্তু দুই version একসাথে চলে), blue/green পুরো নতুন copy চালিয়ে traffic switch করে আর সাথে সাথে rollback দেয় (দ্বিগুণ capacity), আর canary আগে অল্প traffic পাঠায়, alarm বাজলে rollback করে। Immutable image আর IaC প্রতিটা release-কে reproducible আর review-যোগ্য করে।""",
         ex_en=r"""
             - **The database is the hard part.** Every strategy that runs two versions at once needs backward-compatible schema changes. Use expand/contract: add the new column → deploy code that writes both → backfill → switch reads → remove the old column in a later release.
             - **Rollback triggers must be automatic:** attach CloudWatch alarms (5xx rate, p99 latency, business metrics like failed payments) to the deployment so it rolls back without anyone watching a dashboard.
@@ -204,6 +208,8 @@ QUESTIONS = [
         a_bn=r"""
             সঠিক উত্তর Option 2। Partner-দের জন্য যা যা দরকার, অর্থাৎ আলাদা API key, **usage plan** দিয়ে প্রতিটা client-এর quota আর throttling, **request validation**, আর AWS WAF-এর সাথে যুক্ত হওয়া, এগুলো শুধু **REST API**-তেই পাওয়া যায়। Caching, private endpoint আর resource policy-ও তাই। HTTP API দামে সস্তা, latency-ও কম, আর এতে নিজস্ব JWT authorizer আছে; কিন্তু এই API management-এর সুবিধাগুলো এতে নেই।
         """,
+        quick_en=r"""An API Gateway REST API with API keys, usage plans, request validation and an associated AWS WAF web ACL. Only REST APIs have these API-management features; HTTP APIs are cheaper, with native JWT authorizers, but lack usage plans and request validation.""",
+        quick_bn=r"""API key, usage plan, request validation আর AWS WAF web ACL-সহ একটা API Gateway REST API। এই API-management feature-গুলো শুধু REST API-তে আছে; HTTP API সস্তা আর native JWT authorizer আছে, কিন্তু usage plan আর request validation নেই।""",
         ex_en=r"""
             - **Option 1 is the tempting trap.** "HTTP APIs are the newer, cheaper option" is true, but they don't support API keys, usage plans, request validation or WAF. Choose HTTP APIs for simple JWT-protected backends (for example a SPA calling Lambda with Cognito or Auth0 tokens).
             - Options 3 and 4 have no built-in API keys, quotas or schema validation. You'd have to rebuild API management yourself.
@@ -259,6 +265,8 @@ QUESTIONS = [
 
             **Compute আর traffic:** একই IaC pipeline দুই Region-এই deploy করে। DR Region-এ ECS চলে সর্বনিম্ন size-এ, quota আগে থেকেই বাড়ানো। Traffic সরে health check-সহ Route 53 failover record দিয়ে, অথবা ইচ্ছাকৃত, মানুষের অনুমোদিত switch-এর জন্য Application Recovery Controller-এর routing control দিয়ে।
         """,
+        quick_en=r"""Advanced: warm standby for the payment path, backup and restore for reporting. Aurora Global Database (lag in seconds) meets the 1-minute RPO, DynamoDB global tables, S3 replication and cross-account backups protect the rest, and Route 53 or Application Recovery Controller switches to a scaled-down copy in the DR Region.""",
+        quick_bn=r"""Advanced: payment path-এর জন্য warm standby, reporting-এর জন্য backup and restore। Aurora Global Database (lag কয়েক second) 1 মিনিটের RPO পূরণ করে, DynamoDB global table, S3 replication আর cross-account backup বাকি data রক্ষা করে, আর Route 53 বা Application Recovery Controller DR Region-এর ছোট copy-তে traffic সরিয়ে দেয়।""",
         ex_en=r"""
             **Failover runbook (target ≤ 15 minutes):**
             1. *Detect:* alarms plus synthetic payment canaries. An incident commander decides. Automatic failover for payments risks flapping and split-brain.
@@ -360,6 +368,8 @@ QUESTIONS = [
             - **Multi-step consistency:** **saga** ব্যবহার করো। Payment সফল হওয়ার পরে inventory fail করলে compensating refund চালাও, Step Functions দিয়ে orchestrate করে বা event দিয়ে choreograph করে।
             - **Observability:** event metadata-তে correlation ID, tracing, আর `ApproximateAgeOfOldestMessage`, DLQ depth ও Lambda error/throttle-এ alarm।
         """,
+        quick_en=r"""Advanced: save the order and its event atomically with a transactional outbox, publish to EventBridge or SNS, and fan out to one SQS queue per consumer with Lambda. Make every consumer idempotent, send poison messages to DLQs with partial batch responses, and handle ordering with versioned updates or FIFO queues per order.""",
+        quick_bn=r"""Advanced: transactional outbox দিয়ে order আর তার event একসাথে atomic-ভাবে save করো, EventBridge বা SNS-এ publish করো, আর প্রতিটা consumer-এর জন্য আলাদা SQS queue ও Lambda-তে fan out করো। প্রতিটা consumer idempotent রাখো, partial batch response-সহ poison message DLQ-তে পাঠাও, আর ordering সামলাও versioned update বা order-প্রতি FIFO queue দিয়ে।""",
         ex_en=r"""
             **About the code below:** it's a simplified consumer. It claims an idempotency key, performs the side effect, marks the key completed, and reports only failed messages. It has a known gap: if the function crashes *after* claiming the key but *before* finishing, the key stays `IN_PROGRESS` and retries skip it. Production implementations (for example the Powertools for AWS Lambda idempotency utility) store an in-progress expiry and the saved result, so a stuck claim can be retried and duplicates get the original response. The strongest defence is making the side effect itself idempotent: a unique `(order_id)` constraint on the reservation table, or the payment provider's idempotency key.
 
@@ -487,6 +497,8 @@ QUESTIONS = [
             - **Resource control policy (RCP)** আর `aws:PrincipalOrgID` condition দিয়ে *data perimeter* বানাও, যাতে S3 bucket আর KMS key শুধু তোমার organisation-এর principal-রাই ব্যবহার করতে পারে।
             - Tag policy, backup policy আর declarative policy (যেমন IMDS default-এর মতো EC2 setting enforce করা) সামঞ্জস্য আনে।
         """,
+        quick_en=r"""Advanced: split workloads into accounts by OU (management, security with log archive and audit, infrastructure, prod and non-prod, sandbox) and replace IAM users with IAM Identity Center and MFA. SCPs cap the maximum permissions, centralised CloudTrail and Config feed a locked log account, and RCPs build a data perimeter.""",
+        quick_bn=r"""Advanced: workload-গুলো OU অনুযায়ী আলাদা account-এ ভাগ করো (management, log archive ও audit-সহ security, infrastructure, prod আর non-prod, sandbox), আর IAM user বাদ দিয়ে MFA-সহ IAM Identity Center ব্যবহার করো। SCP সর্বোচ্চ permission-এর সীমা টানে, centralised CloudTrail আর Config একটা locked log account-এ যায়, আর RCP দিয়ে data perimeter বানাও।""",
         ex_en=r"""
             **How SCPs actually behave** (frequent interview probes):
             - SCPs **never grant** permissions. They only filter. A user still needs an IAM Allow, and an action must be allowed by *every* SCP level from the root through the OUs to the account.

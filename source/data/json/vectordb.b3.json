@@ -58,6 +58,10 @@
    "vec-020",
    "vec-007"
   ],
+  "quickAnswer": {
+   "en": "RAG retrieves the most relevant chunks from your own data and puts them into the LLM's prompt, so it answers from them, ideally with citations. It beats plain prompting because the LLM doesn't know your private or recent data, and beats fine-tuning for facts because you can update, permission-filter and cite the data.",
+   "bn": "RAG তোমার নিজের data থেকে সবচেয়ে relevant chunk খুঁজে LLM-এর prompt-এ দেয়, যাতে LLM সেগুলো থেকে উত্তর দেয়, পারলে citation-সহ। শুধু prompt করার চেয়ে ভালো, কারণ LLM তোমার private বা সাম্প্রতিক data জানে না; আর fact রাখার জন্য fine-tuning-এর চেয়ে ভালো, কারণ data update, permission filter আর cite করা যায়।"
+  },
   "commonMistakes": {
    "en": "Saying RAG \"trains the model on your documents\", or that it guarantees correct answers.",
    "bn": "বলা যে RAG \"তোমার document দিয়ে model-কে train করে\", অথবা এটা সঠিক উত্তরের নিশ্চয়তা দেয়।"
@@ -117,6 +121,10 @@
    "vec-013",
    "vec-021"
   ],
+  "quickAnswer": {
+   "en": "Enable pgvector, add a `vector` column with an HNSW index and query it with SQL. The embeddings then live next to your products with joins, filters, transactions and your existing backups, and 200,000 vectors is well within its comfort zone.",
+   "bn": "pgvector চালু করো, HNSW index-সহ একটা `vector` column যোগ করো, আর SQL দিয়ে query করো। তাতে embedding product-এর পাশেই থাকে, join, filter, transaction আর আগের backup-সহ, আর 200,000 vector এর জন্য একদম সহজ কাজ।"
+  },
   "options": [
    {
     "en": "Store embeddings as JSON arrays and compute cosine similarity in Node.js for every query",
@@ -197,6 +205,10 @@
    "vec-028",
    "vec-020"
   ],
+  "quickAnswer": {
+   "en": "Build a golden set of real questions labelled with the right documents. Recall@k checks whether the relevant documents appear in the top k (here, with one relevant doc per query, 2/3 ≈ 0.67); MRR averages 1/rank of the first relevant result (≈ 0.44). Track both before and after every change.",
+   "bn": "আসল প্রশ্ন আর তাদের সঠিক document দিয়ে label করা একটা golden set বানাও। Recall@k দেখে relevant document top k-তে আসছে কিনা (এখানে প্রতি query-তে একটা relevant doc, তাই 2/3 ≈ 0.67); MRR প্রথম relevant result-এর 1/rank-এর গড় (≈ 0.44)। প্রতিটা change-এর আগে-পরে দুটোই মাপো।"
+  },
   "commonMistakes": {
    "en": "Judging quality by eyeballing a few queries, confusing recall with precision, or evaluating only English queries for a bilingual product.",
    "bn": "কয়েকটা query চোখে দেখে quality বিচার করা, recall আর precision গুলিয়ে ফেলা, অথবা দ্বিভাষিক product-এ শুধু English query দিয়ে মূল্যায়ন করা।"
@@ -268,6 +280,10 @@
    "vec-012",
    "vec-024"
   ],
+  "quickAnswer": {
+   "en": "Documents are embedded with `kb-embed-v2` but queries with `kb-embed-v1`, so distances are meaningless even though nothing errors. The index uses `vector_l2_ops` while the query uses `<=>`, and `ORDER BY similarity DESC` can't use an index anyway. Fix: one model, `vector_cosine_ops`, and `ORDER BY embedding <=> $1 LIMIT k`.",
+   "bn": "Document embed হচ্ছে `kb-embed-v2` দিয়ে কিন্তু query `kb-embed-v1` দিয়ে, তাই কোনো error না হলেও distance অর্থহীন। Index `vector_l2_ops`-এ, অথচ query `<=>` ব্যবহার করে, আর `ORDER BY similarity DESC` এমনিতেও index ব্যবহার করতে পারে না। Fix: একটাই model, `vector_cosine_ops`, আর `ORDER BY embedding <=> $1 LIMIT k`।"
+  },
   "commonMistakes": {
    "en": "Fixing only the slowness by adding more indexes, or assuming equal dimensions mean the models are compatible.",
    "bn": "আরও index যোগ করে শুধু ধীরগতি ঠিক করা, অথবা ধরে নেওয়া যে সমান dimension মানে model দুটো compatible।"
@@ -346,6 +362,10 @@
    "vec-017",
    "vec-022"
   ],
+  "quickAnswer": {
+   "en": "Embed each cleaned ticket (subject plus first message) with a multilingual model, search the nearest recent open tickets filtered by product or channel, and show those above a similarity threshold as possible duplicates. Tune the threshold on labelled pairs, and start with suggestions rather than auto-merging.",
+   "bn": "প্রতিটা পরিষ্কার করা ticket (subject আর প্রথম message) multilingual model দিয়ে embed করো, product বা channel দিয়ে filter করে সাম্প্রতিক open ticket-এর মধ্যে সবচেয়ে কাছেরগুলো খোঁজো, আর similarity threshold-এর ওপরে থাকলে possible duplicate হিসেবে দেখাও। Label করা pair দিয়ে threshold ঠিক করো, আর auto-merge না করে suggestion দিয়ে শুরু করো।"
+  },
   "commonMistakes": {
    "en": "Picking a threshold like 0.8 by gut feeling, auto-merging without human review, or comparing new tickets against years of closed tickets with no time or product filter.",
    "bn": "অনুমানে 0.8-এর মতো একটা threshold বেছে নেওয়া, মানুষের review ছাড়া auto-merge করা, অথবা কোনো সময় বা product filter ছাড়াই নতুন ticket-কে বছরের পর বছরের বন্ধ ticket-এর সাথে তুলনা করা।"
@@ -420,6 +440,10 @@
    "vec-031",
    "vec-022"
   ],
+  "quickAnswer": {
+   "en": "The tenant id comes from the request body, retrieval isn't filtered by tenant (a prompt instruction isn't a security boundary), and `category` is interpolated into the SQL. Fix: tenant from auth, parameterised SQL, a tenant filter inside the query, row-level security, and iterative scans so filtered searches still return enough rows.",
+   "bn": "Tenant id request body থেকে আসছে, retrieval-এ tenant filter নেই (prompt-এর নির্দেশ security boundary না), আর `category` সরাসরি SQL-এ বসানো হচ্ছে। Fix: auth থেকে tenant, parameterised SQL, query-র ভেতরেই tenant filter, row-level security, আর iterative scan যাতে filter-সহ search-ও যথেষ্ট row দেয়।"
+  },
   "commonMistakes": {
    "en": "Filtering results by tenant in JavaScript after the `LIMIT` (low recall and easy to forget), or trusting the LLM to ignore other tenants' context.",
    "bn": "`LIMIT`-এর পরে JavaScript-এ tenant দিয়ে result filter করা (recall কম আর ভুলে যাওয়া সহজ), অথবা LLM অন্য tenant-এর context উপেক্ষা করবে বলে বিশ্বাস করা।"
@@ -501,6 +525,10 @@
    "vec-024",
    "vec-021"
   ],
+  "quickAnswer": {
+   "en": "10M × 1536-dim float32 vectors is ≈ 61.5 GB before the HNSW graph, so the index no longer fits in RAM. Try a `halfvec` index first (about half the size, little recall loss), then binary quantisation with re-ranking, fewer dimensions, partitioning and cleanup, measuring recall against exact search each time.",
+   "bn": "10M × 1536-dim float32 vector মানে HNSW graph ছাড়াই ≈ 61.5 GB, তাই index আর RAM-এ ধরে না। আগে `halfvec` index চেষ্টা করো (প্রায় অর্ধেক size, recall সামান্য কমে), তারপর re-ranking-সহ binary quantisation, কম dimension, partitioning আর cleanup; প্রতিবার exact search-এর সাথে recall মেপে দেখো।"
+  },
   "commonMistakes": {
    "en": "Only \"adding more RAM\", lowering `ef_search` until recall collapses without measuring it, or truncating vectors from a model that wasn't trained for shorter dimensions.",
    "bn": "শুধু \"আরও RAM যোগ করো\" বলা, না মেপেই `ef_search` এতটা কমানো যে recall ভেঙে পড়ে, অথবা ছোট dimension-এর জন্য train করা হয়নি এমন model-এর vector কেটে ছোট করা।"
@@ -575,6 +603,10 @@
    "vec-022",
    "vec-023"
   ],
+  "quickAnswer": {
+   "en": "There are three isolation models: a shared index filtered by `tenant_id` with row-level security (cheap, but leak and recall risks), a partition or namespace per tenant, or a dedicated database per tenant (strongest, costliest). Tier them: pooled for small tenants, partitions for mid-size, silos for large or regulated ones.",
+   "bn": "Isolation-এর তিনটা model: `tenant_id` দিয়ে filter করা shared index আর row-level security (সস্তা, কিন্তু leak আর recall-এর ঝুঁকি), প্রতি tenant-এ আলাদা partition বা namespace, অথবা প্রতি tenant-এ আলাদা database (সবচেয়ে শক্ত, সবচেয়ে দামি)। Tier করো: ছোট tenant pooled, মাঝারি tenant partition-এ, বড় বা regulated tenant silo-তে।"
+  },
   "commonMistakes": {
    "en": "Choosing one model for everyone, relying on application filters without a database-level backstop, or forgetting that deleting documents must also delete their vectors and cached answers.",
    "bn": "সবার জন্য একটাই মডেল বেছে নেওয়া, database-level backstop ছাড়া শুধু application filter-এর ওপর ভরসা করা, অথবা ভুলে যাওয়া যে document মুছলে তার vector আর cached answer-ও মুছতে হবে।"
